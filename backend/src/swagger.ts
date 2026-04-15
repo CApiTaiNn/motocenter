@@ -6,7 +6,7 @@ const options: swaggerJsdoc.Options = {
     info: {
       title: 'API Brands',
       version: '1.0.0',
-      description: 'Documentation de ton API Express',
+      description: 'Documentation de notre API express utilisé pour motocenter',
     },
     servers: [
       {
@@ -22,22 +22,22 @@ const options: swaggerJsdoc.Options = {
             content: { type: 'string' },
             user: {
               type: 'object',
-              description: 'Utilisateur associé (si populate activé)'
+              description: 'Utilisateur associé',
             },
             reference: { type: 'string' },
             referenceModel: { type: 'string' },
             usersLikeId: {
               type: 'array',
-              items: { type: 'string' }
+              items: { type: 'string' },
             },
             usersDislikeId: {
               type: 'array',
-              items: { type: 'string' }
+              items: { type: 'string' },
             },
             like: { type: 'integer' },
             dislike: { type: 'integer' },
-            createdAt: { type: 'string', format: 'date-time' }
-          }
+            createdAt: { type: 'string', format: 'date-time' },
+          },
         },
         MessageInput: {
           type: 'object',
@@ -45,13 +45,13 @@ const options: swaggerJsdoc.Options = {
             content: { type: 'string' },
             user: { type: 'string' },
             reference: { type: 'string' },
-            referenceModel: { type: 'string' }
-          }
-        }
-      }
-    }
+            referenceModel: { type: 'string' },
+          },
+        },
+      },
+    },
   },
-  apis: ['./src/routes/*.ts'], // chemin vers tes routes,
+  apis: ['./src/routes/*.ts'],
 }
 
 export const swaggerSpec = swaggerJsdoc(options)
