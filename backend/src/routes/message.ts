@@ -3,6 +3,54 @@ import { type Request, Response, Router } from 'express'
 import { prepareQuery, type ReqQuery } from '../utils/find'
 
 const router = Router()
+/**
+ * @openapi
+ * /messages:
+ *   get:
+ *     summary: Récupérer la liste des messages
+ *     tags:
+ *       - Messages
+ *     parameters:
+ *       - in: query
+ *         name: project
+ *         schema:
+ *           type: string
+ *         description: Champs à retourner
+ *       - in: query
+ *         name: sort
+ *         schema:
+ *           type: string
+ *         description: Tri des résultats
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: Nombre maximum de résultats
+ *       - in: query
+ *         name: filter
+ *         schema:
+ *           type: string
+ *         description: Filtres MongoDB
+ *       - in: query
+ *         name: deep
+ *         schema:
+ *           type: boolean
+ *         description: Inclure les données utilisateur (populate)
+ *     responses:
+ *       200:
+ *         description: Liste des messages
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 messages:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Message'
+ *       500:
+ *         description: Erreur serveur
+ */
 router.get(
   '/',
   async (req: Request<unknown, unknown, unknown, ReqQuery>, res) => {
@@ -24,6 +72,37 @@ router.get(
   },
 )
 
+/**
+ * @openapi
+ * /messages/{id}/responses:
+ *   get:
+ *     summary: Récupérer les réponses d’un message
+ *     tags:
+ *       - Messages
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID du message
+ *     responses:
+ *       200:
+ *         description: Liste des réponses
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 messages:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Message'
+ *       404:
+ *         description: Message non trouvé
+ *       500:
+ *         description: Erreur serveur
+ */
 router.get('/:id/responses', async (req, res) => {
   try {
     const message = await Message.findOne({ _id: req.params.id })
@@ -46,7 +125,29 @@ router.get('/:id/responses', async (req, res) => {
   }
 })
 
-
+/**
+ * @openapi
+ * /messages:
+ *   post:
+ *     summary: Créer un message
+ *     tags:
+ *       - Messages
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/MessageInput'
+ *     responses:
+ *       201:
+ *         description: Message créé
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Message'
+ *       500:
+ *         description: Erreur serveur
+ */
 router.post('/', async (req: Request, res: Response) => {
   try {
     const message = new Message(req.body)
@@ -58,6 +159,50 @@ router.post('/', async (req: Request, res: Response) => {
   }
 })
 
+/**
+ * @openapi
+ * /messages:
+ *   patch:
+ *     summary: Like ou dislike un message
+ *     tags:
+ *       - Messages
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - userId
+ *               - messageId
+ *               - like
+ *             properties:
+ *               userId:
+ *                 type: string
+ *                 description: ID de l'utilisateur
+ *               messageId:
+ *                 type: string
+ *                 description: ID du message
+ *               like:
+ *                 type: boolean
+ *                 description: true pour like, false pour dislike
+ *     responses:
+ *       200:
+ *         description: Message mis à jour
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 populatedMessage:
+ *                   $ref: '#/components/schemas/Message'
+ *       400:
+ *         description: Paramètres manquants
+ *       404:
+ *         description: Message non trouvé
+ *       500:
+ *         description: Erreur serveur
+ */
 router.patch('/', async (req: Request, res: Response) => {
   const { userId, messageId, like } = req.body
 
