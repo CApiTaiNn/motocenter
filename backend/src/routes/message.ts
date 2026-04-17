@@ -137,7 +137,7 @@ router.get('/:id/responses', async (req, res) => {
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/MessageInput'
+ *             $ref: '#/components/schemas/Message'
  *     responses:
  *       201:
  *         description: Message créé

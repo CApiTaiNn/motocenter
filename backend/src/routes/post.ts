@@ -392,16 +392,16 @@ router.post('/', async (req, res) => {
  * @openapi
  * /posts:
  *   put:
- *     summary: Mettre à jour un post
+ *     summary: Mettre à jour un post existant
  *     tags:
  *       - Posts
  *     parameters:
  *       - in: query
- *         name: filter
+ *         name: id
  *         required: true
  *         schema:
  *           type: string
- *         description: Filtre contenant l'id du post (ex. {"id":"..."})
+ *         description: Identifiant du post à mettre à jour
  *     requestBody:
  *       required: true
  *       content:
@@ -417,27 +417,24 @@ router.post('/', async (req, res) => {
  *             properties:
  *               title:
  *                 type: string
- *                 description: Titre du post
  *               content:
  *                 type: string
- *                 description: Contenu du post
+ *               image:
+ *                 type: string
  *               brand:
  *                 type: string
- *                 description: Nom de la marque associée
+ *                 description: Nom de la marque
  *               category:
  *                 type: string
- *                 description: Nom de la catégorie associée
+ *                 description: Nom de la catégorie
  *               user:
  *                 type: string
- *                 description: ID de l'utilisateur
- *               url:
- *                 type: string
- *                 description: URL de l'image du post
+ *                 description: ID de l’utilisateur
  *     responses:
  *       204:
  *         description: Post mis à jour avec succès
  *       500:
- *         description: Ressource non trouvée ou erreur serveur
+ *         description: Erreur serveur
  */
 router.put('/', async (req, res) => {
   const { filter } = prepareQuery(req.query)
