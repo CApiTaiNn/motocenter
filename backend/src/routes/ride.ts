@@ -133,7 +133,7 @@ router.get(
  *       400:
  *         description: userId manquant
  *       404:
- *         description: Balade non trouvé
+ *         description: Balade non trouvée
  *       500:
  *         description: Erreur serveur
  */
@@ -418,7 +418,7 @@ router.post(
  *       400:
  *         description: userId manquant, format invalide ou balade non-événement
  *       404:
- *         description: Balade non trouvé
+ *         description: Balade non trouvée
  *       500:
  *         description: Erreur serveur
  */
