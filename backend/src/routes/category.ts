@@ -7,7 +7,7 @@ const router = Router()
  * @openapi
  * /categories:
  *   get:
- *     summary: Récupérer la liste des marques
+ *     summary: Récupérer la liste des catégories
  *     tags:
  *       - Categories
  *     parameters:
@@ -28,7 +28,7 @@ const router = Router()
  *         description: Nombre maximum de résultats
  *     responses:
  *       200:
- *         description: Liste des marques
+ *         description: Liste des catégories
  *         content:
  *           application/json:
  *             schema:
@@ -41,21 +41,18 @@ const router = Router()
  *       500:
  *         description: Internal server error
  */
-router.get(
-	'/',
-	async (req: Request, res) => {
-		const { project, sort, limit } = prepareQuery(req.query)
-		try {
-			const categories = await Category.find()
-				.select(project)
-				.sort(sort)
-				.limit(limit)
-			res.status(200).json({ categories })
-		} catch (error) {
-			console.error('Error accessing message route:', error)
-			res.status(500).json({ error: 'Internal server error' })
-		}
-	},
-)
+router.get('/', async (req: Request, res) => {
+  const { project, sort, limit } = prepareQuery(req.query)
+  try {
+    const categories = await Category.find()
+      .select(project)
+      .sort(sort)
+      .limit(limit)
+    res.status(200).json({ categories })
+  } catch (error) {
+    console.error('Error accessing message route:', error)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
 
 export default router
