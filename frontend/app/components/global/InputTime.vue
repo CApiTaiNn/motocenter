@@ -27,7 +27,7 @@ const selectTime = (h: number) => {
 <template>
   <UInputTime
     ref="inputRef"
-    v-model="value as any"
+    v-model="value"
     :hour-cycle="24"
     class="w-full"
     size="xl"
