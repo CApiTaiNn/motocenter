@@ -71,7 +71,7 @@ const handleAddComment = async () => {
     } else {
       toast.add({
         title: 'Erreur',
-        description: 'Votre commentaire n\'a pas pu être ajouté.',
+        description: "Votre commentaire n'a pas pu être ajouté.",
         color: 'error'
       })
     }
@@ -82,15 +82,18 @@ const handleAddFavorite = async () => {
   if (!user.value) {
     open()
   } else {
-    const response = await $fetch<{ isAdded: boolean }>(`${apiBase}posts/add-favorite`, {
-      method: 'POST',
-      body: {
-        userId: user.value._id
-      },
-      params: {
-        filter: JSON.stringify({ _id: post.value?._id })
+    const response = await $fetch<{ isAdded: boolean }>(
+      `${apiBase}posts/add-favorite`,
+      {
+        method: 'POST',
+        body: {
+          userId: user.value._id
+        },
+        params: {
+          filter: JSON.stringify({ _id: post.value?._id })
+        }
       }
-    })
+    )
 
     if (response.isAdded === true) {
       toast.add({
@@ -109,7 +112,7 @@ const handleAddFavorite = async () => {
     } else {
       toast.add({
         title: 'Erreur',
-        description: 'Votre post n\'a pas été ajouté aux favoris.',
+        description: "Votre post n'a pas été ajouté aux favoris.",
         color: 'error'
       })
     }
@@ -143,7 +146,12 @@ onMounted(async () => {
       <USkeleton v-if="isLoading === false" class="size-20 rounded-full" />
       <div v-else>
         <div class="icon-and-text title-mobile-version">
-          <UAvatar :src="`/images/users/${post?.user.image}`" size="3xl" loading="lazy" class="margin-2" />
+          <UAvatar
+            :src="`/images/users/${post?.user.image}`"
+            size="3xl"
+            loading="lazy"
+            class="margin-2"
+          />
           <h2>{{ post?.title }}</h2>
         </div>
         <div>
@@ -160,7 +168,7 @@ onMounted(async () => {
               </p>
             </div>
             <p>
-              Par {{ post?.user.firstname }},
+              Par {{ post?.user.pseudo }},
               {{ formatTimeAgo(post?.createdAt) }}
             </p>
             <div class="icon-and-text right">
@@ -168,21 +176,38 @@ onMounted(async () => {
               <p>{{ post?.views }} vues</p>
             </div>
           </div>
-          <div class="icon-and-text margin-bottom-1 margin-top-0_5 put-in-favorite" @click="handleAddFavorite">
-            <UIcon :name="isSolidStar ? 'i-heroicons-star-solid' : 'i-heroicons-star'" class="size-7" />
+          <div
+            class="icon-and-text margin-bottom-1 margin-top-0_5 put-in-favorite"
+            @click="handleAddFavorite"
+          >
+            <UIcon
+              :name="
+                isSolidStar ? 'i-heroicons-star-solid' : 'i-heroicons-star'
+              "
+              class="size-7"
+            />
             <p>Mettre ce post en favori</p>
           </div>
-          <img :src="`${post?.image}`" :alt="`Image du post ${post?.title} par ${post?.user.firstname}`"
-            :title="`Image du post ${post?.title} par ${post?.user.firstname}`"
-            class="img margin-1_5 margin-bottom-1" />
+          <img
+            :src="`${post?.image}`"
+            :alt="`Image du post ${post?.title} par ${post?.user.pseudo}`"
+            :title="`Image du post ${post?.title} par ${post?.user.pseudo}`"
+            class="img margin-1_5 margin-bottom-1"
+          />
         </div>
         <h4 class="margin-bottom-1">{{ post?.content }}</h4>
         <div class="add-comment">
           <UFormField label="Ecrire un commentaire" required>
             <UTextarea v-model="newReponseOfPost" />
           </UFormField>
-          <UButton :disabled="newReponseOfPost === ''" size="sm" class="button-comment" @click="handleAddComment">
-            Ajouter mon commentaire</UButton>
+          <UButton
+            :disabled="newReponseOfPost === ''"
+            size="sm"
+            class="button-comment"
+            @click="handleAddComment"
+          >
+            Ajouter mon commentaire</UButton
+          >
         </div>
         <p v-if="responses.length === 0">
           Aucun commentaire à ce post, ajouter le premier
@@ -263,11 +288,11 @@ onMounted(async () => {
   margin: 2rem 5rem;
 }
 
-.post-filters>div:first-child {
+.post-filters > div:first-child {
   flex-shrink: 0;
 }
 
-.post-filters>div:nth-child(2) {
+.post-filters > div:nth-child(2) {
   flex: 1;
   min-width: 0;
 }
