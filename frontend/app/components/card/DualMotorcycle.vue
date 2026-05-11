@@ -18,7 +18,7 @@ const isOpen = ref(true)
     <div v-if="isOpen" class="dual-motorcycle">
       <div class="slot-container">
         <div class="motorcycle-left">
-          <UIcon 
+          <UIcon
             name="i-lucide-circle-x"
             class="absolute top-2 right-2 size-5 self-end cursor-pointer"
             @click="emit('delete', 'left')"
@@ -37,13 +37,13 @@ const isOpen = ref(true)
         </div>
         <UButton
           icon="i-lucide-arrow-left-right"
-          class="w-fit  rounded-4xl m-1 btn-select"
+          class="w-fit rounded-4xl m-1 btn-select"
           @click="emit('compare')"
         >
           Comparer
         </UButton>
         <div class="motorcycle-right">
-          <UIcon 
+          <UIcon
             name="i-lucide-circle-x"
             class="absolute top-2 right-2 size-5 self-end cursor-pointer"
             @click="emit('delete', 'right')"

@@ -35,7 +35,7 @@ export enum RideColor {
   ORANGE = '#E69F00',
   PINK = '#CC79A7',
   YELLOW = '#F0E442',
-  GREEN = '#7EDE6B',
+  GREEN = '#7EDE6B'
 }
 
 export interface ICreateRideBody {

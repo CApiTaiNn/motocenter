@@ -1,5 +1,5 @@
-import { Types } from "mongoose"
-import { IUser } from "./user"
+import { Types } from 'mongoose'
+import { IUser } from './user'
 
 export interface IMessage {
   content: string
@@ -7,8 +7,8 @@ export interface IMessage {
   like: number
   dislike: number
   isRep: boolean
-  reference?: Types.ObjectId;
-  referenceModel?: 'Post' | 'Message';
+  reference?: Types.ObjectId
+  referenceModel?: 'Post' | 'Message'
   user: IUser
   createAt: string
   usersLikeId: Array<string>

@@ -16,7 +16,7 @@ describe('Motorcycle Routes - /api/v1/motorcycles', () => {
     torque: 67,
     weight: 184,
     consumption: 4.5,
-    price: 7699,
+    price: 7699
   }
 
   beforeEach(async () => {
@@ -60,7 +60,9 @@ describe('Motorcycle Routes - /api/v1/motorcycles', () => {
 
     it('should respect limit', async () => {
       await Motorcycle.create({ ...motoData, name: 'MT-09', brand: brandId })
-      const res = await request(app).get('/api/v1/motorcycles?project=all&limit=1')
+      const res = await request(app).get(
+        '/api/v1/motorcycles?project=all&limit=1'
+      )
 
       expect(res.status).toBe(200)
       expect(res.body.motorcycles.length).toBe(1)
@@ -87,7 +89,12 @@ describe('Motorcycle Routes - /api/v1/motorcycles', () => {
   describe('GET /api/v1/motorcycles/stats', () => {
     it('should return total horsePower sum', async () => {
       await Motorcycle.create({ ...motoData, brand: brandId })
-      await Motorcycle.create({ ...motoData, name: 'R1', horsePower: 200, brand: brandId })
+      await Motorcycle.create({
+        ...motoData,
+        name: 'R1',
+        horsePower: 200,
+        brand: brandId
+      })
 
       const res = await request(app).get('/api/v1/motorcycles/stats')
 
@@ -99,7 +106,13 @@ describe('Motorcycle Routes - /api/v1/motorcycles', () => {
   describe('GET /api/v1/motorcycles/max-stats', () => {
     it('should return max values for numeric fields', async () => {
       await Motorcycle.create({ ...motoData, brand: brandId })
-      await Motorcycle.create({ ...motoData, name: 'R1', horsePower: 200, price: 20000, brand: brandId })
+      await Motorcycle.create({
+        ...motoData,
+        name: 'R1',
+        horsePower: 200,
+        price: 20000,
+        brand: brandId
+      })
 
       const res = await request(app).get('/api/v1/motorcycles/max-stats')
 

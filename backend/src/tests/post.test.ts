@@ -18,7 +18,7 @@ describe('Post Routes - /api/v1/posts', () => {
       lastname: 'Admin',
       pseudo: 'admin',
       email: 'admin@test.com',
-      password: 'pass',
+      password: 'pass'
     })
     const brand = await Brand.create({ name: 'Yamaha', icon: 'yamaha.svg' })
     const category = await Category.create({ name: 'Sport', icon: 'sport.svg' })
@@ -34,7 +34,7 @@ describe('Post Routes - /api/v1/posts', () => {
         content: 'Content',
         user: userId,
         brand: brandId,
-        category: categoryId,
+        category: categoryId
       })
 
       const res = await request(app).get('/api/v1/posts?project=all')
@@ -50,7 +50,7 @@ describe('Post Routes - /api/v1/posts', () => {
         content: 'Content',
         user: userId,
         brand: brandId,
-        category: categoryId,
+        category: categoryId
       })
 
       const res = await request(app).get('/api/v1/posts?project=all&deep=true')
@@ -58,7 +58,7 @@ describe('Post Routes - /api/v1/posts', () => {
       expect(res.status).toBe(200)
       expect(res.body.posts[0].brand.name).toBe('Yamaha')
       expect(res.body.posts[0].category.name).toBe('Sport')
-      expect(res.body.posts[0].user.firstname).toBe('MotoCenter')
+      expect(res.body.posts[0].user.pseudo).toBe('admin')
     })
   })
 
@@ -79,18 +79,19 @@ describe('Post Routes - /api/v1/posts', () => {
         content: 'Content',
         user: userId,
         brand: brandId,
-        category: categoryId,
+        category: categoryId
       })
 
       await Message.create({
         content: 'Reply to post',
         reference: post._id,
         referenceModel: 'Post',
-        user: userId,
+        user: userId
       })
 
-      const res = await request(app)
-        .get(`/api/v1/posts/${post._id}/responses?project=all`)
+      const res = await request(app).get(
+        `/api/v1/posts/${post._id}/responses?project=all`
+      )
 
       expect(res.status).toBe(200)
       expect(res.body.messages).toBeInstanceOf(Array)
@@ -100,7 +101,9 @@ describe('Post Routes - /api/v1/posts', () => {
 
     it('should return 404 for non-existent post', async () => {
       const fakeId = '507f1f77bcf86cd799439011'
-      const res = await request(app).get(`/api/v1/posts/${fakeId}/responses?project=all`)
+      const res = await request(app).get(
+        `/api/v1/posts/${fakeId}/responses?project=all`
+      )
 
       expect(res.status).toBe(404)
     })
@@ -113,11 +116,12 @@ describe('Post Routes - /api/v1/posts', () => {
         content: 'Content',
         user: userId,
         brand: brandId,
-        category: categoryId,
+        category: categoryId
       })
 
-      await request(app)
-        .post(`/api/v1/posts/add-view?filter={"id":"${post._id}"}`)
+      await request(app).post(
+        `/api/v1/posts/add-view?filter={"id":"${post._id}"}`
+      )
 
       const updated = await Post.findById(post._id)
       expect(updated!.views).toBe(1)
@@ -126,30 +130,26 @@ describe('Post Routes - /api/v1/posts', () => {
 
   describe('POST /api/v1/posts', () => {
     it('should create a new post', async () => {
-      const res = await request(app)
-        .post('/api/v1/posts')
-        .send({
-          title: 'New post',
-          content: 'New content',
-          brand: 'Yamaha',
-          category: 'Sport',
-          isNewMotoComment: true,
-        })
+      const res = await request(app).post('/api/v1/posts').send({
+        title: 'New post',
+        content: 'New content',
+        brand: 'Yamaha',
+        category: 'Sport',
+        isNewMotoComment: true
+      })
 
       expect(res.status).toBe(201)
       expect(res.body._id).toBeDefined()
     })
 
     it('should fail with non-existent brand', async () => {
-      const res = await request(app)
-        .post('/api/v1/posts')
-        .send({
-          title: 'Bad post',
-          content: 'Content',
-          brand: 'NonExistent',
-          category: 'Sport',
-          isNewMotoComment: true,
-        })
+      const res = await request(app).post('/api/v1/posts').send({
+        title: 'Bad post',
+        content: 'Content',
+        brand: 'NonExistent',
+        category: 'Sport',
+        isNewMotoComment: true
+      })
 
       expect(res.status).toBe(500)
     })

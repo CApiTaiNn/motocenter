@@ -1,5 +1,5 @@
-import { model, Schema, Types } from "mongoose";
-import type { IPost } from "../types/post";
+import { model, Schema, Types } from 'mongoose'
+import type { IPost } from '../types/post'
 
 const postSchema = new Schema({
   title: {
@@ -27,14 +27,14 @@ const postSchema = new Schema({
   },
   views: {
     type: Number,
-    default: 0,
+    default: 0
   },
   image: {
-    type: String,
+    type: String
   },
   createdAt: {
     type: Date,
-    default: Date.now,
+    default: Date.now
   },
   isNewMotoComment: {
     type: Boolean,

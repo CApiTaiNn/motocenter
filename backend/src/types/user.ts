@@ -8,6 +8,12 @@ export interface IUser {
   ridingStartYear?: number
   createdAt: Date
   userType: 'beginner' | 'confirmed' | 'expert' | 'other'
-  idMoto: string,
+  idMoto: string
+  image: string
+}
+
+export interface IUserPublic {
+  _id: string
+  pseudo: string
   image: string
 }

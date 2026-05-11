@@ -1,4 +1,3 @@
-
 import { connectToMongo } from '.'
 import Category from '../models/Category'
 

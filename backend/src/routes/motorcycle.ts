@@ -19,7 +19,7 @@ router.get(
       console.error('Error accessing motorcycle route:', error)
       res.status(500).json({ error: 'Internal server error' })
     }
-  },
+  }
 )
 
 router.post('/', async (req: Request, res: Response) => {
@@ -49,9 +49,9 @@ router.get('/stats', async (req: Request, res: Response) => {
       {
         $group: {
           _id: null,
-          totalHorsePower: { $sum: '$horsePower' },
-        },
-      },
+          totalHorsePower: { $sum: '$horsePower' }
+        }
+      }
     ])
     res.status(200).json(totalHorsePower[0].totalHorsePower)
   } catch (error) {
@@ -64,7 +64,7 @@ router.put('/:id', async (req: Request, res: Response) => {
   try {
     const updatedMotorcycle = await Motorcycle.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      req.body
     ).populate('brand')
     if (!updatedMotorcycle) {
       return res.status(404).json({ error: 'Motorcycle not found' })
@@ -103,9 +103,9 @@ router.get('/max-stats', async (req: Request, res: Response) => {
           maxConsumption: { $max: '$consumption' },
           maxAcceleration: { $max: '$acceleration' },
           maxSpeedMax: { $max: '$speedMax' },
-          maxPrice: { $max: '$price' },
-        },
-      },
+          maxPrice: { $max: '$price' }
+        }
+      }
     ])
     res.status(200).json(maxStats[0])
   } catch (error) {

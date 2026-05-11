@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import AudioPlayer from '../AudioPlayer.vue';
+import AudioPlayer from '../AudioPlayer.vue'
 
 const props = defineProps<{
   fieldName: string

@@ -14,7 +14,7 @@ const addViewInAPost = async (id: string) => {
   await $fetch(`${apiBase}posts/add-view`, {
     method: 'POST',
     params: {
-      filter: JSON.stringify({ id: id }),
+      filter: JSON.stringify({ id: id })
     }
   })
 }
@@ -32,11 +32,21 @@ const handlePostChange = () => {
   <UCard class="card-forum custom-border" @click="handleOpenAPost(post._id)">
     <div class="postCard">
       <USkeleton v-if="props.loading" class="size-12 rounded-full" />
-      <UAvatar v-else :src="`/images/users/${props.post.user.image}`" size="3xl" loading="lazy" class="margin-2" />
+      <UAvatar
+        v-else
+        :src="`/images/users/${props.post.user.image}`"
+        size="3xl"
+        loading="lazy"
+        class="margin-2"
+      />
       <div class="main">
         <div class="top">
           <h4>{{ props.post.title }}</h4>
-          <ForumEditAPost :post="post" :is-new-post="false" @edited-post="handlePostChange" />
+          <ForumEditAPost
+            :post="post"
+            :is-new-post="false"
+            @edited-post="handlePostChange"
+          />
         </div>
         <div class="grid">
           <div>
@@ -47,7 +57,7 @@ const handlePostChange = () => {
               <UBadge size="lg">{{ props.post.category.name }}</UBadge>
             </div>
             <p>
-              Par {{ props.post.user.firstname }},
+              Par {{ props.post.user.pseudo }},
               {{ formatTimeAgo(props.post.createdAt) }}
             </p>
           </div>
@@ -56,14 +66,20 @@ const handlePostChange = () => {
               <UIcon class="size-7 margin-2" name="i-lucide-messages-square" />
               <div class="responses">
                 <p>{{ props.post.responses.length || 0 }}&nbsp;</p>
-                <p class="number">{{ props.post.responses.length > 1 ? ' réponses' : ' réponse' }}</p>
+                <p class="number">
+                  {{
+                    props.post.responses.length > 1 ? ' réponses' : ' réponse'
+                  }}
+                </p>
               </div>
             </div>
             <div class="stats">
               <UIcon class="size-7 margin-2" name="i-lucide-eye" />
               <div class="responses">
                 <p>{{ props.post.views }}&nbsp;</p>
-                <p class="number">{{ props.post.views.length > 1 ? 'vues' : ' vue' }}</p>
+                <p class="number">
+                  {{ props.post.views.length > 1 ? 'vues' : ' vue' }}
+                </p>
               </div>
             </div>
           </div>

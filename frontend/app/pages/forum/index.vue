@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import ForumMyFavoritesPost from '~/components/forum/ForumMyFavoritesPost.vue';
-import HeaderInfo from '~/components/global/HeaderInfo.vue';
-import type { IPost } from '~/types/post';
+import ForumMyFavoritesPost from '~/components/forum/ForumMyFavoritesPost.vue'
+import HeaderInfo from '~/components/global/HeaderInfo.vue'
+import type { IPost } from '~/types/post'
 
 const posts = ref<IPost[]>([])
 const loading = ref(true)
@@ -41,13 +41,16 @@ const filter = computed(() => {
 })
 
 const getPosts = async () => {
-  const res = await $fetch<{ posts: IPost[] }>(`${useRuntimeConfig().public.apiBase}posts`, {
-    params: {
-      deep: true,
-      project: 'content,title,id,createdAt,views,image',
-      filter: filter.value
+  const res = await $fetch<{ posts: IPost[] }>(
+    `${useRuntimeConfig().public.apiBase}posts`,
+    {
+      params: {
+        deep: true,
+        project: 'content,title,id,createdAt,views,image',
+        filter: filter.value
+      }
     }
-  })
+  )
   posts.value = await Promise.all(
     res.posts.map(async (post: IPost) => {
       post.responses = await getResponseOfPost(post._id)
@@ -57,7 +60,9 @@ const getPosts = async () => {
 }
 
 const getResponseOfPost = async (postId: string) => {
-  const res = await fetch(`${useRuntimeConfig().public.apiBase}posts/${postId}/responses`)
+  const res = await fetch(
+    `${useRuntimeConfig().public.apiBase}posts/${postId}/responses`
+  )
   const data = await res.json()
   return data.messages
 }
@@ -71,9 +76,7 @@ const handleFilter = async (updateFilter: any) => {
 }
 
 onMounted(async () => {
-  await Promise.all([
-    getPosts()
-  ])
+  await Promise.all([getPosts()])
   loading.value = false
 })
 </script>
@@ -99,11 +102,19 @@ onMounted(async () => {
       </div>
       <div class="posts">
         <USkeleton v-if="loading" class="size-12 rounded-full" />
-        <div v-if="loading === false && posts.length === 0" class="center add-post-empty">
+        <div
+          v-if="loading === false && posts.length === 0"
+          class="center add-post-empty"
+        >
           <p>Aucun post disponible, ajouter le premier</p>
         </div>
         <div v-for="post in posts" :key="post._id">
-          <ForumPost :post="post" class="cursor-pointer" :loading @post-change="getPosts()" />
+          <ForumPost
+            :post="post"
+            class="cursor-pointer"
+            :loading
+            @post-change="getPosts()"
+          />
         </div>
       </div>
       <div class="panel">
@@ -193,9 +204,7 @@ onMounted(async () => {
   cursor: pointer;
 }
 
-
-
-.forum-filters>div:nth-child(2) {
+.forum-filters > div:nth-child(2) {
   flex: 1;
   min-width: 0;
 }

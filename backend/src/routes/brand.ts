@@ -9,15 +9,15 @@ router.get(
     const { project, sort, limit, filter } = prepareQuery(req.query)
     try {
       const brands = await Brand.find(filter)
-      .select(project)
-      .sort(sort)
-      .limit(limit)
+        .select(project)
+        .sort(sort)
+        .limit(limit)
       res.status(200).json({ brands })
     } catch (error) {
       console.error('Error accessing brand route:', error)
       res.status(500).json({ error: 'Internal server error' })
     }
-  },
+  }
 )
 
 router.get('/count', async (req: Request, res: Response) => {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import FilterContent from './FilterContent.vue';
+import FilterContent from './FilterContent.vue'
 
 const emits = defineEmits(['filters'])
 const isOpen = ref(false)
@@ -18,8 +18,13 @@ const handleFiltersChange = (payload: any) => {
     </div>
     <div id="mobile-filters">
       <USlideover side="left">
-        <UButton color="neutral" variant="subtle" class="button-mobile" icon="i-lucide-arrow-right"
-          @click="isOpen = true" />
+        <UButton
+          color="neutral"
+          variant="subtle"
+          class="button-mobile"
+          icon="i-lucide-arrow-right"
+          @click="isOpen = true"
+        />
         <template #body>
           <FilterContent @change="handleFiltersChange" />
           <div class="panel-mobile">

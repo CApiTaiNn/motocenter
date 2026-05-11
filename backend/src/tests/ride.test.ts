@@ -24,13 +24,13 @@ describe('Ride Routes - /api/v1/rides', () => {
             type: 'LineString',
             coordinates: [
               [-2.75, 47.65],
-              [-3.12, 47.48],
-            ],
+              [-3.12, 47.48]
+            ]
           },
-          properties: {},
-        },
-      ],
-    },
+          properties: {}
+        }
+      ]
+    }
   }
 
   describe('GET /api/v1/rides', () => {
@@ -79,7 +79,7 @@ describe('Ride Routes - /api/v1/rides', () => {
           rideType: 'highway',
           userId: '507f1f77bcf86cd799439011',
           imageLink: 'https://example.com/ride.jpg',
-          geom: rideData.geom,
+          geom: rideData.geom
         })
 
       expect(res.status).toBe(201)

@@ -121,57 +121,102 @@ onMounted(async () => {
 
 <template>
   <div class="comment-wrapper">
-    <div class="comment" :class="responsesOfComment.length === 0 ? 'margin_left-0_9' : ''">
+    <div
+      class="comment"
+      :class="responsesOfComment.length === 0 ? 'margin_left-0_9' : ''"
+    >
       <div class="avatar">
         <div>
-          <UIcon v-if="responsesOfComment.length !== 0"
-            :name="isOpen ? 'i-lucide-circle-minus' : 'i-lucide-circle-plus'" class="cursor-pointer"
-            @click="isOpen = !isOpen" />
+          <UIcon
+            v-if="responsesOfComment.length !== 0"
+            :name="isOpen ? 'i-lucide-circle-minus' : 'i-lucide-circle-plus'"
+            class="cursor-pointer"
+            @click="isOpen = !isOpen"
+          />
         </div>
-        <UAvatar :src="`/images/users/${message.user.image}`" :alt="message.user.firstname" size="3xl"
-          :title="message.user.firstname" class="margin-right-0_5" />
+        <UAvatar
+          :src="`/images/users/${message.user.image}`"
+          :alt="message.user.pseudo"
+          size="3xl"
+          :title="message.user.pseudo"
+          class="margin-right-0_5"
+        />
       </div>
       <div class="comment-content">
         <div class="comment-header">
-          <p class="bold">{{ message.user.firstname }},&nbsp;</p>
+          <p class="bold">{{ message.user.pseudo }},&nbsp;</p>
           <p>{{ formatTimeAgo(message.createdAt) }}</p>
         </div>
         <p class="comment-text">{{ message.content }}</p>
         <div class="comment-actions">
-          <div class="action-button cursor-pointer" @click="handleAddLikeOrDislike(true, message._id)">
-            <UIcon :name="isSolidThumbUp
-                ? 'i-heroicons-hand-thumb-up-solid'
-                : 'i-heroicons-hand-thumb-up'
-              " class="size-6" />
+          <div
+            class="action-button cursor-pointer"
+            @click="handleAddLikeOrDislike(true, message._id)"
+          >
+            <UIcon
+              :name="
+                isSolidThumbUp
+                  ? 'i-heroicons-hand-thumb-up-solid'
+                  : 'i-heroicons-hand-thumb-up'
+              "
+              class="size-6"
+            />
             <p>{{ message.like }}</p>
           </div>
-          <div class="action-button cursor-pointer" @click="handleAddLikeOrDislike(false, message._id)">
-            <UIcon :name="isSolidThumbDown
-                ? 'i-heroicons-hand-thumb-down-solid'
-                : 'i-heroicons-hand-thumb-down'
-              " class="size-6" />
+          <div
+            class="action-button cursor-pointer"
+            @click="handleAddLikeOrDislike(false, message._id)"
+          >
+            <UIcon
+              :name="
+                isSolidThumbDown
+                  ? 'i-heroicons-hand-thumb-down-solid'
+                  : 'i-heroicons-hand-thumb-down'
+              "
+              class="size-6"
+            />
             <p>{{ message.dislike }}</p>
           </div>
-          <div class="action-button cursor-pointer" @click="handleSeeInputToAddResponseOfComment">
+          <div
+            class="action-button cursor-pointer"
+            @click="handleSeeInputToAddResponseOfComment"
+          >
             <UIcon name="i-lucide-messages-square" class="size-6" />
             <p>Répondre</p>
           </div>
         </div>
         <div v-if="isResponseOfAcomment" class="add-reponse-comment w-full">
-          <UTextarea v-model="isResponseOfAcommentValue" placeholder="Ecrivez votre réponse">
+          <UTextarea
+            v-model="isResponseOfAcommentValue"
+            placeholder="Ecrivez votre réponse"
+          >
           </UTextarea>
-          <UButton label="Envoyer ma réponse" class="cursor-pointer" size="sm"
-            :disabled="isResponseOfAcommentValue.length === 0" @click="handleAddResponseOfComment(message._id)" />
+          <UButton
+            label="Envoyer ma réponse"
+            class="cursor-pointer"
+            size="sm"
+            :disabled="isResponseOfAcommentValue.length === 0"
+            @click="handleAddResponseOfComment(message._id)"
+          />
         </div>
       </div>
     </div>
     <template v-if="responsesOfComment.length !== 0 && isOpen">
-      <div v-for="responseOfComment in responsesOfComment" :key="responseOfComment._id">
-        <div :class="props.deep >= MAX_DEEP
-            ? 'responses-container-flat'
-            : 'responses-container'
-          ">
-          <Comment :response="responseOfComment" :deep="props.deep >= MAX_DEEP ? props.deep : props.deep + 1" />
+      <div
+        v-for="responseOfComment in responsesOfComment"
+        :key="responseOfComment._id"
+      >
+        <div
+          :class="
+            props.deep >= MAX_DEEP
+              ? 'responses-container-flat'
+              : 'responses-container'
+          "
+        >
+          <Comment
+            :response="responseOfComment"
+            :deep="props.deep >= MAX_DEEP ? props.deep : props.deep + 1"
+          />
         </div>
       </div>
     </template>

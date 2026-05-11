@@ -13,7 +13,7 @@ const seedMotorcycles = async () => {
     const brand = brands.find((b) => b.name === name)
     if (!brand)
       throw new Error(
-        `Brand "${name}" introuvable. Lancez le seed brand d'abord.`,
+        `Brand "${name}" introuvable. Lancez le seed brand d'abord.`
       )
     return brand._id
   }
@@ -36,7 +36,7 @@ const seedMotorcycles = async () => {
       is_public: false,
       speedMax: 257,
       soundLink: '/sounds/CBR600RR.mp3',
-      imageUrl: '/images/motorcycles/CBR600RR_2020.png',
+      imageUrl: '/images/motorcycles/CBR600RR_2020.png'
     },
     {
       brand: brandByName('Kawasaki'),
@@ -54,7 +54,7 @@ const seedMotorcycles = async () => {
       withAllField: false,
       is_public: false,
       speedMax: 262,
-      imageUrl: '/images/motorcycles/ninja_zx-6R_2021.png',
+      imageUrl: '/images/motorcycles/ninja_zx-6R_2021.png'
     },
     {
       brand: brandByName('Suzuki'),
@@ -72,7 +72,7 @@ const seedMotorcycles = async () => {
       withAllField: false,
       is_public: false,
       speedMax: 250,
-      imageUrl: '/images/motorcycles/gsx-r600_2019.jpg',
+      imageUrl: '/images/motorcycles/gsx-r600_2019.jpg'
     },
     {
       brand: brandByName('Yamaha'),
@@ -90,7 +90,7 @@ const seedMotorcycles = async () => {
       withAllField: false,
       is_public: false,
       speedMax: 257,
-      imageUrl: '/images/motorcycles/yzf-r6_2020.png',
+      imageUrl: '/images/motorcycles/yzf-r6_2020.png'
     },
     {
       brand: brandByName('Ducati'),
@@ -112,7 +112,7 @@ const seedMotorcycles = async () => {
       time_100_200: 6.1,
       time_200_300: 999,
       speedMax: 270,
-      imageUrl: '/images/motorcycles/panigale_v2_2023.png',
+      imageUrl: '/images/motorcycles/panigale_v2_2023.png'
     },
     {
       brand: brandByName('BMW'),
@@ -131,7 +131,7 @@ const seedMotorcycles = async () => {
       withAllField: false,
       is_public: true,
       time_0_100: 3.1,
-      speedMax: 303,
+      speedMax: 303
     },
     {
       brand: brandByName('Honda'),
@@ -150,7 +150,7 @@ const seedMotorcycles = async () => {
       is_public: true,
       time_0_100: 3.2,
       speedMax: 299,
-      imageUrl: '/images/motorcycles/cbr1000rr-r_fireblade_2024.png',
+      imageUrl: '/images/motorcycles/cbr1000rr-r_fireblade_2024.png'
     },
     {
       brand: brandByName('Yamaha'),
@@ -169,7 +169,7 @@ const seedMotorcycles = async () => {
       withAllField: false,
       is_public: true,
       time_0_100: 3.0,
-      speedMax: 299,
+      speedMax: 299
     },
     {
       brand: brandByName('Ducati'),
@@ -187,7 +187,7 @@ const seedMotorcycles = async () => {
       withAllField: false,
       is_public: true,
       speedMax: 290,
-      imageUrl: '/images/motorcycles/StreetfighterV4_2024.png',
+      imageUrl: '/images/motorcycles/StreetfighterV4_2024.png'
     },
     {
       brand: brandByName('Kawasaki'),
@@ -206,7 +206,7 @@ const seedMotorcycles = async () => {
       is_public: true,
       time_0_100: 3.4,
       speedMax: 280,
-      imageUrl: '/images/motorcycles/ZH2_2023.png',
+      imageUrl: '/images/motorcycles/ZH2_2023.png'
     },
     {
       brand: brandByName('Honda'),
@@ -224,7 +224,7 @@ const seedMotorcycles = async () => {
       withAllField: false,
       is_new: false,
       speedMax: 257,
-      imageUrl: '/images/motorcycles/CBR600RR_2021.png',
+      imageUrl: '/images/motorcycles/CBR600RR_2021.png'
     },
     // Motos A2
     {
@@ -243,7 +243,7 @@ const seedMotorcycles = async () => {
       withAllField: false,
       is_new: true,
       speedMax: 191,
-      imageUrl: '/images/motorcycles/CB500F_2024.png',
+      imageUrl: '/images/motorcycles/CB500F_2024.png'
     },
     {
       brand: brandByName('Yamaha'),
@@ -261,7 +261,7 @@ const seedMotorcycles = async () => {
       withAllField: false,
       is_new: true,
       speedMax: 200,
-      imageUrl: '/images/motorcycles/mt-07_2024.png',
+      imageUrl: '/images/motorcycles/mt-07_2024.png'
     },
     {
       brand: brandByName('Kawasaki'),
@@ -279,7 +279,7 @@ const seedMotorcycles = async () => {
       withAllField: false,
       is_new: true,
       speedMax: 195,
-      imageUrl: '/images/motorcycles/Z650_2024.png',
+      imageUrl: '/images/motorcycles/Z650_2024.png'
     },
     {
       brand: brandByName('Suzuki'),
@@ -297,7 +297,7 @@ const seedMotorcycles = async () => {
       withAllField: false,
       is_new: false,
       speedMax: 198,
-      imageUrl: '/images/motorcycles/SV650_2023.png',
+      imageUrl: '/images/motorcycles/SV650_2023.png'
     },
     // Motos Adventure
     {
@@ -316,7 +316,7 @@ const seedMotorcycles = async () => {
       withAllField: false,
       is_new: true,
       speedMax: 210,
-      imageUrl: '/images/motorcycles/africa_twin_2024.png',
+      imageUrl: '/images/motorcycles/africa_twin_2024.png'
     },
     {
       brand: brandByName('BMW'),
@@ -334,7 +334,7 @@ const seedMotorcycles = async () => {
       withAllField: false,
       is_new: true,
       speedMax: 220,
-      imageUrl: '/images/motorcycles/r_1250_gs_2024.png',
+      imageUrl: '/images/motorcycles/r_1250_gs_2024.png'
     },
     {
       brand: brandByName('Yamaha'),
@@ -352,7 +352,7 @@ const seedMotorcycles = async () => {
       withAllField: false,
       is_new: false,
       speedMax: 215,
-      imageUrl: '/images/motorcycles/super_tenere_1200_2023.png',
+      imageUrl: '/images/motorcycles/super_tenere_1200_2023.png'
     },
     {
       brand: brandByName('Ducati'),
@@ -370,7 +370,7 @@ const seedMotorcycles = async () => {
       withAllField: false,
       is_new: true,
       speedMax: 240,
-      imageUrl: '/images/motorcycles/multistrada_v4_2024.png',
+      imageUrl: '/images/motorcycles/multistrada_v4_2024.png'
     },
     // Motos A2 supplémentaires
     {
@@ -389,7 +389,7 @@ const seedMotorcycles = async () => {
       withAllField: false,
       is_new: true,
       speedMax: 206,
-      imageUrl: '/images/motorcycles/ninja_650_2024.png',
+      imageUrl: '/images/motorcycles/ninja_650_2024.png'
     },
     {
       brand: brandByName('Yamaha'),
@@ -407,7 +407,7 @@ const seedMotorcycles = async () => {
       withAllField: false,
       is_new: true,
       speedMax: 187,
-      imageUrl: '/images/motorcycles/tenere_700_2024.png',
+      imageUrl: '/images/motorcycles/tenere_700_2024.png'
     },
     {
       brand: brandByName('Honda'),
@@ -425,7 +425,7 @@ const seedMotorcycles = async () => {
       withAllField: false,
       is_new: true,
       speedMax: 183,
-      imageUrl: '/images/motorcycles/CBR500R_2024.png',
+      imageUrl: '/images/motorcycles/CBR500R_2024.png'
     },
     {
       brand: brandByName('Suzuki'),
@@ -443,7 +443,7 @@ const seedMotorcycles = async () => {
       withAllField: false,
       is_new: true,
       speedMax: 140,
-      imageUrl: '/images/motorcycles/v-strom_250_sx_2024.png',
+      imageUrl: '/images/motorcycles/v-strom_250_sx_2024.png'
     },
     // Adventure supplémentaires
     {
@@ -462,7 +462,7 @@ const seedMotorcycles = async () => {
       withAllField: false,
       is_new: true,
       speedMax: 230,
-      imageUrl: '/images/motorcycles/versys_1000_se_2024.png',
+      imageUrl: '/images/motorcycles/versys_1000_se_2024.png'
     },
     {
       brand: brandByName('BMW'),
@@ -480,8 +480,8 @@ const seedMotorcycles = async () => {
       withAllField: false,
       is_new: true,
       speedMax: 215,
-      imageUrl: '/images/motorcycles/r_1250_gs_adventure_2024.png',
-    },
+      imageUrl: '/images/motorcycles/r_1250_gs_adventure_2024.png'
+    }
   ])
 
   console.log('Motorcycles seeded')

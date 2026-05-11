@@ -8,7 +8,7 @@ describe('Brand Routes - /api/v1/brands', () => {
     await Brand.create([
       { name: 'Yamaha', icon: 'yamaha.svg' },
       { name: 'Honda', icon: 'honda.svg' },
-      { name: 'Kawasaki', icon: 'kawasaki.svg' },
+      { name: 'Kawasaki', icon: 'kawasaki.svg' }
     ])
   })
 
@@ -29,8 +29,9 @@ describe('Brand Routes - /api/v1/brands', () => {
     })
 
     it('should filter brands by name', async () => {
-      const res = await request(app)
-        .get('/api/v1/brands?project=all&filter={"name":"Honda"}')
+      const res = await request(app).get(
+        '/api/v1/brands?project=all&filter={"name":"Honda"}'
+      )
 
       expect(res.status).toBe(200)
       expect(res.body.brands.length).toBe(1)

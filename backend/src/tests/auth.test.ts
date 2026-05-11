@@ -11,7 +11,7 @@ describe('Auth Routes - /api/v1/auth', () => {
     pseudo: 'johnd',
     email: 'john@test.com',
     password: 'password123',
-    isAdmin: false,
+    isAdmin: false
   }
 
   beforeEach(async () => {

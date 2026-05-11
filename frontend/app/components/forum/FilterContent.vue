@@ -4,7 +4,10 @@ import type { ICategory } from '~/types/category'
 
 const props = defineProps({
   loading: Boolean,
-  activeFilters: { type: Object, default: () => ({ brandIds: [], categoryIds: [], onlyMyPost: true }) }
+  activeFilters: {
+    type: Object,
+    default: () => ({ brandIds: [], categoryIds: [], onlyMyPost: true })
+  }
 })
 const emits = defineEmits(['change'])
 
@@ -18,15 +21,18 @@ const filters = ref({
   searchBar: ''
 })
 
-watch(() => props.activeFilters, (newVal) => {
-  if (newVal) {
-    filters.value.brandIds = [...(newVal.brandIds || [])]
-    filters.value.categoryIds = [...(newVal.categoryIds || [])]
-    filters.value.onlyMyPost = newVal.onlyMyPost
-    filters.value.searchBar = newVal.searchBar
-  }
-}, { deep: true })
-
+watch(
+  () => props.activeFilters,
+  (newVal) => {
+    if (newVal) {
+      filters.value.brandIds = [...(newVal.brandIds || [])]
+      filters.value.categoryIds = [...(newVal.categoryIds || [])]
+      filters.value.onlyMyPost = newVal.onlyMyPost
+      filters.value.searchBar = newVal.searchBar
+    }
+  },
+  { deep: true }
+)
 
 const handleHaveAllPosts = () => {
   navigateTo('/forum')
@@ -63,7 +69,9 @@ const handleHaveMyFavorites = () => {
 
 const handlClickOnCategory = (filterCategoryId: string) => {
   if (filters.value.categoryIds.includes(filterCategoryId)) {
-    filters.value.categoryIds = filters.value.categoryIds.filter(category => category !== filterCategoryId)
+    filters.value.categoryIds = filters.value.categoryIds.filter(
+      (category) => category !== filterCategoryId
+    )
   } else {
     filters.value.categoryIds.push(filterCategoryId)
   }
@@ -72,7 +80,9 @@ const handlClickOnCategory = (filterCategoryId: string) => {
 
 const handleClickOnBrand = (filterBrandId: string) => {
   if (filters.value.brandIds.includes(filterBrandId)) {
-    filters.value.brandIds = filters.value.brandIds.filter(brand => brand !== filterBrandId)
+    filters.value.brandIds = filters.value.brandIds.filter(
+      (brand) => brand !== filterBrandId
+    )
   } else {
     filters.value.brandIds.push(filterBrandId)
   }
@@ -89,17 +99,34 @@ onMounted(async () => {
 </script>
 
 <template>
-  <UInput v-model="filters.searchBar" placeholder="Rechercher un post dans le forum" @update:model-value="handleSearch">
+  <UInput
+    v-model="filters.searchBar"
+    placeholder="Rechercher un post dans le forum"
+    @update:model-value="handleSearch"
+  >
     <template v-if="filters.searchBar?.length" #trailing>
-      <UButton color="neutral" variant="link" size="sm" icon="i-lucide-circle-x" aria-label="Clear input"
-        class="cursor-pointer" @click="filters.searchBar = ''; emitFilters()" />
+      <UButton
+        color="neutral"
+        variant="link"
+        size="sm"
+        icon="i-lucide-circle-x"
+        aria-label="Clear input"
+        class="cursor-pointer"
+        @click="
+          filters.searchBar = ''
+          emitFilters()
+        "
+      />
     </template>
   </UInput>
   <div class="icon-and-text filter cursor-pointer" @click="handleHaveAllPosts">
     <UIcon class="size-7 margin-0_5" name="i-lucide-messages-square" />
     <p>Tous les posts</p>
   </div>
-  <div class="icon-and-text filter cursor-pointer" @click="handleHaveMyFavorites">
+  <div
+    class="icon-and-text filter cursor-pointer"
+    @click="handleHaveMyFavorites"
+  >
     <UIcon class="size-7 margin-0_5" name="i-lucide-star" />
     <p>Mes favoris</p>
   </div>
@@ -110,9 +137,16 @@ onMounted(async () => {
     </div>
     <div class="filter">
       <USkeleton v-if="props.loading" class="size-12 rounded-full" />
-      <div v-for="category in categories" v-else :key="category._id" class="icon-and-text sub-filter cursor-pointer"
-        :class="{ 'background-selected': filters.categoryIds.includes(category._id) }"
-        @click="handlClickOnCategory(category._id)">
+      <div
+        v-for="category in categories"
+        v-else
+        :key="category._id"
+        class="icon-and-text sub-filter cursor-pointer"
+        :class="{
+          'background-selected': filters.categoryIds.includes(category._id)
+        }"
+        @click="handlClickOnCategory(category._id)"
+      >
         <UIcon class="size-7 margin-0_5" :name="category.icon" />
         <p>{{ category.name }}</p>
       </div>
@@ -125,14 +159,31 @@ onMounted(async () => {
     </div>
     <div class="filter">
       <USkeleton v-if="props.loading" class="size-12 rounded-full" />
-      <div v-else v-for="brand in brands" :key="brand._id" class="icon-and-text sub-filter cursor-pointer"
-        :class="{ 'background-selected': filters.brandIds.includes(brand._id) }" @click="handleClickOnBrand(brand._id)">
-        <img :src="brand.icon" :alt="brand.name" :title="brand.name" width="40" height="40" class="margin-0_5">
+      <div
+        v-else
+        v-for="brand in brands"
+        :key="brand._id"
+        class="icon-and-text sub-filter cursor-pointer"
+        :class="{ 'background-selected': filters.brandIds.includes(brand._id) }"
+        @click="handleClickOnBrand(brand._id)"
+      >
+        <img
+          :src="brand.icon"
+          :alt="brand.name"
+          :title="brand.name"
+          width="40"
+          height="40"
+          class="margin-0_5"
+        />
         <p>{{ brand.name }}</p>
       </div>
     </div>
   </div>
-  <USwitch v-model="filters.onlyMyPost" label="Uniquement mes posts" class="filter" />
+  <USwitch
+    v-model="filters.onlyMyPost"
+    label="Uniquement mes posts"
+    class="filter"
+  />
 </template>
 
 <style scoped>
