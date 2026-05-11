@@ -3,6 +3,7 @@ import { type Request, Router } from 'express'
 import { prepareQuery, type ReqQuery } from '../utils/find'
 import { RideColor, ICreateRideBody, IRide } from '../types/ride'
 import { Types } from 'mongoose'
+import { attachUsers } from '../utils/attach'
 
 const router = Router()
 
@@ -11,15 +12,9 @@ router.get(
   async (req: Request<unknown, unknown, unknown, ReqQuery>, res: any) => {
     const { project, sort, limit, deep } = prepareQuery(req.query)
     try {
-      let query = Ride.find().select(project).sort(sort).limit(limit)
-
-      if (deep) {
-        query = query.populate('participating_user', 'image pseudo')
-      }
-
-      const rides = await query
+      const rides = await Ride.find().select(project).sort(sort).limit(limit)
       const now = new Date(
-        new Date().toLocaleString('en-US', { timeZone: 'Europe/Paris' }),
+        new Date().toLocaleString('en-US', { timeZone: 'Europe/Paris' })
       )
 
       // Promise pour être sûr que toutes les modif sont faites avant de renvoyer les données
@@ -38,15 +33,20 @@ router.get(
               await ride.save()
             }
           }
-        }),
+        })
       )
 
-      res.status(200).json({ rides })
+      const ridesOut = rides.map((r) => r.toObject()) as any[]
+      if (deep) {
+        await attachUsers(ridesOut, 'participating_user')
+      }
+
+      res.status(200).json({ rides: ridesOut })
     } catch (error) {
       console.error('Error accessing ride route:', error)
       res.status(500).json({ error: 'Internal server error' })
     }
-  },
+  }
 )
 
 router.patch('/:id/like', async (req: Request<{ id: string }>, res: any) => {
@@ -66,14 +66,14 @@ router.patch('/:id/like', async (req: Request<{ id: string }>, res: any) => {
       : { $addToSet: { liked_id: userId }, $inc: { like: 1 } }
 
     const updatedRide = await Ride.findByIdAndUpdate(rideId, update, {
-      new: true,
+      new: true
     })
 
     if (!updatedRide) return res.status(404).json({ error: 'Update failed' })
 
     res.status(200).json({
       like: updatedRide.like,
-      isLiked: !hasLiked,
+      isLiked: !hasLiked
     })
   } catch (error: any) {
     console.error('MONGODB ERROR:', error.message)
@@ -90,10 +90,10 @@ router.get('/count', async (req, res) => {
     const intermediate = new Date(now.getFullYear(), now.getMonth() - 1, 1)
     const end = new Date()
     const countFirstPeriod = await Ride.countDocuments({
-      createdAt: { $gte: start, $lt: intermediate },
+      createdAt: { $gte: start, $lt: intermediate }
     })
     const countSecondPeriod = await Ride.countDocuments({
-      createdAt: { $gte: intermediate, $lt: end },
+      createdAt: { $gte: intermediate, $lt: end }
     })
 
     const percent =
@@ -111,7 +111,7 @@ router.post(
   '/',
   async (
     req: Request<unknown, unknown, ICreateRideBody, ReqQuery>,
-    res: any,
+    res: any
   ) => {
     try {
       const {
@@ -127,7 +127,7 @@ router.post(
         isEvent,
         dateEvent,
         hourEvent,
-        geom,
+        geom
       } = req.body
 
       const colors = Object.values(RideColor)
@@ -147,23 +147,23 @@ router.post(
         image_link: imageLink,
         is_event: isEvent,
         date_event: dateEvent,
-        hour_event: hourEvent,
+        hour_event: hourEvent
       })
 
       const savedRide = await newRide.save()
 
       res.status(201).json({
         message: 'Ride created successfully',
-        ride: savedRide,
+        ride: savedRide
       })
     } catch (error) {
       console.error('Error creating ride:', error)
       res.status(400).json({
         error: 'Failed to create ride',
-        details: error,
+        details: error
       })
     }
-  },
+  }
 )
 
 router.patch(
@@ -185,7 +185,7 @@ router.patch(
       }
 
       const isParticipating = ride.participating_user.some(
-        (id) => id.toString() === userId.toString(),
+        (id) => id.toString() === userId.toString()
       )
 
       const update = isParticipating
@@ -193,24 +193,26 @@ router.patch(
         : { $addToSet: { participating_user: userId } }
 
       const updatedRide = await Ride.findByIdAndUpdate(rideId, update, {
-        new: true,
-      }).populate('participating_user', 'image pseudo')
+        new: true
+      }).lean()
 
       if (!updatedRide) return res.status(404).json({ error: 'Update failed' })
+
+      await attachUsers([updatedRide as any], 'participating_user')
 
       res.status(200).json({
         participatingCount: updatedRide.participating_user.length,
         isParticipating: !isParticipating,
-        updatedParticipants: updatedRide.participating_user,
+        updatedParticipants: updatedRide.participating_user
       })
     } catch (error: any) {
       console.error('Participation error:', error.message)
       res.status(500).json({
         error: 'Internal server error',
-        details: error.message,
+        details: error.message
       })
     }
-  },
+  }
 )
 
 export default router

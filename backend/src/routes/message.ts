@@ -1,6 +1,7 @@
 import Message from '../models/Message'
 import { type Request, Response, Router } from 'express'
 import { prepareQuery, type ReqQuery } from '../utils/find'
+import { attachUser } from '../utils/attach'
 
 const router = Router()
 router.get(
@@ -8,20 +9,20 @@ router.get(
   async (req: Request<unknown, unknown, unknown, ReqQuery>, res) => {
     const { project, sort, limit, filter, deep } = prepareQuery(req.query)
     try {
-      const query = Message.find(filter)
+      const messages = await Message.find(filter)
         .select(project)
         .sort(sort)
         .limit(limit)
+        .lean()
       if (deep) {
-        query.populate('user')
+        await attachUser(messages, 'user')
       }
-      const messages = await query
       res.status(200).json({ messages })
     } catch (error) {
       console.error('Error accessing message route:', error)
       res.status(500).json({ error: 'Internal server error' })
     }
-  },
+  }
 )
 
 router.get('/:id/responses', async (req, res) => {
@@ -30,14 +31,12 @@ router.get('/:id/responses', async (req, res) => {
     if (!message) {
       return res.status(404).json({ error: 'Message not found' })
     }
-    const query = Message.find({
+    const messages = await Message.find({
       reference: message._id,
       referenceModel: 'Message'
-    })
+    }).lean()
 
-    query.populate('user')
-
-    const messages = await query
+    await attachUser(messages, 'user')
 
     res.json({ messages })
   } catch (error) {
@@ -45,7 +44,6 @@ router.get('/:id/responses', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' })
   }
 })
-
 
 router.post('/', async (req: Request, res: Response) => {
   try {
@@ -85,26 +83,26 @@ router.patch('/', async (req: Request, res: Response) => {
       }
     } else {
       if (isAlreadyDisliked) {
-        update = { $pull: { usersDislikeId: userId } };
+        update = { $pull: { usersDislikeId: userId } }
       } else {
         update = {
           $addToSet: { usersDislikeId: userId },
           $pull: { usersLikeId: userId }
-        };
+        }
       }
     }
 
-    await Message.findByIdAndUpdate(messageId, update);
+    await Message.findByIdAndUpdate(messageId, update)
 
     const finalMessage = await Message.findById(messageId)
     if (finalMessage) {
       finalMessage.like = finalMessage.usersLikeId.length
       finalMessage.dislike = finalMessage.usersDislikeId.length
       await finalMessage.save()
-      const populatedMessage = await Message.findById(messageId).populate('user')
-      res.status(200).json({ populatedMessage })
+      const result = await Message.findById(messageId).lean()
+      if (result) await attachUser([result], 'user')
+      res.status(200).json({ populatedMessage: result })
     }
-
   } catch (error: any) {
     console.error('ERREUR MONGODB:', error.message)
     res.status(500).json({ error: 'Erreur serveur', details: error.message })

@@ -17,7 +17,7 @@ describe('Message Routes - /api/v1/messages', () => {
       lastname: 'Doe',
       pseudo: 'johnd',
       email: 'john@test.com',
-      password: 'pass',
+      password: 'pass'
     })
     const brand = await Brand.create({ name: 'Yamaha', icon: 'yamaha.svg' })
     const category = await Category.create({ name: 'Sport', icon: 'sport.svg' })
@@ -26,7 +26,7 @@ describe('Message Routes - /api/v1/messages', () => {
       content: 'Content',
       user: user._id,
       brand: brand._id,
-      category: category._id,
+      category: category._id
     })
     userId = user._id.toString()
     postId = post._id.toString()
@@ -46,23 +46,23 @@ describe('Message Routes - /api/v1/messages', () => {
     it('should deep populate user', async () => {
       await Message.create({ content: 'Hello', user: userId })
 
-      const res = await request(app).get('/api/v1/messages?project=all&deep=true')
+      const res = await request(app).get(
+        '/api/v1/messages?project=all&deep=true'
+      )
 
       expect(res.status).toBe(200)
-      expect(res.body.messages[0].user.firstname).toBe('John')
+      expect(res.body.messages[0].user.pseudo).toBe('johnd')
     })
   })
 
   describe('POST /api/v1/messages', () => {
     it('should create a new message', async () => {
-      const res = await request(app)
-        .post('/api/v1/messages')
-        .send({
-          content: 'New message',
-          reference: postId,
-          referenceModel: 'Post',
-          user: userId,
-        })
+      const res = await request(app).post('/api/v1/messages').send({
+        content: 'New message',
+        reference: postId,
+        referenceModel: 'Post',
+        user: userId
+      })
 
       expect(res.status).toBe(201)
       expect(res.body.content).toBe('New message')
@@ -95,7 +95,7 @@ describe('Message Routes - /api/v1/messages', () => {
         content: 'Liked',
         user: userId,
         usersLikeId: [userId],
-        like: 1,
+        like: 1
       })
 
       const res = await request(app)
@@ -123,7 +123,7 @@ describe('Message Routes - /api/v1/messages', () => {
         content: 'Switch',
         user: userId,
         usersLikeId: [userId],
-        like: 1,
+        like: 1
       })
 
       const res = await request(app)
@@ -136,9 +136,7 @@ describe('Message Routes - /api/v1/messages', () => {
     })
 
     it('should return 400 without required fields', async () => {
-      const res = await request(app)
-        .patch('/api/v1/messages')
-        .send({})
+      const res = await request(app).patch('/api/v1/messages').send({})
 
       expect(res.status).toBe(400)
     })

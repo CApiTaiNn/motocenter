@@ -1,11 +1,11 @@
 import { Request, Router } from 'express'
 import { prepareQuery, ReqQuery } from '../utils/find'
 import Post from '../models/Post'
-import { IPost } from '../types/post'
 import Message from '../models/Message'
 import Brand from '../models/Brand'
 import User from '../models/User'
 import Category from '../models/Category'
+import { attachUser } from '../utils/attach'
 
 const router = Router()
 router.get(
@@ -15,15 +15,18 @@ router.get(
     try {
       let query = Post.find(filter).select(project).sort(sort).limit(limit)
       if (deep) {
-        query = query.populate('user').populate('brand').populate('category')
+        query = query.populate('brand').populate('category')
       }
-      const posts: Array<IPost> = await query
+      const posts = await query.lean()
+      if (deep) {
+        await attachUser(posts, 'user')
+      }
       res.status(200).json({ posts })
     } catch (error) {
       console.error('Error accessing message route:', error)
       res.status(500).json({ error: 'Internal server error' })
     }
-  },
+  }
 )
 
 router.get('/count', async (req, res) => {
@@ -33,10 +36,10 @@ router.get('/count', async (req, res) => {
     const intermediate = new Date(now.getFullYear(), now.getMonth() - 1, 1)
     const end = new Date()
     const countFirstPeriod = await Post.countDocuments({
-      createdAt: { $gte: start, $lt: intermediate },
+      createdAt: { $gte: start, $lt: intermediate }
     })
     const countSecondPeriod = await Post.countDocuments({
-      createdAt: { $gte: intermediate, $lt: end },
+      createdAt: { $gte: intermediate, $lt: end }
     })
 
     const percent =
@@ -60,27 +63,26 @@ router.get(
       if (!post) {
         return res.status(404).json({ error: 'Post not found' })
       }
-      let query = Message.find({
+      const messages = await Message.find({
         // TODO: mettre filter
         reference: post._id,
-        referenceModel: 'Post',
+        referenceModel: 'Post'
       })
         .select(project)
         .sort(sort)
         .limit(limit)
+        .lean()
 
       if (deep) {
-        query = query.populate('user')
+        await attachUser(messages, 'user')
       }
-
-      const messages = await query
 
       res.json({ messages })
     } catch (error) {
       console.error('Error accessing message route:', error)
       res.status(500).json({ error: 'Internal server error' })
     }
-  },
+  }
 )
 
 router.post('/add-view', async (req, res) => {
@@ -139,7 +141,7 @@ router.post('/', async (req, res) => {
       user: user,
       brand: brand,
       category: category,
-      image: body.url,
+      image: body.url
     })
     res.status(201).json({ _id: postCreated._id })
   } catch (error) {
@@ -166,7 +168,7 @@ router.put('/', async (req, res) => {
       category: category._id,
       user: user._id,
       brand: brand._id,
-      url: body.url,
+      url: body.url
     })
     if (!updatePost) {
       return res.status(500).json()
