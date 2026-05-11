@@ -20,4 +20,8 @@ router.use('/brand', brandRoutes)
 router.use('/rides', rideRoutes)
 router.use('/auth', token)
 
+router.get('/status', (req, res) => {
+  res.send('Api is running')
+})
+
 export default router
