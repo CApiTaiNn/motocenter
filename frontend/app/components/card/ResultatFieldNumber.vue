@@ -27,7 +27,7 @@ function countUpOptions(number: number) {
   const { unit } = parseField(number)
   return {
     suffix: unit,
-    useGrouping: props.fieldName !== 'year',
+    useGrouping: props.fieldName !== 'year'
   }
 }
 

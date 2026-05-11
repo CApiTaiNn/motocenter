@@ -11,6 +11,6 @@ const appName: string = useRuntimeConfig().public.appName
 .logo {
   font-family: 'krona-one', sans-serif;
   font-size: 1.2rem;
-  color:white !important;
+  color: white !important;
 }
 </style>

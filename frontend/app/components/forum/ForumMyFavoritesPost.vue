@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { IPost } from '~/types/post';
+import type { IPost } from '~/types/post'
 
 const apiBase = useRuntimeConfig().public.apiBase
 const { user } = useAuth()
@@ -13,18 +13,21 @@ const getFavoritesPostsOfUser = async () => {
     pending.value = true
     const response = await $fetch<{ posts: IPost[] }>(`${apiBase}posts`, {
       params: {
-        project: 'image,content,title,createdAt,views,userFavoritePost,brand,user,brand,category',
+        project:
+          'image,content,title,createdAt,views,userFavoritePost,brand,user,brand,category',
         deep: true
       }
     })
 
     if (user.value?._id) {
-      myFavoritesPosts.value = response.posts.filter((post) => post.userFavoritePost?.includes(user.value._id))
+      myFavoritesPosts.value = response.posts.filter((post) =>
+        post.userFavoritePost?.includes(user.value._id)
+      )
     }
   } catch {
     toast.add({
       title: 'Erreur',
-      description: 'Les favoris n\'ont pas été chargé.',
+      description: "Les favoris n'ont pas été chargé.",
       color: 'success'
     })
   } finally {
@@ -47,8 +50,12 @@ onMounted(async () => {
       </template>
       <template #default>
         <div v-if="myFavoritesPosts.length">
-          <div v-for="post in myFavoritesPosts" :key="post._id" class="cursor-pointer border-bottom"
-            @click="navigateTo(`/forum/${post._id}`)">
+          <div
+            v-for="post in myFavoritesPosts"
+            :key="post._id"
+            class="cursor-pointer border-bottom"
+            @click="navigateTo(`/forum/${post._id}`)"
+          >
             {{ post.title }}
           </div>
         </div>

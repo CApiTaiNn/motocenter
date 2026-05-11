@@ -29,11 +29,11 @@ const motorcyclesList = ref<IMotorcycle[]>([])
 const isMotorcyclesFetched = ref<boolean>(false)
 const selectedBrand = ref<BrandItem | undefined>()
 
-type BrandItem = IBrand & { 
-  label: string; 
-  avatar: { 
-    src: string 
-  } 
+type BrandItem = IBrand & {
+  label: string
+  avatar: {
+    src: string
+  }
 }
 
 // Brand list with avatar for the dropdown
