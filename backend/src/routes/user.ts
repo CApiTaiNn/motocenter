@@ -22,7 +22,7 @@ router.get(
       console.error('Error accessing user route:', error)
       res.status(500).json({ error: 'Internal server error' })
     }
-  },
+  }
 )
 
 router.post('/account', async (req: Request, res: Response) => {
@@ -34,7 +34,7 @@ router.post('/account', async (req: Request, res: Response) => {
     pseudo,
     userType,
     ridingStartYear,
-    image,
+    image
   } = req.body
 
   if (!email || !password) {
@@ -57,7 +57,7 @@ router.post('/account', async (req: Request, res: Response) => {
       ridingStartYear,
       createdAt: new Date(),
       isAdmin: false,
-      idMoto: '',
+      idMoto: ''
     }
 
     const users = await User.insertOne(newUser)
@@ -82,7 +82,7 @@ router.put(
       userType,
       ridingStartYear,
       image,
-      password,
+      password
     } = req.body
 
     const allowedFields = [
@@ -92,7 +92,7 @@ router.put(
       'userType',
       'ridingStartYear',
       'image',
-      'password',
+      'password'
     ]
 
     const updateData: any = {}
@@ -105,7 +105,7 @@ router.put(
     if (updateData.pseudo) {
       const existingUser = await User.findOne({
         pseudo: updateData.pseudo,
-        _id: { $ne: id },
+        _id: { $ne: id }
       })
       if (existingUser) {
         return res.status(409).json({ error: 'Pseudo already taken' })
@@ -117,7 +117,7 @@ router.put(
       const currentYear = new Date().getFullYear()
       if (isNaN(year) || year < 1950 || year > currentYear) {
         return res.status(400).json({
-          error: `Riding start year must be between 1950 and ${currentYear}`,
+          error: `Riding start year must be between 1950 and ${currentYear}`
         })
       }
     }
@@ -127,7 +127,7 @@ router.put(
 
       const users = await User.findByIdAndUpdate(id, updateData, {
         new: true,
-        runValidators: true,
+        runValidators: true
       }).select('-password') // Ne pas retourner le mot de passe
 
       if (!users) {
@@ -139,7 +139,7 @@ router.put(
       console.error('Error updating user:', error)
       res.status(500).json({ error: 'Internal server error' })
     }
-  },
+  }
 )
 
 router.get(
@@ -150,13 +150,13 @@ router.get(
       'pseudo',
       'userType',
       'ridingStartYear',
-      'image',
+      'image'
     ]
 
     const { project, sort, limit, filter } = prepareQuery(req.query)
 
     const safeProject = Object.fromEntries(
-      Object.entries(project).filter(([key]) => allowedFields.includes(key)),
+      Object.entries(project).filter(([key]) => allowedFields.includes(key))
     )
 
     const finalProject =
@@ -172,7 +172,7 @@ router.get(
       console.error('Error accessing user route:', error)
       res.status(500).json({ error: 'Internal server error' })
     }
-  },
+  }
 )
 
 router.get('/count', async (req: Request, res: Response) => {
@@ -190,7 +190,7 @@ router.get('/stats/monthly', async (req: Request, res: Response) => {
     const currentYear = new Date().getFullYear()
 
     const baseCount = await User.countDocuments({
-      createdAt: { $lt: new Date(currentYear, 0, 1) },
+      createdAt: { $lt: new Date(currentYear, 0, 1) }
     })
 
     const monthly = await User.aggregate([
@@ -198,17 +198,17 @@ router.get('/stats/monthly', async (req: Request, res: Response) => {
         $match: {
           createdAt: {
             $gte: new Date(currentYear, 0, 1),
-            $lt: new Date(currentYear + 1, 0, 1),
-          },
-        },
+            $lt: new Date(currentYear + 1, 0, 1)
+          }
+        }
       },
       {
         $group: {
           _id: { $month: '$createdAt' },
-          count: { $sum: 1 },
-        },
+          count: { $sum: 1 }
+        }
       },
-      { $sort: { _id: 1 } },
+      { $sort: { _id: 1 } }
     ])
 
     let cumulative = baseCount

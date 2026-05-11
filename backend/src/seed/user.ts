@@ -17,7 +17,7 @@ const seedUser = async () => {
       userType: 'expert',
       ridingStartYear: 2005,
       createdAt: new Date(),
-      image: 'test2.png',
+      image: 'test2.png'
     },
     {
       firstname: 'Bob',
@@ -29,7 +29,7 @@ const seedUser = async () => {
       userType: 'confirmed',
       ridingStartYear: 2015,
       createdAt: new Date(),
-      image: 'test1.png',
+      image: 'test1.png'
     },
     {
       firstname: 'Clara',
@@ -41,7 +41,7 @@ const seedUser = async () => {
       userType: 'beginner',
       ridingStartYear: 2023,
       createdAt: new Date(),
-      image: 'test4.png',
+      image: 'test4.png'
     },
     {
       firstname: 'David',
@@ -53,7 +53,7 @@ const seedUser = async () => {
       userType: 'confirmed',
       ridingStartYear: 2018,
       createdAt: new Date(),
-      image: 'test3.png',
+      image: 'test3.png'
     },
     {
       firstname: 'Emma',
@@ -64,7 +64,7 @@ const seedUser = async () => {
         '$argon2id$v=19$m=4096,t=3,p=1$mhldbmqlRl6JIp/SALIe8g$nQYvpc29eDxCBgauvxFkn4+fnfMVEp8Tr+qDm6z7Kks', // hashed version of 'hashed_password_5'
       userType: 'other',
       createdAt: new Date(),
-      image: 'test4.png',
+      image: 'test4.png'
     },
     {
       firstname: 'MotoCenter',
@@ -74,8 +74,8 @@ const seedUser = async () => {
       password:
         '$argon2id$v=19$m=4096,t=3,p=1$v8bn6+ztl4x3+udQCSExIg$yH66yo4pbCtk/dm9hP1xLXMo04lPpWeeeKTk5QsV1wk', // hashed version of 'hashed_password_6'
       userType: 'confirmed',
-      image: 'motocenter.png',
-    },
+      image: 'motocenter.png'
+    }
   ])
 
   console.log('User seeding')

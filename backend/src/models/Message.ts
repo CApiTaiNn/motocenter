@@ -5,21 +5,21 @@ const messageSchema = new Schema(
   {
     content: {
       type: String,
-      required: true,
+      required: true
     },
     description: {
-      type: String,
+      type: String
     },
     like: {
       type: Number,
-      default: 0,
+      default: 0
     },
     dislike: {
       type: Number,
-      default: 0,
+      default: 0
     },
     isRep: {
-      type: Boolean,
+      type: Boolean
     },
     reference: {
       type: Types.ObjectId,
@@ -35,7 +35,7 @@ const messageSchema = new Schema(
     },
     createdAt: {
       type: Date,
-      default: Date.now,
+      default: Date.now
     },
     usersLikeId: {
       type: [String],
@@ -47,8 +47,8 @@ const messageSchema = new Schema(
     }
   },
   {
-    validateBeforeSave: true,
-  },
+    validateBeforeSave: true
+  }
 )
 
 export default model<IMessage>('Message', messageSchema)

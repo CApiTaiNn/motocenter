@@ -11,7 +11,7 @@ describe('User Routes - /api/v1/users', () => {
     pseudo: 'johnd',
     email: 'john@test.com',
     password: 'password123',
-    userType: 'beginner' as const,
+    userType: 'beginner' as const
   }
 
   let userId: string
@@ -20,7 +20,10 @@ describe('User Routes - /api/v1/users', () => {
   beforeEach(async () => {
     const user = await User.create(userData)
     userId = user._id.toString()
-    const token = jwt.sign({ id: userId, email: userData.email }, process.env.JWT_SECRET!)
+    const token = jwt.sign(
+      { id: userId, email: userData.email },
+      process.env.JWT_SECRET!
+    )
     authCookie = `accessToken=${token}`
   })
 
@@ -54,8 +57,7 @@ describe('User Routes - /api/v1/users', () => {
 
   describe('GET /api/v1/users', () => {
     it('should return users list', async () => {
-      const res = await request(app)
-        .get('/api/v1/users?project=email,pseudo')
+      const res = await request(app).get('/api/v1/users?project=email,pseudo')
 
       expect(res.status).toBe(200)
       expect(res.body.users).toBeInstanceOf(Array)
@@ -63,8 +65,7 @@ describe('User Routes - /api/v1/users', () => {
     })
 
     it('should filter only allowed fields (no password)', async () => {
-      const res = await request(app)
-        .get('/api/v1/users?project=password,email')
+      const res = await request(app).get('/api/v1/users?project=password,email')
 
       expect(res.status).toBe(200)
       const user = res.body.users[0]
@@ -73,7 +74,11 @@ describe('User Routes - /api/v1/users', () => {
     })
 
     it('should respect limit parameter', async () => {
-      await User.create({ ...userData, email: 'john2@test.com', pseudo: 'johnd2' })
+      await User.create({
+        ...userData,
+        email: 'john2@test.com',
+        pseudo: 'johnd2'
+      })
       const res = await request(app).get('/api/v1/users?project=email&limit=1')
 
       expect(res.status).toBe(200)

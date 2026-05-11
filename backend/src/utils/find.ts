@@ -8,7 +8,7 @@ export interface ReqQuery {
 
 const defaultLimit = 10
 const defaultSort = {
-  createdAt: -1,
+  createdAt: -1
 }
 const defaultProject = 'id'
 const defaultFilter = {}
@@ -26,7 +26,7 @@ export function prepareQuery(query: ReqQuery) {
         acc[field.trim()] = 1
         return acc
       },
-      {} as Record<string, number>,
+      {} as Record<string, number>
     )
   } else {
     project = { [defaultProject]: 1 }

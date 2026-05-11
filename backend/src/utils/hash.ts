@@ -30,7 +30,7 @@ const getArgon2Config = () => {
   return {
     memoryCost: getPositiveIntFromEnv('ARGON2_MEMORY_COST', 65536),
     timeCost: getPositiveIntFromEnv('ARGON2_TIME_COST', 3),
-    parallelism: getPositiveIntFromEnv('ARGON2_PARALLELISM', 1),
+    parallelism: getPositiveIntFromEnv('ARGON2_PARALLELISM', 1)
   }
 }
 
@@ -40,13 +40,13 @@ const hashPassword = async (password: string): Promise<string> => {
 
   return argon2hash(`${password}${pepper}`, {
     type: argon2id,
-    ...argon2Config,
+    ...argon2Config
   })
 }
 
 const verifyPassword = async (
   password: string,
-  hash: string,
+  hash: string
 ): Promise<boolean> => {
   const pepper = getPepper()
 
@@ -55,5 +55,5 @@ const verifyPassword = async (
 
 export const argon2PasswordHasher = {
   hash: hashPassword,
-  verify: verifyPassword,
+  verify: verifyPassword
 }

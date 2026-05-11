@@ -5,49 +5,49 @@ const userSchema = new Schema(
   {
     firstname: {
       type: String,
-      required: true,
+      required: true
     },
     lastname: {
       type: String,
-      required: true,
+      required: true
     },
     pseudo: {
       type: String,
-      required: true,
+      required: true
     },
     email: {
       type: String,
       required: true,
-      unique: true,
+      unique: true
     },
     isAdmin: {
       type: Boolean,
-      default: false,
+      default: false
     },
     password: {
       type: String,
-      required: true,
+      required: true
     },
     ridingStartYear: {
-      type: Number,
+      type: Number
     },
     createdAt: {
       type: Date,
-      default: Date.now,
+      default: Date.now
     },
     userType: {
       type: String,
       enum: ['beginner', 'confirmed', 'expert', 'other'],
-      default: 'beginner',
+      default: 'beginner'
     },
     idMoto: {
-      type: String,
+      type: String
     },
     image: {
-      type: String,
-    },
+      type: String
+    }
   },
-  { timestamps: true },
+  { timestamps: true }
 )
 
 export default model<IUser>('User', userSchema)

@@ -61,11 +61,11 @@ const seedRide = async () => {
                 [-3.5106645472042715, 48.831454012792136],
                 [-3.5114664097794446, 48.832157833027026],
                 [-3.513070223485869, 48.832439284044824],
-                [-3.51488783183882, 48.83286148278742],
-              ],
-            },
-          },
-        ],
+                [-3.51488783183882, 48.83286148278742]
+              ]
+            }
+          }
+        ]
       },
       duration: 0.25,
       distance: 14.5,
@@ -75,7 +75,7 @@ const seedRide = async () => {
       like: 24,
       createdAt: '2024-03-20T10:00:00Z',
       user_id: user1Id,
-      image_link: './images/rides/image.jpg',
+      image_link: './images/rides/image.jpg'
     },
     {
       title: 'Boucle de Trélévern',
@@ -128,11 +128,11 @@ const seedRide = async () => {
                 [-3.361579730702516, 48.82070881178538],
                 [-3.3626369499042994, 48.82113609208062],
                 [-3.363430092788377, 48.82132599781684],
-                [-3.3641511339415047, 48.82096995005901],
-              ],
-            },
-          },
-        ],
+                [-3.3641511339415047, 48.82096995005901]
+              ]
+            }
+          }
+        ]
       },
       duration: 0.17,
       distance: 6.2,
@@ -142,7 +142,7 @@ const seedRide = async () => {
       like: 12,
       createdAt: '2024-03-21T14:30:00Z',
       user_id: user1Id,
-      image_link: './images/rides/image2.jpg',
+      image_link: './images/rides/image2.jpg'
     },
     {
       title: 'Coeur de Bretagne : Vallées et Virages',
@@ -250,11 +250,11 @@ const seedRide = async () => {
                 [-2.3267646671125135, 48.408273286337476],
                 [-2.325017479978129, 48.40881678590836],
                 [-2.323544663516003, 48.407729805128724],
-                [-2.3235421559696476, 48.40845438640386],
-              ],
-            },
-          },
-        ],
+                [-2.3235421559696476, 48.40845438640386]
+              ]
+            }
+          }
+        ]
       },
       duration: 0.55,
       distance: 35.2,
@@ -264,7 +264,7 @@ const seedRide = async () => {
       like: 56,
       createdAt: '2024-03-22T09:15:00Z',
       user_id: user1Id,
-      image_link: './images/rides/image3.jpg',
+      image_link: './images/rides/image3.jpg'
     },
     {
       title: 'Descente du Trieux',
@@ -364,11 +364,11 @@ const seedRide = async () => {
                 [-3.197910788890039, 48.6601425600618],
                 [-3.1987061110981663, 48.66245619320121],
                 [-3.1996643648574246, 48.66380148252609],
-                [-3.2058322427839983, 48.668608797842694],
-              ],
-            },
-          },
-        ],
+                [-3.2058322427839983, 48.668608797842694]
+              ]
+            }
+          }
+        ]
       },
       duration: 0.33,
       distance: 18.5,
@@ -378,7 +378,7 @@ const seedRide = async () => {
       like: 15,
       createdAt: '2024-03-22T09:15:00Z',
       user_id: user1Id,
-      image_link: './images/rides/image4.jpg',
+      image_link: './images/rides/image4.jpg'
     },
     {
       title: 'De Loudéac aux Montagnes Noires',
@@ -485,12 +485,12 @@ const seedRide = async () => {
                 [-4.050513020725333, 48.21526784459192],
                 [-4.050510310897721, 48.21794557733921],
                 [-4.052884507475341, 48.21940615256494],
-                [-4.04795161471273, 48.22293590812018],
+                [-4.04795161471273, 48.22293590812018]
               ],
-              type: 'LineString',
-            },
-          },
-        ],
+              type: 'LineString'
+            }
+          }
+        ]
       },
       duration: 1.17,
       distance: 108.4,
@@ -500,7 +500,7 @@ const seedRide = async () => {
       like: 48,
       createdAt: '2024-03-22T09:15:00Z',
       user_id: user1Id,
-      image_link: './images/rides/image5.jpg',
+      image_link: './images/rides/image5.jpg'
     },
     {
       title: 'Petite balade à Quimper',
@@ -714,11 +714,11 @@ const seedRide = async () => {
                 [-3.56122, 47.858544],
                 [-3.560732, 47.858781],
                 [-3.55757, 47.859335],
-                [-3.559868, 47.861748],
-              ],
-            },
-          },
-        ],
+                [-3.559868, 47.861748]
+              ]
+            }
+          }
+        ]
       },
       duration: 0.65,
       distance: 47.98,
@@ -733,8 +733,8 @@ const seedRide = async () => {
       date_event: '2026-04-18',
       hour_event: '15:27:00',
       participating_user: [],
-      createdAt: '2026-04-07T13:29:26.776Z',
-    },
+      createdAt: '2026-04-07T13:29:26.776Z'
+    }
   ])
 
   console.log('Ride seeding done')
