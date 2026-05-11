@@ -1,6 +1,7 @@
 import js from '@eslint/js'
 import globals from 'globals'
 import tseslint from 'typescript-eslint'
+import eslintConfigPrettier from 'eslint-config-prettier'
 import { defineConfig } from 'eslint/config'
 
 export default defineConfig([
@@ -8,7 +9,7 @@ export default defineConfig([
     files: ['**/*.{js,mjs,cjs,ts,mts,cts}'],
     plugins: { js },
     extends: ['js/recommended'],
-    languageOptions: { globals: globals.node },
+    languageOptions: { globals: globals.node }
   },
   tseslint.configs.recommended,
   {
@@ -18,15 +19,15 @@ export default defineConfig([
         'error',
         {
           selector: 'function',
-          format: ['camelCase'],
+          format: ['camelCase']
         },
         {
           selector: 'variable',
-          format: ['camelCase'],
-        },
+          format: ['camelCase', 'UPPER_CASE']
+        }
       ],
-      'no-console': ['error', { allow: ['error', 'warn'] }],
-      '@typescript-eslint/no-explicit-any': 'off',
-    },
+      '@typescript-eslint/no-explicit-any': 'off'
+    }
   },
+  eslintConfigPrettier
 ])
