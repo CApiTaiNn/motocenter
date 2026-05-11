@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "nodemon --watch \"src/**/*.ts\" --exec \"npx ts-node\" src/server.ts",
     "build": "tsc",
-    "start": "node dist/index.js",
+    "start": "tsx dist/server.js",
     "seed": "ts-node src/seed/index.ts",
     "test": "vitest run",
     "lint": "eslint src/",
