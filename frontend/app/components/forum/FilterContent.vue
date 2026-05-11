@@ -113,8 +113,8 @@ onMounted(async () => {
         aria-label="Clear input"
         class="cursor-pointer"
         @click="
-          filters.searchBar = ''
-          emitFilters()
+          filters.searchBar = '';
+          emitFilters();
         "
       />
     </template>
