@@ -1,4 +1,5 @@
 import type { Time, CalendarDate } from '@internationalized/date'
+import type { IUserPublic } from './users'
 
 export interface IRide {
   _id: string
@@ -18,7 +19,7 @@ export interface IRide {
   is_event: boolean
   date_event: string
   hour_event: string
-  participating_user: string[]
+  participating_user: IUserPublic[]
   createdAt: string
 }
 

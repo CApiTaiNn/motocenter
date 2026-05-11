@@ -12,3 +12,9 @@ export interface IUser {
   image: string
   idMoto: string
 }
+
+export interface IUserPublic {
+  _id: string
+  pseudo: string
+  image: string
+}

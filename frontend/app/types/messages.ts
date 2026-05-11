@@ -1,4 +1,4 @@
-import type { IUser } from "./users"
+import type { IUserPublic } from './users'
 
 export interface IMessage {
   _id: string
@@ -9,7 +9,7 @@ export interface IMessage {
   isRep: boolean
   isPublicationResponse: boolean
   parentId: string | null
-  user: IUser
+  user: IUserPublic
   createdAt: string
   usersLikeId: Array<string>
   usersDislikeId: Array<string>
