@@ -2,6 +2,7 @@ import { Router } from 'express'
 import multer from 'multer'
 import { supabase } from '../utils/supabase'
 import { decode } from 'base64-arraybuffer'
+import { v4 as uuidv4 } from 'uuid'
 
 const router = Router()
 const storage = multer.memoryStorage()
@@ -10,22 +11,13 @@ const upload = multer({ storage })
 router.post('/', upload.single('file'), async (req, res) => {
   try {
     const file = req.file
-    const name = req.body.name as string | undefined
 
     if (!file) {
       res.status(400).json({ message: 'Please upload a file' })
       return
     }
-
-    const rawExt = file.originalname.includes('.')
-      ? file.originalname.split('.').pop()!
-      : 'bin'
-    const ext = rawExt.toLowerCase().replace(/[^a-z0-9]/g, '') || 'bin'
-    const baseName = (name || Date.now().toString()).replace(
-      /[^a-zA-Z0-9_-]/g,
-      ''
-    )
-    const fileName = `${baseName}.${ext}`
+    const ext = file.originalname.split('.').pop()?.toLocaleLowerCase() || 'bin'
+    const fileName = `${uuidv4()}.${ext}`
 
     const fileBase64 = decode(file.buffer.toString('base64'))
 
