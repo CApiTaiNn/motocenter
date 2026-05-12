@@ -17,10 +17,24 @@ router.post('/', upload.single('file'), async (req, res) => {
       return
     }
 
-    const ext = file.originalname.split('.').pop()
-    const fileName = name ? `${name}.${ext}` : file.originalname
+    const rawExt = file.originalname.includes('.')
+      ? file.originalname.split('.').pop()!
+      : 'bin'
+    const ext = rawExt.toLowerCase().replace(/[^a-z0-9]/g, '') || 'bin'
+    const baseName = (name || Date.now().toString()).replace(
+      /[^a-zA-Z0-9_-]/g,
+      ''
+    )
+    const fileName = `${baseName}.${ext}`
 
     const fileBase64 = decode(file.buffer.toString('base64'))
+
+    console.log('[image upload]', {
+      fileName,
+      mimetype: file.mimetype,
+      size: file.size,
+      originalname: file.originalname
+    })
 
     const { data, error } = await supabase.storage
       .from('userProfilImages')
