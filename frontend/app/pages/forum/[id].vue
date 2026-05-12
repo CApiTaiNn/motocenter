@@ -147,7 +147,7 @@ onMounted(async () => {
       <div v-else>
         <div class="icon-and-text title-mobile-version">
           <UAvatar
-            :src="`/images/users/${post?.user.image}`"
+            :src="post?.user.image"
             size="3xl"
             loading="lazy"
             class="margin-2"

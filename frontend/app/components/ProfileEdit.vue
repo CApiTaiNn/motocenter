@@ -49,9 +49,7 @@ const fillProfil = () => {
   state.password = ''
   state.confirmPassword = ''
 
-  // Prévisualisation de l'image existante
-  const existingImage = user.value?.image || ''
-  imagePreview.value = existingImage ? `/images/users/${existingImage}` : ''
+  imagePreview.value = user.value?.image || ''
 }
 
 const validate = (): FormError[] => {

@@ -135,7 +135,7 @@ onMounted(async () => {
           />
         </div>
         <UAvatar
-          :src="`/images/users/${message.user.image}`"
+          :src="message.user.image"
           :alt="message.user.pseudo"
           size="3xl"
           :title="message.user.pseudo"

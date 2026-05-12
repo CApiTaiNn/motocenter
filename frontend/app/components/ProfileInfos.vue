@@ -58,11 +58,7 @@ watch(
         <h3>Mon Profil</h3>
 
         <div class="avatar">
-          <img
-            v-if="state.image"
-            :src="'/images/users/' + state.image"
-            alt="Avatar"
-          />
+          <img v-if="state.image" :src="state.image" alt="Avatar" />
           <span v-else>{{ getInitials }}</span>
         </div>
 

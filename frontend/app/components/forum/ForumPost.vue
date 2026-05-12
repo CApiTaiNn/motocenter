@@ -34,7 +34,7 @@ const handlePostChange = () => {
       <USkeleton v-if="props.loading" class="size-12 rounded-full" />
       <UAvatar
         v-else
-        :src="`/images/users/${props.post.user.image}`"
+        :src="props.post.user.image"
         size="3xl"
         loading="lazy"
         class="margin-2"

@@ -49,9 +49,7 @@ const participantsAvatars = computed(() => {
 
   return props.ride.participating_user.map((participant: any) => {
     return {
-      src: participant.image
-        ? `/images/users/${participant.image}`
-        : `/images/users/default.svg`,
+      src: participant.image || '/images/users/default.svg',
       alt: participant.pseudo,
       label: participant.pseudo?.substring(0, 2).toUpperCase()
     }
@@ -61,9 +59,7 @@ const participantsAvatars = computed(() => {
 const emit = defineEmits(['update:like', 'update:participants'])
 
 const srcAvatarCreator = computed<string>(() => {
-  return creator.value?.image
-    ? `/images/users/${creator.value.image}`
-    : `/images/users/default.svg`
+  return creator.value?.image || '/images/users/default.svg'
 })
 
 const hour = computed<number>(() => {
