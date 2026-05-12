@@ -8,7 +8,9 @@ const storage = multer.memoryStorage()
 const upload = multer({ storage })
 
 router.post('/', upload.single('file'), async (req, res) => {
+  console.log('[image upload request]', req.body);
   try {
+    console.log('[image upload try]');
     const file = req.file
     const name = req.body.name as string | undefined
 
@@ -16,6 +18,8 @@ router.post('/', upload.single('file'), async (req, res) => {
       res.status(400).json({ message: 'Please upload a file' })
       return
     }
+
+    console.log('[image upload file is good]');
 
     const rawExt = file.originalname.includes('.')
       ? file.originalname.split('.').pop()!
@@ -26,6 +30,8 @@ router.post('/', upload.single('file'), async (req, res) => {
       ''
     )
     const fileName = `${baseName}.${ext}`
+
+    console.log('[file info]', fileName);
 
     const fileBase64 = decode(file.buffer.toString('base64'))
 
