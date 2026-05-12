@@ -1,11 +1,11 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  compatibilityDate: '2025-07-15',
+  compatibilityDate: '2026-05-12',
   devtools: { enabled: true },
 
   runtimeConfig: {
     public: {
-      appName: 'MotoCenter',
+      appName: 'Vroom',
       apiBase:
         process.env.NUXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1/'
     }
