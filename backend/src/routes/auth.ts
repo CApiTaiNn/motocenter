@@ -24,10 +24,11 @@ router.post('/', async (req: Request<unknown, unknown>, res: Response) => {
       { expiresIn: '24h' }
     )
 
+    const isProd = process.env.NODE_ENV === 'production'
     res.cookie('accessToken', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      secure: isProd,
+      sameSite: isProd ? 'none' : 'lax',
       maxAge: 24 * 60 * 60 * 1000
     })
     res.status(200).json({ message: 'Connected' })
@@ -38,10 +39,11 @@ router.post('/', async (req: Request<unknown, unknown>, res: Response) => {
 })
 
 router.post('/logout', (req: Request, res: Response) => {
+  const isProd = process.env.NODE_ENV === 'production'
   res.clearCookie('accessToken', {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict'
+    secure: isProd,
+    sameSite: isProd ? 'none' : 'lax'
   })
   res.status(200).json({ message: 'Disconnected' })
 })
