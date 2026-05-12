@@ -6,12 +6,11 @@ import { useAuth } from '~/composables/useAuth'
 
 const { register } = useAuth()
 const { isOpen } = useCreateAccountModal()
-const form = useTemplateRef('form')
 const currentStep = ref(1)
 const formErrors = ref<FormError[]>([])
 const show = ref(false)
 const isLoading = ref(false)
-
+const apiBase = useRuntimeConfig().public.apiBase
 const state = reactive({
   firstname: '',
   lastname: '',
@@ -85,15 +84,13 @@ const validateStep = (step: number): FormError[] => {
 const uploadImage = async (file: File, name: string): Promise<string> => {
   const formData = new FormData()
   formData.append('file', file)
-  formData.append('type', 'image')
-  formData.append('directory', 'users')
   formData.append('name', name)
 
-  await $fetch<{ url: string }>('/api/uploadFile', {
+  const { url } = await $fetch<{ url: string }>(`${apiBase}images`, {
     method: 'POST',
     body: formData
   })
-  return name + '.' + file.name.split('.').pop()
+  return url
 }
 
 const getError = (path: string) => {
