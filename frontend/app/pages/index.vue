@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import Sponsor from '@/components/Sponsor.vue'
+import CarrouselSponsors from '@/components/CarrouselSponsors.vue'
 import type { IMotorcycle } from '@/types/motorcycles'
 import StatsHome from '~/components/card/StatsHome.vue'
 
@@ -191,7 +191,7 @@ onMounted(async () => {
       <h2 class="h2-mobile" style="text-align: center">
         Ils nous font confiance
       </h2>
-      <Sponsor />
+      <CarrouselSponsors />
     </section>
     <section class="justify-content-center">
       <UButton

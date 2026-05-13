@@ -1,6 +1,10 @@
 <script setup lang="ts">
+const modules = import.meta.glob('@/assets/images/sponsors/*.png', { 
+  eager: true,
+  import: 'default'
+})
 // On définit une liste pour pouvoir la doubler facilement
-const logos = ['1', '2', '3', '4', '5']
+const logos = Object.values(modules).map((mod) => mod as string)
 </script>
 
 <template>
@@ -8,7 +12,7 @@ const logos = ['1', '2', '3', '4', '5']
     <div class="inner">
       <div v-for="card in [...logos, ...logos]" :key="card" class="card">
         <img
-          :src="`/_nuxt/assets/images/sponsors/${card}.png`"
+          :src="card"
           :alt="`Sponsor ${card}`"
         />
       </div>
