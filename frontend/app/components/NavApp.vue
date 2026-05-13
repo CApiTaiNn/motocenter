@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import ToggleSwitch from './ToggleSwitch.vue'
 import LogoApp from './LogoApp.vue'
 import { useAuth } from '~/composables/useAuth'
 import { useConnexionModal } from '~/composables/useConnexionModal'
@@ -8,8 +7,6 @@ import { useProfileModal } from '~/composables/useProfileModal'
 const { isAuthenticated, user } = useAuth()
 
 const isOpen = ref(false)
-const mode = ref(false)
-const colorMode = useColorMode()
 
 const connexionModal = useConnexionModal()
 const profileModal = useProfileModal()
@@ -18,17 +15,6 @@ function toggle_open() {
   isOpen.value = !isOpen.value
 }
 
-// In the loading of the page
-watch(
-  () => colorMode.value,
-  (newVal) => {
-    mode.value = newVal === 'dark'
-  },
-  { immediate: true }
-)
-
-// To update the color mode when the toggle switch is changed
-colorMode.preference = computed(() => (mode.value ? 'dark' : 'light'))
 </script>
 
 <template>
@@ -36,7 +22,6 @@ colorMode.preference = computed(() => (mode.value ? 'dark' : 'light'))
     <div class="navbar">
       <div class="list-left">
         <LogoApp />
-        <ToggleSwitch v-model="mode" />
       </div>
       <div class="list-right">
         <UButton size="md" color="neutral" variant="ghost" to="/comparo"
@@ -75,7 +60,6 @@ colorMode.preference = computed(() => (mode.value ? 'dark' : 'light'))
     <div class="navbar">
       <div class="list-left">
         <LogoApp />
-        <ToggleSwitch v-model="mode" />
       </div>
       <UIcon
         :name="isOpen ? 'i-lucide-chevron-down' : 'i-lucide-menu'"
