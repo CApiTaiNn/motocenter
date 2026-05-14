@@ -1,6 +1,6 @@
 <template>
   <ConnexionForm />
-  <CreateAccountForm />
+  <CreateForm />
   <ProfileInfos />
-  <ProfileEdit />
+  <EditForm />
 </template>
