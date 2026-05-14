@@ -356,7 +356,7 @@ onMounted(() => {
         </div>
         <UButton
           icon="i-lucide-arrow-left-right"
-          class="w-fit rounded-4xl"
+          class="w-fit rounded-4xl text-white"
           :disabled="!motorcycle1Id || !motorcycle2Id"
           @click="fetchMotocycles"
           >Comparer</UButton

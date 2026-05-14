@@ -52,13 +52,12 @@ const isOpen = ref(true)
             v-if="props.rightMotorcycleUrl"
             :src="props.rightMotorcycleUrl"
             alt="Right Motorcycle"
-            style="transform: scaleX(-1)"
+            class="-scale-x-100"
           />
           <img
             v-if="!props.rightMotorcycleUrl"
             src="/svg/motorcycleIcon.svg"
-            class="size-20"
-            style="transform: scaleX(-1)"
+            class="size-20 -scale-x-100"
           />
           <p>{{ props.rightName }}</p>
         </div>

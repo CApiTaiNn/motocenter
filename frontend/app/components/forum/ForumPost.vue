@@ -29,7 +29,10 @@ const handlePostChange = () => {
 }
 </script>
 <template>
-  <UCard class="card-forum custom-border" @click="handleOpenAPost(post._id)">
+  <UCard
+    class="w-full max-w-275 border-[0.5px] border-(--border-gray)"
+    @click="handleOpenAPost(post._id)"
+  >
     <div class="postCard">
       <USkeleton v-if="props.loading" class="size-12 rounded-full" />
       <UAvatar
@@ -116,11 +119,6 @@ const handlePostChange = () => {
   }
 }
 
-.card-forum {
-  width: 100%;
-  max-width: 1100px;
-}
-
 .responses {
   display: flex;
   flex-direction: row;
@@ -180,9 +178,5 @@ const handlePostChange = () => {
   align-items: center;
   margin-top: 0.5em;
   width: 100%;
-}
-
-.custom-border {
-  border: 0.5px solid var(--border-gray);
 }
 </style>

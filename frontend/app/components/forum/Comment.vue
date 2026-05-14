@@ -139,7 +139,7 @@ onMounted(async () => {
           :alt="message.user.pseudo"
           size="3xl"
           :title="message.user.pseudo"
-          class="margin-right-0_5"
+          class="mr-2"
         />
       </div>
       <div class="comment-content">

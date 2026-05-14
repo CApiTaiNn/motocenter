@@ -12,7 +12,7 @@ const handleFiltersChange = (payload: any) => {
 <template>
   <div>
     <div id="dekstop-filters">
-      <UCard class="custom-border filters">
+      <UCard class="border-[0.5px] border-(--border-gray) filters">
         <FilterContent @change="handleFiltersChange" />
       </UCard>
     </div>
@@ -38,10 +38,6 @@ const handleFiltersChange = (payload: any) => {
 </template>
 
 <style scoped>
-.custom-border {
-  border: 0.5px solid var(--border-gray);
-}
-
 /** Style version mobile */
 @media (max-width: 1024px) {
   #mobile-filter {

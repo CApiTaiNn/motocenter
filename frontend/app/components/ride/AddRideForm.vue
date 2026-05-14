@@ -723,7 +723,7 @@ watch(
               <UIcon name="i-lucide-map-pinned" class="w-4 h-4 text-primary" />
               <span
                 >Distance :
-                <strong style="color: var(--ui-primary)"
+                <strong class="text-primary"
                   >{{ rideDistance }} km</strong
                 ></span
               >

@@ -85,16 +85,14 @@ watch(
         </div>
         <UButton
           label="Modifier mon profil"
-          class="rounded-full mt-6"
+          class="rounded-full mt-6 w-full justify-center"
           variant="soft"
           color="neutral"
-          style="width: 100%; justify-content: center"
           @click="useProfileEditModal().open"
         />
         <UButton
           label="Se déconnecter"
-          class="rounded-full mt-6"
-          style="width: 100%; justify-content: center; color: white"
+          class="rounded-full mt-6 w-full justify-center text-white"
           @click="
             () => {
               logout()

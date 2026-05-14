@@ -7,7 +7,7 @@ const props = defineProps<{
 </script>
 
 <template>
-  <UCard class="stats-card">
+  <UCard class="min-w-[20%] border border-(--border-gray)">
     <template #header>
       <h3>{{ props.value }}</h3>
     </template>
@@ -49,11 +49,6 @@ h6,
 h3,
 p {
   text-align: center;
-}
-
-.stats-card {
-  min-width: 20%;
-  border: 1px solid var(--border-gray);
 }
 
 .info-container {

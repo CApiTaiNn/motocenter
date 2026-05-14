@@ -48,7 +48,7 @@ onMounted(async () => {
 
 <template>
   <div>
-    <UCard variant="outline" class="my-favourites-posts custom-border">
+    <UCard variant="outline" class="w-full border-[0.5px] border-(--border-gray)">
       <template #header>
         <h3>Mes favoris</h3>
       </template>
@@ -70,14 +70,6 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.my-favourites-posts {
-  width: 100%;
-}
-
-.custom-border {
-  border: 0.5px solid var(--border-gray);
-}
-
 .cursor-pointer {
   cursor: pointer;
 }

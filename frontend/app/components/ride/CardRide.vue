@@ -186,7 +186,7 @@ onMounted(async () => {
             variant="subtle"
             size="md"
             icon="i-lucide-calendar-days"
-            class="event-badge-header"
+            class="bg-white/15 backdrop-blur-xs text-white border border-white/20 text-[0.7rem] py-0.5 px-2 whitespace-nowrap shrink-0"
           >
             {{ dateEvent.toLocaleDateString('fr-FR') }}
             •
@@ -209,7 +209,7 @@ onMounted(async () => {
           variant="subtle"
           color="neutral"
           size="md"
-          class="like-button cursor-pointer"
+          class="text-white! font-bold transition-transform active:scale-120 cursor-pointer"
           @click="likeGestion"
         />
       </header>
@@ -276,7 +276,7 @@ onMounted(async () => {
               :color="isParticipating ? 'neutral' : 'error'"
               :variant="isParticipating ? 'subtle' : 'solid'"
               size="lg"
-              class="btn-participate cursor-pointer"
+              class="px-5 font-bold max-[480px]:flex-1 max-[480px]:justify-center cursor-pointer"
               @click="participateGestion"
             />
 
@@ -372,33 +372,11 @@ onMounted(async () => {
   flex-shrink: 1;
 }
 
-.event-badge-header {
-  background-color: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(4px);
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  font-size: 0.7rem;
-  padding: 2px 8px;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
 .dot {
   width: 14px;
   height: 14px;
   border-radius: 50%;
   box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
-}
-
-/* --- BOUTON LIKE --- */
-.like-button {
-  color: white !important;
-  font-weight: bold;
-  transition: transform 0.2s ease;
-}
-
-.like-button:active {
-  transform: scale(1.2);
 }
 
 /* --- CORPS : DESCRIPTION & GRILLE D'INFOS --- */
@@ -453,11 +431,6 @@ onMounted(async () => {
   gap: 10px;
 }
 
-.btn-participate {
-  padding: 0 20px;
-  font-weight: 700;
-}
-
 .no-participants {
   font-size: 0.75rem;
   opacity: 0.7;
@@ -500,11 +473,6 @@ onMounted(async () => {
     width: 100%;
     justify-content: flex-start;
     flex-wrap: wrap;
-  }
-
-  .btn-participate {
-    flex: 1;
-    justify-content: center;
   }
 }
 </style>

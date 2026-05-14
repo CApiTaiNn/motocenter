@@ -2,15 +2,12 @@
 const appName: string = useRuntimeConfig().public.appName
 </script>
 <template>
-  <UButton size="md" color="primary" class="logo" to="/">
+  <UButton
+    size="md"
+    color="primary"
+    class="font-[krona-one] text-[1.2rem] text-white!"
+    to="/"
+  >
     {{ appName }}
   </UButton>
 </template>
-
-<style scoped>
-.logo {
-  font-family: 'krona-one', sans-serif;
-  font-size: 1.2rem;
-  color: white !important;
-}
-</style>

@@ -19,7 +19,9 @@ const getMyPost = async () => {
       }
     })
 
-    postOfUser.value = response.posts.filter(post => post.user._id === user.value?._id)
+    postOfUser.value = response.posts.filter(
+      (post) => post.user._id === user.value?._id
+    )
   }
 }
 
@@ -35,31 +37,52 @@ const handleHaveANewPost = async () => {
   emits('new-post')
 }
 
-watch(user, async (newUser) => {
-  if (newUser?._id) {
-    await getMyPost()
-  } else {
-    postOfUser.value = []
-  }
-}, { immediate: true })
+watch(
+  user,
+  async (newUser) => {
+    if (newUser?._id) {
+      await getMyPost()
+    } else {
+      postOfUser.value = []
+    }
+  },
+  { immediate: true }
+)
 </script>
 
 <template>
   <div>
-    <UCard variant="outline" class="my-posts custom-border">
+    <UCard
+      variant="outline"
+      class="w-full border-[0.5px] border-(--border-gray)"
+    >
       <template #header>
         <div class="header">
           <h3>Mes posts</h3>
-          <UButton v-if="!isAuthenticated" icon="i-lucide-plus" size="sm" color="primary" variant="solid"
-            @click="handleAddPost" />
-          <LazyForumModalAddPost v-else v-model:open="openAddPost" :is-new-post="true"
-            @added-post="handleHaveANewPost" />
+          <UButton
+            v-if="!isAuthenticated"
+            icon="i-lucide-plus"
+            size="sm"
+            color="primary"
+            variant="solid"
+            @click="handleAddPost"
+          />
+          <LazyForumModalAddPost
+            v-else
+            v-model:open="openAddPost"
+            :is-new-post="true"
+            @added-post="handleHaveANewPost"
+          />
         </div>
       </template>
       <template #default>
         <div v-if="postOfUser.length">
-          <div v-for="post in postOfUser" :key="post._id" class="cursor-pointer border-bottom"
-            @click="navigateTo(`/forum/${post._id}`)">
+          <div
+            v-for="post in postOfUser"
+            :key="post._id"
+            class="cursor-pointer border-bottom"
+            @click="navigateTo(`/forum/${post._id}`)"
+          >
             {{ post.title }}
           </div>
         </div>
@@ -70,14 +93,6 @@ watch(user, async (newUser) => {
 </template>
 
 <style scoped>
-.my-posts {
-  width: 100%;
-}
-
-.custom-border {
-  border: 0.5px solid var(--border-gray);
-}
-
 .header {
   display: flex;
   flex-direction: row;

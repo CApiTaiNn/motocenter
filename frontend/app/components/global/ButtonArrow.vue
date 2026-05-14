@@ -10,7 +10,7 @@ const props = defineProps<IProps>()
 
 <template>
   <UButton
-    class="font-bold rounded-full cursor-pointer"
+    class="font-bold rounded-full cursor-pointer text-white"
     icon="i-lucide-move-down"
     size="xl"
     @click="scrollToMap(props.scrollToElementId)"

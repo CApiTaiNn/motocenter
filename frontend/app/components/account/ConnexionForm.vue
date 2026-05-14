@@ -97,11 +97,10 @@ watch(
           <UButton
             type="submit"
             label="Se connecter"
-            class="rounded-full"
-            style="width: 100%; justify-content: center; color: white"
+            class="rounded-full w-full justify-center text-white"
           />
         </UForm>
-        <p style="font-size: small">
+        <p class="text-sm">
           Nouveau sur ce site ?
           <span class="new-account" @click="openCreateAccountModal"
             >S'inscrire</span
