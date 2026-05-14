@@ -1,4 +1,4 @@
-import type { IUser } from '@/types/users'
+import type { IUser } from '~/types/users.ts'
 
 const user = ref<IUser | null>(null)
 const isAuthenticated = computed(() => !!user.value)

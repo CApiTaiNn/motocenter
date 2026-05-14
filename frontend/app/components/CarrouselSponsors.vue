@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const modules = import.meta.glob('@/assets/images/sponsors/*.png', { 
+const modules = import.meta.glob('@/images/sponsors/*.png', { 
   eager: true,
   import: 'default'
 })

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import CarrouselSponsors from '@/components/CarrouselSponsors.vue'
-import type { IMotorcycle } from '@/types/motorcycles'
+import CarrouselSponsors from '~/components/CarrouselSponsors.vue'
+import type { IMotorcycle } from '~/types/motorcycles'
 import StatsHome from '~/components/card/StatsHome.vue'
 
 import { useConnexionModal } from '~/composables/useConnexionModal'
