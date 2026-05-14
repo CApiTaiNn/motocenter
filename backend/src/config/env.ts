@@ -2,8 +2,6 @@ const REQUIRED_ENV_VARS = [
   'MONGO_URI',
   'JWT_SECRET',
   'PASSWORD_PEPPER',
-  'SUPABASE_PROJECT_URL',
-  'SUPABASE_KEY',
 ] as const
 
 export const validateEnv = () => {

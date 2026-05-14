@@ -7,7 +7,7 @@ import {
 import multer, { MulterError } from 'multer'
 import { extname } from 'path'
 import { v4 as uuidv4 } from 'uuid'
-import { supabase } from '../utils/supabase'
+import { getSupabase } from '../utils/supabase'
 
 const BUCKET = 'userProfilImages'
 const MAX_FILE_SIZE = 5 * 1024 * 1024
@@ -51,6 +51,7 @@ router.post('/', handleUpload, async (req, res) => {
     const ext = extname(file.originalname).slice(1).toLowerCase() || 'bin'
     const fileName = `${uuidv4()}.${ext}`
 
+    const supabase = getSupabase()
     const { data, error } = await supabase.storage
       .from(BUCKET)
       .upload(fileName, file.buffer, {
