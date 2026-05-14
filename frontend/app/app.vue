@@ -1,13 +1,12 @@
 <script setup>
-import ConnexionForm from '@/components/ConnexionForm.vue'
-import LoadingOverlay from '@/components/LoadingOverlay.vue'
-import { useAuth } from '@/composables/useAuth'
-import { useConnexionModal } from '@/composables/useConnexionModal'
+import LoadingOverlay from '~/components/LoadingOverlay.vue'
+import { useAuth } from '~/composables/useAuth'
+
+const colorMode = useColorMode()
+colorMode.preference = 'system'
 
 const { fetchUser, isLoading } = useAuth()
 onMounted(fetchUser)
-
-const connexionModal = useConnexionModal()
 </script>
 
 <template>
