@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { IBrand } from '@/types/brand'
-import type { IMotorcycle } from '@/types/motorcycles'
+import type { IBrand } from '~/types/brand'
+import type { IMotorcycle } from '~/types/motorcycles'
 
 // Moto 1 || Moto 2
 const props = defineProps<{
@@ -47,7 +47,7 @@ const brandItems = computed(() =>
 
 const modelInput = computed({
   get: () => motorcycle.value.model?.name ?? '',
-  set: (name: string) => {
+  set: (name) => {
     motorcycle.value.model = motorcyclesList.value.find((m) => m.name === name)
     motorcycle.value.year = undefined
   }
@@ -61,7 +61,7 @@ const motorcycleFilteredList = computed(() => {
       motorcyclesList.value
         .filter((motorcycle) => motorcycle.name?.toLowerCase().includes(search))
         .map((motorcycle) => motorcycle.name)
-        .filter((name): name is string => !!name)
+        .filter((name) => !!name)
     )
   ]
 })
@@ -128,7 +128,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="form-container min-w-0">
+  <div class="form-container border min-w-0">
     <h3>{{ props.formTitle }}</h3>
     <UFormField label="Marque" name="brand">
       <UInputMenu
@@ -139,6 +139,7 @@ onMounted(() => {
         label-key="name"
         clear
         class="w-full"
+        :ui="{ base: 'w-full max-w-full bg-(--input-background)' }"
       >
         <template #empty> Aucune marque trouvée </template>
       </UInputMenu>
@@ -151,6 +152,7 @@ onMounted(() => {
         :items="motorcycleFilteredList"
         clear
         class="w-full"
+        :ui="{ base: 'w-full max-w-full bg-(--input-background)' }"
         @update:open="fetchMotorcyclesByBrand"
       >
         <template #empty> Aucun modèle trouvé </template>
@@ -164,6 +166,7 @@ onMounted(() => {
         :items="yearFilteredList"
         clear
         class="w-full"
+        :ui="{ base: 'w-full max-w-full bg-(--input-background)' }"
         @update:open="fetchMotorcyclesByBrand"
       >
         <template #empty> Aucune année trouvée </template>
@@ -174,7 +177,6 @@ onMounted(() => {
 
 <style scoped>
 .form-container {
-  border: 1px solid #dddddd;
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -188,17 +190,6 @@ onMounted(() => {
 
 h3 {
   text-align: center;
-}
-
-:deep(input),
-:deep(button[id]) {
-  background-color: #f4f4f4;
-  width: 100% !important;
-  max-width: 100% !important;
-}
-
-:deep(.relative) {
-  width: 100%;
 }
 
 @media (max-width: 1024px) {

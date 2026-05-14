@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { IMotorcycle } from '@/types/motorcycles'
+import type { IMotorcycle } from '~/types/motorcycles'
 
 defineProps<{
   items: IMotorcycle[]
@@ -58,8 +58,7 @@ function handleCompareClick(itemId: string, imgUrl: string) {
         <UButton
           size="sm"
           color="primary"
-          class="rounded-full cursor-pointer"
-          style="color: white"
+          class="rounded-full cursor-pointer text-white"
           icon="i-lucide-arrow-left-right"
           @click.stop="
             () =>
