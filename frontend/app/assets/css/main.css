@@ -25,6 +25,7 @@
 
   --background: #fff;
   --background-secondary: #0000001b;
+  --input-background: #f4f4f4;
   --border-gray: rgba(0, 0, 0, 0.25);
   --overlay-loading-background: rgba(199, 199, 199, 0.7);
   --label-text: rgba(0, 0, 0, 0.49);
@@ -49,6 +50,7 @@
 
   --background: #000;
   --background-secondary: #ffffff1b;
+  --input-background: #262626;
   --border-gray: rgba(255, 255, 255, 0.25);
   --overlay-loading-background: rgba(15, 23, 42, 0.7);
   --label-text: rgba(255, 255, 255, 0.49);
@@ -114,7 +116,7 @@ p {
   font-weight: 300;
 }
 .border {
-  border: 1px solid #000000;
+  border: 0.5px solid var(--border-gray);
 }
 @media (max-width: 1024px) {
   /* mobile */
