@@ -1,7 +1,20 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+import { fileURLToPath } from 'node:url'
+
 export default defineNuxtConfig({
   compatibilityDate: '2026-05-12',
   devtools: { enabled: true },
+
+  alias: {
+    '@': fileURLToPath(new URL('./app/assets', import.meta.url)),
+  },
+
+  components: [
+    {
+      path: '~/components',
+      pathPrefix: false
+    }
+  ],
 
   runtimeConfig: {
     public: {
