@@ -11,6 +11,14 @@ const emit = defineEmits<{
 }>()
 
 const isOpen = ref(true)
+const colorMode = useColorMode()
+
+const srcImage = computed(() => {
+  if (colorMode.value === 'dark') {
+    return '/svg/motorcycleIcon_light.svg'
+  }
+  return '/svg/motorcycleIcon_dark.svg'
+})
 </script>
 
 <template>
@@ -30,14 +38,14 @@ const isOpen = ref(true)
           />
           <img
             v-if="!props.leftMotorcycleUrl"
-            src="/svg/motorcycleIcon.svg"
+            :src="srcImage"
             class="size-20"
           />
           <p>{{ props.leftName }}</p>
         </div>
         <UButton
           icon="i-lucide-arrow-left-right"
-          class="w-fit rounded-4xl m-1 btn-select"
+          class="text-white -fit rounded-4xl m-1 btn-select"
           @click="emit('compare')"
         >
           Comparer
@@ -56,7 +64,7 @@ const isOpen = ref(true)
           />
           <img
             v-if="!props.rightMotorcycleUrl"
-            src="/svg/motorcycleIcon.svg"
+            :src="srcImage"
             class="size-20 -scale-x-100"
           />
           <p>{{ props.rightName }}</p>

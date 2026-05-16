@@ -51,7 +51,7 @@ const goToForm = async () => {
       <UButton
         color="primary"
         icon="i-lucide-map-pinned"
-        class="cursor-pointer"
+        class="cursor-pointer text-white"
         @click="goToForm"
         >Ajouter une balade</UButton
       >

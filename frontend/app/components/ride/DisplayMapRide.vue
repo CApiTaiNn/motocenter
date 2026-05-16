@@ -800,7 +800,7 @@ watch(
         icon="i-lucide-filter"
         color="primary"
         variant="solid"
-        class="cursor-pointer"
+        class="cursor-pointer text-white"
         @click="handleFilters"
       >
         Filtres
