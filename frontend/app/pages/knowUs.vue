@@ -47,10 +47,8 @@
           />
           <p class="second-p">
             <strong>MotoCenter</strong> vise à se positionner comme une
-            plateforme centrale et cohérente, combinant aide au choix d’une moto
-            et partage communautaire. Afin de garantir la pertinence de ses
-            choix fonctionnels et techniques, il est indispensable d’analyser
-            les solutions existantes.
+            plateforme centrale et cohérente, combinant l'aide au choix d'une moto
+            et partage communautaire.
           </p>
         </article>
       </section>
