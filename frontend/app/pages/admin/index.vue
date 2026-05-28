@@ -5,6 +5,8 @@ import StatsAnalytics from '~/components/admin/StatsAnalytics.vue'
 interface Stat {
   title: string
   value: number
+  icon: string
+  accent: string
 }
 
 definePageMeta({
@@ -35,19 +37,27 @@ async function fetchStats() {
     stats.value = [
       {
         title: 'Utilisateurs',
-        value: totalUsers ?? 0
+        value: totalUsers ?? 0,
+        icon: 'i-lucide-users',
+        accent: 'var(--ui-color-info-500)'
       },
       {
         title: 'Motos',
-        value: totalBikes ?? 0
+        value: totalBikes ?? 0,
+        icon: 'i-lucide-bike',
+        accent: 'var(--ui-primary)'
       },
       {
         title: "Nouveaux utilisateurs aujourd'hui",
-        value: resToday.users.length ?? 0
+        value: resToday.users.length ?? 0,
+        icon: 'i-lucide-user-plus',
+        accent: 'var(--ui-color-success-600)'
       },
       {
         title: "Posts créés aujourd'hui",
-        value: resPostsToday.posts.length ?? 0
+        value: resPostsToday.posts.length ?? 0,
+        icon: 'i-lucide-message-square-plus',
+        accent: 'var(--ui-color-warning-500)'
       }
     ]
   } catch (error) {
@@ -61,10 +71,16 @@ onMounted(() => {
 </script>
 
 <template>
-  <main>
+  <main class="admin-container">
     <h3>Bienvenue {{ userName }}</h3>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pl-40 pr-40">
-      <div v-for="stat in stats" :key="stat.title" class="card">
+    <div class="stats-grid">
+      <div
+        v-for="stat in stats"
+        :key="stat.title"
+        class="card"
+        :style="{ borderLeftColor: stat.accent }"
+      >
+        <UIcon :name="stat.icon" class="stat-icon" :style="{ color: stat.accent }" />
         <StatsAnalytics :title="stat.title" :value="stat.value" />
       </div>
     </div>
@@ -77,11 +93,38 @@ h3 {
   margin: 20px;
 }
 
-main {
-  margin: 100px 20px;
+.admin-container {
+  max-width: 80rem;
+  margin: 4rem auto;
+  padding: 0 1.5rem;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .stats-grid {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 .card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem 1.25rem;
   border-radius: var(--radius-md);
+  border: var(--border-thin) solid var(--color-gray-light);
+  border-left: 4px solid var(--ui-primary);
+  background-color: var(--background);
+}
+
+.stat-icon {
+  width: 1.75rem;
+  height: 1.75rem;
 }
 </style>

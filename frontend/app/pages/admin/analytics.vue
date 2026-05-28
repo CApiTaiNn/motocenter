@@ -120,8 +120,12 @@ onMounted(() => {
       />
     </div>
     <div class="stats-container">
-      <UCard class="stat-card">
+      <UCard class="stat-card winner-card">
         <template #header>
+          <div class="winner-header">
+            <UIcon name="i-lucide-trophy" class="size-5 text-(--ui-color-warning-500)" />
+            <span class="winner-tag">Top post</span>
+          </div>
           <h4>{{ bestTopic?.title }}</h4>
         </template>
         <template #default>
@@ -135,8 +139,12 @@ onMounted(() => {
           </div>
         </template>
       </UCard>
-      <UCard class="stat-card">
+      <UCard class="stat-card winner-card">
         <template #header>
+          <div class="winner-header">
+            <UIcon name="i-lucide-crown" class="size-5 text-(--ui-primary)" />
+            <span class="winner-tag">Top moto</span>
+          </div>
           <h4>{{ bestMotorcycle?.name }}</h4>
         </template>
         <template #default>
@@ -199,6 +207,29 @@ onMounted(() => {
   border-radius: var(--radius-sm);
   align-items: center;
   justify-content: center;
+}
+
+.winner-card {
+  border-top: 3px solid var(--ui-color-warning-500);
+}
+
+.winner-card:nth-of-type(2) {
+  border-top-color: var(--ui-primary);
+}
+
+.winner-header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.25rem;
+}
+
+.winner-tag {
+  font-family: 'Krona One', sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-gray-mid);
 }
 
 .card-content {

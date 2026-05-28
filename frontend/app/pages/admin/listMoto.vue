@@ -264,6 +264,15 @@ watch(
           </div>
         </div>
         <div v-if="panelOpen" class="panel-moto">
+          <header class="panel-header">
+            <UIcon
+              :name="selectedMoto ? 'i-lucide-pencil' : 'i-lucide-plus-circle'"
+              class="size-5 text-(--ui-primary)"
+            />
+            <h4>
+              {{ selectedMoto ? `Modifier · ${selectedMoto.name}` : 'Nouvelle moto' }}
+            </h4>
+          </header>
           <CardMoto
             :key="selectedMoto?._id ?? 'create'"
             :mode="selectedMoto ? 'edit' : 'create'"
@@ -294,6 +303,15 @@ watch(
   border: var(--border-thin) solid var(--border-gray);
   border-radius: var(--radius-md);
   padding: 1em;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-bottom: 0.75rem;
+  margin-bottom: 1rem;
+  border-bottom: var(--border-thin) solid var(--color-gray-light);
 }
 
 .main-content {

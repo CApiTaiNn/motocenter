@@ -123,6 +123,11 @@ onMounted(async () => {
           class="img-cover moto-right"
         />
       </div>
+      <UIcon
+        name="i-lucide-chevron-down"
+        class="scroll-cue size-8 text-(--ui-primary)"
+        aria-hidden="true"
+      />
     </section>
     <section class="max-lg:mx-[5%]!">
       <div class="list">
@@ -148,21 +153,27 @@ onMounted(async () => {
         en quelques chiffres
       </h2>
       <article class="column">
-        <div class="row justify-content-center max-lg:gap-4!">
-          <StatsHome
-            v-for="item in dynamicStats"
-            :key="item.content"
-            :content="item.content"
-            :url-img="item.urlImg"
-          />
+        <div class="stats-group">
+          <h4 class="stats-group-label">En chiffres</h4>
+          <div class="row justify-content-center max-lg:gap-4!">
+            <StatsHome
+              v-for="item in dynamicStats"
+              :key="item.content"
+              :content="item.content"
+              :url-img="item.urlImg"
+            />
+          </div>
         </div>
-        <div class="row justify-content-center max-lg:gap-4!">
-          <StatsHome
-            v-for="item in itemsTab"
-            :key="item.content"
-            :content="item.content"
-            :url-img="item.urlImg"
-          />
+        <div class="stats-group">
+          <h4 class="stats-group-label">Notre promesse</h4>
+          <div class="row justify-content-center max-lg:gap-4!">
+            <StatsHome
+              v-for="item in itemsTab"
+              :key="item.content"
+              :content="item.content"
+              :url-img="item.urlImg"
+            />
+          </div>
         </div>
       </article>
     </section>
@@ -230,6 +241,34 @@ section {
   align-items: center;
 
   height: 100vh;
+  position: relative;
+}
+
+.scroll-cue {
+  position: absolute;
+  bottom: 2rem;
+  animation: scroll-bounce 1.8s ease-in-out infinite;
+  opacity: 0.7;
+}
+
+@keyframes scroll-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(8px); }
+}
+
+.stats-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.stats-group-label {
+  text-align: center;
+  font-family: 'Krona One', sans-serif;
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-gray-mid);
 }
 
 .title {
@@ -295,19 +334,32 @@ section {
 }
 
 .invitation {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
 
   border-radius: var(--radius-lg);
-  background-color: var(--background-secondary);
-  border: solid var(--border-thick) var(--border-gray);
+  background:
+    radial-gradient(circle at top right, color-mix(in srgb, var(--ui-primary) 18%, transparent), transparent 60%),
+    var(--background-secondary);
   border: solid var(--border-thick) var(--border-gray);
 
   margin: 0 20%;
   padding: 4rem;
 
   gap: 3rem;
+  overflow: hidden;
+}
+
+.invitation::before {
+  content: '';
+  position: absolute;
+  inset: auto -2rem -2rem auto;
+  width: 8rem;
+  height: 8rem;
+  background-image: radial-gradient(circle, color-mix(in srgb, var(--ui-primary) 25%, transparent), transparent 70%);
+  pointer-events: none;
 }
 
 :deep(.button) {

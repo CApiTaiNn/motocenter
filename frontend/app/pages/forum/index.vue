@@ -102,12 +102,23 @@ onMounted(async () => {
       </div>
       <div class="posts">
         <USkeleton v-if="loading" class="size-12 rounded-full" />
-        <div
+        <UCard
           v-if="loading === false && posts.length === 0"
-          class="center add-post-empty"
+          class="empty-state"
         >
-          <p>Aucun post disponible, ajouter le premier</p>
-        </div>
+          <div class="flex flex-col items-center gap-4 py-8 text-center">
+            <UIcon
+              name="i-lucide-message-square-plus"
+              class="size-16 text-(--color-gray-mid)"
+            />
+            <div class="flex flex-col gap-1">
+              <h4>Aucun post pour le moment</h4>
+              <p class="text-sm text-(--color-gray-mid)">
+                Soyez le premier à lancer la discussion.
+              </p>
+            </div>
+          </div>
+        </UCard>
         <div v-for="post in posts" :key="post._id">
           <ForumPost
             :post="post"

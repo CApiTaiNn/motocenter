@@ -1,4 +1,12 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+const team = [
+  { name: 'Sloan Morgant', role: 'Chef de projet' },
+  { name: 'Loris Caruhel', role: 'Expert BDD' },
+  { name: 'Léo Bruneau-Gache', role: 'Développeur' },
+  { name: 'Milio Lintanff-Castel', role: 'Développeur' },
+  { name: 'Nominoë Barbotaud', role: 'Stagiaire' }
+]
+</script>
 
 <template>
   <div class="page">
@@ -19,18 +27,29 @@
       <br />
 
       <section class="section">
+        <h4 class="section-label">L'équipe</h4>
         <article class="row max-lg:flex-col!">
-          <p class="first-p max-lg:font-[var(--font-main)] max-lg:text-xs! max-lg:text-center max-lg:m-[2em]">
-            <strong>Sloan Morgant</strong> a eu cette idée de projet en 2025 et
-            il a créé notre équipe les Breizh Devs.<br /><br />
-            Elle est composée de notre chef de projet :
-            <strong>Sloan Morgant</strong>.<br /><br />
-            De notre expert BDD : <strong>Loris Caruhel</strong>.<br /><br />
-            Nos 2 devs : <strong>Léo Bruneau-Gache</strong> et
-            <strong>Milio Lintanff-Castel</strong>.<br /><br />
-            Et enfin notre stagiaire :
-            <strong>Nominoë Barbotaud</strong>.
-          </p>
+          <div class="team-block">
+            <p class="first-p max-lg:font-[var(--font-main)] max-lg:text-xs! max-lg:text-center max-lg:m-[2em]">
+              <strong>Sloan Morgant</strong> a eu cette idée de projet en 2025 et
+              il a créé notre équipe les <strong>Breizh Devs</strong>.
+            </p>
+            <div class="team-grid">
+              <div v-for="member in team" :key="member.name" class="team-card">
+                <UAvatar
+                  :alt="member.name"
+                  :ui="{ base: 'bg-(--ui-primary) text-white' }"
+                  size="lg"
+                >
+                  {{ member.name.split(' ').map((p) => p[0]).join('') }}
+                </UAvatar>
+                <div class="team-info">
+                  <p class="team-name">{{ member.name }}</p>
+                  <p class="team-role">{{ member.role }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
 
           <img
             src="../assets/images/knowUs/Teamwork.png"
@@ -41,6 +60,7 @@
       </section>
 
       <section class="section">
+        <h4 class="section-label">La mission</h4>
         <article class="row reverse max-lg:flex-col-reverse!">
           <img
             src="../assets/images/knowUs/Gsxr.png"
@@ -111,5 +131,55 @@
 
 strong {
   font-weight: bold;
+}
+
+.section-label {
+  font-family: 'Krona One', sans-serif;
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-gray-mid);
+  margin-bottom: 1.5rem;
+  padding-left: 0.5rem;
+  border-left: 3px solid var(--ui-primary);
+}
+
+.team-block {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  flex: 1;
+}
+
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.75rem;
+}
+
+.team-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border: var(--border-thin) solid var(--color-gray-light);
+  border-radius: var(--radius-md);
+  background-color: var(--background);
+}
+
+.team-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.team-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  line-height: 1.2;
+}
+
+.team-role {
+  color: var(--color-gray-mid);
+  font-size: 0.8rem;
 }
 </style>

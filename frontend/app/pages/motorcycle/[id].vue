@@ -104,6 +104,20 @@ const statsNumbers = computed(() => {
     })
 })
 
+const statsGroups = computed(() => {
+  const groups: Record<string, string[]> = {
+    Moteur: ['engine_size', 'horsePower', 'torque'],
+    Performances: ['acceleration', 'speedMax', 'consumption'],
+    'Caractéristiques générales': ['year', 'weight', 'price']
+  }
+  return Object.entries(groups)
+    .map(([label, keys]) => ({
+      label,
+      stats: statsNumbers.value.filter((s) => keys.includes(s.key))
+    }))
+    .filter((g) => g.stats.length > 0)
+})
+
 function getCountUpOptions(key: string) {
   return {
     useEasing: true,
@@ -246,22 +260,29 @@ watch(
 
     <div ref="statsRef" class="stats-section">
       <h3>Caractéristiques</h3>
-      <div class="stats-grid">
-        <div v-for="stat in statsNumbers" :key="stat.label" class="stat-card">
-          <span class="stat-label">{{ stat.label }}</span>
-          <CountUp :key="countStarted ? stat.label : ''" class="stat-value" :end-val="Number(stat.value)" :duration="2"
-            :options="getCountUpOptions(stat.key)" :autoplay="true" />
-          <div class="bar-outer">
-            <div class="bar-fill" :style="{ width: stat.percent + '%' }"></div>
+      <div v-for="group in statsGroups" :key="group.label" class="stats-group">
+        <h4 class="stats-group-label">{{ group.label }}</h4>
+        <div class="stats-grid">
+          <div v-for="stat in group.stats" :key="stat.label" class="stat-card">
+            <span class="stat-label">{{ stat.label }}</span>
+            <CountUp :key="countStarted ? stat.label : ''" class="stat-value" :end-val="Number(stat.value)" :duration="2"
+              :options="getCountUpOptions(stat.key)" :autoplay="true" />
+            <div class="bar-outer">
+              <div class="bar-fill" :style="{ width: stat.percent + '%' }"></div>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="sound-section">
+    <UCard class="sound-section">
+      <div class="sound-header">
+        <UIcon name="i-lucide-audio-waveform" class="size-6 text-(--ui-primary)" />
+        <h4>Son moteur</h4>
+      </div>
       <AudioPlayer v-if="m.soundLink" :src="m.soundLink" />
-      <p v-else>Pas d'audio</p>
-    </div>
+      <p v-else class="sound-empty">Aucun extrait audio disponible pour cette moto.</p>
+    </UCard>
 
     <h4>Commentaires présents sur la moto</h4>
     <div v-if="commentsMotorcycle.length > 0" class="display-comment">
@@ -271,16 +292,20 @@ watch(
     </div>
     <p v-else>Aucun commentaire sur la moto, ajouter le premier.</p>
 
-    <div class="input-comment-box">
-      <div v-if="!isAuthenticated" class="need-connection">
-        <h3>
-          Rejoignez la communauté pour débattre et partager vos avis sur ces
-          motos !
-        </h3>
-        <UButton color="neutral" class="rounded-4xl self-end text-xs p-2" size="xl" @click="open()">Se connecter
+    <UCard v-if="!isAuthenticated" class="input-comment-box">
+      <div class="auth-prompt">
+        <UIcon name="i-lucide-users" class="size-12 text-(--ui-primary)" />
+        <h3>Rejoignez la communauté</h3>
+        <p class="auth-prompt-text">
+          Connectez-vous pour débattre et partager vos avis sur cette moto.
+        </p>
+        <UButton color="primary" size="xl" class="text-white! cursor-pointer" @click="open()">
+          Se connecter
         </UButton>
       </div>
-      <div v-if="!messagePosted" class="input-comment-container" :class="{ blurred: !isAuthenticated }">
+    </UCard>
+    <div v-else class="input-comment-box">
+      <div v-if="!messagePosted" class="input-comment-container">
         <h4>
           Déjà roulé sur cette moto ?<br />
           Faite le savoir à la communauté !
@@ -345,6 +370,53 @@ span {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 1em;
+}
+
+.stats-group {
+  margin-bottom: 2em;
+}
+
+.stats-group-label {
+  font-family: 'Krona One', sans-serif;
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-gray-mid);
+  margin-bottom: 0.75em;
+  padding-left: 0.25em;
+  border-left: 3px solid var(--ui-primary);
+}
+
+.sound-section {
+  width: 60%;
+}
+
+.sound-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.sound-empty {
+  color: var(--color-gray-mid);
+  font-style: italic;
+  text-align: center;
+  padding: 1rem 0;
+}
+
+.auth-prompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem;
+  text-align: center;
+}
+
+.auth-prompt-text {
+  color: var(--color-gray-mid);
+  max-width: 28rem;
 }
 
 .stat-card {

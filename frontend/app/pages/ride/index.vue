@@ -44,28 +44,41 @@ const goToForm = async () => {
       display-ride
     />
 
-    <div class="add-container max-[410px]:justify-center">
-      <p class="p-mobile">
-        Vous ne trouvez pas votre balade, vous pouvez l’ajouter :
-      </p>
-      <UButton
-        color="primary"
-        icon="i-lucide-map-pinned"
-        class="cursor-pointer text-white!"
-        @click="goToForm"
-        >Ajouter une balade</UButton
-      >
-    </div>
+    <UCard class="add-cta">
+      <div class="add-cta-content max-[410px]:justify-center">
+        <UIcon name="i-lucide-map-pinned" class="size-10 text-(--ui-primary)" />
+        <div class="add-cta-text">
+          <h4>Pas trouvé votre balade ?</h4>
+          <p class="p-mobile">Ajoutez-la pour la partager avec la communauté.</p>
+        </div>
+        <UButton
+          color="primary"
+          icon="i-lucide-plus"
+          size="lg"
+          class="cursor-pointer text-white!"
+          @click="goToForm"
+          >Ajouter une balade</UButton
+        >
+      </div>
+    </UCard>
   </div>
 </template>
 <style scoped>
-.add-container {
+.add-cta {
+  max-width: 60rem;
+  margin: 2rem auto 4rem;
+}
+
+.add-cta-content {
   display: flex;
   flex-direction: row;
   align-items: center;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 50px;
-  margin-left: 20px;
+  gap: 1rem;
+}
+
+.add-cta-text {
+  flex: 1;
+  min-width: 12rem;
 }
 </style>
