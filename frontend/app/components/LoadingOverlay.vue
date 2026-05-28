@@ -27,7 +27,7 @@ defineProps<Props>()
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 9999;
+  z-index: var(--z-loader);
   backdrop-filter: blur(2px);
 }
 

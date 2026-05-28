@@ -8,7 +8,7 @@ const props = defineProps<{
 
 <template>
   <div class="resultat">
-    <div class="container-row">
+    <div class="container-row max-lg:w-[95%]! max-lg:gap-[10px]!">
       <div class="left">
         <img
           v-if="props.firstValue"
@@ -61,12 +61,5 @@ h3 {
 p {
   text-align: center;
   width: 100%;
-}
-
-@media (max-width: 1024px) {
-  .container-row {
-    width: 95%;
-    gap: 10px;
-  }
 }
 </style>

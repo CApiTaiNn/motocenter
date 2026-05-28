@@ -519,14 +519,14 @@ watch(
 )
 </script>
 <template>
-  <div id="container-form" class="container-form">
+  <div id="container-form" class="container-form md:p-8!">
     <UForm
-      class="form-wrapper"
+      class="form-wrapper lg:flex-row! lg:flex-wrap"
       :state="stateForm"
       :validate="validate"
       @submit="onSubmit"
     >
-      <UContainer class="column-info flex flex-col space-y-6">
+      <UContainer class="column-info flex flex-col space-y-6 lg:flex-1 lg:order-1 lg:w-1/2">
         <header class="form-header">
           <UButton
             to="/ride?scroll=true"
@@ -568,7 +568,7 @@ watch(
           />
         </UFormField>
 
-        <div class="row-container">
+        <div class="row-container sm:grid-cols-2!">
           <div class="flex flex-col gap-2">
             <UFormField label="Ville de départ" name="startTown" required>
               <USelectMenu
@@ -691,7 +691,7 @@ watch(
         </UFormField>
       </UContainer>
 
-      <UContainer class="column-map flex flex-col">
+      <UContainer class="column-map flex flex-col lg:flex-1 lg:order-2 lg:w-1/2">
         <UFormField
           label="Tracé de la balade"
           name="geom"
@@ -718,7 +718,7 @@ watch(
             Modification désactivée pour les tracés GPS et sur téléphone
           </div>
 
-          <div class="container-info-under-map">
+          <div class="container-info-under-map lg:flex-row! lg:gap-10! lg:items-center">
             <div v-if="rideDistance > 0" class="ride-line-info">
               <UIcon name="i-lucide-map-pinned" class="w-4 h-4 text-primary" />
               <span
@@ -746,7 +746,7 @@ watch(
         </UFormField>
       </UContainer>
 
-      <div class="submit-container flex justify-start ml-7">
+      <div class="submit-container flex justify-start ml-7 lg:order-3 lg:w-full lg:mt-4">
         <UButton
           type="submit"
           label="Créer"
@@ -826,48 +826,4 @@ watch(
   white-space: nowrap;
 }
 
-/* --- RESPONSIVE (TABLETTES ET MOBILES) --- */
-@media (min-width: 1024px) {
-  .form-wrapper {
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: stretch;
-  }
-
-  .column-info {
-    flex: 1;
-    order: 1;
-    width: 50%;
-  }
-
-  .column-map {
-    flex: 1;
-    order: 2;
-    width: 50%;
-  }
-
-  .submit-container {
-    order: 3;
-    width: 100%;
-    margin-top: 1rem;
-  }
-
-  .container-info-under-map {
-    flex-direction: row;
-    gap: 40px;
-    align-items: center;
-  }
-}
-
-@media (min-width: 768px) {
-  .container-form {
-    padding: 2rem;
-  }
-}
-
-@media (min-width: 640px) {
-  .row-container {
-    grid-template-columns: 1fr 1fr;
-  }
-}
 </style>

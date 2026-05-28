@@ -46,7 +46,7 @@ const logos = Object.values(modules).map((mod) => mod as string)
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
-  border-radius: 20px;
+  border-radius: var(--radius-lg);
 }
 
 @keyframes scroll {

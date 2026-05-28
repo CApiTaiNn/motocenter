@@ -10,17 +10,17 @@
         </h1>
       </template>
       <template #subtitle>
-        <p>Découvrez notre histoire et nos engagements</p>
+        <p class="max-lg:text-xs! max-lg:text-center max-lg:font-[var(--font-main)]">Découvrez notre histoire et nos engagements</p>
       </template>
     </HeaderInfo>
 
     <div id="content" class="content">
-      <h3 class="subtitle h3-mobile">En quelques mots</h3>
+      <h3 class="subtitle h3-mobile max-lg:font-[var(--font-main)] max-lg:text-base! max-lg:font-semibold max-lg:text-center">En quelques mots</h3>
       <br />
 
       <section class="section">
-        <article class="row">
-          <p class="first-p">
+        <article class="row max-lg:flex-col!">
+          <p class="first-p max-lg:font-[var(--font-main)] max-lg:text-xs! max-lg:text-center max-lg:m-[2em]">
             <strong>Sloan Morgant</strong> a eu cette idée de projet en 2025 et
             il a créé notre équipe les Breizh Devs.<br /><br />
             Elle est composée de notre chef de projet :
@@ -35,17 +35,19 @@
           <img
             src="../assets/images/knowUs/Teamwork.png"
             alt="Image de travail d'équipe"
+            class="max-lg:w-full max-lg:max-w-[500px]"
           />
         </article>
       </section>
 
       <section class="section">
-        <article class="row reverse">
+        <article class="row reverse max-lg:flex-col-reverse!">
           <img
             src="../assets/images/knowUs/Gsxr.png"
             alt="image du gsxr de Sloan"
+            class="max-lg:w-full max-lg:max-w-[500px]"
           />
-          <p class="second-p">
+          <p class="second-p max-lg:font-[var(--font-main)] max-lg:text-xs! max-lg:text-center">
             <strong>MotoCenter</strong> vise à se positionner comme une
             plateforme centrale et cohérente, combinant aide au choix d’une moto
             et partage communautaire. Afin de garantir la pertinence de ses
@@ -105,37 +107,6 @@
 
 .second-p {
   width: 70dvw;
-}
-
-/* Mobile layout  */
-@media (max-width: 1024px) {
-  .row {
-    flex-direction: column;
-  }
-
-  .row.reverse {
-    flex-direction: column-reverse;
-  }
-
-  .row img {
-    width: 100%;
-    max-width: 500px;
-  }
-  .h3-mobile,
-  .subtitle {
-    font-family: 'Poppins', sans-serif;
-    font-size: 16px;
-    font-weight: 600;
-    text-align: center;
-  }
-  p {
-    font-family: 'Poppins', sans-serif;
-    font-size: 12px;
-    text-align: center;
-  }
-  .first-p {
-    margin: 2em;
-  }
 }
 
 strong {

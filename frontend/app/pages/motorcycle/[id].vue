@@ -322,8 +322,8 @@ watch(
   display: flex;
   flex-direction: column;
   gap: 0.5em;
-  border: black solid 1px;
-  border-radius: 5px;
+  border: var(--border-thin) solid var(--border-gray);
+  border-radius: var(--radius-sm);
   padding: 1em;
   width: 50%;
 }
@@ -352,14 +352,14 @@ span {
   flex-direction: column;
   align-items: center;
   padding: 1em;
-  border: 1px solid #c0c0c0;
-  border-radius: 8px;
+  border: var(--border-thin) solid var(--color-gray-light);
+  border-radius: var(--radius-sm);
   gap: 0.5em;
 }
 
 .stat-label {
   font-size: 0.85em;
-  color: #666;
+  color: var(--color-gray-mid);
   text-align: center;
 }
 
@@ -379,13 +379,13 @@ span {
 .motorcycle-image {
   max-width: 100%;
   height: auto;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
 }
 
 .display-comment {
   flex: 1;
-  border: 1px solid #c0c0c0;
-  border-radius: 1.25rem;
+  border: var(--border-thin) solid var(--color-gray-light);
+  border-radius: var(--radius-lg);
   padding: 2rem;
   max-width: 50%;
   height: fit-content;
@@ -394,15 +394,15 @@ span {
 .bar-outer {
   width: 100%;
   height: 10px;
-  background-color: #d7d7d7;
-  border-radius: 5px;
+  background-color: var(--color-track-bg);
+  border-radius: var(--radius-sm);
   overflow: hidden;
 }
 
 .bar-fill {
   height: 100%;
-  background: linear-gradient(90deg, #ff0000, #990000);
-  border-radius: 5px;
+  background: var(--gradient-primary);
+  border-radius: var(--radius-sm);
   animation: slide-in 2s ease-in-out;
 }
 
@@ -417,8 +417,8 @@ span {
   margin: 3rem 25%;
   width: 50%;
   min-height: 25rem;
-  border: 1px solid #757575;
-  border-radius: 1.25rem;
+  border: var(--border-thin) solid var(--color-gray-mid);
+  border-radius: var(--radius-lg);
 }
 
 .need-connection {
@@ -426,7 +426,7 @@ span {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  z-index: 10;
+  z-index: var(--z-elevated);
   text-align: center;
 }
 

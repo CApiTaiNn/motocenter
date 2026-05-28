@@ -82,6 +82,6 @@ main {
 }
 
 .card {
-  border-radius: 10px;
+  border-radius: var(--radius-md);
 }
 </style>

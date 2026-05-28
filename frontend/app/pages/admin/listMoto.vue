@@ -291,8 +291,8 @@ watch(
 }
 .panel-moto {
   margin: 2em;
-  border: 1px solid var(--border-gray);
-  border-radius: 15px;
+  border: var(--border-thin) solid var(--border-gray);
+  border-radius: var(--radius-md);
   padding: 1em;
 }
 
@@ -308,8 +308,8 @@ watch(
 
 .panel-moto {
   margin: 2em;
-  border: 1px solid var(--border-gray);
-  border-radius: 15px;
+  border: var(--border-thin) solid var(--border-gray);
+  border-radius: var(--radius-md);
   padding: 1em;
   height: calc(150vh - 200px);
   overflow-y: auto;

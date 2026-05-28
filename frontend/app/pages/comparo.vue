@@ -350,7 +350,7 @@ onMounted(() => {
     </HeaderInfo>
     <div class="container-form">
       <div id="form" class="form-button">
-        <div class="form">
+        <div class="form max-lg:flex-col! max-lg:items-center">
           <MotocyclesForm v-model="motorcycle1Id" form-title="Moto 1" />
           <MotocyclesForm v-model="motorcycle2Id" form-title="Moto 2" />
         </div>
@@ -395,8 +395,8 @@ onMounted(() => {
               />
             </div>
           </div>
-          <div class="display-comment-container">
-            <div class="left-display-comment">
+          <div class="display-comment-container max-lg:flex-col!">
+            <div class="left-display-comment max-lg:max-w-full!">
               <h4>Commentaires sur la {{ motorcycle1?.name }}</h4>
               <template v-if="commentsMotorcycle1.length > 0">
                 <div
@@ -408,7 +408,7 @@ onMounted(() => {
               </template>
               <p v-else>Postez le premier commentaire !</p>
             </div>
-            <div class="right-display-comment">
+            <div class="right-display-comment max-lg:max-w-full!">
               <h4>Commentaires sur la {{ motorcycle2?.name }}</h4>
               <template v-if="commentsMotorcycle2.length > 0">
                 <div
@@ -421,9 +421,9 @@ onMounted(() => {
               <p v-else>Postez le premier commentaire !</p>
             </div>
           </div>
-          <div class="input-comment-box">
-            <div v-if="!isAuthenticated" class="need-connection">
-              <h3 class="h3-mobile">
+          <div class="input-comment-box max-lg:m-[1.5rem_1rem]! max-lg:w-auto! max-lg:min-h-[auto]!">
+            <div v-if="!isAuthenticated" class="need-connection max-lg:w-[90%]! max-lg:flex! max-lg:flex-col max-lg:items-center! max-lg:gap-4">
+              <h3 class="h3-mobile max-lg:w-auto! max-lg:text-lg!">
                 Rejoignez la communauté pour débattre et partager vos avis sur
                 ces motos !
               </h3>
@@ -437,7 +437,7 @@ onMounted(() => {
             </div>
             <div
               v-if="!messagePosted"
-              class="input-comment-container"
+              class="input-comment-container max-lg:min-h-[auto]! max-lg:p-4!"
               :class="{ blurred: !isAuthenticated }"
             >
               <h4>
@@ -467,7 +467,7 @@ onMounted(() => {
             </div>
             <div
               v-else
-              class="input-posted-container"
+              class="input-posted-container max-lg:min-h-[auto]! max-lg:p-4!"
               :class="{ blurred: !isAuthenticated }"
             >
               <h4>Merci pour votre contribution !</h4>
@@ -479,7 +479,7 @@ onMounted(() => {
           </div>
         </div>
       </Transition>
-      <div class="caroussel-container">
+      <div class="caroussel-container max-lg:mx-4!">
         <div>
           <h3 class="h3-mobile">Pour la performance</h3>
           <CarrouselMotorcycles
@@ -575,8 +575,8 @@ onMounted(() => {
 .left-display-comment,
 .right-display-comment {
   flex: 1;
-  border: 1px solid #c0c0c0;
-  border-radius: 1.25rem;
+  border: var(--border-thin) solid var(--color-gray-light);
+  border-radius: var(--radius-lg);
   padding: 2rem;
   max-width: 50%;
   height: fit-content;
@@ -599,8 +599,8 @@ onMounted(() => {
   margin: 3rem 25%;
   width: 50%;
   min-height: 25rem;
-  border: 1px solid #757575;
-  border-radius: 1.25rem;
+  border: var(--border-thin) solid var(--color-gray-mid);
+  border-radius: var(--radius-lg);
 }
 
 .input-comment-container {
@@ -645,7 +645,7 @@ onMounted(() => {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  z-index: 10;
+  z-index: var(--z-elevated);
   text-align: center;
 }
 
@@ -682,55 +682,4 @@ onMounted(() => {
   opacity: 0;
 }
 
-@media (max-width: 1024px) {
-  .form {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .display-comment-container {
-    flex-direction: column;
-  }
-
-  .left-display-comment,
-  .right-display-comment {
-    max-width: 100%;
-  }
-
-  .input-comment-box {
-    margin: 1.5rem 1rem;
-    width: auto;
-  }
-
-  .caroussel-container {
-    margin: 0 1rem;
-  }
-
-  .need-connection {
-    width: 90%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-  }
-
-  .need-connection h3 {
-    width: auto;
-    font-size: 18px;
-  }
-
-  .input-comment-box {
-    min-height: auto;
-  }
-
-  .input-comment-container {
-    min-height: auto;
-    padding: 1rem;
-  }
-
-  .input-posted-container {
-    min-height: auto;
-    padding: 1rem;
-  }
-}
 </style>

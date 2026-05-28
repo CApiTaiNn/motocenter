@@ -40,13 +40,13 @@ const contactEmail = 'contact@mgtsoftware.com'
   <footer class="footer-wrapper">
     <div class="footer-top-border" />
 
-    <div class="footer-main">
-      <div class="footer-logo">
+    <div class="footer-main max-lg:flex-wrap! max-lg:pt-[2.5rem]! max-lg:px-[6%]! max-lg:pb-[2rem]! max-lg:gap-x-4! max-lg:gap-y-8!">
+      <div class="footer-logo max-lg:flex-[1_1_100%]! max-lg:items-center! max-lg:text-center">
         <LogoApp />
         <p class="footer-tagline">La communauté des passionnés de moto</p>
       </div>
 
-      <nav class="footer-col">
+      <nav class="footer-col max-lg:flex-[1_1_45%]!">
         <h5 class="footer-heading">Guides</h5>
         <ul class="footer-list">
           <li
@@ -61,9 +61,9 @@ const contactEmail = 'contact@mgtsoftware.com'
         </ul>
       </nav>
 
-      <div class="footer-col">
-        <h5 class="footer-heading text-hidden">Réseaux sociaux</h5>
-        <ul class="footer-list footer-socials-list">
+      <div class="footer-col max-lg:flex-[1_1_100%]! max-lg:order-4 max-lg:items-center!">
+        <h5 class="footer-heading text-hidden max-lg:hidden">Réseaux sociaux</h5>
+        <ul class="footer-list footer-socials-list max-lg:flex-row! max-lg:gap-6! max-lg:justify-center">
           <li v-for="(item, idx) in socials" :key="`social-${idx}`">
             <a
               :href="item.href"
@@ -72,14 +72,14 @@ const contactEmail = 'contact@mgtsoftware.com'
               :aria-label="`${item.label} (ouvre un nouvel onglet)`"
               class="footer-social-link"
             >
-              <UIcon :name="item.icon" class="footer-social-icon" />
-              <span class="footer-social-label">{{ item.label }}</span>
+              <UIcon :name="item.icon" class="footer-social-icon max-lg:text-[26px]!" />
+              <span class="footer-social-label max-lg:hidden">{{ item.label }}</span>
             </a>
           </li>
         </ul>
       </div>
 
-      <div class="footer-col">
+      <div class="footer-col max-lg:flex-[1_1_45%]!">
         <h5 class="footer-heading">Contact</h5>
         <ul class="footer-list">
           <li class="footer-list-item">
@@ -93,7 +93,7 @@ const contactEmail = 'contact@mgtsoftware.com'
 
     <div class="footer-separator" />
 
-    <div class="footer-bottom">
+    <div class="footer-bottom max-lg:flex-col! max-lg:gap-2! max-lg:text-center max-lg:py-4!">
       <p class="footer-bottom-text">
         &copy; 2026 MotoCenter &mdash; Tout droit réservé
       </p>
@@ -266,55 +266,4 @@ const contactEmail = 'contact@mgtsoftware.com'
   font-size: 13px;
 }
 
-/* ── Mobile ── */
-@media (max-width: 1024px) {
-  .footer-main {
-    flex-wrap: wrap;
-    padding: 2.5rem 6% 2rem;
-    gap: 2rem 1rem;
-  }
-
-  .footer-logo {
-    flex: 1 1 100%;
-    align-items: center;
-    text-align: center;
-  }
-
-  .footer-col {
-    flex: 1 1 45%;
-  }
-
-  /* Socials row in mobile */
-  .footer-col:nth-child(3) {
-    flex: 1 1 100%;
-    order: 4;
-    align-items: center;
-  }
-
-  .footer-col:nth-child(3) .footer-socials-list {
-    flex-direction: row;
-    gap: 1.5rem;
-    justify-content: center;
-  }
-
-  .footer-social-label {
-    display: none;
-  }
-
-  .footer-social-icon {
-    font-size: 26px;
-  }
-
-  .text-hidden {
-    display: none;
-  }
-
-  /* Bottom bar stacked */
-  .footer-bottom {
-    flex-direction: column;
-    gap: 0.5rem;
-    text-align: center;
-    padding: 1rem 5%;
-  }
-}
 </style>

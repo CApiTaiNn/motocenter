@@ -44,7 +44,7 @@ audio.addEventListener('loadedmetadata', () => {
   gap: 20px;
   width: 200px;
   padding: 10px;
-  border-radius: 50px;
-  border: 0.5px solid #364153;
+  border-radius: var(--radius-full);
+  border: var(--border-hairline) solid #364153;
 }
 </style>

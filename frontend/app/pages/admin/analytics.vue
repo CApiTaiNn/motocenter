@@ -195,8 +195,8 @@ onMounted(() => {
 .stat-card {
   flex: 1 1 300px;
   max-width: 600px;
-  border: 1px solid var(--border-gray);
-  border-radius: 8px;
+  border: var(--border-thin) solid var(--border-gray);
+  border-radius: var(--radius-sm);
   align-items: center;
   justify-content: center;
 }
@@ -211,12 +211,12 @@ onMounted(() => {
 .card-img {
   max-width: 200px;
   max-height: 100px;
-  border-radius: 10px;
+  border-radius: var(--radius-md);
 }
 
 .chart-container {
   margin: 1.5rem 1rem;
-  border: 1px solid var(--border-gray);
-  border-radius: 8px;
+  border: var(--border-thin) solid var(--border-gray);
+  border-radius: var(--radius-sm);
 }
 </style>

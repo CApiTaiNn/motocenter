@@ -44,14 +44,14 @@ const goToForm = async () => {
       display-ride
     />
 
-    <div class="add-container">
+    <div class="add-container max-[410px]:justify-center">
       <p class="p-mobile">
         Vous ne trouvez pas votre balade, vous pouvez l’ajouter :
       </p>
       <UButton
         color="primary"
         icon="i-lucide-map-pinned"
-        class="cursor-pointer"
+        class="cursor-pointer text-white!"
         @click="goToForm"
         >Ajouter une balade</UButton
       >
@@ -67,11 +67,5 @@ const goToForm = async () => {
   gap: 10px;
   margin-bottom: 50px;
   margin-left: 20px;
-}
-
-@media (max-width: 410px) {
-  .add-container {
-    justify-content: center;
-  }
 }
 </style>

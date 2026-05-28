@@ -96,7 +96,7 @@ onMounted(async () => {
         </p>
       </template>
     </HeaderInfo>
-    <div id="forum" class="forum-filters">
+    <div id="forum" class="forum-filters flex flex-row items-start m-[2em] gap-[0.5em] lg:gap-[2em]">
       <div class="panel-filters">
         <ForumPanel :loading :active-filter="filters" @filters="handleFilter" />
       </div>
@@ -117,7 +117,7 @@ onMounted(async () => {
           />
         </div>
       </div>
-      <div class="panel">
+      <div class="panel hidden lg:flex lg:flex-col lg:gap-6 lg:w-[300px] lg:sticky lg:top-[70px] lg:right-0">
         <ForumMyPosts @new-post="getPosts()" />
         <ForumMyFavoritesPost />
       </div>
@@ -126,51 +126,6 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-/** Style version PC */
-@media (max-width: 1024px) {
-  #navbar-pc {
-    display: none;
-  }
-
-  .panel {
-    display: none;
-  }
-
-  .forum-filters {
-    display: flex;
-    flex-direction: row;
-    align-items: start;
-    margin: 2em;
-    gap: 0.5em;
-  }
-}
-
-/** Style version mobile */
-
-@media (min-width: 1024px) {
-  #navbar-mobile {
-    display: none;
-  }
-
-  .panel {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    width: 300px;
-    position: sticky;
-    top: 70px;
-    right: 0;
-  }
-
-  .forum-filters {
-    display: flex;
-    flex-direction: row;
-    align-items: start;
-    margin: 2em;
-    gap: 2em;
-  }
-}
-
 .panel-filters {
   position: sticky;
   top: 70px;

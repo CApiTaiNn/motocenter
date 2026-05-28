@@ -330,8 +330,8 @@ onMounted(async () => {
 }
 
 .border {
-  border: 2px dashed var(--border-gray);
-  border-radius: 10px;
+  border: var(--border-thick) dashed var(--border-gray);
+  border-radius: var(--radius-md);
   text-align: center;
   min-height: 100px;
   max-height: 100px;

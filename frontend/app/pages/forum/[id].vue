@@ -139,7 +139,7 @@ onMounted(async () => {
         <p>Échanger librement sur votre sujet favori en lien avec la moto.</p>
       </template>
     </HeaderInfo>
-    <div id="post" class="post-filters">
+    <div id="post" class="post-filters max-lg:m-[0.5em]! max-lg:gap-0!">
       <div>
         <ForumPanel />
       </div>
@@ -192,7 +192,7 @@ onMounted(async () => {
             :src="`${post?.image}`"
             :alt="`Image du post ${post?.title} par ${post?.user.pseudo}`"
             :title="`Image du post ${post?.title} par ${post?.user.pseudo}`"
-            class="img margin-1_5 margin-bottom-1"
+            class="img margin-1_5 margin-bottom-1 w-full lg:w-3/4"
           />
         </div>
         <h4 class="margin-bottom-1">{{ post?.content }}</h4>
@@ -203,7 +203,7 @@ onMounted(async () => {
           <UButton
             :disabled="newReponseOfPost === ''"
             size="sm"
-            class="button-comment"
+            class="button-comment w-3/4 lg:w-1/4"
             @click="handleAddComment"
           >
             Ajouter mon commentaire</UButton
@@ -223,39 +223,6 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-/** Style version mobile */
-@media (max-width: 1024px) {
-  #post {
-    margin: 0.5em;
-    gap: 0;
-  }
-
-  .title-mobile-version {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-  }
-
-  .img {
-    width: 100%;
-  }
-
-  .button-comment {
-    width: 75%;
-  }
-}
-
-/** Style version PC */
-@media (min-width: 1024px) {
-  .img {
-    width: 75%;
-  }
-
-  .button-comment {
-    width: 25%;
-  }
-}
-
 .margin-2 {
   margin-right: 0.5em;
 }

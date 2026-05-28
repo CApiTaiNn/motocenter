@@ -107,6 +107,6 @@ watch(
 
 .border-bottom {
   margin-bottom: 1em;
-  border-bottom: 1px solid var(--border-gray);
+  border-bottom: var(--border-thin) solid var(--border-gray);
 }
 </style>

@@ -14,10 +14,10 @@ const isOpen = ref(true)
 </script>
 
 <template>
-  <div class="wrapper">
-    <div v-if="isOpen" class="dual-motorcycle">
+  <div class="wrapper max-lg:w-[90vw]!">
+    <div v-if="isOpen" class="dual-motorcycle max-lg:w-full!">
       <div class="slot-container">
-        <div class="motorcycle-left">
+        <div class="motorcycle-left max-lg:h-[100px]! max-lg:p-[5px]!">
           <UIcon
             name="i-lucide-circle-x"
             class="absolute top-2 right-2 size-5 self-end cursor-pointer"
@@ -37,12 +37,12 @@ const isOpen = ref(true)
         </div>
         <UButton
           icon="i-lucide-arrow-left-right"
-          class="w-fit rounded-4xl m-1 btn-select"
+          class="w-fit rounded-4xl m-1 max-lg:text-[0.7rem]! max-lg:py-1! max-lg:px-2!"
           @click="emit('compare')"
         >
           Comparer
         </UButton>
-        <div class="motorcycle-right">
+        <div class="motorcycle-right max-lg:h-[100px]! max-lg:p-[5px]!">
           <UIcon
             name="i-lucide-circle-x"
             class="absolute top-2 right-2 size-5 self-end cursor-pointer"
@@ -105,11 +105,11 @@ const isOpen = ref(true)
   height: fit-content;
   width: 100%;
   height: 150px;
-  border: 1px dashed var(--text-color);
+  border: var(--border-thin) dashed var(--text-color);
   padding: 1rem;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   background-color: var(--background);
-  z-index: 1;
+  z-index: var(--z-base);
 }
 
 .motorcycle-left p,
@@ -132,7 +132,7 @@ const isOpen = ref(true)
   width: 94%;
   gap: 0.5rem;
   padding: 20px 0.5rem;
-  border-radius: 0 0 8px 8px;
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
   color: var(--background);
   background-color: var(--text-color);
   z-index: 5;
@@ -152,34 +152,9 @@ const isOpen = ref(true)
   width: 94%;
   gap: 0.5rem;
   padding: 20px 0.5rem;
-  border-radius: 8px 8px 0 0;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
   color: var(--background);
   background-color: var(--text-color);
 }
 
-@media (max-width: 1024px) {
-  .wrapper {
-    width: 90vw;
-  }
-
-  .dual-motorcycle {
-    width: 100%;
-  }
-
-  .footer-open,
-  .footer-closed {
-    width: 94%;
-  }
-
-  .btn-select {
-    font-size: 0.7rem;
-    padding: 4px 8px;
-  }
-
-  .motorcycle-left,
-  .motorcycle-right {
-    height: 100px;
-    padding: 5px;
-  }
-}
 </style>
