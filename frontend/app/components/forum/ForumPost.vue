@@ -30,7 +30,8 @@ const handlePostChange = () => {
 </script>
 <template>
   <UCard
-    class="w-full max-w-275 border-[0.5px] border-(--border-gray)"
+    class="w-full max-w-275 border-[0.5px] border-(--border-gray) category-accent"
+    :style="{ '--category-accent': categoryAccent(props.post.category?.name) }"
     @click="handleOpenAPost(post._id)"
   >
     <div class="postCard">
@@ -92,6 +93,10 @@ const handlePostChange = () => {
   </UCard>
 </template>
 <style scoped>
+.category-accent {
+  border-left: 4px solid var(--category-accent, var(--border-gray));
+}
+
 .responses {
   display: flex;
   flex-direction: row;

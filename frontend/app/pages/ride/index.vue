@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useAuth } from '~/composables/useAuth.js'
 import HeaderInfo from '../../components/global/HeaderInfo.vue'
-import DisplayMapRide from '../../components/ride/DisplayMapRide.vue'
+import RideBrowseMap from '../../components/ride/RideBrowseMap.vue'
 import { useConnexionModal } from '~/composables/useConnexionModal.js'
 
 const { user } = useAuth()
@@ -36,13 +36,7 @@ const goToForm = async () => {
       </template>
     </HeaderInfo>
 
-    <DisplayMapRide
-      display-filters
-      display-enlarge-button
-      display-ride-list
-      display-map-loader
-      display-ride
-    />
+    <RideBrowseMap />
 
     <UCard class="add-cta">
       <div class="add-cta-content max-[410px]:justify-center">
