@@ -24,7 +24,7 @@ const logos = Object.values(modules).map((mod) => mod as string)
 .carousel {
   width: 100%;
   overflow: hidden;
-  padding: 20px 0;
+  padding: var(--space-lg) 0;
 }
 
 .inner {
@@ -36,7 +36,7 @@ const logos = Object.values(modules).map((mod) => mod as string)
 .card {
   flex-shrink: 0;
   width: 10%;
-  margin: 0 10px;
+  margin: 0 var(--space-sm);
   display: flex;
   align-items: center;
   justify-content: center;

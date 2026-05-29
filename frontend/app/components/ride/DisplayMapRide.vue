@@ -927,7 +927,7 @@ watch(
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-sm);
 }
 
 .loader-icon {
@@ -957,7 +957,7 @@ watch(
   position: relative !important;
   width: 100%;
   height: 80dvh;
-  margin-bottom: 20px;
+  margin-bottom: var(--space-lg);
   overflow: hidden;
   transition:
     width 0.3s ease-in-out,
@@ -997,7 +997,7 @@ watch(
   flex-direction: row;
   align-items: center;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: var(--space-sm);
   z-index: 1001;
   pointer-events: none;
 }
@@ -1031,9 +1031,9 @@ watch(
 :deep(.leaflet-control) {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-left: 15px !important;
-  margin-bottom: 15px !important;
+  gap: var(--space-sm);
+  margin-left: var(--space-md) !important;
+  margin-bottom: var(--space-md) !important;
   border: none !important;
   overflow: visible !important;
 }
@@ -1048,7 +1048,7 @@ watch(
   z-index: var(--z-modal);
   background-color: var(--background);
   color: var(--text-color);
-  padding: 10px 20px;
+  padding: var(--space-sm) var(--space-lg);
   border-radius: var(--radius-full);
   box-shadow: var(--shadow-xl);
   display: flex;
@@ -1152,7 +1152,7 @@ watch(
 :deep(.leaflet-draw-actions a) {
   background: var(--background) !important;
   color: var(--text-color) !important;
-  padding: 0 12px !important;
+  padding: 0 var(--space-sm) !important;
   display: flex !important;
   align-items: center;
   justify-content: center;
@@ -1175,11 +1175,11 @@ watch(
   border: var(--border-thin) solid var(--border-gray) !important;
   color: var(--text-color) !important;
   border-radius: var(--radius-sm) !important;
-  padding: 5px 10px !important;
+  padding: var(--space-2xs) var(--space-sm) !important;
   font-size: 11px !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
-  margin-left: 20px !important;
-  margin-top: 20px !important;
+  margin-left: var(--space-lg) !important;
+  margin-top: var(--space-lg) !important;
   white-space: nowrap !important;
 }
 
@@ -1225,15 +1225,15 @@ watch(
 :deep(.leaflet-control-attribution) {
   display: block !important;
   margin: 0 !important;
-  padding: 0 5px;
+  padding: 0 var(--space-2xs);
   background: rgba(255, 255, 255, 0.7) !important;
 }
 
 :deep(.leaflet-control-zoom) {
   display: block !important;
   margin: 0 !important;
-  padding: 0 5px;
-  margin-bottom: 10px !important;
-  margin-left: 10px !important;
+  padding: 0 var(--space-2xs);
+  margin-bottom: var(--space-sm) !important;
+  margin-left: var(--space-sm) !important;
 }
 </style>

@@ -86,10 +86,10 @@ article {
   border: var(--border-thick) solid var(--background-secondary);
   border-radius: var(--radius-lg);
 
-  padding: 12px 0;
-  margin: 0 8px;
+  padding: var(--space-sm) 0;
+  margin: 0 var(--space-xs);
 
-  gap: 0.5rem;
+  gap: var(--space-xs);
 }
 
 article p,

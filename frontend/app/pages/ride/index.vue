@@ -60,7 +60,7 @@ const goToForm = async () => {
 <style scoped>
 .add-cta {
   max-width: 60rem;
-  margin: 2rem auto 4rem;
+  margin: var(--space-xl) auto var(--space-3xl);
 }
 
 .add-cta-content {
@@ -68,7 +68,7 @@ const goToForm = async () => {
   flex-direction: row;
   align-items: center;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: var(--space-md);
 }
 
 .add-cta-text {

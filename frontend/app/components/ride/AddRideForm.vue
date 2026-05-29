@@ -848,13 +848,13 @@ watch(
 /* --- CONTENEURS PRINCIPAUX --- */
 .container-form {
   width: 100%;
-  padding: 1rem;
+  padding: var(--space-md);
 }
 
 .form-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 2.5rem;
+  gap: var(--space-2xl);
   width: 100%;
   align-items: stretch;
 }
@@ -870,7 +870,7 @@ watch(
 .row-container {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 1.5rem;
+  gap: var(--space-lg);
 }
 
 .switch-container {
@@ -878,7 +878,7 @@ watch(
   flex-direction: row;
   justify-content: start;
   align-items: center;
-  gap: 10px;
+  gap: var(--space-sm);
 }
 
 .switch-container p {
@@ -895,15 +895,15 @@ watch(
 .container-info-under-map {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: var(--space-md);
   min-width: 200px;
-  margin-top: 1rem;
+  margin-top: var(--space-md);
 }
 
 .ride-line-info {
   display: flex;
   flex-direction: row;
-  gap: 10px;
+  gap: var(--space-sm);
   justify-content: start;
   align-items: center;
   white-space: nowrap;
@@ -919,16 +919,16 @@ watch(
   padding: 0;
   margin: 0;
   display: flex;
-  gap: 0.5rem;
+  gap: var(--space-xs);
   align-items: stretch;
 }
 
 .stepper-item {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-xs);
   flex: 1;
-  padding: 0.5rem 0.75rem;
+  padding: var(--space-xs) var(--space-sm);
   border-radius: var(--radius-sm);
   border: var(--border-thin) solid var(--color-gray-light);
   color: var(--color-gray-mid);
@@ -992,14 +992,14 @@ watch(
 .step-panel {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: var(--space-lg);
 }
 
 .step-nav {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  margin-top: 1rem;
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
 }
 
 .step-nav-spacer {

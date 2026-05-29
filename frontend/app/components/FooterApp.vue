@@ -109,7 +109,7 @@ const contactEmail = 'contact@mgtsoftware.com'
 <style scoped>
 /* ── Footer wrapper ── */
 .footer-wrapper {
-  margin-top: 5rem;
+  margin-top: var(--space-4xl);
 }
 
 .footer-top-border {
@@ -127,8 +127,8 @@ const contactEmail = 'contact@mgtsoftware.com'
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 2rem;
-  padding: 3.5rem 5% 2.5rem;
+  gap: var(--space-xl);
+  padding: var(--space-3xl) 5% var(--space-2xl);
   max-width: 1400px;
   margin: 0 auto;
 }
@@ -139,7 +139,7 @@ const contactEmail = 'contact@mgtsoftware.com'
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 0.8rem;
+  gap: var(--space-sm);
 }
 
 .footer-tagline {
@@ -158,7 +158,7 @@ const contactEmail = 'contact@mgtsoftware.com'
 }
 
 .footer-heading {
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-md);
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
@@ -167,7 +167,7 @@ const contactEmail = 'contact@mgtsoftware.com'
 .footer-list {
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
+  gap: var(--space-xs);
   list-style: none;
   padding-left: 0;
 }
@@ -188,13 +188,13 @@ const contactEmail = 'contact@mgtsoftware.com'
 
 /* ── Social links ── */
 .footer-socials-list {
-  gap: 0.75rem;
+  gap: var(--space-sm);
 }
 
 .footer-social-link {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: var(--space-xs);
   color: var(--text-color);
   text-decoration: none;
   transition: color 0.2s ease;
@@ -230,7 +230,7 @@ const contactEmail = 'contact@mgtsoftware.com'
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.2rem 5%;
+  padding: var(--space-md) 5%;
   max-width: 1400px;
   margin: 0 auto;
 }
@@ -245,7 +245,7 @@ const contactEmail = 'contact@mgtsoftware.com'
 .footer-bottom-links {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-xs);
 }
 
 .footer-bottom-link {

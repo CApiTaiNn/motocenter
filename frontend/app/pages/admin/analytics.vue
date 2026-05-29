@@ -188,16 +188,16 @@ onMounted(() => {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
-  margin: 1rem;
-  gap: 1rem;
+  margin: var(--space-md);
+  gap: var(--space-md);
 }
 
 .stats-container {
   display: flex;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 1.5rem;
-  margin: 1.5rem 1rem;
+  gap: var(--space-lg);
+  margin: var(--space-lg) var(--space-md);
 }
 
 .stat-card {
@@ -220,8 +220,8 @@ onMounted(() => {
 .winner-header {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  margin-bottom: 0.25rem;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-2xs);
 }
 
 .winner-tag {
@@ -236,7 +236,7 @@ onMounted(() => {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 2rem;
+  gap: var(--space-xl);
 }
 
 .card-img {
@@ -246,7 +246,7 @@ onMounted(() => {
 }
 
 .chart-container {
-  margin: 1.5rem 1rem;
+  margin: var(--space-lg) var(--space-md);
   border: var(--border-thin) solid var(--border-gray);
   border-radius: var(--radius-sm);
 }

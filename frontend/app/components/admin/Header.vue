@@ -32,7 +32,7 @@ const appName: string = useRuntimeConfig().public.appName
   justify-content: space-between;
   max-width: 1400px;
   margin: 0 auto;
-  padding: 0 1.5rem;
+  padding: 0 var(--space-lg);
   height: 64px;
 }
 
@@ -40,7 +40,7 @@ const appName: string = useRuntimeConfig().public.appName
 .brand {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--space-sm);
 }
 
 .brand-label {
@@ -59,14 +59,14 @@ const appName: string = useRuntimeConfig().public.appName
   color: var(--ui-primary);
   background: color-mix(in srgb, var(--ui-primary) 12%, transparent);
   border: var(--border-thin) solid color-mix(in srgb, var(--ui-primary) 30%, transparent);
-  padding: 2px 7px;
+  padding: var(--space-2xs) var(--space-xs);
   border-radius: 4px;
 }
 
 .user-area {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-xs);
   cursor: pointer;
   position: relative;
 }

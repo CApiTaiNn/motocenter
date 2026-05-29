@@ -394,23 +394,23 @@ span {
 .sound-header {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-md);
 }
 
 .sound-empty {
   color: var(--color-gray-mid);
   font-style: italic;
   text-align: center;
-  padding: 1rem 0;
+  padding: var(--space-md) 0;
 }
 
 .auth-prompt {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
-  padding: 2rem;
+  gap: var(--space-md);
+  padding: var(--space-xl);
   text-align: center;
 }
 
@@ -458,7 +458,7 @@ span {
   flex: 1;
   border: var(--border-thin) solid var(--color-gray-light);
   border-radius: var(--radius-lg);
-  padding: 2rem;
+  padding: var(--space-xl);
   max-width: 50%;
   height: fit-content;
 }
@@ -486,7 +486,7 @@ span {
 
 .input-comment-box {
   position: relative;
-  margin: 3rem 25%;
+  margin: var(--space-2xl) 25%;
   width: 50%;
   min-height: 25rem;
   border: var(--border-thin) solid var(--color-gray-mid);
@@ -512,7 +512,7 @@ span {
   justify-content: space-between;
   height: 100%;
   min-height: 25rem;
-  padding: 2rem;
+  padding: var(--space-xl);
 }
 
 .input-comment-container h4 {
@@ -522,7 +522,7 @@ span {
 .comment-input {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: var(--space-md);
 }
 
 .input-posted-container {
@@ -531,8 +531,8 @@ span {
   justify-content: center;
   height: fit-content;
   min-height: 25rem;
-  padding: 2rem;
-  gap: 30px;
+  padding: var(--space-xl);
+  gap: var(--space-xl);
 }
 
 .input-posted-container h4 {

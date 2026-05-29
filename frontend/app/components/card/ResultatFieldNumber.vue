@@ -152,7 +152,7 @@ h3 {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: var(--space-sm);
 }
 
 .container-row {
@@ -160,7 +160,7 @@ h3 {
   align-items: center;
   justify-content: space-between;
   width: 80%;
-  gap: 20px;
+  gap: var(--space-lg);
 }
 
 .left,

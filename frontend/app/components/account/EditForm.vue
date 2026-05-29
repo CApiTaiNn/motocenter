@@ -371,7 +371,7 @@ watch(
 .content {
   display: flex;
   flex-direction: column;
-  padding: 2rem;
+  padding: var(--space-xl);
   overflow-y: auto;
   max-height: 80vh;
 }
@@ -379,7 +379,7 @@ watch(
 .form-container {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: var(--space-lg);
   flex: 1;
 }
 
@@ -387,8 +387,8 @@ watch(
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 8px;
+  gap: var(--space-md);
+  margin-bottom: var(--space-xs);
 }
 
 .avatar:hover {
@@ -411,19 +411,19 @@ watch(
 .form-fields {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: var(--space-lg);
 }
 
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  gap: var(--space-md);
 }
 
 .experience-section {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-sm);
 }
 
 .experience-label {
@@ -435,11 +435,11 @@ watch(
 .experience-buttons {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: var(--space-xs);
 }
 
 .experience-button {
-  padding: 8px 16px;
+  padding: var(--space-xs) var(--space-md);
   border-radius: var(--radius-full);
   font-size: 0.875rem;
   border: var(--border-thick) solid var(--color-gray-light);
@@ -462,8 +462,8 @@ watch(
 
 .button-group {
   display: flex;
-  gap: 12px;
-  padding-top: 16px;
+  gap: var(--space-sm);
+  padding-top: var(--space-md);
   margin-top: auto;
 }
 </style>

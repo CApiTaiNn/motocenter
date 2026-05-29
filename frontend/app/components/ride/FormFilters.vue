@@ -244,15 +244,15 @@ h3 {
 .container-bottom-buttons {
   display: flex;
   flex-direction: row;
-  gap: 10px;
+  gap: var(--space-sm);
   width: 100%;
 }
 
 .value-slider-container {
   display: flex;
   justify-content: start;
-  margin-bottom: 0.5rem;
-  gap: 2px;
+  margin-bottom: var(--space-xs);
+  gap: var(--space-2xs);
 }
 
 :deep(label) {
@@ -268,16 +268,16 @@ h3 {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 1rem;
-  padding-left: 15px;
-  padding-right: 15px;
+  gap: var(--space-md);
+  padding-left: var(--space-md);
+  padding-right: var(--space-md);
 }
 
 .filters-container {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  margin-left: 10px;
+  gap: var(--space-md);
+  margin-left: var(--space-sm);
   background-color: var(--background);
   width: 20dvw;
   height: 46rem;
@@ -290,7 +290,7 @@ h3 {
   border-radius: var(--radius-sm);
   border: var(--border-thin) solid var(--border-gray);
   box-shadow: var(--shadow-md);
-  padding: 1rem;
+  padding: var(--space-md);
   overflow-y: auto;
   transition:
     left 0.3s,

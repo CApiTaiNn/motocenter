@@ -405,15 +405,15 @@ const handleSubmit = async () => {
   height: 65vh;
   display: flex;
   flex-direction: column;
-  padding: 2rem;
+  padding: var(--space-xl);
   overflow-y: auto;
 }
 
 .progress-indicator {
   display: flex;
   justify-content: center;
-  gap: 8px;
-  margin-bottom: 32px;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-xl);
 }
 
 .progress-dot {
@@ -431,26 +431,26 @@ const handleSubmit = async () => {
 .form-container {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: var(--space-lg);
   flex: 1;
 }
 
 .form-step {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: var(--space-lg);
 }
 
 .step-content {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: var(--space-lg);
 }
 
 .form-field {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--space-xs);
 }
 
 .field-label {
@@ -470,14 +470,14 @@ const handleSubmit = async () => {
 .field-error {
   color: var(--ui-color-error-600);
   font-size: 0.75rem;
-  margin-top: 2px;
+  margin-top: var(--space-2xs);
 }
 
 .avatar-button {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: var(--space-md);
   background: none;
   border: none;
   cursor: pointer;
@@ -507,7 +507,7 @@ const handleSubmit = async () => {
 .experience-section {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-sm);
 }
 
 .experience-label {
@@ -519,12 +519,12 @@ const handleSubmit = async () => {
 .experience-buttons {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: var(--space-xs);
   justify-content: space-between;
 }
 
 .experience-button {
-  padding: 8px 16px;
+  padding: var(--space-xs) var(--space-md);
   border-radius: var(--radius-full);
   font-size: 0.875rem;
   border: var(--border-thick) solid var(--color-gray-light);
@@ -546,7 +546,7 @@ const handleSubmit = async () => {
 .error-message {
   color: var(--ui-color-error-600);
   font-size: 0.875rem;
-  padding: 8px;
+  padding: var(--space-xs);
   background-color: var(--ui-color-error-100);
   border-radius: var(--radius-sm);
 }
@@ -554,15 +554,15 @@ const handleSubmit = async () => {
 .success-message {
   color: var(--ui-color-success-600);
   font-size: 0.875rem;
-  padding: 8px;
+  padding: var(--space-xs);
   background-color: var(--ui-color-success-50);
   border-radius: var(--radius-sm);
 }
 
 .button-group {
   display: flex;
-  gap: 12px;
-  padding-top: 16px;
+  gap: var(--space-sm);
+  padding-top: var(--space-md);
   margin-top: auto;
 }
 </style>

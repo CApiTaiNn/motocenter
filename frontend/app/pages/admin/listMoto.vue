@@ -291,7 +291,7 @@ watch(
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 3rem;
+  margin: var(--space-2xl);
 }
 
 .table-moto {
@@ -308,9 +308,9 @@ watch(
 .panel-header {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding-bottom: 0.75rem;
-  margin-bottom: 1rem;
+  gap: var(--space-xs);
+  padding-bottom: var(--space-sm);
+  margin-bottom: var(--space-md);
   border-bottom: var(--border-thin) solid var(--color-gray-light);
 }
 

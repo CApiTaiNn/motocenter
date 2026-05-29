@@ -111,7 +111,7 @@ const handlePostChange = () => {
 
 .postCard {
   width: 100%;
-  padding: 0.75rem 1.25rem;
+  padding: var(--space-sm) var(--space-lg);
   display: flex;
   gap: 1.5em;
   align-items: flex-start;
@@ -132,7 +132,7 @@ const handlePostChange = () => {
 .badges {
   display: flex;
   flex-direction: row;
-  gap: 1.5rem;
+  gap: var(--space-lg);
   align-items: center;
   margin-bottom: 1em;
   margin-top: 1em;

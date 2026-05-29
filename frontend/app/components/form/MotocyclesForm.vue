@@ -179,8 +179,8 @@ onMounted(() => {
 .form-container {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  padding: 1rem;
+  gap: var(--space-md);
+  padding: var(--space-md);
   width: 100%;
   max-width: 340px;
   border-radius: var(--radius-md);

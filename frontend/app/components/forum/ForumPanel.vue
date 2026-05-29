@@ -48,8 +48,8 @@ const handleFiltersChange = (payload: any) => {
 .drawer-section {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  padding: 0.5rem 0;
+  gap: var(--space-sm);
+  padding: var(--space-xs) 0;
 }
 
 .drawer-section-label {
@@ -58,14 +58,14 @@ const handleFiltersChange = (payload: any) => {
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--color-gray-mid);
-  padding-left: 0.25rem;
+  padding-left: var(--space-2xs);
   border-left: 3px solid var(--ui-primary);
 }
 
 .drawer-divider {
   border: 0;
   border-top: var(--border-thin) solid var(--color-gray-light);
-  margin: 1rem 0;
+  margin: var(--space-md) 0;
 }
 </style>
 

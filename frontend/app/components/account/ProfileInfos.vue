@@ -110,7 +110,7 @@ watch(
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 3rem;
+  padding: var(--space-2xl);
 
   overflow-y: auto;
 }
@@ -126,7 +126,7 @@ watch(
   font-weight: bold;
   color: var(--ui-color-error-500);
   background-color: var(--ui-color-error-50);
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--space-lg);
   overflow: hidden;
 }
 
@@ -138,7 +138,7 @@ watch(
 
 .user-info {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: var(--space-xl);
 }
 
 .pseudo {
@@ -154,7 +154,7 @@ watch(
 .info-item {
   display: flex;
   justify-content: space-between;
-  padding: 0.8rem 0;
+  padding: var(--space-sm) 0;
   border-bottom: var(--border-thin) solid var(--color-gray-light);
 }
 

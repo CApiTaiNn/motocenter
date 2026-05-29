@@ -85,14 +85,14 @@ const team = [
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
-  margin-top: 100px;
+  gap: var(--space-sm);
+  margin-top: var(--space-5xl);
 }
 
 .button-container {
   display: flex;
   justify-content: center;
-  margin: 40px 0;
+  margin: var(--space-2xl) 0;
 }
 
 .content {
@@ -103,17 +103,17 @@ const team = [
 
 .subtitle {
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: var(--space-2xl);
 }
 
 .section {
-  margin-bottom: 60px;
+  margin-bottom: var(--space-3xl);
 }
 
 .row {
   display: flex;
   align-items: center;
-  gap: 40px;
+  gap: var(--space-2xl);
 }
 
 .row img {
@@ -139,29 +139,29 @@ strong {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-gray-mid);
-  margin-bottom: 1.5rem;
-  padding-left: 0.5rem;
+  margin-bottom: var(--space-lg);
+  padding-left: var(--space-xs);
   border-left: 3px solid var(--ui-primary);
 }
 
 .team-block {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: var(--space-lg);
   flex: 1;
 }
 
 .team-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 0.75rem;
+  gap: var(--space-sm);
 }
 
 .team-card {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.5rem 0.75rem;
+  gap: var(--space-sm);
+  padding: var(--space-xs) var(--space-sm);
   border: var(--border-thin) solid var(--color-gray-light);
   border-radius: var(--radius-md);
   background-color: var(--background);

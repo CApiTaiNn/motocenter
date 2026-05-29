@@ -561,14 +561,14 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
 .container-form {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
-  margin-top: 6rem;
+  gap: var(--space-3xl);
+  margin-top: var(--space-5xl);
   justify-content: center;
 }
 
 .container-form h3 {
   text-align: center;
-  margin: 1.25rem;
+  margin: var(--space-lg);
 }
 
 /* Formulaire */
@@ -577,7 +577,7 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 1.5rem;
+  gap: var(--space-lg);
 }
 
 .form-hint {
@@ -589,11 +589,11 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
 /* Result tabs — centered segmented pill control */
 .result-tabs {
   display: flex;
-  gap: 0.25rem;
+  gap: var(--space-2xs);
   width: fit-content;
   max-width: 100%;
-  margin: 0 auto 1.5rem;
-  padding: 0.3rem;
+  margin: 0 auto var(--space-2xl);
+  padding: var(--space-2xs);
   background: var(--input-background);
   border-radius: var(--radius-full);
   flex-wrap: wrap;
@@ -601,7 +601,7 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
 }
 
 .result-tab {
-  padding: 0.5rem 1.5rem;
+  padding: var(--space-xs) var(--space-lg);
   background: transparent;
   border: none;
   border-radius: var(--radius-full);
@@ -631,7 +631,7 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
 /* Avis — both bikes' opinions side by side */
 .comments-grid {
   display: flex;
-  gap: 2rem;
+  gap: var(--space-xl);
   align-items: flex-start;
 }
 
@@ -640,12 +640,12 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: var(--space-sm);
 }
 
 .comments-pane-title {
   text-align: center;
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--space-xs);
 }
 
 @media (max-width: 1024px) {
@@ -658,7 +658,7 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
   color: var(--color-gray-mid);
   font-style: italic;
   text-align: center;
-  padding: 1rem 0;
+  padding: var(--space-md) 0;
 }
 
 @keyframes tab-fade {
@@ -669,19 +669,19 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
 .form {
   display: flex;
   justify-content: center;
-  gap: 2rem;
+  gap: var(--space-xl);
 }
 
 /* Résultats */
 .resultat-section {
-  scroll-margin-top: 6rem;
+  scroll-margin-top: var(--space-5xl);
 }
 
 /* Carrousel */
 .caroussel-container {
   display: flex;
   flex-direction: column;
-  gap: 5rem;
+  gap: var(--space-4xl);
   margin: 0 10%;
 }
 
@@ -692,8 +692,8 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
 /* Commentaires Display */
 .display-comment-container {
   display: flex;
-  gap: 2rem;
-  margin: 3rem 10%;
+  gap: var(--space-xl);
+  margin: var(--space-2xl) 10%;
   justify-content: center;
 }
 
@@ -702,7 +702,7 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
   flex: 1;
   border: var(--border-thin) solid var(--color-gray-light);
   border-radius: var(--radius-lg);
-  padding: 2rem;
+  padding: var(--space-xl);
   max-width: 50%;
   height: fit-content;
 }
@@ -710,7 +710,7 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
 .left-display-comment h4,
 .right-display-comment h4 {
   text-align: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--space-lg);
 }
 
 .left-display-comment p,
@@ -721,7 +721,7 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
 /* Commentaires Input */
 .input-comment-box {
   position: relative;
-  margin: 3rem 25%;
+  margin: var(--space-2xl) 25%;
   width: 50%;
   min-height: 25rem;
   border: var(--border-thin) solid var(--color-gray-mid);
@@ -734,7 +734,7 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
   justify-content: space-between;
   height: 100%;
   min-height: 25rem;
-  padding: 2rem;
+  padding: var(--space-xl);
 }
 
 .input-comment-container h4 {
@@ -747,8 +747,8 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
   justify-content: center;
   height: fit-content;
   min-height: 25rem;
-  padding: 2rem;
-  gap: 30px;
+  padding: var(--space-xl);
+  gap: var(--space-xl);
 }
 
 .input-posted-container h4 {
@@ -762,7 +762,7 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
 .comment-input {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: var(--space-md);
 }
 
 .need-connection {

@@ -27,8 +27,8 @@ import HeaderInfo from '../../components/global/HeaderInfo.vue'
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 50px;
-  margin-left: 20px;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-2xl);
+  margin-left: var(--space-lg);
 }
 </style>

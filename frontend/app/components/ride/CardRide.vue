@@ -335,11 +335,11 @@ onMounted(async () => {
 .card-content {
   position: relative;
   z-index: 2;
-  padding: 16px;
+  padding: var(--space-md);
   color: white;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-xs);
 }
 
 /* --- HEADER : TITRE & LIKE --- */
@@ -348,7 +348,7 @@ onMounted(async () => {
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: var(--space-sm);
   width: 100%;
 }
 
@@ -357,7 +357,7 @@ onMounted(async () => {
   flex-wrap: wrap;
   flex-direction: row;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-xs);
   min-width: 0;
   flex: 1;
 }
@@ -384,7 +384,7 @@ onMounted(async () => {
 .description {
   font-size: 0.9rem;
   opacity: 0.85;
-  margin: 4px 0 12px 0;
+  margin: var(--space-2xs) 0 var(--space-sm) 0;
   display: -webkit-box;
   line-clamp: 2;
   -webkit-line-clamp: 2;
@@ -395,8 +395,8 @@ onMounted(async () => {
 .info-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px 12px;
-  margin-bottom: 12px;
+  gap: var(--space-2xs) var(--space-sm);
+  margin-bottom: var(--space-sm);
 }
 
 /* Style partagé pour tous les badges d'info */
@@ -407,7 +407,7 @@ onMounted(async () => {
   border: none !important;
   box-shadow: none !important;
   padding-left: 0 !important;
-  padding-right: 12px !important;
+  padding-right: var(--space-sm) !important;
 }
 
 :deep(.invisible-background .pointer-events-none) {
@@ -420,8 +420,8 @@ onMounted(async () => {
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 10px;
-  padding-top: 12px;
+  gap: var(--space-sm);
+  padding-top: var(--space-sm);
   border-top: var(--border-thin) solid rgba(255, 255, 255, 0.1);
   font-size: 0.85rem;
 }
@@ -429,7 +429,7 @@ onMounted(async () => {
 .card-footer-item {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--space-sm);
 }
 
 .no-participants {
@@ -440,11 +440,11 @@ onMounted(async () => {
 
 .participants-list {
   background-color: rgba(255, 255, 255, 0.9);
-  padding: 4px 10px 4px 6px;
+  padding: var(--space-2xs) var(--space-sm) var(--space-2xs) var(--space-xs);
   border-radius: var(--radius-lg);
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-xs);
   color: var(--color-gray-dark);
 }
 

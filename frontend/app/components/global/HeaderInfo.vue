@@ -39,8 +39,8 @@ const props = defineProps<IProps>()
 }
 
 .subtitle {
-  padding: 2rem;
-  gap: 3rem;
+  padding: var(--space-xl);
+  gap: var(--space-2xl);
   width: 50%;
   margin: 0 auto;
 }

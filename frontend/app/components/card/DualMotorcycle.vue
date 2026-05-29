@@ -85,7 +85,7 @@ const isOpen = ref(true)
   align-items: end;
   justify-content: space-between;
   width: 100%;
-  gap: 1rem;
+  gap: var(--space-md);
 }
 
 .motorcycle-left,
@@ -99,7 +99,7 @@ const isOpen = ref(true)
   width: 100%;
   height: 150px;
   border: var(--border-thin) dashed var(--text-color);
-  padding: 1rem;
+  padding: var(--space-md);
   border-radius: var(--radius-sm);
   background-color: var(--background);
   z-index: var(--z-base);
@@ -123,8 +123,8 @@ const isOpen = ref(true)
   align-items: center;
   justify-content: center;
   width: 94%;
-  gap: 0.5rem;
-  padding: 20px 0.5rem;
+  gap: var(--space-xs);
+  padding: var(--space-lg) var(--space-xs);
   border-radius: 0 0 var(--radius-sm) var(--radius-sm);
   color: var(--background);
   background-color: var(--text-color);
@@ -143,8 +143,8 @@ const isOpen = ref(true)
   align-items: center;
   justify-content: center;
   width: 94%;
-  gap: 0.5rem;
-  padding: 20px 0.5rem;
+  gap: var(--space-xs);
+  padding: var(--space-lg) var(--space-xs);
   border-radius: var(--radius-sm) var(--radius-sm) 0 0;
   color: var(--background);
   background-color: var(--text-color);

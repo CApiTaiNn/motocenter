@@ -272,14 +272,14 @@ onMounted(async () => {
 
 .comment-item {
   display: flex;
-  gap: 1rem;
-  margin-bottom: 2rem;
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl);
 }
 
 .comment-content {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: var(--space-xs);
   flex: 1;
 }
 
@@ -291,7 +291,7 @@ onMounted(async () => {
 }
 
 .comment-header {
-  gap: 0.5rem;
+  gap: var(--space-xs);
 }
 
 .comment-text {
@@ -300,12 +300,12 @@ onMounted(async () => {
 }
 
 .comment-actions {
-  gap: 1.5rem;
-  margin-top: 0.25rem;
+  gap: var(--space-lg);
+  margin-top: var(--space-2xs);
 }
 
 .action-button {
-  gap: 0.4rem;
+  gap: var(--space-xs);
 }
 
 .icon {

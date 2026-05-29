@@ -42,7 +42,7 @@ const props = defineProps<{
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-xs);
 }
 
 h6,
@@ -55,6 +55,6 @@ p {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: var(--space-xs);
 }
 </style>

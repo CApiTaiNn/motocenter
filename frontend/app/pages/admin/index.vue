@@ -90,19 +90,19 @@ onMounted(() => {
 <style scoped>
 h3 {
   text-align: center;
-  margin: 20px;
+  margin: var(--space-lg);
 }
 
 .admin-container {
   max-width: 80rem;
-  margin: 4rem auto;
-  padding: 0 1.5rem;
+  margin: var(--space-3xl) auto;
+  padding: 0 var(--space-lg);
 }
 
 .stats-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 1rem;
+  gap: var(--space-md);
 }
 
 @media (min-width: 768px) {
@@ -115,8 +115,8 @@ h3 {
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  padding: 1rem 1.25rem;
+  gap: var(--space-xs);
+  padding: var(--space-md) var(--space-lg);
   border-radius: var(--radius-md);
   border: var(--border-thin) solid var(--color-gray-light);
   border-left: 4px solid var(--ui-primary);

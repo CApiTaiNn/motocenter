@@ -119,13 +119,13 @@ watch(
   align-items: center;
   justify-content: center;
 
-  margin: 5rem;
+  margin: var(--space-4xl);
 }
 
 .error-message {
   color: red;
   font-size: 0.8em;
-  margin: 1rem;
+  margin: var(--space-md);
 }
 
 .new-account {

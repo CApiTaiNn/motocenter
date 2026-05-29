@@ -20,7 +20,7 @@ const props = defineProps<{
   justify-content: center;
   text-align: center;
 
-  gap: 1rem;
+  gap: var(--space-md);
 
   border: solid var(--border-thick) var(--border-gray);
   border-radius: var(--radius-md);

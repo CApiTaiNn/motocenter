@@ -239,22 +239,22 @@ onMounted(async () => {
 }
 
 .title-row {
-  gap: 0.75rem;
-  margin: 1rem 0;
+  gap: var(--space-sm);
+  margin: var(--space-md) 0;
 }
 
 .meta-bar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.75rem 1rem;
+  gap: var(--space-sm) var(--space-md);
   margin: 1.5em 0 1em;
 }
 
 .meta-item {
   display: flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: var(--space-2xs);
   color: var(--color-gray-mid);
   font-size: 0.95rem;
 }
@@ -274,8 +274,8 @@ onMounted(async () => {
   display: flex;
   flex-direction: row;
   align-items: start;
-  gap: 3rem;
-  margin: 2rem 5rem;
+  gap: var(--space-2xl);
+  margin: var(--space-xl) var(--space-4xl);
 }
 
 .post-filters > div:first-child {

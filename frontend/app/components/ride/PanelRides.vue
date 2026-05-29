@@ -50,8 +50,8 @@ const isSidebarOpen = ref(false) // État du volet latéral (ouvert/fermé)
 .ride-container {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  padding-bottom: 20px;
+  gap: var(--space-lg);
+  padding-bottom: var(--space-lg);
 }
 
 .ride-item {
@@ -82,7 +82,7 @@ const isSidebarOpen = ref(false) // État du volet latéral (ouvert/fermé)
 
 .sidebar-content {
   flex: 1;
-  padding: 20px;
+  padding: var(--space-lg);
   overflow-y: auto;
   font-family: sans-serif;
 }
@@ -90,7 +90,7 @@ const isSidebarOpen = ref(false) // État du volet latéral (ouvert/fermé)
 .sidebar-title {
   font-size: 1.125rem;
   font-weight: 700;
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-md);
   color: var(--text-color);
 }
 </style>

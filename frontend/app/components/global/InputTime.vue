@@ -61,11 +61,11 @@ const selectTime = (h: number) => {
 
 <style scoped>
 .hours-popover-container {
-  padding: 0.5rem;
+  padding: var(--space-xs);
   height: 12rem;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: var(--space-2xs);
 }
 </style>

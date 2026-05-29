@@ -220,7 +220,7 @@ onMounted(async () => {
 main {
   display: flex;
   flex-direction: column;
-  gap: 10rem;
+  gap: var(--space-5xl);
 }
 
 section {
@@ -230,7 +230,7 @@ section {
 .basic-section {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: var(--space-xl);
 }
 
 .hero-header {
@@ -259,7 +259,7 @@ section {
 .stats-group {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: var(--space-md);
 }
 
 .stats-group-label {
@@ -279,7 +279,7 @@ section {
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 1rem;
+  gap: var(--space-md);
 }
 
 .hero-images {
@@ -287,7 +287,7 @@ section {
   flex-direction: row;
   justify-content: center;
   align-items: flex-end;
-  gap: 1rem;
+  gap: var(--space-md);
   position: relative;
 }
 
@@ -313,7 +313,7 @@ section {
 .row {
   display: flex;
   flex-direction: row;
-  gap: 3.5rem;
+  gap: var(--space-3xl);
 
   margin: 0 5%;
 }
@@ -321,7 +321,7 @@ section {
 .column {
   display: flex;
   flex-direction: column;
-  gap: 3.5rem;
+  gap: var(--space-3xl);
 }
 
 .justify-content-center {
@@ -346,9 +346,9 @@ section {
   border: solid var(--border-thick) var(--border-gray);
 
   margin: 0 20%;
-  padding: 4rem;
+  padding: var(--space-3xl);
 
-  gap: 3rem;
+  gap: var(--space-2xl);
   overflow: hidden;
 }
 
@@ -364,7 +364,7 @@ section {
 
 :deep(.button) {
   font-size: small;
-  padding: 10px 40px;
+  padding: var(--space-sm) var(--space-2xl);
 }
 
 @keyframes slide-left-to-right {

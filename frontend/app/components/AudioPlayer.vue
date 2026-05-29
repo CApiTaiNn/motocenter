@@ -41,9 +41,9 @@ audio.addEventListener('loadedmetadata', () => {
 .audio-container {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: var(--space-lg);
   width: 200px;
-  padding: 10px;
+  padding: var(--space-sm);
   border-radius: var(--radius-full);
   border: var(--border-hairline) solid #364153;
 }

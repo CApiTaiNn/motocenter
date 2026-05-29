@@ -385,7 +385,7 @@ async function removeMotorcycle() {
 .form-div {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: var(--space-md);
 }
 
 .header-cardMoto {
