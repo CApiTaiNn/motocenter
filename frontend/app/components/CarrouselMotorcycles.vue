@@ -111,7 +111,6 @@ hr {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: -5px;
 }
 
 .no-select {

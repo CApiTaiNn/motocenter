@@ -1203,6 +1203,8 @@ watch(
   border-radius: 50% !important;
   width: 12px !important;
   height: 12px !important;
+  /* Centrage de la poignée sur le sommet : Leaflet réserve `transform` pour
+     positionner le marqueur, donc on centre via marge négative (= -taille/2). */
   margin-left: -6px !important;
   margin-top: -6px !important;
 }
