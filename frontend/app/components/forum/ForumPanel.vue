@@ -11,26 +11,33 @@ const handleFiltersChange = (payload: any) => {
 
 <template>
   <div>
-    <div id="dekstop-filters">
+    <div id="dekstop-filters" class="max-lg:hidden">
       <UCard class="border-[0.5px] border-(--border-gray) filters">
         <FilterContent @change="handleFiltersChange" />
       </UCard>
     </div>
-    <div id="mobile-filters">
+    <div id="mobile-filters" class="lg:hidden">
       <USlideover side="left">
         <UButton
           color="neutral"
           variant="subtle"
-          class="button-mobile"
+          class="max-lg:fixed max-lg:left-0 max-lg:bottom-1/2 max-lg:-translate-y-1/2"
           icon="i-lucide-arrow-right"
           @click="isOpen = true"
         />
         <template #body>
-          <FilterContent @change="handleFiltersChange" />
-          <div class="panel-mobile">
-            <ForumMyPosts />
-            <ForumMyFavoritesPost />
-          </div>
+          <section class="drawer-section">
+            <h5 class="drawer-section-label">Filtres</h5>
+            <FilterContent @change="handleFiltersChange" />
+          </section>
+          <hr class="drawer-divider" />
+          <section class="drawer-section">
+            <h5 class="drawer-section-label">Mon activité</h5>
+            <div class="panel-mobile flex flex-col gap-[0.5em]">
+              <ForumMyPosts />
+              <ForumMyFavoritesPost />
+            </div>
+          </section>
         </template>
       </USlideover>
     </div>
@@ -38,34 +45,27 @@ const handleFiltersChange = (payload: any) => {
 </template>
 
 <style scoped>
-/** Style version mobile */
-@media (max-width: 1024px) {
-  #mobile-filter {
-    display: block;
-  }
-
-  #dekstop-filters {
-    display: none;
-  }
-
-  .button-mobile {
-    position: fixed;
-    left: 0;
-    bottom: 50%;
-    transform: translateY(-50%);
-  }
-
-  .panel-mobile {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5em;
-  }
+.drawer-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
 }
 
-/** Style version PC */
-@media (min-width: 1024px) {
-  #mobile-filters {
-    display: none;
-  }
+.drawer-section-label {
+  font-family: 'Krona One', sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-gray-mid);
+  padding-left: 0.25rem;
+  border-left: 3px solid var(--ui-primary);
+}
+
+.drawer-divider {
+  border: 0;
+  border-top: var(--border-thin) solid var(--color-gray-light);
+  margin: 1rem 0;
 }
 </style>
+

@@ -8,11 +8,11 @@ const props = defineProps<IProps>()
 </script>
 
 <template>
-  <div class="header-container">
+  <div class="header-container max-lg:min-h-[50vh]!">
     <div class="centered">
       <slot name="title"> </slot>
     </div>
-    <div class="centered subtitle">
+    <div class="centered subtitle max-lg:w-[95%]!">
       <slot name="subtitle"> </slot>
       <ButtonArrow :scroll-to-element-id="props.scrollToElementId" />
     </div>
@@ -43,15 +43,5 @@ const props = defineProps<IProps>()
   gap: 3rem;
   width: 50%;
   margin: 0 auto;
-}
-
-@media (max-width: 1024px) {
-  .subtitle {
-    width: 95%;
-  }
-
-  .header-container {
-    min-height: 50vh;
-  }
 }
 </style>

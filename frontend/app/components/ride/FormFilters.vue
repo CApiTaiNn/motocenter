@@ -103,7 +103,7 @@ const resetFilter = () => {
 </script>
 
 <template>
-  <div class="filters-container">
+  <div class="filters-container max-[480px]:w-[95%]! max-[480px]:min-w-0! max-[480px]:h-auto! max-[480px]:max-h-[80vh]! max-[480px]:left-1/2 max-[480px]:-translate-x-1/2 max-[480px]:m-0!">
     <h3>Filtres</h3>
     <div class="container-fields">
       <UFormField label="Titre de la balade">
@@ -286,28 +286,15 @@ h3 {
   position: absolute;
   top: 60px;
   bottom: 20px;
-  z-index: 2000;
-  border-radius: 7px;
-  border: 1px solid var(--border-gray);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: var(--z-modal);
+  border-radius: var(--radius-sm);
+  border: var(--border-thin) solid var(--border-gray);
+  box-shadow: var(--shadow-md);
   padding: 1rem;
   overflow-y: auto;
   transition:
     left 0.3s,
     transform 0.3s,
     width 0.3s;
-}
-
-@media (max-width: 480px) {
-  .filters-container {
-    width: 95%;
-    min-width: 0;
-    height: auto;
-    max-height: 80vh;
-
-    left: 50%;
-    transform: translateX(-50%);
-    margin: 0;
-  }
 }
 </style>

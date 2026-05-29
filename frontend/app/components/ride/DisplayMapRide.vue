@@ -800,7 +800,7 @@ watch(
         icon="i-lucide-filter"
         color="primary"
         variant="solid"
-        class="cursor-pointer"
+        class="cursor-pointer text-white!"
         @click="handleFilters"
       >
         Filtres
@@ -892,7 +892,7 @@ watch(
   position: absolute;
   top: 25px;
   right: 15px;
-  z-index: 1010;
+  z-index: var(--z-overlay);
   pointer-events: auto;
 }
 
@@ -900,7 +900,7 @@ watch(
   position: absolute;
   bottom: 25px;
   right: 15px;
-  z-index: 1010;
+  z-index: var(--z-overlay);
   pointer-events: auto;
 }
 
@@ -920,7 +920,7 @@ watch(
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 2000;
+  z-index: var(--z-modal);
 }
 
 .loader-content {
@@ -973,7 +973,7 @@ watch(
   bottom: 0 !important;
   width: 100vw !important;
   height: 100dvh !important;
-  z-index: 99999 !important;
+  z-index: var(--z-top) !important;
   margin: 0 !important;
   border-radius: 0 !important;
 }
@@ -984,7 +984,7 @@ watch(
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 1;
+  z-index: var(--z-base);
   touch-action: none;
 }
 
@@ -1004,7 +1004,7 @@ watch(
 
 .filters > * {
   pointer-events: auto;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-md);
 }
 
 /* --- LEAFLET UI CUSTOM --- */
@@ -1045,17 +1045,17 @@ watch(
   bottom: 15px;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 2000;
+  z-index: var(--z-modal);
   background-color: var(--background);
   color: var(--text-color);
   padding: 10px 20px;
-  border-radius: 99px;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-xl);
   display: flex;
   align-items: center;
   font-size: 0.9rem;
   font-weight: 500;
-  border: 1px solid var(--ui-primary);
+  border: var(--border-thin) solid var(--ui-primary);
   backdrop-filter: blur(8px);
 }
 
@@ -1077,13 +1077,13 @@ watch(
 
 :deep(.leaflet-draw-toolbar) {
   margin-top: 0 !important;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  border-radius: 8px !important;
+  box-shadow: var(--shadow-lg);
+  border-radius: var(--radius-sm) !important;
   overflow: hidden;
   background: rgba(0, 0, 0, 0.25) !important;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 0.25px solid rgba(0, 0, 0, 0.25) !important;
+  border: var(--border-hairline) solid rgba(0, 0, 0, 0.25) !important;
 }
 
 :deep(.leaflet-draw-toolbar a) {
@@ -1095,7 +1095,7 @@ watch(
   align-items: center;
   justify-content: center;
   color: var(--text-color) !important;
-  border-bottom: 0.25px solid rgba(0, 0, 0, 0.1) !important;
+  border-bottom: var(--border-hairline) solid rgba(0, 0, 0, 0.1) !important;
   transition: all 0.2s ease;
 }
 
@@ -1159,7 +1159,7 @@ watch(
   height: 32px !important;
   font-size: 11px !important;
   font-weight: 500 !important;
-  border-left: 1px solid var(--border-gray) !important;
+  border-left: var(--border-thin) solid var(--border-gray) !important;
 }
 
 :deep(.leaflet-draw-actions a:hover) {
@@ -1172,9 +1172,9 @@ watch(
 /* Bulle qui suit la souris pendant le dessin */
 :deep(.leaflet-draw-tooltip) {
   background: var(--background) !important;
-  border: 1px solid var(--border-gray) !important;
+  border: var(--border-thin) solid var(--border-gray) !important;
   color: var(--text-color) !important;
-  border-radius: 6px !important;
+  border-radius: var(--radius-sm) !important;
   padding: 5px 10px !important;
   font-size: 11px !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
@@ -1199,7 +1199,7 @@ watch(
 /* --- ÉLÉMENTS DE DESSIN --- */
 :deep(.leaflet-editing-icon) {
   background: var(--circle-draw-line) !important;
-  border: 2px solid var(--circle-draw-line-outline) !important;
+  border: var(--border-thick) solid var(--circle-draw-line-outline) !important;
   border-radius: 50% !important;
   width: 12px !important;
   height: 12px !important;

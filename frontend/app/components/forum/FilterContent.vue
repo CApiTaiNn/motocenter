@@ -208,7 +208,7 @@ onMounted(async () => {
 
 .background-selected {
   background-color: rgba(109, 100, 100, 0.325);
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   padding-right: 0.3em;
   padding-left: 0.3em;
   width: fit-content;
@@ -216,11 +216,11 @@ onMounted(async () => {
 
 .sub-filter:hover {
   background-color: rgba(109, 100, 100, 0.097);
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   width: fit-content;
 }
 
 .custom-border {
-  border: 0.5px solid var(--border-gray);
+  border: var(--border-hairline) solid var(--border-gray);
 }
 </style>

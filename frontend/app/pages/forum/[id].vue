@@ -139,60 +139,51 @@ onMounted(async () => {
         <p>Échanger librement sur votre sujet favori en lien avec la moto.</p>
       </template>
     </HeaderInfo>
-    <div id="post" class="post-filters">
+    <div id="post" class="post-filters max-lg:m-[0.5em]! max-lg:gap-0!">
       <div>
         <ForumPanel />
       </div>
       <USkeleton v-if="isLoading === false" class="size-20 rounded-full" />
       <div v-else>
-        <div class="icon-and-text title-mobile-version">
+        <div class="icon-and-text title-mobile-version title-row">
           <UAvatar
             :src="post?.user.image"
             size="3xl"
             loading="lazy"
             class="margin-2"
           />
-          <h2>{{ post?.title }}</h2>
+          <h2 class="flex-1">{{ post?.title }}</h2>
+          <UButton
+            :icon="isSolidStar ? 'i-heroicons-star-solid' : 'i-heroicons-star'"
+            color="neutral"
+            variant="ghost"
+            size="xl"
+            :aria-label="isSolidStar ? 'Retirer des favoris' : 'Ajouter aux favoris'"
+            class="cursor-pointer text-(--ui-primary)"
+            @click="handleAddFavorite"
+          />
         </div>
         <div>
-          <div class="grid margin-1_5">
-            <div>
-              <UBadge size="xl" class="margin-2">{{ post?.brand.name }}</UBadge>
-              <UBadge size="xl">{{ post?.category.name }}</UBadge>
+          <div class="meta-bar">
+            <UBadge size="lg">{{ post?.brand.name }}</UBadge>
+            <UBadge size="lg" variant="subtle">{{ post?.category.name }}</UBadge>
+            <span class="meta-dot" aria-hidden="true">·</span>
+            <div class="meta-item">
+              <UIcon name="i-lucide-messages-square" class="size-5" />
+              <span>{{ responses.length || 0 }} {{ responses.length > 1 ? 'réponses' : 'réponse' }}</span>
             </div>
-            <div class="icon-and-text right">
-              <UIcon class="size-7 margin-2" name="i-lucide-messages-square" />
-              <p>
-                {{ responses.length || 0 }}
-                {{ responses.length > 1 ? 'réponses' : 'réponse' }}
-              </p>
+            <div class="meta-item">
+              <UIcon name="i-lucide-eye" class="size-5" />
+              <span>{{ post?.views }} vues</span>
             </div>
-            <p>
-              Par {{ post?.user.pseudo }},
-              {{ formatTimeAgo(post?.createdAt) }}
-            </p>
-            <div class="icon-and-text right">
-              <UIcon class="size-7 margin-2" name="i-lucide-eye" />
-              <p>{{ post?.views }} vues</p>
-            </div>
-          </div>
-          <div
-            class="icon-and-text margin-bottom-1 margin-top-0_5 put-in-favorite"
-            @click="handleAddFavorite"
-          >
-            <UIcon
-              :name="
-                isSolidStar ? 'i-heroicons-star-solid' : 'i-heroicons-star'
-              "
-              class="size-7"
-            />
-            <p>Mettre ce post en favori</p>
+            <span class="meta-dot" aria-hidden="true">·</span>
+            <span class="meta-author">Par {{ post?.user.pseudo }}, {{ formatTimeAgo(post?.createdAt) }}</span>
           </div>
           <img
             :src="`${post?.image}`"
             :alt="`Image du post ${post?.title} par ${post?.user.pseudo}`"
             :title="`Image du post ${post?.title} par ${post?.user.pseudo}`"
-            class="img margin-1_5 margin-bottom-1"
+            class="img margin-1_5 margin-bottom-1 w-full lg:w-3/4"
           />
         </div>
         <h4 class="margin-bottom-1">{{ post?.content }}</h4>
@@ -203,7 +194,7 @@ onMounted(async () => {
           <UButton
             :disabled="newReponseOfPost === ''"
             size="sm"
-            class="button-comment"
+            class="button-comment w-3/4 lg:w-1/4"
             @click="handleAddComment"
           >
             Ajouter mon commentaire</UButton
@@ -223,39 +214,6 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-/** Style version mobile */
-@media (max-width: 1024px) {
-  #post {
-    margin: 0.5em;
-    gap: 0;
-  }
-
-  .title-mobile-version {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-  }
-
-  .img {
-    width: 100%;
-  }
-
-  .button-comment {
-    width: 75%;
-  }
-}
-
-/** Style version PC */
-@media (min-width: 1024px) {
-  .img {
-    width: 75%;
-  }
-
-  .button-comment {
-    width: 25%;
-  }
-}
-
 .margin-2 {
   margin-right: 0.5em;
 }
@@ -278,6 +236,38 @@ onMounted(async () => {
   display: flex;
   flex-direction: row;
   align-items: center;
+}
+
+.title-row {
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+
+.meta-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+  margin: 1.5em 0 1em;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--color-gray-mid);
+  font-size: 0.95rem;
+}
+
+.meta-author {
+  color: var(--color-gray-mid);
+  font-size: 0.95rem;
+}
+
+.meta-dot {
+  color: var(--color-gray-light);
+  font-size: 1.25rem;
+  line-height: 1;
 }
 
 .post-filters {

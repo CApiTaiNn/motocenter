@@ -20,10 +20,10 @@ const appName: string = useRuntimeConfig().public.appName
 .header {
   position: sticky;
   top: 0;
-  z-index: 50;
+  z-index: var(--z-sticky);
   background: color-mix(in srgb, var(--ui-bg) 80%, transparent);
   backdrop-filter: blur(16px);
-  border-bottom: 1px solid color-mix(in srgb, var(--ui-border) 60%, transparent);
+  border-bottom: var(--border-thin) solid color-mix(in srgb, var(--ui-border) 60%, transparent);
 }
 
 .header-inner {
@@ -58,7 +58,7 @@ const appName: string = useRuntimeConfig().public.appName
   text-transform: uppercase;
   color: var(--ui-primary);
   background: color-mix(in srgb, var(--ui-primary) 12%, transparent);
-  border: 1px solid color-mix(in srgb, var(--ui-primary) 30%, transparent);
+  border: var(--border-thin) solid color-mix(in srgb, var(--ui-primary) 30%, transparent);
   padding: 2px 7px;
   border-radius: 4px;
 }

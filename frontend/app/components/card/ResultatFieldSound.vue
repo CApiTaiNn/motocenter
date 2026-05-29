@@ -10,7 +10,7 @@ const props = defineProps<{
 
 <template>
   <div class="resultat">
-    <div class="container-row">
+    <div class="container-row max-lg:w-[95%]! max-lg:gap-[10px]!">
       <div class="left">
         <AudioPlayer v-if="props.firstValue" :src="props.firstValue" />
         <p v-else>Pas d'audio</p>
@@ -50,12 +50,5 @@ audio {
   justify-content: center;
   align-items: center;
   width: 100%;
-}
-
-@media (max-width: 1024px) {
-  .container-row {
-    width: 95%;
-    gap: 10px;
-  }
 }
 </style>

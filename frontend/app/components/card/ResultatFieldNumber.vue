@@ -115,19 +115,19 @@ function tradFieldName(fieldName: string) {
 <template>
   <div class="resultat">
     <p class="p-mobile">{{ tradFieldName(props.fieldName) }}</p>
-    <div class="container-row">
-      <div class="left">
+    <div class="container-row max-lg:flex-col! max-lg:w-[95%]! max-lg:gap-2!">
+      <div class="left max-lg:flex-row-reverse! max-lg:gap-[10px]">
         <count-up
           :end-val="parseField(props.firstValue).value"
           :options="countUpOptions(props.firstValue)"
         />
-        <div class="bar-container">
-          <span class="bar-value" :style="{ width: firstPercent + '%' }"></span>
+        <div class="bar-container max-lg:h-[10px]! max-lg:w-[70%]!">
+          <span class="bar-value max-lg:right-auto! max-lg:left-0 max-lg:[transform:rotateY(180deg)]" :style="{ width: firstPercent + '%' }"></span>
           <span class="bar-background"></span>
         </div>
       </div>
-      <div class="right">
-        <div class="bar-container">
+      <div class="right max-lg:gap-[10px]">
+        <div class="bar-container max-lg:h-[10px]! max-lg:w-[70%]!">
           <span
             class="bar-value"
             :style="{ width: secondPercent + '%' }"
@@ -184,17 +184,17 @@ h3 {
   left: 0;
   height: 100%;
   width: 100%;
-  background-color: #d7d7d7;
-  border-radius: 5px;
+  background-color: var(--color-track-bg);
+  border-radius: var(--radius-sm);
 }
 
 .bar-value {
   position: absolute;
   top: 0;
   height: 100%;
-  background: linear-gradient(90deg, #ff0000, #990000);
-  border-radius: 5px;
-  z-index: 1;
+  background: var(--gradient-primary);
+  border-radius: var(--radius-sm);
+  z-index: var(--z-base);
   animation: slide-in 2s ease-in-out;
 }
 
@@ -210,34 +210,6 @@ h3 {
 @keyframes slide-in {
   from {
     width: 0;
-  }
-}
-
-@media (max-width: 1024px) {
-  .container-row {
-    flex-direction: column;
-    width: 95%;
-    gap: 8px;
-  }
-
-  .left {
-    flex-direction: row-reverse;
-    gap: 10px;
-  }
-
-  .right {
-    gap: 10px;
-  }
-
-  .left .bar-value {
-    right: auto;
-    left: 0;
-    transform: rotateY(180deg);
-  }
-
-  .bar-container {
-    height: 10px;
-    width: 70%;
   }
 }
 </style>

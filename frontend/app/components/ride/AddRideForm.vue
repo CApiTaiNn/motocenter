@@ -5,7 +5,7 @@ import {
   type IValueCommuneSelect,
   type IValueForm
 } from '~/types/ride'
-import DisplayMapRide from './DisplayMapRide.vue'
+import RideEditorMap from './RideEditorMap.vue'
 import * as turf from '@turf/turf'
 import { useAuth } from '~/composables/useAuth.js'
 import { Time, CalendarDate } from '@internationalized/date'
@@ -46,6 +46,13 @@ const rideTypeOptions = Object.values(RideType).map((type: string) => ({
 
 const listCommunes = ref<IValueCommuneSelect[]>([])
 const isMobile = useMediaQuery('(max-width: 1023px)')
+
+const steps = [
+  { label: 'Infos', description: 'Titre, description, type' },
+  { label: 'Trajet', description: 'Villes de départ et arrivée' },
+  { label: 'Détails', description: 'Image et événement' }
+] as const
+const currentStep = ref(0) // 0-indexed
 
 const stateForm = reactive<IValueForm>({
   title: '',
@@ -376,6 +383,29 @@ async function validate(data: Partial<typeof stateForm>) {
   return []
 }
 
+const canAdvanceStep = computed(() => {
+  if (currentStep.value === 0) {
+    return Boolean(stateForm.title?.length && stateForm.rideType?.length)
+  }
+  if (currentStep.value === 1) {
+    return Boolean(
+      stateForm.startTown?.label?.length &&
+        stateForm.endTown?.label?.length &&
+        stateForm.geom
+    )
+  }
+  return true
+})
+
+function nextStep() {
+  if (!canAdvanceStep.value) return
+  if (currentStep.value < steps.length - 1) currentStep.value += 1
+}
+
+function prevStep() {
+  if (currentStep.value > 0) currentStep.value -= 1
+}
+
 onMounted(async () => {
   // Si le paramètre est présent dans l'URL on scroll
   if (route.query.scroll === 'true') {
@@ -519,14 +549,14 @@ watch(
 )
 </script>
 <template>
-  <div id="container-form" class="container-form">
+  <div id="container-form" class="container-form md:p-8!">
     <UForm
-      class="form-wrapper"
+      class="form-wrapper lg:flex-row! lg:flex-wrap"
       :state="stateForm"
       :validate="validate"
       @submit="onSubmit"
     >
-      <UContainer class="column-info flex flex-col space-y-6">
+      <UContainer class="column-info flex flex-col space-y-6 lg:flex-1 lg:order-1 lg:w-1/2">
         <header class="form-header">
           <UButton
             to="/ride?scroll=true"
@@ -536,39 +566,75 @@ watch(
             label="Retour"
           />
           <h3 class="text-xl font-bold mt-2">Nouvelle balade</h3>
-          <p v-if="!isMobile" class="text-gray-500 text-sm mt-1">
+        </header>
+
+        <nav class="stepper" aria-label="Étapes de création">
+          <ol class="stepper-list">
+            <li
+              v-for="(step, idx) in steps"
+              :key="step.label"
+              :class="['stepper-item', {
+                active: currentStep === idx,
+                done: currentStep > idx
+              }]"
+            >
+              <span class="stepper-bullet">
+                <UIcon v-if="currentStep > idx" name="i-lucide-check" class="size-4" />
+                <span v-else>{{ idx + 1 }}</span>
+              </span>
+              <span class="stepper-text">
+                <span class="stepper-label">{{ step.label }}</span>
+                <span class="stepper-description">{{ step.description }}</span>
+              </span>
+            </li>
+          </ol>
+        </nav>
+
+        <div v-show="currentStep === 0" class="step-panel">
+          <UFormField label="Titre de la balade" name="title" required>
+            <UInput
+              v-model="stateForm.title"
+              class="w-full"
+              placeholder="Entrez un titre..."
+              size="xl"
+            />
+          </UFormField>
+
+          <UFormField label="Description de la balade" name="description">
+            <UTextarea
+              v-model="stateForm.description"
+              class="w-full"
+              placeholder="Entrez une description..."
+              size="xl"
+              :rows="4"
+            />
+          </UFormField>
+
+          <UFormField label="Type de la balade" name="rideType" required>
+            <USelect
+              v-model="stateForm.rideType"
+              class="w-full"
+              :items="rideTypeOptions"
+              placeholder="Sélectionnez le type..."
+              size="xl"
+            />
+          </UFormField>
+        </div>
+
+        <div v-show="currentStep === 1" class="step-panel">
+          <p v-if="!isMobile" class="text-gray-500 text-sm">
             Tracez à la main avec
             <UIcon name="i-lucide-pen" class="size-4 text-primary" /> ou
             <strong class="text-primary">choisissez deux villes</strong> puis
             calculer l'itinéraire.
           </p>
-          <p v-else>
+          <p v-else class="text-gray-500 text-sm">
             Tracez une balade en
             <strong class="text-primary">choisissant deux villes</strong> puis
             calculer l'itinéraire.
           </p>
-        </header>
 
-        <UFormField label="Titre de la balade" name="title" required>
-          <UInput
-            v-model="stateForm.title"
-            class="w-full"
-            placeholder="Entrez un titre..."
-            size="xl"
-          />
-        </UFormField>
-
-        <UFormField label="Description de la balade" name="description">
-          <UTextarea
-            v-model="stateForm.description"
-            class="w-full"
-            placeholder="Entrez une description..."
-            size="xl"
-            :rows="4"
-          />
-        </UFormField>
-
-        <div class="row-container">
+          <div class="row-container sm:grid-cols-2!">
           <div class="flex flex-col gap-2">
             <UFormField label="Ville de départ" name="startTown" required>
               <USelectMenu
@@ -633,65 +699,82 @@ watch(
           </div>
         </div>
 
-        <div class="flex justify-end">
+          <div class="flex justify-end">
+            <UButton
+              icon="i-lucide-navigation"
+              color="neutral"
+              variant="subtle"
+              :loading="isMapLoading"
+              :disabled="!stateForm.startTown?.value || !stateForm.endTown?.value"
+              class="w-full sm:w-fit justify-center cursor-pointer"
+              @click="calculateRouteFromCities"
+            >
+              Calculer le tracé GPS
+            </UButton>
+          </div>
+        </div>
+
+        <div v-show="currentStep === 2" class="step-panel">
+          <UFormField label="Image de la balade" name="picture" required>
+            <div class="card-image">
+              <UFileUpload v-model="stateForm.picture" class="w-full h-full" />
+            </div>
+          </UFormField>
+
+          <UFormField name="groupRide" required>
+            <div class="switch-container">
+              <USwitch v-model="stateForm.isEvent" />
+              <p>Créer une balade groupée</p>
+            </div>
+          </UFormField>
+
+          <div v-if="stateForm.isEvent" class="row-container sm:grid-cols-2!">
+            <UFormField label="Date" required>
+              <InputDate
+                v-model="stateForm.dateEvent"
+                class="w-full"
+                :min-value="
+                  new CalendarDate(
+                    now.getFullYear(),
+                    now.getMonth() + 1,
+                    now.getDate()
+                  )
+                "
+              />
+            </UFormField>
+
+            <UFormField label="Heure" required>
+              <InputTime v-model="stateForm.hourEvent" class="w-full" />
+            </UFormField>
+          </div>
+        </div>
+
+        <div class="step-nav">
           <UButton
-            icon="i-lucide-navigation"
+            v-if="currentStep > 0"
+            type="button"
             color="neutral"
-            variant="subtle"
-            :loading="isMapLoading"
-            :disabled="!stateForm.startTown?.value || !stateForm.endTown?.value"
-            class="w-full sm:w-fit justify-center cursor-pointer"
-            @click="calculateRouteFromCities"
-          >
-            Calculer le tracé GPS
-          </UButton>
-        </div>
-
-        <UFormField label="Type de la balade" name="rideType" required>
-          <USelect
-            v-model="stateForm.rideType"
-            class="w-full"
-            :items="rideTypeOptions"
-            placeholder="Sélectionnez le type..."
-            size="xl"
+            variant="ghost"
+            icon="i-lucide-chevron-left"
+            label="Précédent"
+            class="cursor-pointer"
+            @click="prevStep"
           />
-        </UFormField>
-
-        <UFormField name="groupRide" required>
-          <div class="switch-container">
-            <USwitch v-model="stateForm.isEvent" />
-            <p>Créer une balade groupée</p>
-          </div>
-        </UFormField>
-
-        <div v-if="stateForm.isEvent" class="row-container">
-          <UFormField label="Date" required>
-            <InputDate
-              v-model="stateForm.dateEvent"
-              class="w-full"
-              :min-value="
-                new CalendarDate(
-                  now.getFullYear(),
-                  now.getMonth() + 1,
-                  now.getDate()
-                )
-              "
-            />
-          </UFormField>
-
-          <UFormField label="Heure" required>
-            <InputTime v-model="stateForm.hourEvent" class="w-full" />
-          </UFormField>
+          <span class="step-nav-spacer" />
+          <UButton
+            v-if="currentStep < steps.length - 1"
+            type="button"
+            color="primary"
+            trailing-icon="i-lucide-chevron-right"
+            label="Suivant"
+            :disabled="!canAdvanceStep"
+            class="cursor-pointer text-white!"
+            @click="nextStep"
+          />
         </div>
-
-        <UFormField label="Image de la balade" name="picture" required>
-          <div class="card-image">
-            <UFileUpload v-model="stateForm.picture" class="w-full h-full" />
-          </div>
-        </UFormField>
       </UContainer>
 
-      <UContainer class="column-map flex flex-col">
+      <UContainer class="column-map flex flex-col lg:flex-1 lg:order-2 lg:w-1/2">
         <UFormField
           label="Tracé de la balade"
           name="geom"
@@ -699,15 +782,12 @@ watch(
           class="flex flex-col grow mt-25"
           :ui="{ container: 'flex-grow' }"
         >
-          <DisplayMapRide
-            :key="mapKey"
+          <RideEditorMap
             v-model:geom="stateForm.geom"
             v-model:is-map-loading="isMapLoading"
-            display-enlarge-button
-            :display-editor-container="!isGpsRoute && !isMobile"
-            :disable-editing="isGpsRoute"
-            :disable-creating="isGpsRoute"
-            class="grow min-h-100 lg:min-h-0"
+            :is-gps-route="isGpsRoute"
+            :is-mobile="isMobile"
+            :map-key="mapKey"
           />
 
           <div
@@ -718,7 +798,7 @@ watch(
             Modification désactivée pour les tracés GPS et sur téléphone
           </div>
 
-          <div class="container-info-under-map">
+          <div class="container-info-under-map lg:flex-row! lg:gap-10! lg:items-center">
             <div v-if="rideDistance > 0" class="ride-line-info">
               <UIcon name="i-lucide-map-pinned" class="w-4 h-4 text-primary" />
               <span
@@ -746,13 +826,16 @@ watch(
         </UFormField>
       </UContainer>
 
-      <div class="submit-container flex justify-start ml-7">
+      <div
+        v-show="currentStep === steps.length - 1"
+        class="submit-container flex justify-start ml-7 lg:order-3 lg:w-full lg:mt-4"
+      >
         <UButton
           type="submit"
-          label="Créer"
+          label="Créer la balade"
           color="primary"
           size="xl"
-          class="w-full lg:w-fit justify-center cursor-pointer"
+          class="w-full lg:w-fit justify-center cursor-pointer text-white!"
           icon="i-lucide-check"
           loading-auto
         />
@@ -826,48 +909,106 @@ watch(
   white-space: nowrap;
 }
 
-/* --- RESPONSIVE (TABLETTES ET MOBILES) --- */
-@media (min-width: 1024px) {
-  .form-wrapper {
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: stretch;
-  }
-
-  .column-info {
-    flex: 1;
-    order: 1;
-    width: 50%;
-  }
-
-  .column-map {
-    flex: 1;
-    order: 2;
-    width: 50%;
-  }
-
-  .submit-container {
-    order: 3;
-    width: 100%;
-    margin-top: 1rem;
-  }
-
-  .container-info-under-map {
-    flex-direction: row;
-    gap: 40px;
-    align-items: center;
-  }
+/* --- STEPPER --- */
+.stepper {
+  width: 100%;
 }
 
-@media (min-width: 768px) {
-  .container-form {
-    padding: 2rem;
-  }
+.stepper-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  gap: 0.5rem;
+  align-items: stretch;
 }
 
-@media (min-width: 640px) {
-  .row-container {
-    grid-template-columns: 1fr 1fr;
+.stepper-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-sm);
+  border: var(--border-thin) solid var(--color-gray-light);
+  color: var(--color-gray-mid);
+  transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease;
+}
+
+.stepper-item.active {
+  border-color: var(--ui-primary);
+  color: var(--text-color);
+}
+
+.stepper-item.done {
+  border-color: var(--ui-color-success-600);
+  color: var(--ui-color-success-600);
+}
+
+.stepper-bullet {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 9999px;
+  background-color: var(--color-gray-light);
+  color: var(--background);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.stepper-item.active .stepper-bullet {
+  background-color: var(--ui-primary);
+  color: white;
+}
+
+.stepper-item.done .stepper-bullet {
+  background-color: var(--ui-color-success-600);
+  color: white;
+}
+
+.stepper-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+  min-width: 0;
+}
+
+.stepper-label {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.stepper-description {
+  font-size: 0.75rem;
+  color: var(--color-gray-mid);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.step-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.step-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.step-nav-spacer {
+  flex: 1;
+}
+
+@media (max-width: 640px) {
+  .stepper-description {
+    display: none;
   }
 }
 </style>

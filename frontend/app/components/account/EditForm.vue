@@ -440,11 +440,11 @@ watch(
 
 .experience-button {
   padding: 8px 16px;
-  border-radius: 9999px;
+  border-radius: var(--radius-full);
   font-size: 0.875rem;
-  border: 2px solid #d1d5db;
+  border: var(--border-thick) solid var(--color-gray-light);
   background-color: transparent;
-  color: #374151;
+  color: var(--color-gray-dark);
   cursor: pointer;
   transition: all 0.2s ease;
   flex: 1;
@@ -452,12 +452,12 @@ watch(
 }
 
 .experience-button:hover {
-  border-color: #9ca3af;
+  border-color: var(--color-gray-mid);
 }
 
 .experience-button.active {
-  border-color: #ef4444;
-  color: #ef4444;
+  border-color: var(--ui-color-error-500);
+  color: var(--ui-color-error-500);
 }
 
 .button-group {

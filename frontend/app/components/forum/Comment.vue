@@ -120,9 +120,9 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="comment-wrapper">
+  <div class="comment-wrapper max-lg:ml-[0.3em]!">
     <div
-      class="comment"
+      class="comment max-lg:min-w-0"
       :class="responsesOfComment.length === 0 ? 'margin_left-0_9' : ''"
     >
       <div class="avatar">
@@ -209,8 +209,8 @@ onMounted(async () => {
         <div
           :class="
             props.deep >= MAX_DEEP
-              ? 'responses-container-flat'
-              : 'responses-container'
+              ? 'responses-container-flat max-lg:ml-0! max-lg:pl-[0.5em]!'
+              : 'responses-container max-lg:ml-[0.5em]! max-lg:pl-[0.5em]! max-lg:border-l-2!'
           "
         >
           <Comment
@@ -246,28 +246,6 @@ onMounted(async () => {
   border-left: none;
   margin-top: 1em;
   margin-left: 0.5em;
-}
-
-/** Style version mobile */
-@media (max-width: 1024px) {
-  .comment {
-    min-width: 0;
-  }
-
-  .comment-wrapper {
-    margin-left: 0.3em;
-  }
-
-  .responses-container {
-    margin-left: 0.5em;
-    padding-left: 0.5em;
-    border-left: 2px solid var(--border-gray);
-  }
-
-  .responses-container-flat {
-    margin-left: 0;
-    padding-left: 0.5em;
-  }
 }
 
 .add-reponse-comment {

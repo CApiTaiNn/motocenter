@@ -128,7 +128,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="form-container border min-w-0">
+  <div class="form-container border min-w-0 max-lg:max-w-[300px]!">
     <h3>{{ props.formTitle }}</h3>
     <UFormField label="Marque" name="brand">
       <UInputMenu
@@ -183,18 +183,12 @@ onMounted(() => {
   padding: 1rem;
   width: 100%;
   max-width: 340px;
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   background-color: var(--background);
   box-shadow: 20px 20px 5em var(--border-gray);
 }
 
 h3 {
   text-align: center;
-}
-
-@media (max-width: 1024px) {
-  .form-container {
-    max-width: 300px;
-  }
 }
 </style>

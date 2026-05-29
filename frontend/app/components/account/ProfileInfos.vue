@@ -124,8 +124,8 @@ watch(
   justify-content: center;
   font-size: 2.5rem;
   font-weight: bold;
-  color: #ef4444;
-  background-color: #fef2f2;
+  color: var(--ui-color-error-500);
+  background-color: var(--ui-color-error-50);
   margin-bottom: 1.5rem;
   overflow: hidden;
 }
@@ -142,7 +142,7 @@ watch(
 }
 
 .pseudo {
-  color: #6b7280;
+  color: var(--color-gray-mid);
   font-size: 0.9rem;
 }
 
@@ -155,7 +155,7 @@ watch(
   display: flex;
   justify-content: space-between;
   padding: 0.8rem 0;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: var(--border-thin) solid var(--color-gray-light);
 }
 
 .info-item:last-child {
@@ -163,7 +163,7 @@ watch(
 }
 
 .label {
-  color: #6b7280;
+  color: var(--color-gray-mid);
   font-size: 0.9rem;
 }
 </style>

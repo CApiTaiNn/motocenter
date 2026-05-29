@@ -6,9 +6,9 @@ const props = defineProps<{
 </script>
 
 <template>
-  <div class="box">
-    <img :src="props.urlImg" />
-    <p>{{ props.content }}</p>
+  <div class="box max-lg:min-w-[105px] max-lg:border! max-lg:border-(--background-secondary)!">
+    <img :src="props.urlImg" class="max-lg:w-[40px] max-lg:h-auto" />
+    <p class="max-lg:text-[10px]">{{ props.content }}</p>
   </div>
 </template>
 
@@ -22,26 +22,11 @@ const props = defineProps<{
 
   gap: 1rem;
 
-  border: solid 2px var(--border-gray);
-  border-radius: 10px;
+  border: solid var(--border-thick) var(--border-gray);
+  border-radius: var(--radius-md);
 
   width: 20%;
   aspect-ratio: 1 / 1;
 }
 
-@media (max-width: 1024px) {
-  .box {
-    min-width: 105px;
-    border: 1px solid var(--background-secondary);
-  }
-
-  img {
-    width: 40px;
-    height: auto;
-  }
-
-  p {
-    font-size: 10px;
-  }
-}
 </style>

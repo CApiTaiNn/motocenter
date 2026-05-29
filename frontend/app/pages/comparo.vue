@@ -330,6 +330,27 @@ function handleDelete(side?: 'left' | 'right') {
 onMounted(() => {
   fetchCarrouselMotorcycles()
 })
+
+// Auto-trigger comparison the moment both motorcycles are picked
+watch([motorcycle1Id, motorcycle2Id], ([id1, id2]) => {
+  if (id1 && id2) {
+    fetchMotocycles()
+  } else {
+    showResultat.value = false
+  }
+})
+
+const resultTabs = computed(() => {
+  const tabs: { label: string; key: 'stats' | 'images' | 'sons' | 'comments' }[] = []
+  if (resultatNumber.length > 0) tabs.push({ label: 'Performances', key: 'stats' })
+  if (resultatImg.length > 0) tabs.push({ label: 'Look', key: 'images' })
+  if (resultatSound.length > 0) tabs.push({ label: 'Son', key: 'sons' })
+  tabs.push({ label: 'Avis', key: 'comments' })
+  return tabs
+})
+
+const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
+const activeCommentTab = ref<'left' | 'right'>('left')
 </script>
 
 <template>
@@ -350,22 +371,36 @@ onMounted(() => {
     </HeaderInfo>
     <div class="container-form">
       <div id="form" class="form-button">
-        <div class="form">
+        <div class="form max-lg:flex-col! max-lg:items-center">
           <MotocyclesForm v-model="motorcycle1Id" form-title="Moto 1" />
+          <UIcon
+            name="i-lucide-arrow-left-right"
+            class="size-8 text-(--ui-primary) self-center max-lg:rotate-90"
+            aria-hidden="true"
+          />
           <MotocyclesForm v-model="motorcycle2Id" form-title="Moto 2" />
         </div>
-        <UButton
-          icon="i-lucide-arrow-left-right"
-          class="w-fit rounded-4xl text-white"
-          :disabled="!motorcycle1Id || !motorcycle2Id"
-          @click="fetchMotocycles"
-          >Comparer</UButton
-        >
+        <p v-if="!motorcycle1Id || !motorcycle2Id" class="form-hint">
+          Sélectionnez deux motos pour lancer la comparaison.
+        </p>
       </div>
       <Transition>
         <div v-if="showResultat" ref="resultat" class="resultat-section">
-          <div v-if="resultatNumber.length > 0">
-            <h3>Résultats</h3>
+          <nav class="result-tabs" role="tablist">
+            <button
+              v-for="tab in resultTabs"
+              :key="tab.key"
+              type="button"
+              :class="['result-tab', { active: activeResultTab === tab.key }]"
+              role="tab"
+              :aria-selected="activeResultTab === tab.key"
+              @click="activeResultTab = tab.key"
+            >
+              {{ tab.label }}
+            </button>
+          </nav>
+
+          <div v-show="activeResultTab === 'stats'" class="tab-panel">
             <div v-for="field in resultatNumber" :key="field.fieldName">
               <ResultatFieldNumber
                 :field-name="field.fieldName"
@@ -375,8 +410,7 @@ onMounted(() => {
               <br />
             </div>
           </div>
-          <div v-if="resultatImg.length > 0">
-            <h3>Images</h3>
+          <div v-show="activeResultTab === 'images'" class="tab-panel">
             <div v-for="field in resultatImg" :key="field.fieldName">
               <ResultatFieldImg
                 :field-name="field.fieldName"
@@ -385,8 +419,7 @@ onMounted(() => {
               />
             </div>
           </div>
-          <div v-if="resultatSound.length > 0">
-            <h3>Sons</h3>
+          <div v-show="activeResultTab === 'sons'" class="tab-panel">
             <div v-for="field in resultatSound" :key="field.fieldName">
               <ResultatFieldSound
                 :field-name="field.fieldName"
@@ -395,35 +428,47 @@ onMounted(() => {
               />
             </div>
           </div>
-          <div class="display-comment-container">
-            <div class="left-display-comment">
-              <h4>Commentaires sur la {{ motorcycle1?.name }}</h4>
+          <div v-show="activeResultTab === 'comments'" class="tab-panel">
+            <nav class="comment-tabs" role="tablist">
+              <button
+                type="button"
+                :class="['comment-tab', { active: activeCommentTab === 'left' }]"
+                role="tab"
+                :aria-selected="activeCommentTab === 'left'"
+                @click="activeCommentTab = 'left'"
+              >
+                {{ motorcycle1?.name ?? 'Moto 1' }}
+              </button>
+              <button
+                type="button"
+                :class="['comment-tab', { active: activeCommentTab === 'right' }]"
+                role="tab"
+                :aria-selected="activeCommentTab === 'right'"
+                @click="activeCommentTab = 'right'"
+              >
+                {{ motorcycle2?.name ?? 'Moto 2' }}
+              </button>
+            </nav>
+            <div v-show="activeCommentTab === 'left'" class="comments-pane">
               <template v-if="commentsMotorcycle1.length > 0">
-                <div
-                  v-for="comment1 in commentsMotorcycle1"
-                  :key="comment1._id"
-                >
+                <div v-for="comment1 in commentsMotorcycle1" :key="comment1._id">
                   <Comment :response="comment1" />
                 </div>
               </template>
-              <p v-else>Postez le premier commentaire !</p>
+              <p v-else class="empty-comment">Postez le premier commentaire !</p>
             </div>
-            <div class="right-display-comment">
-              <h4>Commentaires sur la {{ motorcycle2?.name }}</h4>
+            <div v-show="activeCommentTab === 'right'" class="comments-pane">
               <template v-if="commentsMotorcycle2.length > 0">
-                <div
-                  v-for="comment2 in commentsMotorcycle2"
-                  :key="comment2._id"
-                >
+                <div v-for="comment2 in commentsMotorcycle2" :key="comment2._id">
                   <Comment :response="comment2" />
                 </div>
               </template>
-              <p v-else>Postez le premier commentaire !</p>
+              <p v-else class="empty-comment">Postez le premier commentaire !</p>
             </div>
           </div>
-          <div class="input-comment-box">
-            <div v-if="!isAuthenticated" class="need-connection">
-              <h3 class="h3-mobile">
+          <div class="input-comment-box max-lg:m-[1.5rem_1rem]! max-lg:w-auto! max-lg:min-h-[auto]!">
+            <div v-if="!isAuthenticated" class="need-connection max-lg:w-[90%]! max-lg:flex! max-lg:flex-col max-lg:items-center! max-lg:gap-4">
+              <h3 class="h3-mobile max-lg:w-auto! max-lg:text-lg!">
                 Rejoignez la communauté pour débattre et partager vos avis sur
                 ces motos !
               </h3>
@@ -437,7 +482,7 @@ onMounted(() => {
             </div>
             <div
               v-if="!messagePosted"
-              class="input-comment-container"
+              class="input-comment-container max-lg:min-h-[auto]! max-lg:p-4!"
               :class="{ blurred: !isAuthenticated }"
             >
               <h4>
@@ -467,7 +512,7 @@ onMounted(() => {
             </div>
             <div
               v-else
-              class="input-posted-container"
+              class="input-posted-container max-lg:min-h-[auto]! max-lg:p-4!"
               :class="{ blurred: !isAuthenticated }"
             >
               <h4>Merci pour votre contribution !</h4>
@@ -479,7 +524,7 @@ onMounted(() => {
           </div>
         </div>
       </Transition>
-      <div class="caroussel-container">
+      <div class="caroussel-container max-lg:mx-4!">
         <div>
           <h3 class="h3-mobile">Pour la performance</h3>
           <CarrouselMotorcycles
@@ -538,7 +583,70 @@ onMounted(() => {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 3rem;
+  gap: 1.5rem;
+}
+
+.form-hint {
+  color: var(--color-gray-mid);
+  font-size: 0.95rem;
+  font-style: italic;
+}
+
+/* Result tabs */
+.result-tabs,
+.comment-tabs {
+  display: flex;
+  gap: 0.25rem;
+  border-bottom: var(--border-thin) solid var(--color-gray-light);
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.result-tab,
+.comment-tab {
+  padding: 0.5rem 1rem;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.95rem;
+  color: var(--color-gray-mid);
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.result-tab:hover,
+.comment-tab:hover {
+  color: var(--text-color);
+}
+
+.result-tab.active,
+.comment-tab.active {
+  color: var(--ui-primary);
+  border-bottom-color: var(--ui-primary);
+  font-weight: 600;
+}
+
+.tab-panel {
+  animation: tab-fade 0.2s ease-out;
+}
+
+.comments-pane {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.empty-comment {
+  color: var(--color-gray-mid);
+  font-style: italic;
+  text-align: center;
+  padding: 1rem 0;
+}
+
+@keyframes tab-fade {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .form {
@@ -575,8 +683,8 @@ onMounted(() => {
 .left-display-comment,
 .right-display-comment {
   flex: 1;
-  border: 1px solid #c0c0c0;
-  border-radius: 1.25rem;
+  border: var(--border-thin) solid var(--color-gray-light);
+  border-radius: var(--radius-lg);
   padding: 2rem;
   max-width: 50%;
   height: fit-content;
@@ -599,8 +707,8 @@ onMounted(() => {
   margin: 3rem 25%;
   width: 50%;
   min-height: 25rem;
-  border: 1px solid #757575;
-  border-radius: 1.25rem;
+  border: var(--border-thin) solid var(--color-gray-mid);
+  border-radius: var(--radius-lg);
 }
 
 .input-comment-container {
@@ -645,7 +753,7 @@ onMounted(() => {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  z-index: 10;
+  z-index: var(--z-elevated);
   text-align: center;
 }
 
@@ -682,55 +790,4 @@ onMounted(() => {
   opacity: 0;
 }
 
-@media (max-width: 1024px) {
-  .form {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .display-comment-container {
-    flex-direction: column;
-  }
-
-  .left-display-comment,
-  .right-display-comment {
-    max-width: 100%;
-  }
-
-  .input-comment-box {
-    margin: 1.5rem 1rem;
-    width: auto;
-  }
-
-  .caroussel-container {
-    margin: 0 1rem;
-  }
-
-  .need-connection {
-    width: 90%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-  }
-
-  .need-connection h3 {
-    width: auto;
-    font-size: 18px;
-  }
-
-  .input-comment-box {
-    min-height: auto;
-  }
-
-  .input-comment-container {
-    min-height: auto;
-    padding: 1rem;
-  }
-
-  .input-posted-container {
-    min-height: auto;
-    padding: 1rem;
-  }
-}
 </style>

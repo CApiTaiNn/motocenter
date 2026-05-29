@@ -420,12 +420,12 @@ const handleSubmit = async () => {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background-color: #d1d5db;
+  background-color: var(--color-gray-light);
   transition: background-color 0.2s ease;
 }
 
 .progress-dot.active {
-  background-color: #ef4444;
+  background-color: var(--ui-color-error-500);
 }
 
 .form-container {
@@ -456,19 +456,19 @@ const handleSubmit = async () => {
 .field-label {
   font-size: 0.875rem;
   font-weight: 500;
-  color: #374151;
+  color: var(--color-gray-dark);
 }
 
 .required {
-  color: #ef4444;
+  color: var(--ui-color-error-500);
 }
 
 .input-error {
-  border-color: #dc2626 !important;
+  border-color: var(--ui-color-error-600) !important;
 }
 
 .field-error {
-  color: #dc2626;
+  color: var(--ui-color-error-600);
   font-size: 0.75rem;
   margin-top: 2px;
 }
@@ -481,7 +481,7 @@ const handleSubmit = async () => {
   background: none;
   border: none;
   cursor: pointer;
-  color: #4b5563;
+  color: var(--color-gray-mid);
   font-size: 0.875rem;
   text-align: center;
   text-decoration: underline;
@@ -489,19 +489,19 @@ const handleSubmit = async () => {
 }
 
 .avatar-button:hover {
-  color: #1f2937;
+  color: var(--color-gray-dark);
 }
 
 .avatar-circle {
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  border: 2px solid #ef4444;
+  border: var(--border-thick) solid var(--ui-color-error-500);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 2.25rem;
-  color: #ef4444;
+  color: var(--ui-color-error-500);
 }
 
 .experience-section {
@@ -525,38 +525,38 @@ const handleSubmit = async () => {
 
 .experience-button {
   padding: 8px 16px;
-  border-radius: 9999px;
+  border-radius: var(--radius-full);
   font-size: 0.875rem;
-  border: 2px solid #d1d5db;
+  border: var(--border-thick) solid var(--color-gray-light);
   background-color: transparent;
-  color: #374151;
+  color: var(--color-gray-dark);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .experience-button:hover {
-  border-color: #9ca3af;
+  border-color: var(--color-gray-mid);
 }
 
 .experience-button.active {
-  border-color: #ef4444;
-  color: #ef4444;
+  border-color: var(--ui-color-error-500);
+  color: var(--ui-color-error-500);
 }
 
 .error-message {
-  color: #dc2626;
+  color: var(--ui-color-error-600);
   font-size: 0.875rem;
   padding: 8px;
-  background-color: #fee2e2;
-  border-radius: 6px;
+  background-color: var(--ui-color-error-100);
+  border-radius: var(--radius-sm);
 }
 
 .success-message {
-  color: #16a34a;
+  color: var(--ui-color-success-600);
   font-size: 0.875rem;
   padding: 8px;
-  background-color: #f0fdf4;
-  border-radius: 6px;
+  background-color: var(--ui-color-success-50);
+  border-radius: var(--radius-sm);
 }
 
 .button-group {

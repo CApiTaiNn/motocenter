@@ -30,7 +30,8 @@ const handlePostChange = () => {
 </script>
 <template>
   <UCard
-    class="w-full max-w-275 border-[0.5px] border-(--border-gray)"
+    class="w-full max-w-275 border-[0.5px] border-(--border-gray) category-accent"
+    :style="{ '--category-accent': categoryAccent(props.post.category?.name) }"
     @click="handleOpenAPost(post._id)"
   >
     <div class="postCard">
@@ -51,7 +52,7 @@ const handlePostChange = () => {
             @edited-post="handlePostChange"
           />
         </div>
-        <div class="grid">
+        <div class="grid max-lg:flex-wrap">
           <div>
             <div class="badges">
               <UBadge size="lg" class="margin-2">{{
@@ -64,12 +65,12 @@ const handlePostChange = () => {
               {{ formatTimeAgo(props.post.createdAt) }}
             </p>
           </div>
-          <div class="statsContainer">
+          <div class="statsContainer flex max-lg:flex-row max-lg:gap-[0.5em] lg:flex-col lg:items-start lg:justify-end">
             <div class="stats">
               <UIcon class="size-7 margin-2" name="i-lucide-messages-square" />
               <div class="responses">
                 <p>{{ props.post.responses.length || 0 }}&nbsp;</p>
-                <p class="number">
+                <p class="number max-lg:hidden">
                   {{
                     props.post.responses.length > 1 ? ' réponses' : ' réponse'
                   }}
@@ -80,7 +81,7 @@ const handlePostChange = () => {
               <UIcon class="size-7 margin-2" name="i-lucide-eye" />
               <div class="responses">
                 <p>{{ props.post.views }}&nbsp;</p>
-                <p class="number">
+                <p class="number max-lg:hidden">
                   {{ props.post.views.length > 1 ? 'vues' : ' vue' }}
                 </p>
               </div>
@@ -92,31 +93,8 @@ const handlePostChange = () => {
   </UCard>
 </template>
 <style scoped>
-/** Style version mobile */
-@media (max-width: 1024px) {
-  .number {
-    display: none;
-  }
-
-  .statsContainer {
-    display: flex;
-    flex-direction: row;
-    gap: 0.5em;
-  }
-
-  .grid {
-    flex-wrap: wrap;
-  }
-}
-
-/** Style version PC */
-@media (min-width: 1024px) {
-  .statsContainer {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: flex-end;
-  }
+.category-accent {
+  border-left: 4px solid var(--category-accent, var(--border-gray));
 }
 
 .responses {

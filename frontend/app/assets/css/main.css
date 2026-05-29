@@ -30,6 +30,46 @@
   --overlay-loading-background: rgba(199, 199, 199, 0.7);
   --label-text: rgba(0, 0, 0, 0.49);
 
+  /* Neutral gray scale — 3 tokens (semantic colors are provided by Nuxt UI: --ui-color-error-*, --ui-color-info-*, etc.) */
+  --color-gray-light: #d1d5db;
+  --color-gray-mid: #6b7280;
+  --color-gray-dark: #374151;
+
+  --color-track-bg: #d7d7d7;
+
+  /* Border radius — 3 sizes + full for pills (use 50% for circles) */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-full: 9999px;
+
+  /* Border widths — 3 sizes */
+  --border-hairline: 0.5px;
+  --border-thin: 1px;
+  --border-thick: 2px;
+
+  /* Shadows */
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+
+  /* Gradients */
+  --gradient-primary: linear-gradient(
+    90deg,
+    var(--ui-primary),
+    color-mix(in srgb, var(--ui-primary) 60%, black)
+  );
+
+  /* Z-index layers */
+  --z-base: 1;
+  --z-elevated: 10;
+  --z-sticky: 50;
+  --z-overlay: 1010;
+  --z-floating-panel: 1020;
+  --z-modal: 2000;
+  --z-loader: 9999;
+  --z-top: 99999;
+
   /* Map leaflet */
   --circle-draw-line: #ffffff;
   --circle-draw-line-outline: #00000028;
@@ -116,7 +156,7 @@ p {
   font-weight: 300;
 }
 .border {
-  border: 0.5px solid var(--border-gray);
+  border: var(--border-hairline) solid var(--border-gray);
 }
 @media (max-width: 1024px) {
   /* mobile */

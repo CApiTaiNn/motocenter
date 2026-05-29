@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useAuth } from '~/composables/useAuth.js'
 import HeaderInfo from '../../components/global/HeaderInfo.vue'
-import DisplayMapRide from '../../components/ride/DisplayMapRide.vue'
+import RideBrowseMap from '../../components/ride/RideBrowseMap.vue'
 import { useConnexionModal } from '~/composables/useConnexionModal.js'
 
 const { user } = useAuth()
@@ -36,42 +36,43 @@ const goToForm = async () => {
       </template>
     </HeaderInfo>
 
-    <DisplayMapRide
-      display-filters
-      display-enlarge-button
-      display-ride-list
-      display-map-loader
-      display-ride
-    />
+    <RideBrowseMap />
 
-    <div class="add-container">
-      <p class="p-mobile">
-        Vous ne trouvez pas votre balade, vous pouvez l’ajouter :
-      </p>
-      <UButton
-        color="primary"
-        icon="i-lucide-map-pinned"
-        class="cursor-pointer"
-        @click="goToForm"
-        >Ajouter une balade</UButton
-      >
-    </div>
+    <UCard class="add-cta">
+      <div class="add-cta-content max-[410px]:justify-center">
+        <UIcon name="i-lucide-map-pinned" class="size-10 text-(--ui-primary)" />
+        <div class="add-cta-text">
+          <h4>Pas trouvé votre balade ?</h4>
+          <p class="p-mobile">Ajoutez-la pour la partager avec la communauté.</p>
+        </div>
+        <UButton
+          color="primary"
+          icon="i-lucide-plus"
+          size="lg"
+          class="cursor-pointer text-white!"
+          @click="goToForm"
+          >Ajouter une balade</UButton
+        >
+      </div>
+    </UCard>
   </div>
 </template>
 <style scoped>
-.add-container {
+.add-cta {
+  max-width: 60rem;
+  margin: 2rem auto 4rem;
+}
+
+.add-cta-content {
   display: flex;
   flex-direction: row;
   align-items: center;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 50px;
-  margin-left: 20px;
+  gap: 1rem;
 }
 
-@media (max-width: 410px) {
-  .add-container {
-    justify-content: center;
-  }
+.add-cta-text {
+  flex: 1;
+  min-width: 12rem;
 }
 </style>
