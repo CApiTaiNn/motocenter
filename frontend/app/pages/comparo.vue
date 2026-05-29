@@ -789,6 +789,13 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
   bottom: 0;
   display: flex;
   justify-content: center;
+  /* Le conteneur prend toute la largeur : on laisse les clics traverser
+     ses zones vides, seul le panneau central reste interactif. */
+  pointer-events: none;
+}
+
+.dual-container > * {
+  pointer-events: auto;
 }
 
 /* Utilitaires */
