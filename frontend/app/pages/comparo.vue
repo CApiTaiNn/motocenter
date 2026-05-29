@@ -48,13 +48,6 @@ const carousselSportBikes = ref<IMotorcycle[]>([])
 const carousselAdventureBikes = ref<IMotorcycle[]>([])
 const { isAuthenticated, user } = useAuth()
 const messagePosted = ref<boolean>(false)
-const optionMotorcycles = computed(() => {
-  if (!motorcycle1.value || !motorcycle2.value) return []
-  return [
-    { label: motorcycle1.value.name, value: motorcycle1.value._id },
-    { label: motorcycle2.value.name, value: motorcycle2.value._id }
-  ]
-})
 const comment = ref<ICommentInput>({
   motorcycleId: '',
   motorcycleName: '',
@@ -232,12 +225,10 @@ async function fetchMessages() {
 }
 
 async function postComment() {
-  if (!comment.value.content || !comment.value.motorcycleId) return
+  if (!comment.value.content) return
 
   const selectedMotorcycle =
-    motorcycle1.value?._id === comment.value.motorcycleId
-      ? motorcycle1.value
-      : motorcycle2.value
+    activeCommentTab.value === 'left' ? motorcycle1.value : motorcycle2.value
   if (!selectedMotorcycle) return
 
   let postId = selectedMotorcycle.post
@@ -490,13 +481,6 @@ const activeCommentTab = ref<'left' | 'right'>('left')
                 Faite le savoir à la communauté !
               </h4>
               <div class="comment-input">
-                <USelect
-                  v-model="comment.motorcycleId"
-                  size="lg"
-                  class="w-50"
-                  :items="optionMotorcycles"
-                  :placeholder="motorcycle1?.name"
-                />
                 <UTextarea
                   v-model="comment.content"
                   size="xl"
@@ -592,27 +576,34 @@ const activeCommentTab = ref<'left' | 'right'>('left')
   font-style: italic;
 }
 
-/* Result tabs */
+/* Result tabs — centered segmented pill control */
 .result-tabs,
 .comment-tabs {
   display: flex;
   gap: 0.25rem;
-  border-bottom: var(--border-thin) solid var(--color-gray-light);
-  margin-bottom: 1.5rem;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto 1.5rem;
+  padding: 0.3rem;
+  background: var(--input-background);
+  border-radius: var(--radius-full);
   flex-wrap: wrap;
+  justify-content: center;
 }
 
 .result-tab,
 .comment-tab {
-  padding: 0.5rem 1rem;
+  padding: 0.5rem 1.5rem;
   background: transparent;
   border: none;
-  border-bottom: 2px solid transparent;
+  border-radius: var(--radius-full);
   cursor: pointer;
   font-family: 'Poppins', sans-serif;
-  font-size: 0.95rem;
+  font-size: 1rem;
+  font-weight: 500;
   color: var(--color-gray-mid);
-  transition: color 0.15s ease, border-color 0.15s ease;
+  white-space: nowrap;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .result-tab:hover,
@@ -622,8 +613,8 @@ const activeCommentTab = ref<'left' | 'right'>('left')
 
 .result-tab.active,
 .comment-tab.active {
-  color: var(--ui-primary);
-  border-bottom-color: var(--ui-primary);
+  background: var(--ui-primary);
+  color: #fff;
   font-weight: 600;
 }
 
