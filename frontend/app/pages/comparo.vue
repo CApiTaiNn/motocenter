@@ -48,6 +48,13 @@ const carousselSportBikes = ref<IMotorcycle[]>([])
 const carousselAdventureBikes = ref<IMotorcycle[]>([])
 const { isAuthenticated, user } = useAuth()
 const messagePosted = ref<boolean>(false)
+const optionMotorcycles = computed(() => {
+  if (!motorcycle1.value || !motorcycle2.value) return []
+  return [
+    { label: motorcycle1.value.name, value: motorcycle1.value._id },
+    { label: motorcycle2.value.name, value: motorcycle2.value._id }
+  ]
+})
 const comment = ref<ICommentInput>({
   motorcycleId: '',
   motorcycleName: '',
@@ -225,10 +232,12 @@ async function fetchMessages() {
 }
 
 async function postComment() {
-  if (!comment.value.content) return
+  if (!comment.value.content || !comment.value.motorcycleId) return
 
   const selectedMotorcycle =
-    activeCommentTab.value === 'left' ? motorcycle1.value : motorcycle2.value
+    motorcycle1.value?._id === comment.value.motorcycleId
+      ? motorcycle1.value
+      : motorcycle2.value
   if (!selectedMotorcycle) return
 
   let postId = selectedMotorcycle.post
@@ -341,7 +350,6 @@ const resultTabs = computed(() => {
 })
 
 const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
-const activeCommentTab = ref<'left' | 'right'>('left')
 </script>
 
 <template>
@@ -420,41 +428,37 @@ const activeCommentTab = ref<'left' | 'right'>('left')
             </div>
           </div>
           <div v-show="activeResultTab === 'comments'" class="tab-panel">
-            <nav class="comment-tabs" role="tablist">
-              <button
-                type="button"
-                :class="['comment-tab', { active: activeCommentTab === 'left' }]"
-                role="tab"
-                :aria-selected="activeCommentTab === 'left'"
-                @click="activeCommentTab = 'left'"
-              >
-                {{ motorcycle1?.name ?? 'Moto 1' }}
-              </button>
-              <button
-                type="button"
-                :class="['comment-tab', { active: activeCommentTab === 'right' }]"
-                role="tab"
-                :aria-selected="activeCommentTab === 'right'"
-                @click="activeCommentTab = 'right'"
-              >
-                {{ motorcycle2?.name ?? 'Moto 2' }}
-              </button>
-            </nav>
-            <div v-show="activeCommentTab === 'left'" class="comments-pane">
-              <template v-if="commentsMotorcycle1.length > 0">
-                <div v-for="comment1 in commentsMotorcycle1" :key="comment1._id">
-                  <Comment :response="comment1" />
-                </div>
-              </template>
-              <p v-else class="empty-comment">Postez le premier commentaire !</p>
-            </div>
-            <div v-show="activeCommentTab === 'right'" class="comments-pane">
-              <template v-if="commentsMotorcycle2.length > 0">
-                <div v-for="comment2 in commentsMotorcycle2" :key="comment2._id">
-                  <Comment :response="comment2" />
-                </div>
-              </template>
-              <p v-else class="empty-comment">Postez le premier commentaire !</p>
+            <div class="comments-grid">
+              <div class="comments-pane">
+                <h4 class="comments-pane-title">
+                  {{ motorcycle1?.name ?? 'Moto 1' }}
+                </h4>
+                <template v-if="commentsMotorcycle1.length > 0">
+                  <Comment
+                    v-for="comment1 in commentsMotorcycle1"
+                    :key="comment1._id"
+                    :response="comment1"
+                  />
+                </template>
+                <p v-else class="empty-comment">
+                  Postez le premier commentaire !
+                </p>
+              </div>
+              <div class="comments-pane">
+                <h4 class="comments-pane-title">
+                  {{ motorcycle2?.name ?? 'Moto 2' }}
+                </h4>
+                <template v-if="commentsMotorcycle2.length > 0">
+                  <Comment
+                    v-for="comment2 in commentsMotorcycle2"
+                    :key="comment2._id"
+                    :response="comment2"
+                  />
+                </template>
+                <p v-else class="empty-comment">
+                  Postez le premier commentaire !
+                </p>
+              </div>
             </div>
           </div>
           <div class="input-comment-box max-lg:m-[1.5rem_1rem]! max-lg:w-auto! max-lg:min-h-[auto]!">
@@ -481,6 +485,13 @@ const activeCommentTab = ref<'left' | 'right'>('left')
                 Faite le savoir à la communauté !
               </h4>
               <div class="comment-input">
+                <USelect
+                  v-model="comment.motorcycleId"
+                  size="lg"
+                  class="w-50"
+                  :items="optionMotorcycles"
+                  :placeholder="motorcycle1?.name"
+                />
                 <UTextarea
                   v-model="comment.content"
                   size="xl"
@@ -577,8 +588,7 @@ const activeCommentTab = ref<'left' | 'right'>('left')
 }
 
 /* Result tabs — centered segmented pill control */
-.result-tabs,
-.comment-tabs {
+.result-tabs {
   display: flex;
   gap: 0.25rem;
   width: fit-content;
@@ -591,8 +601,7 @@ const activeCommentTab = ref<'left' | 'right'>('left')
   justify-content: center;
 }
 
-.result-tab,
-.comment-tab {
+.result-tab {
   padding: 0.5rem 1.5rem;
   background: transparent;
   border: none;
@@ -606,13 +615,11 @@ const activeCommentTab = ref<'left' | 'right'>('left')
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-.result-tab:hover,
-.comment-tab:hover {
+.result-tab:hover {
   color: var(--text-color);
 }
 
-.result-tab.active,
-.comment-tab.active {
+.result-tab.active {
   background: var(--ui-primary);
   color: #fff;
   font-weight: 600;
@@ -622,10 +629,30 @@ const activeCommentTab = ref<'left' | 'right'>('left')
   animation: tab-fade 0.2s ease-out;
 }
 
+/* Avis — both bikes' opinions side by side */
+.comments-grid {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
 .comments-pane {
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+}
+
+.comments-pane-title {
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+@media (max-width: 1024px) {
+  .comments-grid {
+    flex-direction: column;
+  }
 }
 
 .empty-comment {
