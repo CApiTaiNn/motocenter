@@ -7,7 +7,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  (e: 'compare' | 'delete', side?: 'left' | 'right'): void
+  (e: 'delete', side?: 'left' | 'right'): void
 }>()
 
 const isOpen = ref(true)
@@ -35,13 +35,6 @@ const isOpen = ref(true)
           />
           <p>{{ props.leftName }}</p>
         </div>
-        <UButton
-          icon="i-lucide-arrow-left-right"
-          class="w-fit rounded-4xl m-1 max-lg:text-[0.7rem]! max-lg:py-1! max-lg:px-2!"
-          @click="emit('compare')"
-        >
-          Comparer
-        </UButton>
         <div class="motorcycle-right max-lg:h-[100px]! max-lg:p-[5px]!">
           <UIcon
             name="i-lucide-circle-x"

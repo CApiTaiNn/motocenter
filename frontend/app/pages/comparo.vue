@@ -547,7 +547,6 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
             :right-motorcycle-url="motorcycle2PreviewUrl"
             :left-name="motorcycle1?.name"
             :right-name="motorcycle2?.name"
-            @compare="fetchMotocycles"
             @delete="handleDelete"
           />
         </div>
