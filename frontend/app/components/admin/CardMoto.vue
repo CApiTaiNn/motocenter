@@ -3,7 +3,6 @@ import * as v from 'valibot'
 import type { FormSubmitEvent } from '@nuxt/ui'
 import type { IBrand } from '~/types/brand'
 import { MotorcycleCategory, type IMotorcycle } from '~/types/motorcycles'
-import { da } from '@nuxt/ui/runtime/locale/index.js'
 
 const apiBase = useRuntimeConfig().public.apiBase
 
@@ -233,7 +232,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     })
     props.onClosePanel()
     props.onRefresh()
-  } catch (err) {
+  } catch {
     toast.add({
       title: 'Erreur',
       description: 'Échec de la sauvegarde',
@@ -256,7 +255,7 @@ async function removeMotorcycle() {
     })
     props.onClosePanel()
     props.onRefresh()
-  } catch (err) {
+  } catch {
     toast.add({
       title: 'Erreur',
       description: 'Échec de la suppression',
