@@ -128,7 +128,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="form-container border min-w-0 max-lg:max-w-[300px]!">
+  <div class="form-container border min-w-0 max-lg:max-w-[300px]! md:max-lg:max-w-[320px]!">
     <h3>{{ props.formTitle }}</h3>
     <UFormField label="Marque" name="brand">
       <UInputMenu

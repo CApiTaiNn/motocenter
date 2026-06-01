@@ -8,7 +8,7 @@ const props = defineProps<{
 
 <template>
   <div class="resultat">
-    <div class="container-row max-lg:w-[95%]! max-lg:gap-[10px]!">
+    <div class="container-row max-md:w-[95%]! max-lg:w-[80%]! max-md:gap-[10px]!">
       <div class="left">
         <img
           v-if="props.firstValue"

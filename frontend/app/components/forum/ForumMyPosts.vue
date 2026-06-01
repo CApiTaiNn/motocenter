@@ -98,7 +98,7 @@ watch(
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  gap: 0.5em;
+  gap: var(--space-xs);
 }
 
 .cursor-pointer {
@@ -106,7 +106,7 @@ watch(
 }
 
 .border-bottom {
-  margin-bottom: 1em;
+  margin-bottom: var(--space-md);
   border-bottom: var(--border-thin) solid var(--border-gray);
 }
 </style>

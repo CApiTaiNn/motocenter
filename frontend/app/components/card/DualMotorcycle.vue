@@ -14,7 +14,7 @@ const isOpen = ref(true)
 </script>
 
 <template>
-  <div class="wrapper max-lg:w-[90vw]!">
+  <div class="wrapper max-md:w-[90vw]! max-lg:w-[400px]!">
     <div v-if="isOpen" class="dual-motorcycle max-lg:w-full!">
       <div class="slot-container">
         <div class="motorcycle-left max-lg:h-[100px]! max-lg:p-[5px]!">

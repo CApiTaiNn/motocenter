@@ -120,10 +120,10 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="comment-wrapper max-lg:ml-[0.3em]!">
+  <div class="comment-wrapper max-md:ml-[var(--space-2xs)]! max-lg:ml-[var(--space-xs)]!">
     <div
       class="comment max-lg:min-w-0"
-      :class="responsesOfComment.length === 0 ? 'margin_left-0_9' : ''"
+      :class="responsesOfComment.length === 0 ? 'no-responses-indent' : ''"
     >
       <div class="avatar">
         <div>
@@ -209,8 +209,8 @@ onMounted(async () => {
         <div
           :class="
             props.deep >= MAX_DEEP
-              ? 'responses-container-flat max-lg:ml-0! max-lg:pl-[0.5em]!'
-              : 'responses-container max-lg:ml-[0.5em]! max-lg:pl-[0.5em]! max-lg:border-l-2!'
+              ? 'responses-container-flat max-md:ml-0! max-lg:ml-[var(--space-2xs)]! max-md:pl-[var(--space-xs)]! max-lg:pl-[var(--space-sm)]!'
+              : 'responses-container max-md:ml-[var(--space-xs)]! max-lg:ml-[var(--space-sm)]! max-md:pl-[var(--space-xs)]! max-lg:pl-[var(--space-sm)]! max-lg:border-l-[length:var(--border-thick)]!'
           "
         >
           <Comment
@@ -230,43 +230,43 @@ onMounted(async () => {
 .comment-wrapper {
   display: flex;
   flex-direction: column;
-  margin-left: 1em;
+  margin-left: var(--space-md);
 }
 
 .responses-container {
-  margin-left: 1em;
-  border-left: 0.15em solid var(--border-gray);
-  padding-left: 1.25em;
-  margin-top: 0.75em;
+  margin-left: var(--space-md);
+  border-left: var(--border-thick) solid var(--border-gray);
+  padding-left: var(--space-md);
+  margin-top: var(--space-sm);
 }
 
 .responses-container-flat {
   margin-left: 0;
   padding-left: 0;
   border-left: none;
-  margin-top: 1em;
-  margin-left: 0.5em;
+  margin-top: var(--space-md);
+  margin-left: var(--space-xs);
 }
 
 .add-reponse-comment {
   display: flex;
   flex-direction: column;
-  gap: 0.5em;
+  gap: var(--space-xs);
 }
 
 .avatar {
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 0.5em;
+  gap: var(--space-xs);
   height: fit-content;
 }
 
 .comment {
   display: flex;
   flex-direction: row;
-  gap: 1em;
-  margin-bottom: 1em;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
   position: relative;
 }
 
@@ -317,7 +317,7 @@ onMounted(async () => {
   font-weight: bold;
 }
 
-.margin_left-0_9 {
-  margin-left: 0.9em;
+.no-responses-indent {
+  margin-left: var(--space-md);
 }
 </style>

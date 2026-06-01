@@ -12,7 +12,7 @@ const props = defineProps<IProps>()
     <div class="centered">
       <slot name="title"> </slot>
     </div>
-    <div class="centered subtitle max-lg:w-[95%]!">
+    <div class="centered subtitle max-lg:w-[95%]! md:max-lg:w-[70%]!">
       <slot name="subtitle"> </slot>
       <ButtonArrow :scroll-to-element-id="props.scrollToElementId" />
     </div>

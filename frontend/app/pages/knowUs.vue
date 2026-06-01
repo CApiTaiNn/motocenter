@@ -54,7 +54,7 @@ const team = [
           <img
             src="../assets/images/knowUs/Teamwork.png"
             alt="Image de travail d'équipe"
-            class="max-lg:w-full max-lg:max-w-[500px]"
+            class="max-lg:w-full! max-lg:max-w-[500px]"
           />
         </article>
       </section>
@@ -65,9 +65,9 @@ const team = [
           <img
             src="../assets/images/knowUs/Gsxr.png"
             alt="image du gsxr de Sloan"
-            class="max-lg:w-full max-lg:max-w-[500px]"
+            class="max-lg:w-full! max-lg:max-w-[500px]"
           />
-          <p class="second-p max-lg:font-[var(--font-main)] max-lg:text-xs! max-lg:text-center">
+          <p class="second-p max-lg:font-[var(--font-main)] max-lg:text-xs! max-lg:text-center max-lg:w-full!">
             <strong>MotoCenter</strong> vise à se positionner comme une
             plateforme centrale et cohérente, combinant aide au choix d’une moto
             et partage communautaire. Afin de garantir la pertinence de ses

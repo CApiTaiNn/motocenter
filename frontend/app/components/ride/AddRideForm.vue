@@ -948,7 +948,7 @@ watch(
 .stepper-bullet {
   width: 1.75rem;
   height: 1.75rem;
-  border-radius: 9999px;
+  border-radius: var(--radius-full);
   background-color: var(--color-gray-light);
   color: var(--background);
   display: inline-flex;

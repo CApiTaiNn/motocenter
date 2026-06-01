@@ -150,7 +150,7 @@ onMounted(async () => {
             :src="post?.user.image"
             size="3xl"
             loading="lazy"
-            class="margin-2"
+            class="mr-2"
           />
           <h2 class="flex-1">{{ post?.title }}</h2>
           <UButton
@@ -183,10 +183,10 @@ onMounted(async () => {
             :src="`${post?.image}`"
             :alt="`Image du post ${post?.title} par ${post?.user.pseudo}`"
             :title="`Image du post ${post?.title} par ${post?.user.pseudo}`"
-            class="img margin-1_5 margin-bottom-1 w-full lg:w-3/4"
+            class="img mb-4 w-full md:w-5/6 lg:w-3/4"
           />
         </div>
-        <h4 class="margin-bottom-1">{{ post?.content }}</h4>
+        <h4 class="mb-4">{{ post?.content }}</h4>
         <div class="add-comment">
           <UFormField label="Ecrire un commentaire" required>
             <UTextarea v-model="newReponseOfPost" />
@@ -194,7 +194,7 @@ onMounted(async () => {
           <UButton
             :disabled="newReponseOfPost === ''"
             size="sm"
-            class="button-comment w-3/4 lg:w-1/4"
+            class="button-comment w-3/4 md:w-1/2 lg:w-1/4"
             @click="handleAddComment"
           >
             Ajouter mon commentaire</UButton
@@ -203,7 +203,7 @@ onMounted(async () => {
         <p v-if="responses.length === 0">
           Aucun commentaire à ce post, ajouter le premier
         </p>
-        <div v-else class="margin-bottom-1 w-5/6 comments">
+        <div v-else class="mb-4 w-5/6 comments">
           <div v-for="response in responses" :key="response._id">
             <Comment :response="response" />
           </div>
@@ -214,22 +214,18 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.margin-2 {
-  margin-right: 0.5em;
-}
-
 .put-in-favorite {
   display: flex;
   flex-direction: row;
-  gap: 0.5em;
+  gap: var(--space-xs);
   align-items: center;
 }
 
 .comments {
-  margin-top: 1.5em;
+  margin-top: var(--space-lg);
   display: flex;
   flex-direction: column;
-  gap: 0.5em;
+  gap: var(--space-xs);
 }
 
 .icon-and-text {
@@ -248,7 +244,7 @@ onMounted(async () => {
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-sm) var(--space-md);
-  margin: 1.5em 0 1em;
+  margin: var(--space-lg) 0 var(--space-md);
 }
 
 .meta-item {
@@ -295,17 +291,6 @@ onMounted(async () => {
   margin-right: 20em;
 }
 
-w .margin-1_5 {
-  margin-top: 1.5em;
-}
-
-.margin-top-0_5 {
-  margin-top: 0.5em;
-}
-
-.margin-bottom-1 {
-  margin-bottom: 1em;
-}
 
 .grid {
   display: grid;
@@ -320,7 +305,7 @@ w .margin-1_5 {
 .add-comment {
   display: flex;
   flex-direction: column;
-  gap: 0.5em;
+  gap: var(--space-xs);
   align-items: flex-start;
 }
 </style>

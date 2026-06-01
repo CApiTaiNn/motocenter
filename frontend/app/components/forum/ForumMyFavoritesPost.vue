@@ -38,12 +38,6 @@ watch(user, async (newUser) => {
     myFavoritesPosts.value = []
   }
 }, { immediate: true })
-
-onMounted(async () => {
-  if (user.value) {
-    await getFavoritesPostsOfUser()
-  }
-})
 </script>
 
 <template>
@@ -75,7 +69,7 @@ onMounted(async () => {
 }
 
 .border-bottom {
-  margin-bottom: 1em;
+  margin-bottom: var(--space-md);
   border-bottom: var(--border-thin) solid var(--border-gray);
 }
 </style>

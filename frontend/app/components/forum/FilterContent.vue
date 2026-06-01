@@ -63,9 +63,7 @@ const emitFilters = () => {
   })
 }
 
-const handleHaveMyFavorites = () => {
-  console.log('Myfavorite')
-}
+const handleHaveMyFavorites = () => {}
 
 const handlClickOnCategory = (filterCategoryId: string) => {
   if (filters.value.categoryIds.includes(filterCategoryId)) {
@@ -120,19 +118,19 @@ onMounted(async () => {
     </template>
   </UInput>
   <div class="icon-and-text filter cursor-pointer" @click="handleHaveAllPosts">
-    <UIcon class="size-7 margin-0_5" name="i-lucide-messages-square" />
+    <UIcon class="size-7 mr-2" name="i-lucide-messages-square" />
     <p>Tous les posts</p>
   </div>
   <div
     class="icon-and-text filter cursor-pointer"
     @click="handleHaveMyFavorites"
   >
-    <UIcon class="size-7 margin-0_5" name="i-lucide-star" />
+    <UIcon class="size-7 mr-2" name="i-lucide-star" />
     <p>Mes favoris</p>
   </div>
   <div class="filter">
     <div class="icon-and-text">
-      <UIcon class="size-7 margin-0_5" name="i-lucide-grid-2x2-check" />
+      <UIcon class="size-7 mr-2" name="i-lucide-grid-2x2-check" />
       <p>Catégories</p>
     </div>
     <div class="filter">
@@ -147,21 +145,21 @@ onMounted(async () => {
         }"
         @click="handlClickOnCategory(category._id)"
       >
-        <UIcon class="size-7 margin-0_5" :name="category.icon" />
+        <UIcon class="size-7 mr-2" :name="category.icon" />
         <p>{{ category.name }}</p>
       </div>
     </div>
   </div>
   <div class="filter">
     <div class="icon-and-text">
-      <UIcon class="size-7 margin-0_5" name="i-lucide-warehouse" />
+      <UIcon class="size-7 mr-2" name="i-lucide-warehouse" />
       <p>Marques</p>
     </div>
     <div class="filter">
       <USkeleton v-if="props.loading" class="size-12 rounded-full" />
       <div
-        v-else
         v-for="brand in brands"
+        v-else
         :key="brand._id"
         class="icon-and-text sub-filter cursor-pointer"
         :class="{ 'background-selected': filters.brandIds.includes(brand._id) }"
@@ -173,7 +171,7 @@ onMounted(async () => {
           :title="brand.name"
           width="40"
           height="40"
-          class="margin-0_5"
+          class="mr-2"
         />
         <p>{{ brand.name }}</p>
       </div>
@@ -194,16 +192,12 @@ onMounted(async () => {
 }
 
 .filter {
-  margin: 2em;
+  margin: var(--space-xl);
 }
 
 .sub-filter {
-  margin: 0.5em 1em;
+  margin: var(--space-xs) var(--space-md);
   padding: 0.3em;
-}
-
-.margin-0_5 {
-  margin-right: 0.5em;
 }
 
 .background-selected {
@@ -218,9 +212,5 @@ onMounted(async () => {
   background-color: rgba(109, 100, 100, 0.097);
   border-radius: var(--radius-md);
   width: fit-content;
-}
-
-.custom-border {
-  border: var(--border-hairline) solid var(--border-gray);
 }
 </style>

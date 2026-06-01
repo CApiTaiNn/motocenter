@@ -12,7 +12,7 @@ const isSidebarOpen = ref(false) // État du volet latéral (ouvert/fermé)
 </script>
 
 <template>
-  <div class="sidebar max-lg:w-[90dvw]!" :class="{ 'is-open': isSidebarOpen }">
+  <div class="sidebar max-md:w-[90dvw]! max-lg:w-[60dvw]!" :class="{ 'is-open': isSidebarOpen }">
     <div class="absolute -left-10 top-1/2 -translate-y-1/2 h-10 w-10 z-1002">
       <UButton
         :icon="

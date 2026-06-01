@@ -65,7 +65,7 @@ const handlePostChange = () => {
               {{ formatTimeAgo(props.post.createdAt) }}
             </p>
           </div>
-          <div class="statsContainer flex max-lg:flex-row max-lg:gap-[0.5em] lg:flex-col lg:items-start lg:justify-end">
+          <div class="statsContainer flex max-lg:flex-row max-lg:gap-[var(--space-xs)] lg:flex-col lg:items-start lg:justify-end">
             <div class="stats">
               <UIcon class="size-7 margin-2" name="i-lucide-messages-square" />
               <div class="responses">
@@ -113,7 +113,7 @@ const handlePostChange = () => {
   width: 100%;
   padding: var(--space-sm) var(--space-lg);
   display: flex;
-  gap: 1.5em;
+  gap: var(--space-lg);
   align-items: flex-start;
 }
 
@@ -134,8 +134,8 @@ const handlePostChange = () => {
   flex-direction: row;
   gap: var(--space-lg);
   align-items: center;
-  margin-bottom: 1em;
-  margin-top: 1em;
+  margin-bottom: var(--space-md);
+  margin-top: var(--space-md);
 }
 
 .stats:nth-child(2) {
@@ -144,8 +144,8 @@ const handlePostChange = () => {
 
 .stats {
   display: flex;
-  gap: 0.3em;
-  margin-top: 1em;
+  gap: var(--space-2xs);
+  margin-top: var(--space-md);
   align-items: center;
   justify-content: flex-start;
 }
@@ -154,7 +154,7 @@ const handlePostChange = () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 0.5em;
+  margin-top: var(--space-xs);
   width: 100%;
 }
 </style>

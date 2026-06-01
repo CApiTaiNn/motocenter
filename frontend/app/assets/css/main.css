@@ -201,13 +201,4 @@ p {
     font-family: 'Poppins', sans-serif;
     font-size: 16px;
   }
-  p-footer {
-    font-family: 'Poppins', sans-serif;
-    font-size: 10px;
-  }
-  placeholder {
-    font-family: 'Poppins', sans-serif;
-    font-size: 12px;
-    font-weight: 300;
-  }
 }

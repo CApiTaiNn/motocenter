@@ -206,23 +206,26 @@ onMounted(async () => {
   <div>
     <UModal v-model:open="displayModal" :close="true">
       <UIcon v-if="isSameUser && isNewPost === false" class="size-6" name="i-lucide-square-pen" @click.stop />
-      <UButton v-if="isNewPost === true" icon="i-lucide-plus" size="sm" color="primary" variant="solid"
+      <UButton
+v-if="isNewPost === true" icon="i-lucide-plus" size="sm" color="primary" variant="solid"
         class="cursor-pointer" />
       <template #header>
         <div class="modal-header">
           <h3>{{ modalTitle() }}</h3>
-          <UButton color="primary" variant="outline" icon="i-lucide-x" class="rounded-full cursor-pointer"
+          <UButton
+color="primary" variant="outline" icon="i-lucide-x" class="rounded-full cursor-pointer"
             @click="handleCloseModal" />
         </div>
       </template>
       <template #body>
         <div>
-          <UForm :schema :state="state" @submit="onSubmit" class="form">
+          <UForm :schema :state="state" class="form" @submit="onSubmit">
             <UFormField label="Titre du post" required name="title">
               <UInput v-model="state.title" placeholder="Titre du post" size="md" class="w-full" />
             </UFormField>
             <UFormField label="Catégorie" required name="category">
-              <USelectMenu v-model="state.category" placeholder="Sélectionnez la catégorie du post" :items="categories"
+              <USelectMenu
+v-model="state.category" placeholder="Sélectionnez la catégorie du post" :items="categories"
                 value-key="name" label-key="name" :search-input="{
                   placeholder: 'Rechercher',
                   icon: 'i-lucide-search'
@@ -235,7 +238,8 @@ onMounted(async () => {
               </USelectMenu>
             </UFormField>
             <UFormField label="Marque" required name="brand">
-              <USelectMenu v-model="state.brand" placeholder="Sélectionnez la marque du post" :items="brands"
+              <USelectMenu
+v-model="state.brand" placeholder="Sélectionnez la marque du post" :items="brands"
                 value-key="name" label-key="name" :search-input="{
                   placeholder: 'Rechercher',
                   icon: 'i-lucide-search'
@@ -248,7 +252,7 @@ onMounted(async () => {
               </USelectMenu>
             </UFormField>
             <UFormField label="Description" required name="description">
-              <UTextarea size="md" v-model="state.description" placeholder="Ecrivez votre description" class="w-full" />
+              <UTextarea v-model="state.description" size="md" placeholder="Ecrivez votre description" class="w-full" />
             </UFormField>
             <UFormField required :label="onImageTitle()" name="file">
               <UFileUpload v-model="state.file" accept="image/*" label="Déposez votre image" description="PNG ou JPG">
@@ -292,7 +296,7 @@ onMounted(async () => {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 0.5em;
+  gap: var(--space-xs);
 }
 
 .modal-header {
@@ -321,7 +325,7 @@ onMounted(async () => {
 .helper-upload h4 {
   font-size: 14px;
   background-color: rgba(128, 128, 128, 0.865);
-  padding: 0.5em;
+  padding: var(--space-xs);
   color: var(--background);
 }
 

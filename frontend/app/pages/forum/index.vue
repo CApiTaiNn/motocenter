@@ -96,7 +96,7 @@ onMounted(async () => {
         </p>
       </template>
     </HeaderInfo>
-    <div id="forum" class="forum-filters flex flex-row items-start m-[2em] gap-[0.5em] lg:gap-[2em]">
+    <div id="forum" class="forum-filters flex flex-row items-start m-[2em] gap-[0.5em] md:gap-[1.25em] lg:gap-[2em]">
       <div class="panel-filters">
         <ForumPanel :loading :active-filter="filters" @filters="handleFilter" />
       </div>
@@ -148,7 +148,7 @@ onMounted(async () => {
 
 .add-post-empty {
   display: flex;
-  gap: 0.5em;
+  gap: var(--space-xs);
   margin: auto;
 }
 
@@ -163,7 +163,7 @@ onMounted(async () => {
   justify-content: center;
   align-items: center;
   height: 25vh;
-  gap: 1em;
+  gap: var(--space-md);
 }
 
 .cursor-pointer {
@@ -178,6 +178,6 @@ onMounted(async () => {
 .posts {
   display: flex;
   flex-direction: column;
-  gap: 1.5em;
+  gap: var(--space-lg);
 }
 </style>

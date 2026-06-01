@@ -10,7 +10,7 @@ const props = defineProps<{
 
 <template>
   <div class="resultat">
-    <div class="container-row max-lg:w-[95%]! max-lg:gap-[10px]!">
+    <div class="container-row max-md:w-[95%]! max-lg:w-[88%]! max-md:gap-[10px]!">
       <div class="left">
         <AudioPlayer v-if="props.firstValue" :src="props.firstValue" />
         <p v-else>Pas d'audio</p>

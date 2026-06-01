@@ -115,7 +115,7 @@ function tradFieldName(fieldName: string) {
 <template>
   <div class="resultat">
     <p class="p-mobile">{{ tradFieldName(props.fieldName) }}</p>
-    <div class="container-row max-lg:flex-col! max-lg:w-[95%]! max-lg:gap-2!">
+    <div class="container-row max-lg:flex-col! max-md:w-[95%]! max-lg:w-[88%]! max-lg:gap-2!">
       <div class="left max-lg:flex-row-reverse! max-lg:gap-[10px]">
         <count-up
           :end-val="parseField(props.firstValue).value"
