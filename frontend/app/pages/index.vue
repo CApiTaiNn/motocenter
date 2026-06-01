@@ -34,20 +34,12 @@ const itemsTab = reactive<IItemTab[]>([
 ])
 
 async function fetchStats() {
-  // Get total brands
-  const totalBrands = await $fetch<{ totalBrands: number }>(
-    `${apiBase}brands/count`
-  )
-
-  // Get total horsPower
-  const totalHorsePower = await $fetch<{ totalHorsePower: number }>(
-    `${apiBase}motorcycles/stats`
-  )
-
-  // Get total motorcycles
-  const totalMotorcycles = await $fetch<{ totalMotorcycles: number }>(
-    `${apiBase}motorcycles/count`
-  )
+  // Independent count endpoints — fetch concurrently
+  const [totalBrands, totalHorsePower, totalMotorcycles] = await Promise.all([
+    $fetch<{ totalBrands: number }>(`${apiBase}brands/count`),
+    $fetch<{ totalHorsePower: number }>(`${apiBase}motorcycles/stats`),
+    $fetch<{ totalMotorcycles: number }>(`${apiBase}motorcycles/count`)
+  ])
 
   dynamicStats.value.push({
     content: `${totalBrands} Marques`,
@@ -77,8 +69,7 @@ async function fetchMotocycles() {
 }
 
 onMounted(async () => {
-  await fetchMotocycles()
-  await fetchStats()
+  await Promise.all([fetchMotocycles(), fetchStats()])
 })
 </script>
 <template>
@@ -129,7 +120,7 @@ onMounted(async () => {
         aria-hidden="true"
       />
     </section>
-    <section class="max-lg:mx-[5%]!">
+    <section class="max-md:mx-[5%]! max-lg:mx-[8%]!">
       <div class="list">
         <article>
           <h2 class="h2-mobile max-lg:text-start">Un peu d'histoire</h2>
@@ -147,7 +138,7 @@ onMounted(async () => {
         <img src="/images/accueil/Hornet.png" alt="Moto" class="img-cover" />
       </div>
     </section>
-    <section class="basic-section max-lg:mx-[5%]!">
+    <section class="basic-section max-md:mx-[5%]! max-lg:mx-[8%]!">
       <h2 class="h2-mobile" style="text-align: center">
         <span style="color: var(--ui-primary)">Motocenter</span>
         en quelques chiffres
@@ -177,13 +168,13 @@ onMounted(async () => {
         </div>
       </article>
     </section>
-    <section class="basic-section max-lg:mx-[5%]!">
+    <section class="basic-section max-md:mx-[5%]! max-lg:mx-[8%]!">
       <h2 class="h2-mobile" style="text-align: center">Les best-sellers</h2>
       <ClientOnly>
         <CarrouselMotorcycles :items="itemsCaroussel" />
       </ClientOnly>
     </section>
-    <section class="invitation justify-content-center basic-section max-lg:mx-[10%]! max-lg:p-8! max-lg:gap-8!">
+    <section class="invitation justify-content-center basic-section max-md:mx-[10%]! max-lg:mx-[15%]! max-md:p-8! max-md:gap-8!">
       <h3 class="h3-mobile" style="text-align: center">
         Tester le comparateur dès maintenant !
       </h3>
@@ -198,13 +189,13 @@ onMounted(async () => {
         >
       </div>
     </section>
-    <section class="basic-section max-lg:mx-[5%]!">
+    <section class="basic-section max-md:mx-[5%]! max-lg:mx-[8%]!">
       <h2 class="h2-mobile" style="text-align: center">
         Ils nous font confiance
       </h2>
       <CarrouselSponsors />
     </section>
-    <section class="justify-content-center max-lg:mx-[5%]!">
+    <section class="justify-content-center max-md:mx-[5%]! max-lg:mx-[8%]!">
       <UButton
         size="xl"
         color="neutral"
@@ -360,6 +351,45 @@ section {
   height: 8rem;
   background-image: radial-gradient(circle, color-mix(in srgb, var(--ui-primary) 25%, transparent), transparent 70%);
   pointer-events: none;
+  animation: invitation-float-a 12s ease-in-out infinite;
+}
+
+.invitation::after {
+  content: '';
+  position: absolute;
+  inset: -3rem auto auto -3rem;
+  width: 10rem;
+  height: 10rem;
+  background-image: radial-gradient(circle, color-mix(in srgb, var(--ui-primary) 15%, transparent), transparent 70%);
+  pointer-events: none;
+  animation: invitation-float-b 16s ease-in-out infinite;
+}
+
+@keyframes invitation-float-a {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-1.5rem, -1rem) scale(1.15);
+  }
+}
+
+@keyframes invitation-float-b {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(1.5rem, 1rem) scale(1.1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .invitation::before,
+  .invitation::after {
+    animation: none;
+  }
 }
 
 :deep(.button) {

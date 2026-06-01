@@ -35,7 +35,7 @@ function handleCompareClick(itemId: string, imgUrl: string) {
     }"
   >
     <article
-      class="cursor-pointer max-lg:w-[180px]!"
+      class="cursor-pointer max-lg:w-[180px]! md:max-lg:w-[205px]!"
       @click="navigateTo(`/motorcycle/${item._id}`)"
     >
       <h5 class="no-select h5-mobile">{{ item.name }}</h5>
@@ -44,7 +44,7 @@ function handleCompareClick(itemId: string, imgUrl: string) {
         width="100"
         height="100"
         :alt="item.name"
-        class="rounded-lg max-lg:w-[70px]"
+        class="rounded-lg max-lg:w-[70px] md:max-lg:w-[85px]"
         loading="lazy"
       />
       <div id="description" class="no-select">
@@ -85,6 +85,13 @@ article {
 
   border: var(--border-thick) solid var(--background-secondary);
   border-radius: var(--radius-lg);
+  background:
+    radial-gradient(
+      circle at top right,
+      color-mix(in srgb, var(--ui-primary) 18%, transparent),
+      transparent 60%
+    ),
+    var(--background-secondary);
 
   padding: var(--space-sm) 0;
   margin: 0 var(--space-xs);
