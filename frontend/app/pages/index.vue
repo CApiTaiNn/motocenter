@@ -205,6 +205,8 @@ onMounted(async () => {
         <span class="air air-1" />
         <span class="air air-2" />
         <span class="air air-3" />
+        <span class="air air-4" />
+        <span class="air air-5" />
         <span class="fuel fuel-1" />
         <span class="fuel fuel-2" />
         <span class="fuel fuel-3" />
@@ -392,48 +394,63 @@ section {
 /* Air: horizontal streaks sweeping across */
 .air {
   position: absolute;
-  left: 0;
-  right: 0;
+  left: -45%;
+  height: 20px;
   background-color: var(--ui-primary);
-  /* irregular multi-crest wave (varying amplitudes) so the repeat looks organic */
-  -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20240%2040'%20preserveAspectRatio='none'%3E%3Cpath%20d='M0,20%20C20,6%2040,6%2060,20%20C75,28%2095,28%20110,20%20C130,4%20155,4%20175,20%20C195,34%20220,34%20240,20'%20fill='none'%20stroke='black'%20stroke-width='2.5'%20stroke-linecap='round'/%3E%3C/svg%3E")
-    repeat-x left center;
-  mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20240%2040'%20preserveAspectRatio='none'%3E%3Cpath%20d='M0,20%20C20,6%2040,6%2060,20%20C75,28%2095,28%20110,20%20C130,4%20155,4%20175,20%20C195,34%20220,34%20240,20'%20fill='none'%20stroke='black'%20stroke-width='2.5'%20stroke-linecap='round'/%3E%3C/svg%3E")
-    repeat-x left center;
+  /* a single flowing, asymmetric gust curve (not box-wide, not tiled) */
+  -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20200%2030'%20preserveAspectRatio='none'%3E%3Cpath%20d='M0,15%20C35,3%2065,27%20100,14%20C135,4%20165,26%20200,13'%20fill='none'%20stroke='black'%20stroke-width='2'%20stroke-linecap='round'/%3E%3C/svg%3E")
+    no-repeat center / 100% 100%;
+  mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20200%2030'%20preserveAspectRatio='none'%3E%3Cpath%20d='M0,15%20C35,3%2065,27%20100,14%20C135,4%20165,26%20200,13'%20fill='none'%20stroke='black'%20stroke-width='2'%20stroke-linecap='round'/%3E%3C/svg%3E")
+    no-repeat center / 100% 100%;
+  opacity: 0;
+  animation: carb-gust linear infinite;
 }
 
-/* each streamline a different size (amplitude via height, wavelength via mask
-   width) plus its own flow speed and slow vertical drift, so none stay in sync */
+/* 5 gusts: each a different width (wavelength), height (amplitude), vertical
+   position, speed, delay and drift, so the wind never repeats the same way */
 .air-1 {
-  top: 28%;
-  height: 22px;
-  -webkit-mask-size: 200px 100%;
-  mask-size: 200px 100%;
-  opacity: 0.5;
-  --drift: 4px;
-  animation: carb-flow-1 5s linear infinite, carb-drift 9s ease-in-out infinite;
+  top: 22%;
+  width: 38%;
+  height: 20px;
+  --o: 0.45;
+  --drift: 7px;
+  animation-duration: 9s;
 }
 .air-2 {
-  top: 48%;
-  height: 40px;
-  -webkit-mask-size: 320px 100%;
-  mask-size: 320px 100%;
-  opacity: 0.4;
-  --drift: 7px;
-  animation:
-    carb-flow-2 8s linear infinite,
-    carb-drift 13s ease-in-out infinite;
+  top: 40%;
+  width: 28%;
+  height: 15px;
+  --o: 0.35;
+  --drift: -5px;
+  animation-duration: 12s;
+  animation-delay: 2s;
 }
 .air-3 {
-  top: 66%;
-  height: 16px;
-  -webkit-mask-size: 150px 100%;
-  mask-size: 150px 100%;
-  opacity: 0.5;
-  --drift: -5px;
-  animation:
-    carb-flow-3 6.5s linear infinite,
-    carb-drift 11s ease-in-out infinite;
+  top: 56%;
+  width: 46%;
+  height: 26px;
+  --o: 0.4;
+  --drift: 9px;
+  animation-duration: 10s;
+  animation-delay: 4s;
+}
+.air-4 {
+  top: 70%;
+  width: 32%;
+  height: 14px;
+  --o: 0.32;
+  --drift: -6px;
+  animation-duration: 13s;
+  animation-delay: 1s;
+}
+.air-5 {
+  top: 32%;
+  width: 42%;
+  height: 22px;
+  --o: 0.4;
+  --drift: 6px;
+  animation-duration: 11s;
+  animation-delay: 6s;
 }
 
 /* Fuel: droplets rising from the bottom into the airflow */
@@ -474,46 +491,25 @@ section {
   animation-delay: 5s;
 }
 
-@keyframes carb-flow-1 {
-  from {
-    -webkit-mask-position: 0 center;
-    mask-position: 0 center;
-  }
-  to {
-    -webkit-mask-position: 200px center;
-    mask-position: 200px center;
-  }
-}
-
-@keyframes carb-flow-2 {
-  from {
-    -webkit-mask-position: 0 center;
-    mask-position: 0 center;
-  }
-  to {
-    -webkit-mask-position: 320px center;
-    mask-position: 320px center;
-  }
-}
-
-@keyframes carb-flow-3 {
-  from {
-    -webkit-mask-position: 0 center;
-    mask-position: 0 center;
-  }
-  to {
-    -webkit-mask-position: 150px center;
-    mask-position: 150px center;
-  }
-}
-
-@keyframes carb-drift {
-  0%,
-  100% {
+@keyframes carb-gust {
+  0% {
+    left: -45%;
+    opacity: 0;
     transform: translateY(0);
   }
+  15% {
+    opacity: var(--o, 0.4);
+  }
   50% {
-    transform: translateY(var(--drift, 5px));
+    transform: translateY(var(--drift, 6px));
+  }
+  85% {
+    opacity: var(--o, 0.4);
+  }
+  100% {
+    left: 110%;
+    opacity: 0;
+    transform: translateY(0);
   }
 }
 
