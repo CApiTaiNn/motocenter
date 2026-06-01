@@ -28,10 +28,10 @@ const isOpen = ref(true)
             :src="props.leftMotorcycleUrl"
             alt="Left Motorcycle"
           />
-          <img
+          <span
             v-if="!props.leftMotorcycleUrl"
-            src="/svg/motorcycleIcon.svg"
-            class="size-20"
+            class="skeleton-icon size-20"
+            aria-hidden="true"
           />
           <p>{{ props.leftName }}</p>
         </div>
@@ -47,10 +47,10 @@ const isOpen = ref(true)
             alt="Right Motorcycle"
             class="-scale-x-100"
           />
-          <img
+          <span
             v-if="!props.rightMotorcycleUrl"
-            src="/svg/motorcycleIcon.svg"
-            class="size-20 -scale-x-100"
+            class="skeleton-icon size-20 -scale-x-100"
+            aria-hidden="true"
           />
           <p>{{ props.rightName }}</p>
         </div>
@@ -108,6 +108,15 @@ const isOpen = ref(true)
 .motorcycle-left p,
 .motorcycle-right p {
   font-size: small;
+}
+
+/* Placeholder bike: tinted with the theme foreground so it stays visible
+   on the box's --background (white skeleton in dark mode, black in light). */
+.skeleton-icon {
+  display: inline-block;
+  background-color: var(--text-color);
+  -webkit-mask: url('/svg/motorcycleIcon.svg') center / contain no-repeat;
+  mask: url('/svg/motorcycleIcon.svg') center / contain no-repeat;
 }
 
 .motorcycle-left {
