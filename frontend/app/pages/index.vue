@@ -347,41 +347,67 @@ section {
   content: '';
   position: absolute;
   inset: auto -2rem -2rem auto;
-  width: 8rem;
-  height: 8rem;
-  background-image: radial-gradient(circle, color-mix(in srgb, var(--ui-primary) 25%, transparent), transparent 70%);
+  width: 11rem;
+  height: 11rem;
+  background-image: radial-gradient(circle, color-mix(in srgb, var(--ui-primary) 35%, transparent), transparent 70%);
   pointer-events: none;
-  animation: invitation-float-a 12s ease-in-out infinite;
+  animation: invitation-float-a 7s ease-in-out infinite;
 }
 
 .invitation::after {
   content: '';
   position: absolute;
   inset: -3rem auto auto -3rem;
-  width: 10rem;
-  height: 10rem;
-  background-image: radial-gradient(circle, color-mix(in srgb, var(--ui-primary) 15%, transparent), transparent 70%);
+  width: 13rem;
+  height: 13rem;
+  background-image: radial-gradient(circle, color-mix(in srgb, var(--ui-primary) 24%, transparent), transparent 70%);
   pointer-events: none;
-  animation: invitation-float-b 16s ease-in-out infinite;
+  animation: invitation-float-b 9s ease-in-out infinite;
 }
 
 @keyframes invitation-float-a {
-  0%,
-  100% {
+  0% {
     transform: translate(0, 0) scale(1);
+    opacity: 0.7;
+  }
+  25% {
+    transform: translate(-3rem, -1.5rem) scale(1.3);
+    opacity: 1;
   }
   50% {
-    transform: translate(-1.5rem, -1rem) scale(1.15);
+    transform: translate(-1rem, -3.5rem) scale(1.1);
+    opacity: 0.85;
+  }
+  75% {
+    transform: translate(-3.5rem, -0.5rem) scale(1.25);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.7;
   }
 }
 
 @keyframes invitation-float-b {
-  0%,
-  100% {
+  0% {
     transform: translate(0, 0) scale(1);
+    opacity: 0.6;
+  }
+  25% {
+    transform: translate(3rem, 2rem) scale(1.25);
+    opacity: 0.95;
   }
   50% {
-    transform: translate(1.5rem, 1rem) scale(1.1);
+    transform: translate(4rem, -1rem) scale(1.1);
+    opacity: 0.75;
+  }
+  75% {
+    transform: translate(1.5rem, 3rem) scale(1.3);
+    opacity: 0.95;
+  }
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.6;
   }
 }
 
