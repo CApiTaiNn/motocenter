@@ -145,7 +145,6 @@ onMounted(async () => {
       </h2>
       <article class="column">
         <div class="stats-group">
-          <h4 class="stats-group-label">En chiffres</h4>
           <div class="row justify-content-center max-lg:gap-4!">
             <StatsHome
               v-for="item in dynamicStats"
@@ -156,7 +155,6 @@ onMounted(async () => {
           </div>
         </div>
         <div class="stats-group">
-          <h4 class="stats-group-label">Notre promesse</h4>
           <div class="row justify-content-center max-lg:gap-4!">
             <StatsHome
               v-for="item in itemsTab"
@@ -251,15 +249,6 @@ section {
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
-}
-
-.stats-group-label {
-  text-align: center;
-  font-family: 'Krona One', sans-serif;
-  font-size: 14px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-gray-mid);
 }
 
 .title {
