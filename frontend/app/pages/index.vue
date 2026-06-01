@@ -394,29 +394,46 @@ section {
   position: absolute;
   left: 0;
   right: 0;
-  height: 26px;
   background-color: var(--ui-primary);
-  /* one sine period that tiles seamlessly; the mask scrolls right => flow */
-  -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2090%2024'%20preserveAspectRatio='none'%3E%3Cpath%20d='M0,12%20C15,4%2030,4%2045,12%20S75,20%2090,12'%20fill='none'%20stroke='black'%20stroke-width='2.5'%20stroke-linecap='round'/%3E%3C/svg%3E")
-    repeat-x left center / 90px 100%;
-  mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2090%2024'%20preserveAspectRatio='none'%3E%3Cpath%20d='M0,12%20C15,4%2030,4%2045,12%20S75,20%2090,12'%20fill='none'%20stroke='black'%20stroke-width='2.5'%20stroke-linecap='round'/%3E%3C/svg%3E")
-    repeat-x left center / 90px 100%;
-  animation: carb-air linear infinite;
+  /* irregular multi-crest wave (varying amplitudes) so the repeat looks organic */
+  -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20240%2040'%20preserveAspectRatio='none'%3E%3Cpath%20d='M0,20%20C20,6%2040,6%2060,20%20C75,28%2095,28%20110,20%20C130,4%20155,4%20175,20%20C195,34%20220,34%20240,20'%20fill='none'%20stroke='black'%20stroke-width='2.5'%20stroke-linecap='round'/%3E%3C/svg%3E")
+    repeat-x left center;
+  mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20240%2040'%20preserveAspectRatio='none'%3E%3Cpath%20d='M0,20%20C20,6%2040,6%2060,20%20C75,28%2095,28%20110,20%20C130,4%20155,4%20175,20%20C195,34%20220,34%20240,20'%20fill='none'%20stroke='black'%20stroke-width='2.5'%20stroke-linecap='round'/%3E%3C/svg%3E")
+    repeat-x left center;
 }
+
+/* each streamline a different size (amplitude via height, wavelength via mask
+   width) plus its own flow speed and slow vertical drift, so none stay in sync */
 .air-1 {
-  top: 30%;
-  opacity: 0.55;
-  animation-duration: 4.5s;
+  top: 28%;
+  height: 22px;
+  -webkit-mask-size: 200px 100%;
+  mask-size: 200px 100%;
+  opacity: 0.5;
+  --drift: 4px;
+  animation: carb-flow-1 5s linear infinite, carb-drift 9s ease-in-out infinite;
 }
 .air-2 {
-  top: 50%;
-  opacity: 0.45;
-  animation-duration: 6s;
+  top: 48%;
+  height: 40px;
+  -webkit-mask-size: 320px 100%;
+  mask-size: 320px 100%;
+  opacity: 0.4;
+  --drift: 7px;
+  animation:
+    carb-flow-2 8s linear infinite,
+    carb-drift 13s ease-in-out infinite;
 }
 .air-3 {
-  top: 68%;
+  top: 66%;
+  height: 16px;
+  -webkit-mask-size: 150px 100%;
+  mask-size: 150px 100%;
   opacity: 0.5;
-  animation-duration: 5.2s;
+  --drift: -5px;
+  animation:
+    carb-flow-3 6.5s linear infinite,
+    carb-drift 11s ease-in-out infinite;
 }
 
 /* Fuel: droplets rising from the bottom into the airflow */
@@ -457,14 +474,46 @@ section {
   animation-delay: 5s;
 }
 
-@keyframes carb-air {
+@keyframes carb-flow-1 {
   from {
     -webkit-mask-position: 0 center;
     mask-position: 0 center;
   }
   to {
-    -webkit-mask-position: 90px center;
-    mask-position: 90px center;
+    -webkit-mask-position: 200px center;
+    mask-position: 200px center;
+  }
+}
+
+@keyframes carb-flow-2 {
+  from {
+    -webkit-mask-position: 0 center;
+    mask-position: 0 center;
+  }
+  to {
+    -webkit-mask-position: 320px center;
+    mask-position: 320px center;
+  }
+}
+
+@keyframes carb-flow-3 {
+  from {
+    -webkit-mask-position: 0 center;
+    mask-position: 0 center;
+  }
+  to {
+    -webkit-mask-position: 150px center;
+    mask-position: 150px center;
+  }
+}
+
+@keyframes carb-drift {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(var(--drift, 5px));
   }
 }
 
