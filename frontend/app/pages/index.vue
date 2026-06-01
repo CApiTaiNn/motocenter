@@ -381,7 +381,7 @@ section {
   z-index: 0;
   overflow: hidden;
   pointer-events: none;
-  filter: blur(1.5px);
+  filter: blur(3px);
 }
 
 .invitation > :not(.carb-anim) {
@@ -394,7 +394,7 @@ section {
   position: absolute;
   left: -50%;
   width: 45%;
-  height: 3px;
+  height: 4px;
   border-radius: var(--radius-full);
   background: linear-gradient(
     90deg,
@@ -426,8 +426,8 @@ section {
 .fuel {
   position: absolute;
   bottom: -4%;
-  width: 9px;
-  height: 11px;
+  width: 10px;
+  height: 13px;
   border-radius: 50% 50% 50% 50% / 65% 65% 35% 35%;
   background: radial-gradient(
     circle at 50% 35%,
@@ -463,9 +463,22 @@ section {
   0% {
     left: -50%;
     opacity: 0;
+    transform: translateY(0);
   }
   12% {
     opacity: 0.85;
+  }
+  20% {
+    transform: translateY(-6px);
+  }
+  40% {
+    transform: translateY(5px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
+  80% {
+    transform: translateY(6px);
   }
   88% {
     opacity: 0.85;
@@ -473,6 +486,7 @@ section {
   100% {
     left: 105%;
     opacity: 0;
+    transform: translateY(0);
   }
 }
 
@@ -480,20 +494,32 @@ section {
   0% {
     bottom: -4%;
     opacity: 0;
-    transform: translateX(0) scale(1);
+    transform: translate(0, 0) scale(1);
   }
   12% {
     opacity: 0.9;
   }
+  25% {
+    transform: translate(-7px, 0) scale(0.95);
+  }
+  40% {
+    transform: translate(7px, 0) scale(0.9);
+  }
   50% {
     bottom: 46%;
     opacity: 0.9;
-    transform: translateX(12px) scale(0.85);
+    transform: translate(0, 0) scale(0.85);
+  }
+  65% {
+    transform: translate(45px, -9px) scale(0.78);
+  }
+  80% {
+    transform: translate(90px, 7px) scale(0.68);
   }
   100% {
-    bottom: 50%;
+    bottom: 46%;
     opacity: 0;
-    transform: translateX(130px) scale(0.55);
+    transform: translate(145px, -5px) scale(0.5);
   }
 }
 
