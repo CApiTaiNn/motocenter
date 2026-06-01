@@ -20,18 +20,20 @@ const stats = ref<Stat[]>([])
 
 async function fetchStats() {
   try {
-    const totalUsers = await $fetch<number>(`${apiBase}users/count`)
-    const totalBikes = await $fetch<number>(`${apiBase}motorcycles/count`)
-
     const today = new Date()
     today.setHours(0, 0, 0, 0)
 
-    const resToday = await $fetch<{ users: IUser[] }>(
-      `${apiBase}users?filter=${JSON.stringify({ createdAt: { $gte: today } })}`
-    )
-
-    const resPostsToday = await $fetch<{ posts: any[] }>(
-      `${apiBase}posts?filter=${JSON.stringify({ createdAt: { $gte: today } })}`
+    const [totalUsers, totalBikes, resToday, resPostsToday] = await Promise.all(
+      [
+        $fetch<number>(`${apiBase}users/count`),
+        $fetch<number>(`${apiBase}motorcycles/count`),
+        $fetch<{ users: IUser[] }>(
+          `${apiBase}users?filter=${JSON.stringify({ createdAt: { $gte: today } })}`
+        ),
+        $fetch<{ posts: any[] }>(
+          `${apiBase}posts?filter=${JSON.stringify({ createdAt: { $gte: today } })}`
+        )
+      ]
     )
 
     stats.value = [

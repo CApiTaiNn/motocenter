@@ -152,83 +152,41 @@ async function fetchMotocycles() {
 async function fetchCarrouselMotorcycles() {
   const project = 'name,horsePower,torque,price, imageUrl'
   const limit = 10
-  // SportsBikes for Carrousel
-  const sportBikesData = await $fetch<{ motorcycles: IMotorcycle[] }>(
-    `${apiBase}motorcycles`,
-    {
-      params: {
-        filter: JSON.stringify({
-          category: 'sportsbike'
-        }),
-        project,
-        limit
-      }
-    }
+  const groups = [
+    { target: carousselSportBikes, filter: { category: 'sportsbike' } },
+    { target: carousselBeginnerBikes, filter: { isAvailableA2: true } },
+    { target: carousselAdventureBikes, filter: { category: 'adventure' } }
+  ]
+  await Promise.all(
+    groups.map(async ({ target, filter }) => {
+      const data = await $fetch<{ motorcycles: IMotorcycle[] }>(
+        `${apiBase}motorcycles`,
+        { params: { filter: JSON.stringify(filter), project, limit } }
+      )
+      target.value = data.motorcycles
+    })
   )
-  // Beginners Bikes for Carrousel
-  const beginnerBikesData = await $fetch<{ motorcycles: IMotorcycle[] }>(
-    `${apiBase}motorcycles`,
-    {
-      params: {
-        filter: JSON.stringify({
-          isAvailableA2: true
-        }),
-        project,
-        limit
-      }
-    }
-  )
-  // Adventure Bikes for Carrousel
-  const adventureBikesData = await $fetch<{ motorcycles: IMotorcycle[] }>(
-    `${apiBase}motorcycles`,
-    {
-      params: {
-        filter: JSON.stringify({
-          category: 'adventure'
-        }),
-        project,
-        limit
-      }
-    }
-  )
-  carousselSportBikes.value = sportBikesData.motorcycles
-  carousselBeginnerBikes.value = beginnerBikesData.motorcycles
-  carousselAdventureBikes.value = adventureBikesData.motorcycles
 }
 
 async function fetchMessages() {
+  const loadComments = (postId: string) =>
+    $fetch<{ messages: IMessage[] }>(`${apiBase}posts/${postId}/responses`, {
+      params: {
+        project:
+          'content, user, createdAt, like, dislike,usersLikeId,usersDislikeId',
+        deep: true,
+        limit: 5
+      }
+    })
+
   const post1 = motorcycle1.value?.post
   const post2 = motorcycle2.value?.post
-
-  if (post1) {
-    const data = await $fetch<{ messages: IMessage[] }>(
-      `${apiBase}posts/${post1}/responses`,
-      {
-        params: {
-          project:
-            'content, user, createdAt, like, dislike,usersLikeId,usersDislikeId',
-          deep: true,
-          limit: 5
-        }
-      }
-    )
-    commentsMotorcycle1.value = data.messages
-  }
-
-  if (post2) {
-    const data = await $fetch<{ messages: IMessage[] }>(
-      `${apiBase}posts/${post2}/responses`,
-      {
-        params: {
-          project:
-            'content, user, createdAt, like, dislike,usersLikeId,usersDislikeId',
-          deep: true,
-          limit: 5
-        }
-      }
-    )
-    commentsMotorcycle2.value = data.messages
-  }
+  const [data1, data2] = await Promise.all([
+    post1 ? loadComments(post1) : null,
+    post2 ? loadComments(post2) : null
+  ])
+  if (data1) commentsMotorcycle1.value = data1.messages
+  if (data2) commentsMotorcycle2.value = data2.messages
 }
 
 async function postComment() {
@@ -461,7 +419,7 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
               </div>
             </div>
           </div>
-          <div class="input-comment-box max-lg:m-[1.5rem_1rem]! max-lg:w-auto! max-lg:min-h-[auto]!">
+          <div class="input-comment-box">
             <div v-if="!isAuthenticated" class="need-connection max-lg:w-[90%]! max-lg:flex! max-lg:flex-col max-lg:items-center! max-lg:gap-4">
               <h3 class="h3-mobile max-lg:w-auto! max-lg:text-lg!">
                 Rejoignez la communauté pour débattre et partager vos avis sur
@@ -477,7 +435,7 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
             </div>
             <div
               v-if="!messagePosted"
-              class="input-comment-container max-lg:min-h-[auto]! max-lg:p-4!"
+              class="input-comment-container"
               :class="{ blurred: !isAuthenticated }"
             >
               <h4>
@@ -507,7 +465,7 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
             </div>
             <div
               v-else
-              class="input-posted-container max-lg:min-h-[auto]! max-lg:p-4!"
+              class="input-posted-container"
               :class="{ blurred: !isAuthenticated }"
             >
               <h4>Merci pour votre contribution !</h4>
@@ -519,7 +477,7 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
           </div>
         </div>
       </Transition>
-      <div class="caroussel-container max-lg:mx-4!">
+      <div class="caroussel-container max-md:mx-4! max-lg:mx-[6%]!">
         <div>
           <h3 class="h3-mobile">Pour la performance</h3>
           <CarrouselMotorcycles
@@ -689,34 +647,6 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
   text-align: left;
 }
 
-/* Commentaires Display */
-.display-comment-container {
-  display: flex;
-  gap: var(--space-xl);
-  margin: var(--space-2xl) 10%;
-  justify-content: center;
-}
-
-.left-display-comment,
-.right-display-comment {
-  flex: 1;
-  border: var(--border-thin) solid var(--color-gray-light);
-  border-radius: var(--radius-lg);
-  padding: var(--space-xl);
-  max-width: 50%;
-  height: fit-content;
-}
-
-.left-display-comment h4,
-.right-display-comment h4 {
-  text-align: center;
-  margin-bottom: var(--space-lg);
-}
-
-.left-display-comment p,
-.right-display-comment p {
-  text-align: center;
-}
 
 /* Commentaires Input */
 .input-comment-box {
@@ -757,6 +687,27 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
 
 .input-posted-container p {
   text-align: center;
+}
+
+/* Tablet/mobile: box shrinks toward full-width as the viewport narrows */
+@media (max-width: 1024px) {
+  .input-comment-box {
+    margin-inline: 12%;
+    width: 76%;
+    min-height: auto;
+  }
+  .input-comment-container,
+  .input-posted-container {
+    min-height: auto;
+    padding: var(--space-md);
+  }
+}
+
+@media (max-width: 768px) {
+  .input-comment-box {
+    margin: var(--space-lg) var(--space-md);
+    width: auto;
+  }
 }
 
 .comment-input {

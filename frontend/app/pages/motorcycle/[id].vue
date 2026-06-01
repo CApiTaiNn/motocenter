@@ -220,8 +220,7 @@ async function postComment() {
 }
 
 onMounted(async () => {
-  await fetchData()
-  await fetchMax()
+  await Promise.all([fetchData(), fetchMax()])
   await fetchMessages()
 })
 
@@ -249,23 +248,24 @@ watch(
 <template>
   <div v-if="m" class="main-content">
     <h1 class="title">{{ m.name }}</h1>
-    <img :src="m.imageUrl" :alt="`Image de la moto ${m.name}`" class="img-cover moto-left" />
+    <img :src="m.imageUrl" :alt="`Image de la moto ${m.name}`" class="img-cover moto-left max-md:w-[90%]! max-lg:w-[70%]!" />
 
-    <div class="detail">
+    <div class="detail max-md:w-[90%]! max-lg:w-[70%]!">
       <p><span>Marque:</span> {{ m.brand.name }}</p>
       <p><span>Modèle:</span> {{ m.name }}</p>
       <p><span>Année:</span> {{ m.year }}</p>
       <p><span>Moteur:</span> {{ m.engine_size }} m3</p>
     </div>
 
-    <div ref="statsRef" class="stats-section">
+    <div ref="statsRef" class="stats-section max-md:w-[90%]! max-lg:w-[75%]!">
       <h3>Caractéristiques</h3>
       <div v-for="group in statsGroups" :key="group.label" class="stats-group">
         <h4 class="stats-group-label">{{ group.label }}</h4>
         <div class="stats-grid">
           <div v-for="stat in group.stats" :key="stat.label" class="stat-card">
             <span class="stat-label">{{ stat.label }}</span>
-            <CountUp :key="countStarted ? stat.label : ''" class="stat-value" :end-val="Number(stat.value)" :duration="2"
+            <CountUp
+:key="countStarted ? stat.label : ''" class="stat-value" :end-val="Number(stat.value)" :duration="2"
               :options="getCountUpOptions(stat.key)" :autoplay="true" />
             <div class="bar-outer">
               <div class="bar-fill" :style="{ width: stat.percent + '%' }"></div>
@@ -275,7 +275,7 @@ watch(
       </div>
     </div>
 
-    <UCard class="sound-section">
+    <UCard class="sound-section max-md:w-[90%]! max-lg:w-[75%]!">
       <div class="sound-header">
         <UIcon name="i-lucide-audio-waveform" class="size-6 text-(--ui-primary)" />
         <h4>Son moteur</h4>
@@ -285,9 +285,9 @@ watch(
     </UCard>
 
     <h4>Commentaires présents sur la moto</h4>
-    <div v-if="commentsMotorcycle.length > 0" class="display-comment">
-      <div v-for="comment in commentsMotorcycle" :key="comment._id">
-        <Comment :response="comment" />
+    <div v-if="commentsMotorcycle.length > 0" class="display-comment max-md:max-w-[95%]! max-lg:max-w-[72%]!">
+      <div v-for="motoComment in commentsMotorcycle" :key="motoComment._id">
+        <Comment :response="motoComment" />
       </div>
     </div>
     <p v-else>Aucun commentaire sur la moto, ajouter le premier.</p>
@@ -311,7 +311,8 @@ watch(
           Faite le savoir à la communauté !
         </h4>
         <div class="comment-input">
-          <UTextarea v-model="comment.content" size="xl"
+          <UTextarea
+v-model="comment.content" size="xl"
             placeholder="Un retour d'expérience, un conseil d'entretien ou encore une question" />
         </div>
         <UButton class="rounded-4xl self-end text-xs m-1" size="xl" @click="postComment">Poster</UButton>
@@ -332,24 +333,24 @@ watch(
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: 1em;
+  margin-top: var(--space-md);
 }
 
 .main-content {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2em;
-  padding-bottom: 4em;
+  gap: var(--space-xl);
+  padding-bottom: var(--space-3xl);
 }
 
 .detail {
   display: flex;
   flex-direction: column;
-  gap: 0.5em;
+  gap: var(--space-xs);
   border: var(--border-thin) solid var(--border-gray);
   border-radius: var(--radius-sm);
-  padding: 1em;
+  padding: var(--space-md);
   width: 50%;
 }
 
@@ -363,17 +364,17 @@ span {
 
 .stats-section h3 {
   text-align: center;
-  margin-bottom: 1em;
+  margin-bottom: var(--space-md);
 }
 
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 1em;
+  gap: var(--space-md);
 }
 
 .stats-group {
-  margin-bottom: 2em;
+  margin-bottom: var(--space-xl);
 }
 
 .stats-group-label {
@@ -382,8 +383,8 @@ span {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-gray-mid);
-  margin-bottom: 0.75em;
-  padding-left: 0.25em;
+  margin-bottom: var(--space-sm);
+  padding-left: var(--space-2xs);
   border-left: 3px solid var(--ui-primary);
 }
 
@@ -423,10 +424,10 @@ span {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 1em;
+  padding: var(--space-md);
   border: var(--border-thin) solid var(--color-gray-light);
   border-radius: var(--radius-sm);
-  gap: 0.5em;
+  gap: var(--space-xs);
 }
 
 .stat-label {
@@ -441,11 +442,11 @@ span {
 }
 
 .sound-section {
-  margin-top: 2em;
+  margin-top: var(--space-xl);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5em;
+  gap: var(--space-xs);
 }
 
 .motorcycle-image {
@@ -541,6 +542,27 @@ span {
 
 .input-posted-container p {
   text-align: center;
+}
+
+/* Tablet/mobile: box shrinks toward full-width as the viewport narrows */
+@media (max-width: 1024px) {
+  .input-comment-box {
+    margin-inline: 12%;
+    width: 76%;
+    min-height: auto;
+  }
+  .input-comment-container,
+  .input-posted-container {
+    min-height: auto;
+    padding: var(--space-md);
+  }
+}
+
+@media (max-width: 768px) {
+  .input-comment-box {
+    margin: var(--space-lg) var(--space-md);
+    width: auto;
+  }
 }
 
 .blurred {

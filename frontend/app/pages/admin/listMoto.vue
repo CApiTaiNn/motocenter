@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import Header from '~/components/admin/Header.vue'
 import { h, resolveComponent } from 'vue'
 import CardMoto from '../../components/admin/CardMoto.vue'
 import type { IMotorcycle } from '~/types/motorcycles'
@@ -221,7 +220,7 @@ watch(
       </div>
 
       <h3 class="header-list">Liste des motos</h3>
-      <div class="main-content">
+      <div class="main-content max-lg:flex-col">
         <div class="table-moto">
           <UTable
             ref="table"
@@ -263,7 +262,7 @@ watch(
             />
           </div>
         </div>
-        <div v-if="panelOpen" class="panel-moto">
+        <div v-if="panelOpen" class="panel-moto max-lg:w-full! max-lg:static!">
           <header class="panel-header">
             <UIcon
               :name="selectedMoto ? 'i-lucide-pencil' : 'i-lucide-plus-circle'"
@@ -296,13 +295,7 @@ watch(
 
 .table-moto {
   flex: 1;
-  padding: 1em;
-}
-.panel-moto {
-  margin: 2em;
-  border: var(--border-thin) solid var(--border-gray);
-  border-radius: var(--radius-md);
-  padding: 1em;
+  padding: var(--space-md);
 }
 
 .panel-header {
@@ -321,14 +314,14 @@ watch(
 }
 
 .header-list {
-  margin-left: 1em;
+  margin-left: var(--space-md);
 }
 
 .panel-moto {
-  margin: 2em;
+  margin: var(--space-xl);
   border: var(--border-thin) solid var(--border-gray);
   border-radius: var(--radius-md);
-  padding: 1em;
+  padding: var(--space-md);
   height: calc(150vh - 200px);
   overflow-y: auto;
   position: sticky;
