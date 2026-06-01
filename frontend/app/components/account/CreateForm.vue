@@ -26,13 +26,6 @@ const state = reactive({
 
 const experienceLevels = ['Débutant', 'Confirmé', 'Expert', 'Autre']
 
-type Schema = typeof state
-
-const isValidEmail = (email: string) => {
-  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  return re.test(email)
-}
-
 // Validation par étape
 const validateStep = (step: number): FormError[] => {
   const errors: FormError[] = []

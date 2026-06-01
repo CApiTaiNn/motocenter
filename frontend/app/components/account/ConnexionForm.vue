@@ -50,14 +50,11 @@ const resetForm = () => {
   error.value = ''
 }
 
-watch(
-  () => isOpen.value,
-  (newVal) => {
-    if (!newVal) {
-      resetForm()
-    }
+watch(isOpen, (newVal) => {
+  if (!newVal) {
+    resetForm()
   }
-)
+})
 </script>
 
 <template>

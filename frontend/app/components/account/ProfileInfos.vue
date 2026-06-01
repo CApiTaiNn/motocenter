@@ -42,9 +42,9 @@ const ridingYears = computed(() => {
 })
 
 watch(
-  () => !isOpen.value,
-  (newVal) => {
-    if (!newVal) {
+  isOpen,
+  (open) => {
+    if (open) {
       fillProfil()
     }
   }

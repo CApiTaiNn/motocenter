@@ -26,11 +26,6 @@ const state = reactive({
 const imagePreview = ref<string>('')
 const experienceOptions = ['Débutant', 'Confirmé', 'Expert', 'Autre']
 
-const isValidEmail = (email: string) => {
-  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  return re.test(email)
-}
-
 const fillProfil = () => {
   state.firstname = user.value?.firstname || ''
   state.lastname = user.value?.lastname || ''
