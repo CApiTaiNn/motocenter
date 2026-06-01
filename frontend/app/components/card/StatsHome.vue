@@ -19,7 +19,7 @@ const props = defineProps<{
       <CountUp
         v-if="props.started"
         :end-val="props.value"
-        :duration="2"
+        :duration="3.5"
       />
       <span v-else>0</span>
       {{ props.suffix }}

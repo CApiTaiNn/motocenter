@@ -268,7 +268,7 @@ watch(
               v-if="countStarted"
               class="stat-value"
               :end-val="Number(stat.value)"
-              :duration="2"
+              :duration="3.5"
               :options="getCountUpOptions(stat.key)"
             />
             <span v-else class="stat-value">0</span>
