@@ -13,11 +13,21 @@ interface IItemTab {
   urlImg: string
 }
 
+interface IStatCount {
+  value: number
+  suffix: string
+  urlImg: string
+}
+
 const connexionModal = useConnexionModal()
 
 const itemsCaroussel = ref<IMotorcycle[]>([])
 const apiBase = useRuntimeConfig().public.apiBase
-const dynamicStats = ref<IItemTab[]>([])
+const dynamicStats = ref<IStatCount[]>([])
+
+// Count-up only starts once the stats row scrolls into view
+const statsRow = ref<HTMLElement | null>(null)
+const statsStarted = ref(false)
 const itemsTab = reactive<IItemTab[]>([
   {
     content: 'Base de données complètes',
@@ -36,23 +46,26 @@ const itemsTab = reactive<IItemTab[]>([
 async function fetchStats() {
   // Independent count endpoints — fetch concurrently
   const [totalBrands, totalHorsePower, totalMotorcycles] = await Promise.all([
-    $fetch<{ totalBrands: number }>(`${apiBase}brands/count`),
-    $fetch<{ totalHorsePower: number }>(`${apiBase}motorcycles/stats`),
-    $fetch<{ totalMotorcycles: number }>(`${apiBase}motorcycles/count`)
+    $fetch<number>(`${apiBase}brands/count`),
+    $fetch<number>(`${apiBase}motorcycles/stats`),
+    $fetch<number>(`${apiBase}motorcycles/count`)
   ])
 
   dynamicStats.value.push({
-    content: `${totalBrands} Marques`,
+    value: totalBrands,
+    suffix: 'Marques',
     urlImg: '/images/accueil/icon_Binocle.png'
   })
   if (totalHorsePower)
     dynamicStats.value.push({
-      content: `${totalHorsePower} Chevaux`,
+      value: totalHorsePower,
+      suffix: 'Chevaux',
       urlImg: '/images/accueil/icon_Settings.png'
     })
   if (totalMotorcycles)
     dynamicStats.value.push({
-      content: `${totalMotorcycles} Motos`,
+      value: totalMotorcycles,
+      suffix: 'Motos',
       urlImg: '/images/accueil/icon_moto.png'
     })
 }
@@ -69,6 +82,19 @@ async function fetchMotocycles() {
 }
 
 onMounted(async () => {
+  if (statsRow.value) {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) {
+          statsStarted.value = true
+          observer.disconnect()
+        }
+      },
+      { threshold: 0.2 }
+    )
+    observer.observe(statsRow.value)
+  }
+
   await Promise.all([fetchMotocycles(), fetchStats()])
 })
 </script>
@@ -145,12 +171,14 @@ onMounted(async () => {
       </h2>
       <article class="column">
         <div class="stats-group">
-          <div class="row justify-content-center max-lg:gap-4!">
+          <div ref="statsRow" class="row justify-content-center max-lg:gap-4!">
             <StatsHome
               v-for="item in dynamicStats"
-              :key="item.content"
-              :content="item.content"
+              :key="item.suffix"
+              :value="item.value"
+              :suffix="item.suffix"
               :url-img="item.urlImg"
+              :started="statsStarted"
             />
           </div>
         </div>

@@ -265,8 +265,13 @@ watch(
           <div v-for="stat in group.stats" :key="stat.label" class="stat-card">
             <span class="stat-label">{{ stat.label }}</span>
             <CountUp
-:key="countStarted ? stat.label : ''" class="stat-value" :end-val="Number(stat.value)" :duration="2"
-              :options="getCountUpOptions(stat.key)" :autoplay="true" />
+              v-if="countStarted"
+              class="stat-value"
+              :end-val="Number(stat.value)"
+              :duration="2"
+              :options="getCountUpOptions(stat.key)"
+            />
+            <span v-else class="stat-value">0</span>
             <div class="bar-outer">
               <div class="bar-fill" :style="{ width: stat.percent + '%' }"></div>
             </div>
