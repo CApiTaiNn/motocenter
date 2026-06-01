@@ -201,6 +201,15 @@ onMounted(async () => {
       </ClientOnly>
     </section>
     <section class="invitation justify-content-center basic-section max-md:mx-[10%]! max-lg:mx-[15%]! max-md:p-8! max-md:gap-8!">
+      <div class="carb-anim" aria-hidden="true">
+        <span class="air air-1" />
+        <span class="air air-2" />
+        <span class="air air-3" />
+        <span class="fuel fuel-1" />
+        <span class="fuel fuel-2" />
+        <span class="fuel fuel-3" />
+        <span class="fuel fuel-4" />
+      </div>
       <h3 class="h3-mobile" style="text-align: center">
         Tester le comparateur dès maintenant !
       </h3>
@@ -238,6 +247,9 @@ main {
   display: flex;
   flex-direction: column;
   gap: var(--space-5xl);
+  /* the slide-in animations start at translateX(±100vw); clip the resulting
+     horizontal overflow so it doesn't show a page-wide x-scrollbar */
+  overflow-x: hidden;
 }
 
 section {
@@ -360,78 +372,136 @@ section {
   overflow: hidden;
 }
 
-.invitation::before {
-  content: '';
+/* Carburetor-style background: red air streaks flow left → right while fuel
+   droplets rise from the bottom, merge into the airflow (~mid height) and get
+   carried off to the right. Blurred, slow, and kept behind the box content. */
+.carb-anim {
   position: absolute;
-  inset: auto -2rem -2rem auto;
-  width: 11rem;
-  height: 11rem;
-  background-image: radial-gradient(circle, color-mix(in srgb, var(--ui-primary) 35%, transparent), transparent 70%);
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
   pointer-events: none;
-  animation: invitation-float-a 7s ease-in-out infinite;
+  filter: blur(1.5px);
 }
 
-.invitation::after {
-  content: '';
-  position: absolute;
-  inset: -3rem auto auto -3rem;
-  width: 13rem;
-  height: 13rem;
-  background-image: radial-gradient(circle, color-mix(in srgb, var(--ui-primary) 24%, transparent), transparent 70%);
-  pointer-events: none;
-  animation: invitation-float-b 9s ease-in-out infinite;
+.invitation > :not(.carb-anim) {
+  position: relative;
+  z-index: 1;
 }
 
-@keyframes invitation-float-a {
+/* Air: horizontal streaks sweeping across */
+.air {
+  position: absolute;
+  left: -50%;
+  width: 45%;
+  height: 3px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--ui-primary) 70%, transparent),
+    transparent
+  );
+  opacity: 0;
+  animation: carb-air linear infinite;
+}
+.air-1 {
+  top: 32%;
+  animation-duration: 7s;
+}
+.air-2 {
+  top: 50%;
+  width: 55%;
+  animation-duration: 9s;
+  animation-delay: 1.4s;
+}
+.air-3 {
+  top: 67%;
+  width: 38%;
+  animation-duration: 8s;
+  animation-delay: 3s;
+}
+
+/* Fuel: droplets rising from the bottom into the airflow */
+.fuel {
+  position: absolute;
+  bottom: -4%;
+  width: 9px;
+  height: 11px;
+  border-radius: 50% 50% 50% 50% / 65% 65% 35% 35%;
+  background: radial-gradient(
+    circle at 50% 35%,
+    color-mix(in srgb, var(--ui-primary) 90%, transparent),
+    color-mix(in srgb, var(--ui-primary) 30%, transparent) 70%,
+    transparent 72%
+  );
+  opacity: 0;
+  animation: carb-fuel ease-in infinite;
+}
+.fuel-1 {
+  left: 18%;
+  animation-duration: 6.5s;
+  animation-delay: 0.5s;
+}
+.fuel-2 {
+  left: 38%;
+  animation-duration: 8s;
+  animation-delay: 2.2s;
+}
+.fuel-3 {
+  left: 58%;
+  animation-duration: 7s;
+  animation-delay: 3.6s;
+}
+.fuel-4 {
+  left: 30%;
+  animation-duration: 9s;
+  animation-delay: 5s;
+}
+
+@keyframes carb-air {
   0% {
-    transform: translate(0, 0) scale(1);
-    opacity: 0.7;
+    left: -50%;
+    opacity: 0;
   }
-  25% {
-    transform: translate(-3rem, -1.5rem) scale(1.3);
-    opacity: 1;
-  }
-  50% {
-    transform: translate(-1rem, -3.5rem) scale(1.1);
+  12% {
     opacity: 0.85;
   }
-  75% {
-    transform: translate(-3.5rem, -0.5rem) scale(1.25);
-    opacity: 1;
+  88% {
+    opacity: 0.85;
   }
   100% {
-    transform: translate(0, 0) scale(1);
-    opacity: 0.7;
+    left: 105%;
+    opacity: 0;
   }
 }
 
-@keyframes invitation-float-b {
+@keyframes carb-fuel {
   0% {
-    transform: translate(0, 0) scale(1);
-    opacity: 0.6;
+    bottom: -4%;
+    opacity: 0;
+    transform: translateX(0) scale(1);
   }
-  25% {
-    transform: translate(3rem, 2rem) scale(1.25);
-    opacity: 0.95;
+  12% {
+    opacity: 0.9;
   }
   50% {
-    transform: translate(4rem, -1rem) scale(1.1);
-    opacity: 0.75;
-  }
-  75% {
-    transform: translate(1.5rem, 3rem) scale(1.3);
-    opacity: 0.95;
+    bottom: 46%;
+    opacity: 0.9;
+    transform: translateX(12px) scale(0.85);
   }
   100% {
-    transform: translate(0, 0) scale(1);
-    opacity: 0.6;
+    bottom: 50%;
+    opacity: 0;
+    transform: translateX(130px) scale(0.55);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .invitation::before,
-  .invitation::after {
+  .air,
+  .fuel {
     animation: none;
+    opacity: 0;
   }
 }
 
