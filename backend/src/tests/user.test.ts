@@ -106,4 +106,36 @@ describe('User Routes - /api/v1/users', () => {
       expect(res.body.stats[0]).toHaveProperty('total')
     })
   })
+
+  describe('DELETE /api/v1/users/account', () => {
+    it('should delete the authenticated user account', async () => {
+      const res = await request(app)
+        .delete('/api/v1/users/account')
+        .set('Cookie', authCookie)
+
+      expect(res.status).toBe(200)
+      expect(res.body.message).toBe('User deleted successfully')
+
+      const deleted = await User.findById(userId)
+      expect(deleted).toBeNull()
+    })
+
+    it('should return 401 without token', async () => {
+      const res = await request(app).delete('/api/v1/users/account')
+
+      expect(res.status).toBe(401)
+      expect(res.body.message).toBe('Non authentifié')
+    })
+
+    it('should return 404 if the user no longer exists', async () => {
+      await User.findByIdAndDelete(userId)
+
+      const res = await request(app)
+        .delete('/api/v1/users/account')
+        .set('Cookie', authCookie)
+
+      expect(res.status).toBe(404)
+      expect(res.body.error).toBe('User not found')
+    })
+  })
 })

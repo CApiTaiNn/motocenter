@@ -289,6 +289,54 @@ router.put(
 
 /**
  * @openapi
+ * /users/account:
+ *   delete:
+ *     summary: Supprimer le compte de l'utilisateur connecté
+ *     tags:
+ *       - Users
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Compte supprimé avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: User deleted successfully
+ *       401:
+ *         description: Token manquant ou invalide
+ *       404:
+ *         description: Utilisateur non trouvé
+ *       500:
+ *         description: Erreur serveur
+ */
+router.delete(
+  '/account',
+  authenticateToken,
+  async (req: Request, res: Response) => {
+    const { id } = req.user as { id: string }
+
+    try {
+      const deletedUser = await User.findByIdAndDelete(id)
+
+      if (!deletedUser) {
+        return res.status(404).json({ error: 'User not found' })
+      }
+
+      res.status(200).json({ message: 'User deleted successfully' })
+    } catch (error) {
+      console.error('Error deleting user:', error)
+      res.status(500).json({ error: 'Internal server error' })
+    }
+  }
+)
+
+/**
+ * @openapi
  * /users:
  *   get:
  *     summary: Récupérer la liste des utilisateurs (champs publics uniquement)
