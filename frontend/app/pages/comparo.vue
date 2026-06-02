@@ -391,7 +391,7 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
             </div>
           </div>
           <div v-show="activeResultTab === 'comments'" class="tab-panel">
-            <div class="flex gap-8 items-start max-lg:flex-col">
+            <div class="flex gap-8 items-start max-lg:flex-col max-lg:items-center!">
               <div class="flex-1 min-w-0 flex flex-col gap-3">
                 <h4 class="text-center mb-2">
                   {{ motorcycle1?.name ?? 'Moto 1' }}
