@@ -337,13 +337,13 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
           />
           <MotocyclesForm v-model="motorcycle2Id" form-title="Moto 2" />
         </div>
-        <p v-if="!motorcycle1Id || !motorcycle2Id" class="text-gray-500 text-sm italic">
+        <p v-if="!motorcycle1Id || !motorcycle2Id" class="text-center text-gray-500 text-sm italic">
           Sélectionnez deux motos pour lancer la comparaison.
         </p>
       </div>
       <Transition>
         <div v-if="showResultat" ref="resultat" class="scroll-mt-24">
-          <nav class="flex flex-wrap gap-1 w-fit max-w-full mx-auto mb-12 p-1 bg-[var(--input-background)] rounded-full justify-center" role="tablist">
+          <nav class="flex flex-wrap gap-1 w-fit max-w-full mx-auto mb-12 p-1 bg-[var(--background)] border border-[var(--border-gray)] rounded-full justify-center" role="tablist">
             <button
               v-for="tab in resultTabs"
               :key="tab.key"
@@ -351,8 +351,8 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
               :class="[
                 'px-6 py-2 bg-transparent border-none rounded-full cursor-pointer font-[\'Poppins\',sans-serif] text-base font-medium whitespace-nowrap transition-[background-color,color] duration-200 ease-[ease]',
                 activeResultTab === tab.key
-                  ? 'bg-[var(--ui-primary)] text-white font-semibold'
-                  : 'text-gray-500 hover:text-[var(--text-color)]'
+                  ? 'bg-[var(--ui-primary)]/10 text-[var(--ui-primary)] font-semibold'
+                  : 'text-[var(--ui-primary)] hover:bg-[var(--ui-primary)]/5'
               ]"
               role="tab"
               :aria-selected="activeResultTab === tab.key"
