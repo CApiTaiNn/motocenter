@@ -60,7 +60,7 @@ watch(isOpen, (newVal) => {
 <template>
   <UModal v-model:open="isOpen">
     <template #content>
-      <div class="content">
+      <div class="flex flex-col items-center justify-center m-20">
         <h3>Se connecter</h3>
 
         <UForm
@@ -99,34 +99,12 @@ watch(isOpen, (newVal) => {
         </UForm>
         <p class="text-sm">
           Nouveau sur ce site ?
-          <span class="new-account" @click="openCreateAccountModal"
+          <span class="underline cursor-pointer" @click="openCreateAccountModal"
             >S'inscrire</span
           >
         </p>
-        <p class="error-message">{{ error }}</p>
+        <p class="text-[red] text-xs m-4">{{ error }}</p>
       </div>
     </template>
   </UModal>
 </template>
-
-<style scoped>
-.content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-
-  margin: var(--space-4xl);
-}
-
-.error-message {
-  color: red;
-  font-size: 0.8em;
-  margin: var(--space-md);
-}
-
-.new-account {
-  text-decoration: underline;
-  cursor: pointer;
-}
-</style>

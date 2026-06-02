@@ -8,12 +8,17 @@ const logos = Object.values(modules).map((mod) => mod as string)
 </script>
 
 <template>
-  <div class="carousel">
-    <div class="inner">
-      <div v-for="card in [...logos, ...logos]" :key="card" class="card">
+  <div class="carousel w-full overflow-hidden py-6">
+    <div class="inner flex w-max">
+      <div
+        v-for="card in [...logos, ...logos]"
+        :key="card"
+        class="flex w-[10%] shrink-0 items-center justify-center mx-3"
+      >
         <img
           :src="card"
           :alt="`Sponsor ${card}`"
+          class="max-w-full max-h-full object-contain rounded-[20px]"
         />
       </div>
     </div>
@@ -21,32 +26,8 @@ const logos = Object.values(modules).map((mod) => mod as string)
 </template>
 
 <style scoped>
-.carousel {
-  width: 100%;
-  overflow: hidden;
-  padding: var(--space-lg) 0;
-}
-
 .inner {
-  display: flex;
-  width: max-content;
   animation: scroll 20s linear infinite;
-}
-
-.card {
-  flex-shrink: 0;
-  width: 10%;
-  margin: 0 var(--space-sm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.card img {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-  border-radius: var(--radius-lg);
 }
 
 @keyframes scroll {

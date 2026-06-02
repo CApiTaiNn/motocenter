@@ -139,13 +139,13 @@ onMounted(async () => {
         <p>Échanger librement sur votre sujet favori en lien avec la moto.</p>
       </template>
     </HeaderInfo>
-    <div id="post" class="post-filters max-lg:m-[0.5em]! max-lg:gap-0!">
-      <div>
+    <div id="post" class="flex flex-row items-start gap-12 my-8 mx-20 max-lg:m-[0.5em]! max-lg:gap-0!">
+      <div class="shrink-0">
         <ForumPanel />
       </div>
-      <USkeleton v-if="isLoading === false" class="size-20 rounded-full" />
-      <div v-else>
-        <div class="icon-and-text title-mobile-version title-row">
+      <USkeleton v-if="isLoading === false" class="size-20 rounded-full flex-1 min-w-0" />
+      <div v-else class="flex-1 min-w-0">
+        <div class="title-mobile-version flex flex-row items-center gap-3 my-4">
           <UAvatar
             :src="post?.user.image"
             size="3xl"
@@ -164,20 +164,20 @@ onMounted(async () => {
           />
         </div>
         <div>
-          <div class="meta-bar">
+          <div class="flex flex-wrap items-center gap-[0.75rem_1rem] mt-6 mb-4">
             <UBadge size="lg">{{ post?.brand.name }}</UBadge>
             <UBadge size="lg" variant="subtle">{{ post?.category.name }}</UBadge>
-            <span class="meta-dot" aria-hidden="true">·</span>
-            <div class="meta-item">
+            <span class="text-gray-300 text-xl leading-none" aria-hidden="true">·</span>
+            <div class="flex items-center gap-1 text-gray-500 text-sm">
               <UIcon name="i-lucide-messages-square" class="size-5" />
               <span>{{ responses.length || 0 }} {{ responses.length > 1 ? 'réponses' : 'réponse' }}</span>
             </div>
-            <div class="meta-item">
+            <div class="flex items-center gap-1 text-gray-500 text-sm">
               <UIcon name="i-lucide-eye" class="size-5" />
               <span>{{ post?.views }} vues</span>
             </div>
-            <span class="meta-dot" aria-hidden="true">·</span>
-            <span class="meta-author">Par {{ post?.user.pseudo }}, {{ formatTimeAgo(post?.createdAt) }}</span>
+            <span class="text-gray-300 text-xl leading-none" aria-hidden="true">·</span>
+            <span class="text-gray-500 text-sm">Par {{ post?.user.pseudo }}, {{ formatTimeAgo(post?.createdAt) }}</span>
           </div>
           <img
             :src="`${post?.image}`"
@@ -187,7 +187,7 @@ onMounted(async () => {
           />
         </div>
         <h4 class="mb-4">{{ post?.content }}</h4>
-        <div class="add-comment">
+        <div class="flex flex-col items-start gap-2">
           <UFormField label="Ecrire un commentaire" required>
             <UTextarea v-model="newReponseOfPost" />
           </UFormField>
@@ -203,7 +203,7 @@ onMounted(async () => {
         <p v-if="responses.length === 0">
           Aucun commentaire à ce post, ajouter le premier
         </p>
-        <div v-else class="mb-4 w-5/6 comments">
+        <div v-else class="mb-4 w-5/6 mt-6 flex flex-col gap-2">
           <div v-for="response in responses" :key="response._id">
             <Comment :response="response" />
           </div>
@@ -212,100 +212,3 @@ onMounted(async () => {
     </div>
   </div>
 </template>
-
-<style scoped>
-.put-in-favorite {
-  display: flex;
-  flex-direction: row;
-  gap: var(--space-xs);
-  align-items: center;
-}
-
-.comments {
-  margin-top: var(--space-lg);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
-}
-
-.icon-and-text {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-}
-
-.title-row {
-  gap: var(--space-sm);
-  margin: var(--space-md) 0;
-}
-
-.meta-bar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-sm) var(--space-md);
-  margin: var(--space-lg) 0 var(--space-md);
-}
-
-.meta-item {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2xs);
-  color: var(--color-gray-mid);
-  font-size: 0.95rem;
-}
-
-.meta-author {
-  color: var(--color-gray-mid);
-  font-size: 0.95rem;
-}
-
-.meta-dot {
-  color: var(--color-gray-light);
-  font-size: 1.25rem;
-  line-height: 1;
-}
-
-.post-filters {
-  display: flex;
-  flex-direction: row;
-  align-items: start;
-  gap: var(--space-2xl);
-  margin: var(--space-xl) var(--space-4xl);
-}
-
-.post-filters > div:first-child {
-  flex-shrink: 0;
-}
-
-.post-filters > div:nth-child(2) {
-  flex: 1;
-  min-width: 0;
-}
-
-.flex.row.end {
-  display: flex;
-  flex-direction: row;
-  align-items: end;
-  justify-content: space-between;
-  margin-right: 20em;
-}
-
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  grid-gap: 0.5em;
-}
-
-.right {
-  justify-self: end;
-}
-
-.add-comment {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
-  align-items: flex-start;
-}
-</style>

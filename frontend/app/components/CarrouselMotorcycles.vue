@@ -35,10 +35,10 @@ function handleCompareClick(itemId: string, imgUrl: string) {
     }"
   >
     <article
-      class="cursor-pointer max-lg:w-[180px]! md:max-lg:w-[205px]!"
+      class="flex flex-col items-center justify-between text-center h-full w-[230px] gap-2 py-3 mx-2 border-2 border-solid border-[var(--background-secondary)] rounded-[20px] cursor-pointer max-lg:w-[180px]! md:max-lg:w-[205px]!"
       @click="navigateTo(`/motorcycle/${item._id}`)"
     >
-      <h5 class="no-select h5-mobile">{{ item.name }}</h5>
+      <h5 class="select-none h5-mobile">{{ item.name }}</h5>
       <img
         :src="`${item.imageUrl}`"
         width="100"
@@ -47,7 +47,7 @@ function handleCompareClick(itemId: string, imgUrl: string) {
         class="rounded-lg max-lg:w-[70px] md:max-lg:w-[85px]"
         loading="lazy"
       />
-      <div id="description" class="no-select">
+      <div id="description" class="flex flex-col items-center justify-center select-none">
         <p>{{ item.horsePower }} ch</p>
         <hr />
         <p>{{ item.torque }} Nm</p>
@@ -73,18 +73,6 @@ function handleCompareClick(itemId: string, imgUrl: string) {
 
 <style scoped>
 article {
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  text-align: center;
-  align-items: center;
-
-  height: 100%;
-  width: 230px;
-  justify-content: space-between;
-
-  border: var(--border-thick) solid var(--background-secondary);
-  border-radius: var(--radius-lg);
   background:
     radial-gradient(
       circle at top right,
@@ -92,11 +80,6 @@ article {
       transparent 60%
     ),
     var(--background-secondary);
-
-  padding: var(--space-sm) 0;
-  margin: 0 var(--space-xs);
-
-  gap: var(--space-xs);
 }
 
 article p,
@@ -111,16 +94,5 @@ article p {
 
 hr {
   width: 5px;
-}
-
-#description {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-
-.no-select {
-  user-select: none;
 }
 </style>

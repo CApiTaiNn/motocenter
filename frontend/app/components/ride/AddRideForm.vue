@@ -549,9 +549,9 @@ watch(
 )
 </script>
 <template>
-  <div id="container-form" class="container-form md:p-8!">
+  <div id="container-form" class="w-full p-4 md:p-8!">
     <UForm
-      class="form-wrapper lg:flex-row! lg:flex-wrap"
+      class="flex flex-col gap-12 w-full items-stretch lg:flex-row! lg:flex-wrap"
       :state="stateForm"
       :validate="validate"
       @submit="onSubmit"
@@ -568,29 +568,30 @@ watch(
           <h3 class="text-xl font-bold mt-2">Nouvelle balade</h3>
         </header>
 
-        <nav class="stepper" aria-label="Étapes de création">
-          <ol class="stepper-list">
+        <nav class="w-full" aria-label="Étapes de création">
+          <ol class="list-none p-0 m-0 flex gap-2 items-stretch">
             <li
               v-for="(step, idx) in steps"
               :key="step.label"
+              class="flex items-center gap-2 flex-1 py-2 px-3 rounded-lg"
               :class="['stepper-item', {
                 active: currentStep === idx,
                 done: currentStep > idx
               }]"
             >
-              <span class="stepper-bullet">
+              <span class="stepper-bullet size-[1.75rem] rounded-full bg-gray-300 text-[var(--background)] inline-flex items-center justify-center font-semibold text-sm shrink-0">
                 <UIcon v-if="currentStep > idx" name="i-lucide-check" class="size-4" />
                 <span v-else>{{ idx + 1 }}</span>
               </span>
-              <span class="stepper-text">
-                <span class="stepper-label">{{ step.label }}</span>
-                <span class="stepper-description">{{ step.description }}</span>
+              <span class="flex flex-col leading-[1.1] min-w-0">
+                <span class="font-semibold text-sm">{{ step.label }}</span>
+                <span class="text-xs text-gray-500 overflow-hidden text-ellipsis whitespace-nowrap max-sm:hidden">{{ step.description }}</span>
               </span>
             </li>
           </ol>
         </nav>
 
-        <div v-show="currentStep === 0" class="step-panel">
+        <div v-show="currentStep === 0" class="flex flex-col gap-6">
           <UFormField label="Titre de la balade" name="title" required>
             <UInput
               v-model="stateForm.title"
@@ -621,7 +622,7 @@ watch(
           </UFormField>
         </div>
 
-        <div v-show="currentStep === 1" class="step-panel">
+        <div v-show="currentStep === 1" class="flex flex-col gap-6">
           <p v-if="!isMobile" class="text-gray-500 text-sm">
             Tracez à la main avec
             <UIcon name="i-lucide-pen" class="size-4 text-primary" /> ou
@@ -634,7 +635,7 @@ watch(
             calculer l'itinéraire.
           </p>
 
-          <div class="row-container sm:grid-cols-2!">
+          <div class="grid grid-cols-1 gap-6 sm:grid-cols-2!">
           <div class="flex flex-col gap-2">
             <UFormField label="Ville de départ" name="startTown" required>
               <USelectMenu
@@ -661,7 +662,7 @@ watch(
                 size="md"
                 :color="addressErrors.start ? 'error' : 'neutral'"
               />
-              <span v-if="addressErrors.start" class="text-[14px] text-red-500">
+              <span v-if="addressErrors.start" class="text-sm text-red-500">
                 L'adresse n'existe pas à {{ stateForm.startTown?.value }}
               </span>
             </div>
@@ -692,7 +693,7 @@ watch(
                 size="md"
                 :color="addressErrors.end ? 'error' : 'neutral'"
               />
-              <span v-if="addressErrors.end" class="text-[14px] text-red-500">
+              <span v-if="addressErrors.end" class="text-sm text-red-500">
                 L'adresse n'existe pas à {{ stateForm.endTown?.value }}
               </span>
             </div>
@@ -714,21 +715,21 @@ watch(
           </div>
         </div>
 
-        <div v-show="currentStep === 2" class="step-panel">
+        <div v-show="currentStep === 2" class="flex flex-col gap-6">
           <UFormField label="Image de la balade" name="picture" required>
-            <div class="card-image">
+            <div class="w-full h-[200px] overflow-hidden">
               <UFileUpload v-model="stateForm.picture" class="w-full h-full" />
             </div>
           </UFormField>
 
           <UFormField name="groupRide" required>
-            <div class="switch-container">
+            <div class="flex flex-row justify-start items-center gap-3">
               <USwitch v-model="stateForm.isEvent" />
-              <p>Créer une balade groupée</p>
+              <p class="text-[medium]">Créer une balade groupée</p>
             </div>
           </UFormField>
 
-          <div v-if="stateForm.isEvent" class="row-container sm:grid-cols-2!">
+          <div v-if="stateForm.isEvent" class="grid grid-cols-1 gap-6 sm:grid-cols-2!">
             <UFormField label="Date" required>
               <InputDate
                 v-model="stateForm.dateEvent"
@@ -749,7 +750,7 @@ watch(
           </div>
         </div>
 
-        <div class="step-nav">
+        <div class="flex items-center gap-3 mt-4">
           <UButton
             v-if="currentStep > 0"
             type="button"
@@ -760,7 +761,7 @@ watch(
             class="cursor-pointer"
             @click="prevStep"
           />
-          <span class="step-nav-spacer" />
+          <span class="flex-1" />
           <UButton
             v-if="currentStep < steps.length - 1"
             type="button"
@@ -798,8 +799,8 @@ watch(
             Modification désactivée pour les tracés GPS et sur téléphone
           </div>
 
-          <div class="container-info-under-map lg:flex-row! lg:gap-10! lg:items-center">
-            <div v-if="rideDistance > 0" class="ride-line-info">
+          <div class="flex flex-col gap-4 min-w-[200px] mt-4 lg:flex-row! lg:gap-10! lg:items-center">
+            <div v-if="rideDistance > 0" class="flex flex-row gap-3 justify-start items-center whitespace-nowrap">
               <UIcon name="i-lucide-map-pinned" class="w-4 h-4 text-primary" />
               <span
                 >Distance :
@@ -808,7 +809,7 @@ watch(
                 ></span
               >
             </div>
-            <div class="ride-line-info">
+            <div class="flex flex-row gap-3 justify-start items-center whitespace-nowrap">
               <UIcon name="i-lucide-timer" class="w-4 h-4 text-primary" />
               <div class="flex items-center gap-2">
                 <UInputNumber v-model="durationHours" class="w-22" size="md" />
@@ -845,20 +846,6 @@ watch(
 </template>
 
 <style scoped>
-/* --- CONTENEURS PRINCIPAUX --- */
-.container-form {
-  width: 100%;
-  padding: var(--space-md);
-}
-
-.form-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2xl);
-  width: 100%;
-  align-items: stretch;
-}
-
 :deep(.u-container) {
   max-width: none !important;
   margin: 0 !important;
@@ -866,72 +853,10 @@ watch(
   width: 100%;
 }
 
-/* --- ÉLÉMENTS DE FORMULAIRE --- */
-.row-container {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--space-lg);
-}
-
-.switch-container {
-  display: flex;
-  flex-direction: row;
-  justify-content: start;
-  align-items: center;
-  gap: var(--space-sm);
-}
-
-.switch-container p {
-  font-size: medium;
-}
-
-.card-image {
-  width: 100%;
-  height: 200px;
-  overflow: hidden;
-}
-
-/* --- INFORMATIONS SOUS CARTE --- */
-.container-info-under-map {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-md);
-  min-width: 200px;
-  margin-top: var(--space-md);
-}
-
-.ride-line-info {
-  display: flex;
-  flex-direction: row;
-  gap: var(--space-sm);
-  justify-content: start;
-  align-items: center;
-  white-space: nowrap;
-}
-
-/* --- STEPPER --- */
-.stepper {
-  width: 100%;
-}
-
-.stepper-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  gap: var(--space-xs);
-  align-items: stretch;
-}
-
+/* --- STEPPER (état actif/terminé piloté par les classes .active/.done) --- */
 .stepper-item {
-  display: flex;
-  align-items: center;
-  gap: var(--space-xs);
-  flex: 1;
-  padding: var(--space-xs) var(--space-sm);
-  border-radius: var(--radius-sm);
-  border: var(--border-thin) solid var(--color-gray-light);
-  color: var(--color-gray-mid);
+  border: 1px solid #d1d5db;
+  color: #6b7280;
   transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease;
 }
 
@@ -945,20 +870,6 @@ watch(
   color: var(--ui-color-success-600);
 }
 
-.stepper-bullet {
-  width: 1.75rem;
-  height: 1.75rem;
-  border-radius: var(--radius-full);
-  background-color: var(--color-gray-light);
-  color: var(--background);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  font-size: 0.85rem;
-  flex-shrink: 0;
-}
-
 .stepper-item.active .stepper-bullet {
   background-color: var(--ui-primary);
   color: white;
@@ -967,48 +878,5 @@ watch(
 .stepper-item.done .stepper-bullet {
   background-color: var(--ui-color-success-600);
   color: white;
-}
-
-.stepper-text {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.1;
-  min-width: 0;
-}
-
-.stepper-label {
-  font-weight: 600;
-  font-size: 0.95rem;
-}
-
-.stepper-description {
-  font-size: 0.75rem;
-  color: var(--color-gray-mid);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.step-panel {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-lg);
-}
-
-.step-nav {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  margin-top: var(--space-md);
-}
-
-.step-nav-spacer {
-  flex: 1;
-}
-
-@media (max-width: 640px) {
-  .stepper-description {
-    display: none;
-  }
 }
 </style>

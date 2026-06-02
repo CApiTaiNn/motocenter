@@ -99,15 +99,15 @@ onMounted(async () => {
 })
 </script>
 <template>
-  <main>
-    <section class="hero-header max-lg:h-[60vh]! max-lg:gap-8! max-lg:mx-[5%]!">
-      <h1 class="title h1-mobile">
+  <main class="flex flex-col gap-24 overflow-x-hidden">
+    <section class="relative flex flex-col justify-center items-center h-screen max-lg:h-[60vh]! max-lg:gap-8! max-lg:mx-[5%]!">
+      <h1 class="text-center h1-mobile">
         Trouver <span style="color: var(--ui-primary)">la moto</span>
         <br />
         qui vous convient
       </h1>
 
-      <div class="list">
+      <div class="flex flex-row items-center gap-4">
         <UButton
           size="xl"
           color="primary"
@@ -128,50 +128,50 @@ onMounted(async () => {
         >
       </div>
 
-      <div class="hero-images">
+      <div class="relative flex flex-row justify-center items-end gap-4">
         <img
           src="/images/accueil/R1_fond.png"
           alt="Moto"
-          class="img-cover moto-left"
+          class="moto-left flex-[1.1] w-full min-w-[38%] h-auto max-h-[80vh] object-contain object-bottom"
         />
         <img
           src="/images/accueil/BMW_fond.png"
           alt="Moto"
-          class="img-cover moto-right"
+          class="moto-right flex-1 w-full min-w-[38%] h-auto max-h-[80vh] object-contain object-bottom"
         />
       </div>
       <UIcon
         name="i-lucide-chevron-down"
-        class="scroll-cue size-8 text-(--ui-primary)"
+        class="scroll-cue absolute bottom-8 opacity-70 size-8 text-(--ui-primary)"
         aria-hidden="true"
       />
     </section>
     <section class="max-md:mx-[5%]! max-lg:mx-[8%]!">
-      <div class="list">
+      <div class="flex flex-row items-center gap-4">
         <article>
           <h2 class="h2-mobile max-lg:text-start">Un peu d'histoire</h2>
           <p class="p-mobile max-lg:text-xs!">
             Depuis que l'homme a inventé le moteur thermique, il a toujours
             cherché à repousser ses limites : plus de
-            <span class="bold">puissance</span>, plus de
-            <span class="bold">couple</span>, plus de
-            <span class="bold">vitesse</span>. Depuis
-            <span class="bold">1868</span>, des milliers de modèles de motos ont
+            <span class="font-bold">puissance</span>, plus de
+            <span class="font-bold">couple</span>, plus de
+            <span class="font-bold">vitesse</span>. Depuis
+            <span class="font-bold">1868</span>, des milliers de modèles de motos ont
             vu le jour. Et si toi aussi tu veux savoir laquelle correspond le
             mieux à ce que tu recherches...
           </p>
         </article>
-        <img src="/images/accueil/Hornet.png" alt="Moto" class="img-cover" />
+        <img src="/images/accueil/Hornet.png" alt="Moto" class="flex-1 w-full min-w-[38%] h-auto max-h-[80vh] object-contain object-bottom" />
       </div>
     </section>
-    <section class="basic-section max-md:mx-[5%]! max-lg:mx-[8%]!">
+    <section class="flex flex-col gap-8 max-md:mx-[5%]! max-lg:mx-[8%]!">
       <h2 class="h2-mobile" style="text-align: center">
         <span style="color: var(--ui-primary)">Motocenter</span>
         en quelques chiffres
       </h2>
-      <article class="column">
-        <div class="stats-group">
-          <div ref="statsRow" class="row justify-content-center max-lg:gap-4!">
+      <article class="flex flex-col gap-16">
+        <div class="flex flex-col gap-4">
+          <div ref="statsRow" class="flex flex-row justify-center gap-16 mx-[5%] max-lg:gap-4!">
             <StatsHome
               v-for="item in dynamicStats"
               :key="item.suffix"
@@ -182,8 +182,8 @@ onMounted(async () => {
             />
           </div>
         </div>
-        <div class="stats-group">
-          <div class="row justify-content-center max-lg:gap-4!">
+        <div class="flex flex-col gap-4">
+          <div class="flex flex-row justify-center gap-16 mx-[5%] max-lg:gap-4!">
             <StatsHome
               v-for="item in itemsTab"
               :key="item.content"
@@ -194,13 +194,13 @@ onMounted(async () => {
         </div>
       </article>
     </section>
-    <section class="basic-section max-md:mx-[5%]! max-lg:mx-[8%]!">
+    <section class="flex flex-col gap-8 max-md:mx-[5%]! max-lg:mx-[8%]!">
       <h2 class="h2-mobile" style="text-align: center">Les best-sellers</h2>
       <ClientOnly>
         <CarrouselMotorcycles :items="itemsCaroussel" />
       </ClientOnly>
     </section>
-    <section class="invitation justify-content-center basic-section max-md:mx-[10%]! max-lg:mx-[15%]! max-md:p-8! max-md:gap-8!">
+    <section class="invitation relative flex flex-col justify-center items-center gap-12 mx-[20%] p-16 rounded-[20px] border-2 border-solid border-[var(--border-gray)] overflow-hidden max-md:mx-[10%]! max-lg:mx-[15%]! max-md:p-8! max-md:gap-8!">
       <div class="carb-anim" aria-hidden="true">
         <span class="air air-1" />
         <span class="air air-2" />
@@ -226,13 +226,13 @@ onMounted(async () => {
         >
       </div>
     </section>
-    <section class="basic-section max-md:mx-[5%]! max-lg:mx-[8%]!">
+    <section class="flex flex-col gap-8 max-md:mx-[5%]! max-lg:mx-[8%]!">
       <h2 class="h2-mobile" style="text-align: center">
         Ils nous font confiance
       </h2>
       <CarrouselSponsors />
     </section>
-    <section class="justify-content-center max-md:mx-[5%]! max-lg:mx-[8%]!">
+    <section class="flex justify-center max-md:mx-[5%]! max-lg:mx-[8%]!">
       <UButton
         size="xl"
         color="neutral"
@@ -245,41 +245,14 @@ onMounted(async () => {
   </main>
 </template>
 <style scoped>
-main {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-5xl);
-  /* the slide-in animations start at translateX(±100vw); clip the resulting
-     horizontal overflow so it doesn't show a page-wide x-scrollbar */
-  overflow-x: hidden;
-}
-
+/* base (desktop) horizontal margin shared by every section; mobile overrides
+   live as max-md:/max-lg: utilities on each <section> */
 section {
   margin: 0 10%;
 }
 
-.basic-section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xl);
-}
-
-.hero-header {
-  display: flex;
-  flex-direction: column;
-
-  justify-content: center;
-  align-items: center;
-
-  height: 100vh;
-  position: relative;
-}
-
 .scroll-cue {
-  position: absolute;
-  bottom: 2rem;
   animation: scroll-bounce 1.8s ease-in-out infinite;
-  opacity: 0.7;
 }
 
 @keyframes scroll-bounce {
@@ -287,91 +260,19 @@ section {
   50% { transform: translateY(8px); }
 }
 
-.stats-group {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-md);
-}
-
-.title {
-  text-align: center;
-}
-
-.list {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: var(--space-md);
-}
-
-.hero-images {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: flex-end;
-  gap: var(--space-md);
-  position: relative;
-}
-
-.img-cover {
-  flex: 1; /* = flex-grow: 1; flex-shrink: 1; flex-basis: 0%; */
-  width: 100%;
-  min-width: 38%;
-  height: auto;
-  max-height: 80vh;
-  object-fit: contain;
-  object-position: center bottom;
-}
-
 .moto-left {
   animation: slide-left-to-right 2s ease-in-out;
-  flex: 1.1; /* Agrandir légèrement le R1 parce que image plus petite */
 }
 
 .moto-right {
   animation: slide-right-to-left 2s ease-in-out;
 }
 
-.row {
-  display: flex;
-  flex-direction: row;
-  gap: var(--space-3xl);
-
-  margin: 0 5%;
-}
-
-.column {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3xl);
-}
-
-.justify-content-center {
-  display: flex;
-  justify-content: center;
-}
-
-.bold {
-  font-weight: bold;
-}
-
+/* layered radial-gradient + token fallback — no single utility expresses this */
 .invitation {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-
-  border-radius: var(--radius-lg);
   background:
     radial-gradient(circle at top right, color-mix(in srgb, var(--ui-primary) 18%, transparent), transparent 60%),
     var(--background-secondary);
-  border: solid var(--border-thick) var(--border-gray);
-
-  margin: 0 20%;
-  padding: var(--space-3xl);
-
-  gap: var(--space-2xl);
-  overflow: hidden;
 }
 
 /* Carburetor-style background: red air streaks flow left → right while fuel
@@ -562,7 +463,7 @@ section {
 
 :deep(.button) {
   font-size: small;
-  padding: var(--space-sm) var(--space-2xl);
+  padding: 0.75rem 3rem;
 }
 
 @keyframes slide-left-to-right {

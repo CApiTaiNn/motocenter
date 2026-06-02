@@ -206,7 +206,7 @@ watch(
 <template>
   <div>
     <main>
-      <div class="header-page">
+      <div class="flex justify-between items-center m-12">
         <UInput
           v-model="search"
           icon="i-lucide-search"
@@ -219,9 +219,9 @@ watch(
         >
       </div>
 
-      <h3 class="header-list">Liste des motos</h3>
-      <div class="main-content max-lg:flex-col">
-        <div class="table-moto">
+      <h3 class="ml-4">Liste des motos</h3>
+      <div class="flex justify-between items-start max-lg:flex-col">
+        <div class="flex-1 p-4">
           <UTable
             ref="table"
             v-model:pagination="pagination"
@@ -262,8 +262,13 @@ watch(
             />
           </div>
         </div>
-        <div v-if="panelOpen" class="panel-moto max-lg:w-full! max-lg:static!">
-          <header class="panel-header">
+        <div
+          v-if="panelOpen"
+          class="m-8 border border-solid border-[var(--border-gray)] rounded-xl p-4 h-[calc(150vh-200px)] overflow-y-auto sticky top-[60px] max-lg:w-full! max-lg:static!"
+        >
+          <header
+            class="flex items-center gap-2 pb-3 mb-4 border-b border-solid border-gray-300"
+          >
             <UIcon
               :name="selectedMoto ? 'i-lucide-pencil' : 'i-lucide-plus-circle'"
               class="size-5 text-(--ui-primary)"
@@ -284,47 +289,3 @@ watch(
     </main>
   </div>
 </template>
-
-<style scoped>
-.header-page {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: var(--space-2xl);
-}
-
-.table-moto {
-  flex: 1;
-  padding: var(--space-md);
-}
-
-.panel-header {
-  display: flex;
-  align-items: center;
-  gap: var(--space-xs);
-  padding-bottom: var(--space-sm);
-  margin-bottom: var(--space-md);
-  border-bottom: var(--border-thin) solid var(--color-gray-light);
-}
-
-.main-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-}
-
-.header-list {
-  margin-left: var(--space-md);
-}
-
-.panel-moto {
-  margin: var(--space-xl);
-  border: var(--border-thin) solid var(--border-gray);
-  border-radius: var(--radius-md);
-  padding: var(--space-md);
-  height: calc(150vh - 200px);
-  overflow-y: auto;
-  position: sticky;
-  top: 60px;
-}
-</style>

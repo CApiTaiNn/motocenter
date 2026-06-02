@@ -22,20 +22,20 @@ const team = [
       </template>
     </HeaderInfo>
 
-    <div id="content" class="content">
-      <h3 class="subtitle h3-mobile max-lg:font-[var(--font-main)] max-lg:text-base! max-lg:font-semibold max-lg:text-center">En quelques mots</h3>
+    <div id="content" class="max-w-[1000px] mx-auto mt-[10dvh]">
+      <h3 class="text-center mb-12 h3-mobile max-lg:font-[var(--font-main)] max-lg:text-base! max-lg:font-semibold max-lg:text-center">En quelques mots</h3>
       <br />
 
-      <section class="section">
-        <h4 class="section-label">L'équipe</h4>
-        <article class="row max-lg:flex-col!">
-          <div class="team-block">
-            <p class="first-p max-lg:font-[var(--font-main)] max-lg:text-xs! max-lg:text-center max-lg:m-[2em]">
+      <section class="mb-16">
+        <h4 class="font-['Krona_One',sans-serif] text-sm tracking-[0.08em] uppercase text-gray-500 mb-6 pl-2 border-l-[3px] border-solid border-[var(--ui-primary)]">L'équipe</h4>
+        <article class="flex items-center gap-12 max-lg:flex-col!">
+          <div class="flex flex-col gap-6 flex-1">
+            <p class="max-lg:font-[var(--font-main)] max-lg:text-xs! max-lg:text-center max-lg:m-[2em]">
               <strong>Sloan Morgant</strong> a eu cette idée de projet en 2025 et
               il a créé notre équipe les <strong>Breizh Devs</strong>.
             </p>
-            <div class="team-grid">
-              <div v-for="member in team" :key="member.name" class="team-card">
+            <div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-3">
+              <div v-for="member in team" :key="member.name" class="flex items-center gap-3 px-3 py-2 border border-solid border-gray-300 rounded-xl bg-[var(--background)]">
                 <UAvatar
                   :alt="member.name"
                   :ui="{ base: 'bg-(--ui-primary) text-white' }"
@@ -43,9 +43,9 @@ const team = [
                 >
                   {{ member.name.split(' ').map((p) => p[0]).join('') }}
                 </UAvatar>
-                <div class="team-info">
-                  <p class="team-name">{{ member.name }}</p>
-                  <p class="team-role">{{ member.role }}</p>
+                <div class="flex flex-col">
+                  <p class="font-semibold text-sm leading-[1.2]">{{ member.name }}</p>
+                  <p class="text-gray-500 text-xs">{{ member.role }}</p>
                 </div>
               </div>
             </div>
@@ -54,20 +54,20 @@ const team = [
           <img
             src="../assets/images/knowUs/Teamwork.png"
             alt="Image de travail d'équipe"
-            class="max-lg:w-full! max-lg:max-w-[500px]"
+            class="w-[500px] h-auto max-lg:w-full! max-lg:max-w-[500px]"
           />
         </article>
       </section>
 
-      <section class="section">
-        <h4 class="section-label">La mission</h4>
-        <article class="row reverse max-lg:flex-col-reverse!">
+      <section class="mb-16">
+        <h4 class="font-['Krona_One',sans-serif] text-sm tracking-[0.08em] uppercase text-gray-500 mb-6 pl-2 border-l-[3px] border-solid border-[var(--ui-primary)]">La mission</h4>
+        <article class="flex items-center gap-12 max-lg:flex-col-reverse!">
           <img
             src="../assets/images/knowUs/Gsxr.png"
             alt="image du gsxr de Sloan"
-            class="max-lg:w-full! max-lg:max-w-[500px]"
+            class="w-[500px] h-auto max-lg:w-full! max-lg:max-w-[500px]"
           />
-          <p class="second-p max-lg:font-[var(--font-main)] max-lg:text-xs! max-lg:text-center max-lg:w-full!">
+          <p class="flex-1 w-[70dvw] max-lg:font-[var(--font-main)] max-lg:text-xs! max-lg:text-center max-lg:w-full!">
             <strong>MotoCenter</strong> vise à se positionner comme une
             plateforme centrale et cohérente, combinant aide au choix d’une moto
             et partage communautaire. Afin de garantir la pertinence de ses
@@ -81,105 +81,7 @@ const team = [
 </template>
 
 <style scoped>
-.center {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-sm);
-  margin-top: var(--space-5xl);
-}
-
-.button-container {
-  display: flex;
-  justify-content: center;
-  margin: var(--space-2xl) 0;
-}
-
-.content {
-  max-width: 1000px;
-  margin: auto;
-  margin-top: 10dvh;
-}
-
-.subtitle {
-  text-align: center;
-  margin-bottom: var(--space-2xl);
-}
-
-.section {
-  margin-bottom: var(--space-3xl);
-}
-
-.row {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2xl);
-}
-
-.row img {
-  width: 500px;
-  height: auto;
-}
-
-.row p {
-  flex: 1;
-}
-
-.second-p {
-  width: 70dvw;
-}
-
 strong {
   font-weight: bold;
-}
-
-.section-label {
-  font-family: 'Krona One', sans-serif;
-  font-size: 14px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-gray-mid);
-  margin-bottom: var(--space-lg);
-  padding-left: var(--space-xs);
-  border-left: 3px solid var(--ui-primary);
-}
-
-.team-block {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-lg);
-  flex: 1;
-}
-
-.team-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: var(--space-sm);
-}
-
-.team-card {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  padding: var(--space-xs) var(--space-sm);
-  border: var(--border-thin) solid var(--color-gray-light);
-  border-radius: var(--radius-md);
-  background-color: var(--background);
-}
-
-.team-info {
-  display: flex;
-  flex-direction: column;
-}
-
-.team-name {
-  font-weight: 600;
-  font-size: 0.95rem;
-  line-height: 1.2;
-}
-
-.team-role {
-  color: var(--color-gray-mid);
-  font-size: 0.8rem;
 }
 </style>

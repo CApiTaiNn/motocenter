@@ -766,26 +766,35 @@ watch(
 
 <template>
   <div
-    class="map-container"
+    class="map-container relative! w-full h-[80dvh] mb-6 overflow-hidden bg-[#f8f9fa]"
     :class="{ 'is-fullscreen': isFullScreen }"
     tabindex="0"
     @keydown.esc="toggleFullScreen"
   >
     <Transition name="slide-fade">
-      <div v-if="drawInstruction" class="draw-instruction-banner">
+      <div
+        v-if="drawInstruction"
+        class="draw-instruction-banner absolute w-auto bottom-[15px] left-1/2 -translate-x-1/2 z-[2000] bg-[var(--background)] text-[var(--text-color)] py-3 px-6 rounded-full shadow-[var(--shadow-xl)] flex items-center text-sm font-medium border border-solid border-[var(--ui-primary)] backdrop-blur-[8px]"
+      >
         <UIcon name="i-lucide-info" class="w-5 h-5 mr-2" />
         {{ drawInstruction }}
       </div>
     </Transition>
 
     <div id="map"></div>
-    <div v-if="isMapLoading && props.displayMapLoader" class="loader-overlay">
-      <div class="loader-content">
-        <UIcon name="i-lucide-loader-2" class="loader-icon" />
-        <span class="loader-text">Chargement de la carte...</span>
+    <div
+      v-if="isMapLoading && props.displayMapLoader"
+      class="loader-overlay absolute top-0 left-0 w-full h-full bg-[var(--overlay-loading-background)] backdrop-blur-[4px] flex items-center justify-center z-[2000]"
+    >
+      <div class="flex flex-col items-center gap-3">
+        <UIcon name="i-lucide-loader-2" class="loader-icon w-10 h-10 text-[var(--ui-primary)]" />
+        <span class="text-sm font-medium text-[var(--text-color)]">Chargement de la carte...</span>
       </div>
     </div>
-    <div v-if="props.displayFilters" class="filters">
+    <div
+      v-if="props.displayFilters"
+      class="filters absolute top-[15px] left-[15px] flex flex-row items-center flex-wrap gap-3 z-[1001] pointer-events-none"
+    >
       <USelect
         v-model="selectedId"
         :items="mapItems"
@@ -887,60 +896,14 @@ watch(
 </template>
 
 <style scoped>
-/* --- BOUTONS ET ÉLÉMENTS FIXES --- */
-.button-add-line {
-  position: absolute;
-  top: 25px;
-  right: 15px;
-  z-index: var(--z-overlay);
-  pointer-events: auto;
-}
-
-.button-enlarge {
-  position: absolute;
-  bottom: 25px;
-  right: 15px;
-  z-index: var(--z-overlay);
-  pointer-events: auto;
-}
-
+/* Classe utilisée dans le HTML de la popup Leaflet (string JS, pas dans le template) */
 .ride-detail-container {
   margin-bottom: 20em;
 }
 
-/* --- LOADER --- */
-.loader-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: var(--overlay-loading-background);
-  backdrop-filter: blur(4px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: var(--z-modal);
-}
-
-.loader-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-sm);
-}
-
+/* Animation du loader (keyframes non exprimable en utilitaire) */
 .loader-icon {
-  width: 40px;
-  height: 40px;
-  color: var(--ui-primary);
   animation: spin 1s linear infinite;
-}
-
-.loader-text {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--text-color);
 }
 
 @keyframes spin {
@@ -954,15 +917,9 @@ watch(
 
 /* --- CONTENEUR CARTE --- */
 .map-container {
-  position: relative !important;
-  width: 100%;
-  height: 80dvh;
-  margin-bottom: var(--space-lg);
-  overflow: hidden;
   transition:
     width 0.3s ease-in-out,
     height 0.3s ease-in-out;
-  background-color: #f8f9fa;
 }
 
 .map-container.is-fullscreen {
@@ -973,7 +930,7 @@ watch(
   bottom: 0 !important;
   width: 100vw !important;
   height: 100dvh !important;
-  z-index: var(--z-top) !important;
+  z-index: 99999 !important;
   margin: 0 !important;
   border-radius: 0 !important;
 }
@@ -984,24 +941,12 @@ watch(
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: var(--z-base);
+  z-index: 1;
   touch-action: none;
 }
 
 /* --- FILTRES --- */
-.filters {
-  position: absolute;
-  top: 15px;
-  left: 15px;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: var(--space-sm);
-  z-index: 1001;
-  pointer-events: none;
-}
-
+/* Combinateur enfant : cible chaque enfant direct, pas un élément unique du template */
 .filters > * {
   pointer-events: auto;
   box-shadow: var(--shadow-md);
@@ -1031,32 +976,11 @@ watch(
 :deep(.leaflet-control) {
   display: flex;
   flex-direction: column;
-  gap: var(--space-sm);
-  margin-left: var(--space-md) !important;
-  margin-bottom: var(--space-md) !important;
+  gap: 0.75rem;
+  margin-left: 1rem !important;
+  margin-bottom: 1rem !important;
   border: none !important;
   overflow: visible !important;
-}
-
-/* Bandeau en bas pour les instructions */
-.draw-instruction-banner {
-  position: absolute;
-  width: auto;
-  bottom: 15px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: var(--z-modal);
-  background-color: var(--background);
-  color: var(--text-color);
-  padding: var(--space-sm) var(--space-lg);
-  border-radius: var(--radius-full);
-  box-shadow: var(--shadow-xl);
-  display: flex;
-  align-items: center;
-  font-size: 0.9rem;
-  font-weight: 500;
-  border: var(--border-thin) solid var(--ui-primary);
-  backdrop-filter: blur(8px);
 }
 
 /* Animation d'apparition du bandeau */
@@ -1078,12 +1002,12 @@ watch(
 :deep(.leaflet-draw-toolbar) {
   margin-top: 0 !important;
   box-shadow: var(--shadow-lg);
-  border-radius: var(--radius-sm) !important;
+  border-radius: 8px !important;
   overflow: hidden;
   background: rgba(0, 0, 0, 0.25) !important;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: var(--border-hairline) solid rgba(0, 0, 0, 0.25) !important;
+  border: 0.5px solid rgba(0, 0, 0, 0.25) !important;
 }
 
 :deep(.leaflet-draw-toolbar a) {
@@ -1095,7 +1019,7 @@ watch(
   align-items: center;
   justify-content: center;
   color: var(--text-color) !important;
-  border-bottom: var(--border-hairline) solid rgba(0, 0, 0, 0.1) !important;
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.1) !important;
   transition: all 0.2s ease;
 }
 
@@ -1152,14 +1076,14 @@ watch(
 :deep(.leaflet-draw-actions a) {
   background: var(--background) !important;
   color: var(--text-color) !important;
-  padding: 0 var(--space-sm) !important;
+  padding: 0 0.75rem !important;
   display: flex !important;
   align-items: center;
   justify-content: center;
   height: 32px !important;
   font-size: 11px !important;
   font-weight: 500 !important;
-  border-left: var(--border-thin) solid var(--border-gray) !important;
+  border-left: 1px solid var(--border-gray) !important;
 }
 
 :deep(.leaflet-draw-actions a:hover) {
@@ -1172,14 +1096,14 @@ watch(
 /* Bulle qui suit la souris pendant le dessin */
 :deep(.leaflet-draw-tooltip) {
   background: var(--background) !important;
-  border: var(--border-thin) solid var(--border-gray) !important;
+  border: 1px solid var(--border-gray) !important;
   color: var(--text-color) !important;
-  border-radius: var(--radius-sm) !important;
-  padding: var(--space-2xs) var(--space-sm) !important;
+  border-radius: 8px !important;
+  padding: 0.25rem 0.75rem !important;
   font-size: 11px !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
-  margin-left: var(--space-lg) !important;
-  margin-top: var(--space-lg) !important;
+  margin-left: 1.5rem !important;
+  margin-top: 1.5rem !important;
   white-space: nowrap !important;
 }
 
@@ -1199,7 +1123,7 @@ watch(
 /* --- ÉLÉMENTS DE DESSIN --- */
 :deep(.leaflet-editing-icon) {
   background: var(--circle-draw-line) !important;
-  border: var(--border-thick) solid var(--circle-draw-line-outline) !important;
+  border: 2px solid var(--circle-draw-line-outline) !important;
   border-radius: 50% !important;
   width: 12px !important;
   height: 12px !important;
@@ -1227,15 +1151,15 @@ watch(
 :deep(.leaflet-control-attribution) {
   display: block !important;
   margin: 0 !important;
-  padding: 0 var(--space-2xs);
+  padding: 0 0.25rem;
   background: rgba(255, 255, 255, 0.7) !important;
 }
 
 :deep(.leaflet-control-zoom) {
   display: block !important;
   margin: 0 !important;
-  padding: 0 var(--space-2xs);
-  margin-bottom: var(--space-sm) !important;
-  margin-left: var(--space-sm) !important;
+  padding: 0 0.25rem;
+  margin-bottom: 0.75rem !important;
+  margin-left: 0.75rem !important;
 }
 </style>

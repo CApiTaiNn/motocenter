@@ -3,82 +3,41 @@ const appName: string = useRuntimeConfig().public.appName
 </script>
 
 <template>
-  <header class="header">
-    <div class="header-inner">
-      <div class="brand">
-        <span class="brand-label">{{ appName }}</span>
-        <span class="brand-tag">BACK OFFICE</span>
+  <header
+    class="header sticky top-0 z-50 backdrop-blur-[16px] border-b border-b"
+  >
+    <div
+      class="flex items-center justify-between max-w-[1400px] mx-auto px-6 h-[64px]"
+    >
+      <div class="flex items-center gap-3">
+        <span
+          class="font-['krona-one'] text-lg tracking-[0.08em] text-[var(--text-color)] uppercase"
+          >{{ appName }}</span
+        >
+        <span
+          class="brand-tag text-xs font-bold tracking-[0.2em] uppercase text-[var(--ui-primary)] py-1 px-2 rounded-[4px] border border"
+          >BACK OFFICE</span
+        >
       </div>
-      <div class="user-area">
-        <UIcon name="i-lucide-circle-user-round" class="user-icon" />
+      <div class="group flex items-center gap-2 cursor-pointer relative">
+        <UIcon
+          name="i-lucide-circle-user-round"
+          class="w-[36px] h-[36px] text-[var(--ui-text-muted)] transition-colors duration-200 group-hover:text-[var(--text-color)]"
+        />
       </div>
     </div>
   </header>
 </template>
 
 <style scoped>
+/* color-mix backgrounds/borders kept in scoped CSS — not expressible as tokens */
 .header {
-  position: sticky;
-  top: 0;
-  z-index: var(--z-sticky);
   background: color-mix(in srgb, var(--ui-bg) 80%, transparent);
-  backdrop-filter: blur(16px);
-  border-bottom: var(--border-thin) solid color-mix(in srgb, var(--ui-border) 60%, transparent);
-}
-
-.header-inner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 0 var(--space-lg);
-  height: 64px;
-}
-
-/* Brand */
-.brand {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-}
-
-.brand-label {
-  font-family: 'krona-one', sans-serif;
-  font-size: 18px;
-  letter-spacing: 0.08em;
-  color: var(--text-color);
-  text-transform: uppercase;
+  border-bottom-color: color-mix(in srgb, var(--ui-border) 60%, transparent);
 }
 
 .brand-tag {
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--ui-primary);
   background: color-mix(in srgb, var(--ui-primary) 12%, transparent);
-  border: var(--border-thin) solid color-mix(in srgb, var(--ui-primary) 30%, transparent);
-  padding: var(--space-2xs) var(--space-xs);
-  border-radius: 4px;
-}
-
-.user-area {
-  display: flex;
-  align-items: center;
-  gap: var(--space-xs);
-  cursor: pointer;
-  position: relative;
-}
-
-.user-icon {
-  width: 36px;
-  height: 36px;
-  color: var(--ui-text-muted);
-  transition: color 0.2s;
-}
-
-.user-area:hover .user-icon {
-  color: var(--text-color);
+  border-color: color-mix(in srgb, var(--ui-primary) 30%, transparent);
 }
 </style>

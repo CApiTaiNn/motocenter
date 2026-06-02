@@ -51,7 +51,7 @@ watch(user, async (newUser) => {
           <div
             v-for="post in myFavoritesPosts"
             :key="post._id"
-            class="cursor-pointer border-bottom"
+            class="cursor-pointer mb-4 border-b border-solid border-[var(--border-gray)]"
             @click="navigateTo(`/forum/${post._id}`)"
           >
             {{ post.title }}
@@ -62,14 +62,3 @@ watch(user, async (newUser) => {
     </UCard>
   </div>
 </template>
-
-<style scoped>
-.cursor-pointer {
-  cursor: pointer;
-}
-
-.border-bottom {
-  margin-bottom: var(--space-md);
-  border-bottom: var(--border-thin) solid var(--border-gray);
-}
-</style>

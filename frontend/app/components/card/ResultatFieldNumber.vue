@@ -113,26 +113,26 @@ function tradFieldName(fieldName: string) {
 </script>
 
 <template>
-  <div class="resultat">
+  <div class="resultat flex flex-col items-center gap-3">
     <p class="p-mobile">{{ tradFieldName(props.fieldName) }}</p>
-    <div class="container-row max-lg:flex-col! max-md:w-[95%]! max-lg:w-[88%]! max-lg:gap-2!">
-      <div class="left max-lg:flex-row-reverse! max-lg:gap-[10px]">
+    <div class="flex items-center justify-between w-[80%] gap-6 max-lg:flex-col! max-md:w-[95%]! max-lg:w-[88%]! max-lg:gap-2!">
+      <div class="flex flex-row justify-between items-center w-[90%] max-lg:flex-row-reverse! max-lg:gap-[10px]">
         <count-up
           :end-val="parseField(props.firstValue).value"
           :options="countUpOptions(props.firstValue)"
         />
-        <div class="bar-container max-lg:h-[10px]! max-lg:w-[70%]!">
-          <span class="bar-value max-lg:right-auto! max-lg:left-0 max-lg:[transform:rotateY(180deg)]" :style="{ width: firstPercent + '%' }"></span>
-          <span class="bar-background"></span>
+        <div class="bar-container relative w-[80%] h-[15px] max-lg:h-[10px]! max-lg:w-[70%]!">
+          <span class="bar-value absolute top-0 right-0 h-full rounded-lg bg-[image:var(--gradient-primary)] z-[1] max-lg:right-auto! max-lg:left-0 max-lg:[transform:rotateY(180deg)]" :style="{ width: firstPercent + '%' }"></span>
+          <span class="bar-background absolute top-0 left-0 h-full w-full bg-[var(--color-track-bg)] rounded-lg"></span>
         </div>
       </div>
-      <div class="right max-lg:gap-[10px]">
-        <div class="bar-container max-lg:h-[10px]! max-lg:w-[70%]!">
+      <div class="flex flex-row justify-between items-center w-[90%] max-lg:gap-[10px]">
+        <div class="bar-container relative w-[80%] h-[15px] max-lg:h-[10px]! max-lg:w-[70%]!">
           <span
-            class="bar-value"
+            class="bar-value absolute top-0 left-0 h-full rounded-lg bg-[image:var(--gradient-primary)] z-[1] [transform:rotateY(180deg)]"
             :style="{ width: secondPercent + '%' }"
           ></span>
-          <span class="bar-background"></span>
+          <span class="bar-background absolute top-0 left-0 h-full w-full bg-[var(--color-track-bg)] rounded-lg"></span>
         </div>
         <count-up
           :end-val="parseField(props.secondValue).value"
@@ -144,67 +144,8 @@ function tradFieldName(fieldName: string) {
 </template>
 
 <style scoped>
-h3 {
-  text-align: center;
-}
-
-.resultat {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-sm);
-}
-
-.container-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 80%;
-  gap: var(--space-lg);
-}
-
-.left,
-.right {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  width: 90%;
-}
-
-.bar-container {
-  position: relative;
-  width: 80%;
-  height: 15px;
-}
-
-.bar-background {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-  width: 100%;
-  background-color: var(--color-track-bg);
-  border-radius: var(--radius-sm);
-}
-
 .bar-value {
-  position: absolute;
-  top: 0;
-  height: 100%;
-  background: var(--gradient-primary);
-  border-radius: var(--radius-sm);
-  z-index: var(--z-base);
   animation: slide-in 2s ease-in-out;
-}
-
-.left .bar-value {
-  right: 0;
-}
-
-.right .bar-value {
-  left: 0;
-  transform: rotateY(180deg);
 }
 
 @keyframes slide-in {

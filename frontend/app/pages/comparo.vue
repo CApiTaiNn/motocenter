@@ -316,7 +316,7 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
       <template #title>
         <h1 class="h1-mobile">
           Comparez. Choisissez. <br />
-          <span class="text-red">Pilotez</span>
+          <span class="text-[red]">Pilotez</span>
         </h1>
       </template>
       <template #subtitle>
@@ -326,9 +326,9 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
         </p>
       </template>
     </HeaderInfo>
-    <div class="container-form">
-      <div id="form" class="form-button">
-        <div class="form max-lg:flex-col! max-lg:items-center">
+    <div class="container-form flex flex-col gap-16 mt-24 justify-center">
+      <div id="form" class="flex flex-col justify-center items-center gap-6">
+        <div class="flex justify-center gap-8 max-lg:flex-col! max-lg:items-center">
           <MotocyclesForm v-model="motorcycle1Id" form-title="Moto 1" />
           <UIcon
             name="i-lucide-arrow-left-right"
@@ -337,18 +337,23 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
           />
           <MotocyclesForm v-model="motorcycle2Id" form-title="Moto 2" />
         </div>
-        <p v-if="!motorcycle1Id || !motorcycle2Id" class="form-hint">
+        <p v-if="!motorcycle1Id || !motorcycle2Id" class="text-gray-500 text-sm italic">
           Sélectionnez deux motos pour lancer la comparaison.
         </p>
       </div>
       <Transition>
-        <div v-if="showResultat" ref="resultat" class="resultat-section">
-          <nav class="result-tabs" role="tablist">
+        <div v-if="showResultat" ref="resultat" class="scroll-mt-24">
+          <nav class="flex flex-wrap gap-1 w-fit max-w-full mx-auto mb-12 p-1 bg-[var(--input-background)] rounded-full justify-center" role="tablist">
             <button
               v-for="tab in resultTabs"
               :key="tab.key"
               type="button"
-              :class="['result-tab', { active: activeResultTab === tab.key }]"
+              :class="[
+                'px-6 py-2 bg-transparent border-none rounded-full cursor-pointer font-[\'Poppins\',sans-serif] text-base font-medium whitespace-nowrap transition-[background-color,color] duration-200 ease-[ease]',
+                activeResultTab === tab.key
+                  ? 'bg-[var(--ui-primary)] text-white font-semibold'
+                  : 'text-gray-500 hover:text-[var(--text-color)]'
+              ]"
               role="tab"
               :aria-selected="activeResultTab === tab.key"
               @click="activeResultTab = tab.key"
@@ -386,9 +391,9 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
             </div>
           </div>
           <div v-show="activeResultTab === 'comments'" class="tab-panel">
-            <div class="comments-grid">
-              <div class="comments-pane">
-                <h4 class="comments-pane-title">
+            <div class="flex gap-8 items-start max-lg:flex-col">
+              <div class="flex-1 min-w-0 flex flex-col gap-3">
+                <h4 class="text-center mb-2">
                   {{ motorcycle1?.name ?? 'Moto 1' }}
                 </h4>
                 <template v-if="commentsMotorcycle1.length > 0">
@@ -398,12 +403,12 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
                     :response="comment1"
                   />
                 </template>
-                <p v-else class="empty-comment">
+                <p v-else class="text-gray-500 italic text-center py-4">
                   Postez le premier commentaire !
                 </p>
               </div>
-              <div class="comments-pane">
-                <h4 class="comments-pane-title">
+              <div class="flex-1 min-w-0 flex flex-col gap-3">
+                <h4 class="text-center mb-2">
                   {{ motorcycle2?.name ?? 'Moto 2' }}
                 </h4>
                 <template v-if="commentsMotorcycle2.length > 0">
@@ -413,15 +418,15 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
                     :response="comment2"
                   />
                 </template>
-                <p v-else class="empty-comment">
+                <p v-else class="text-gray-500 italic text-center py-4">
                   Postez le premier commentaire !
                 </p>
               </div>
             </div>
           </div>
-          <div class="input-comment-box">
-            <div v-if="!isAuthenticated" class="need-connection max-lg:w-[90%]! max-lg:flex! max-lg:flex-col max-lg:items-center! max-lg:gap-4">
-              <h3 class="h3-mobile max-lg:w-auto! max-lg:text-lg!">
+          <div class="relative my-12 mx-[25%] w-1/2 min-h-[25rem] border border-solid border-gray-500 rounded-[20px] max-lg:mx-[12%]! max-lg:w-[76%]! max-lg:min-h-[auto]! max-md:my-6! max-md:mx-4! max-md:w-auto!">
+            <div v-if="!isAuthenticated" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 text-center max-lg:w-[90%]! max-lg:flex! max-lg:flex-col max-lg:items-center! max-lg:gap-4">
+              <h3 class="h3-mobile w-[400px] max-lg:w-auto! max-lg:text-lg!">
                 Rejoignez la communauté pour débattre et partager vos avis sur
                 ces motos !
               </h3>
@@ -435,14 +440,14 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
             </div>
             <div
               v-if="!messagePosted"
-              class="input-comment-container"
-              :class="{ blurred: !isAuthenticated }"
+              class="flex flex-col justify-between h-full min-h-[25rem] p-8 max-lg:min-h-[auto]! max-lg:p-4!"
+              :class="{ 'blur-[3px] pointer-events-none select-none': !isAuthenticated }"
             >
-              <h4>
+              <h4 class="text-center">
                 Déjà roulé une de ces motos ?<br />
                 Faite le savoir à la communauté !
               </h4>
-              <div class="comment-input">
+              <div class="flex flex-col gap-4">
                 <USelect
                   v-model="comment.motorcycleId"
                   size="lg"
@@ -465,11 +470,11 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
             </div>
             <div
               v-else
-              class="input-posted-container"
-              :class="{ blurred: !isAuthenticated }"
+              class="flex flex-col justify-center h-fit min-h-[25rem] p-8 gap-8 max-lg:min-h-[auto]! max-lg:p-4!"
+              :class="{ 'blur-[3px] pointer-events-none select-none': !isAuthenticated }"
             >
-              <h4>Merci pour votre contribution !</h4>
-              <p>
+              <h4 class="text-center">Merci pour votre contribution !</h4>
+              <p class="text-center">
                 Votre commentaire a été posté avec succès. Il apparaîtra dans la
                 section des commentaires correspondante.
               </p>
@@ -477,7 +482,7 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
           </div>
         </div>
       </Transition>
-      <div class="caroussel-container max-md:mx-4! max-lg:mx-[6%]!">
+      <div class="caroussel-container flex flex-col gap-20 mx-[10%] max-md:mx-4! max-lg:mx-[6%]!">
         <div>
           <h3 class="h3-mobile">Pour la performance</h3>
           <CarrouselMotorcycles
@@ -499,7 +504,7 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
             @selected="handleCaroussel"
           />
         </div>
-        <div class="dual-container">
+        <div class="dual-container sticky bottom-0 flex justify-center pointer-events-none">
           <DualMotorcycle
             :left-motorcycle-url="motorcycle1PreviewUrl"
             :right-motorcycle-url="motorcycle2PreviewUrl"
@@ -515,108 +520,19 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
 </template>
 
 <style scoped>
-/* Layout principal */
-.container-form {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3xl);
-  margin-top: var(--space-5xl);
-  justify-content: center;
-}
-
+/* Bare-element descendant rules: apply to all section headings */
 .container-form h3 {
   text-align: center;
-  margin: var(--space-lg);
+  margin: 1.5rem;
 }
 
-/* Formulaire */
-.form-button {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: var(--space-lg);
+.caroussel-container h3 {
+  text-align: left;
 }
 
-.form-hint {
-  color: var(--color-gray-mid);
-  font-size: 0.95rem;
-  font-style: italic;
-}
-
-/* Result tabs — centered segmented pill control */
-.result-tabs {
-  display: flex;
-  gap: var(--space-2xs);
-  width: fit-content;
-  max-width: 100%;
-  margin: 0 auto var(--space-2xl);
-  padding: var(--space-2xs);
-  background: var(--input-background);
-  border-radius: var(--radius-full);
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-.result-tab {
-  padding: var(--space-xs) var(--space-lg);
-  background: transparent;
-  border: none;
-  border-radius: var(--radius-full);
-  cursor: pointer;
-  font-family: 'Poppins', sans-serif;
-  font-size: 1rem;
-  font-weight: 500;
-  color: var(--color-gray-mid);
-  white-space: nowrap;
-  transition: background-color 0.2s ease, color 0.2s ease;
-}
-
-.result-tab:hover {
-  color: var(--text-color);
-}
-
-.result-tab.active {
-  background: var(--ui-primary);
-  color: #fff;
-  font-weight: 600;
-}
-
+/* Animation on tab switch */
 .tab-panel {
   animation: tab-fade 0.2s ease-out;
-}
-
-/* Avis — both bikes' opinions side by side */
-.comments-grid {
-  display: flex;
-  gap: var(--space-xl);
-  align-items: flex-start;
-}
-
-.comments-pane {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-sm);
-}
-
-.comments-pane-title {
-  text-align: center;
-  margin-bottom: var(--space-xs);
-}
-
-@media (max-width: 1024px) {
-  .comments-grid {
-    flex-direction: column;
-  }
-}
-
-.empty-comment {
-  color: var(--color-gray-mid);
-  font-style: italic;
-  text-align: center;
-  padding: var(--space-md) 0;
 }
 
 @keyframes tab-fade {
@@ -624,134 +540,9 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
   to { opacity: 1; transform: translateY(0); }
 }
 
-.form {
-  display: flex;
-  justify-content: center;
-  gap: var(--space-xl);
-}
-
-/* Résultats */
-.resultat-section {
-  scroll-margin-top: var(--space-5xl);
-}
-
-/* Carrousel */
-.caroussel-container {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4xl);
-  margin: 0 10%;
-}
-
-.caroussel-container h3 {
-  text-align: left;
-}
-
-
-/* Commentaires Input */
-.input-comment-box {
-  position: relative;
-  margin: var(--space-2xl) 25%;
-  width: 50%;
-  min-height: 25rem;
-  border: var(--border-thin) solid var(--color-gray-mid);
-  border-radius: var(--radius-lg);
-}
-
-.input-comment-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  height: 100%;
-  min-height: 25rem;
-  padding: var(--space-xl);
-}
-
-.input-comment-container h4 {
-  text-align: center;
-}
-
-.input-posted-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  height: fit-content;
-  min-height: 25rem;
-  padding: var(--space-xl);
-  gap: var(--space-xl);
-}
-
-.input-posted-container h4 {
-  text-align: center;
-}
-
-.input-posted-container p {
-  text-align: center;
-}
-
-/* Tablet/mobile: box shrinks toward full-width as the viewport narrows */
-@media (max-width: 1024px) {
-  .input-comment-box {
-    margin-inline: 12%;
-    width: 76%;
-    min-height: auto;
-  }
-  .input-comment-container,
-  .input-posted-container {
-    min-height: auto;
-    padding: var(--space-md);
-  }
-}
-
-@media (max-width: 768px) {
-  .input-comment-box {
-    margin: var(--space-lg) var(--space-md);
-    width: auto;
-  }
-}
-
-.comment-input {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-md);
-}
-
-.need-connection {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: var(--z-elevated);
-  text-align: center;
-}
-
-.need-connection h3 {
-  width: 400px;
-}
-
-.blurred {
-  filter: blur(3px);
-  pointer-events: none;
-  user-select: none;
-}
-
-.dual-container {
-  position: sticky;
-  bottom: 0;
-  display: flex;
-  justify-content: center;
-  /* Le conteneur prend toute la largeur : on laisse les clics traverser
-     ses zones vides, seul le panneau central reste interactif. */
-  pointer-events: none;
-}
-
+/* Container lets clicks pass through its empty zones; only the panel is interactive */
 .dual-container > * {
   pointer-events: auto;
-}
-
-/* Utilitaires */
-.text-red {
-  color: red;
 }
 
 /* Transitions */
@@ -764,5 +555,4 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
 .v-leave-to {
   opacity: 0;
 }
-
 </style>

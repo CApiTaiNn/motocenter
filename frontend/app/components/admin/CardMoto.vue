@@ -266,7 +266,7 @@ async function removeMotorcycle() {
 </script>
 
 <template>
-  <div class="header-cardMoto">
+  <div class="flex justify-between items-center">
     <h3>{{ mode === 'edit' ? 'Modifier la moto' : "Ajout d'une moto" }}</h3>
     <UIcon
       name="i-lucide-x"
@@ -368,7 +368,7 @@ async function removeMotorcycle() {
       <USwitch v-model="state.is_public" label="Public" />
     </UFormField>
 
-    <div class="form-end">
+    <div class="flex justify-between items-center">
       <UButton type="submit" color="primary"> Enregistrer </UButton>
       <UIcon
         v-if="mode === 'edit'"
@@ -379,23 +379,3 @@ async function removeMotorcycle() {
     </div>
   </UForm>
 </template>
-
-<style scoped>
-.form-div {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-md);
-}
-
-.header-cardMoto {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.form-end {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-</style>

@@ -8,40 +8,23 @@ defineProps<Props>()
 
 <template>
   <Transition name="fade">
-    <div v-if="isLoading" class="loading-overlay">
-      <div class="spinner-container">
-        <UIcon name="i-lucide-loader-circle" class="spinner" />
+    <div
+      v-if="isLoading"
+      class="fixed inset-0 flex items-center justify-center z-[9999] bg-[rgba(0,0,0,0.1)] backdrop-blur-[2px]"
+    >
+      <div class="flex items-center justify-center">
+        <UIcon
+          name="i-lucide-loader-circle"
+          class="spinner w-[48px] h-[48px] text-[var(--ui-primary)]"
+        />
       </div>
     </div>
   </Transition>
 </template>
 
 <style scoped>
-.loading-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.1);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: var(--z-loader);
-  backdrop-filter: blur(2px);
-}
-
-.spinner-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
 .spinner {
-  width: 48px;
-  height: 48px;
   animation: spin 1s linear infinite;
-  color: var(--ui-primary);
 }
 
 @keyframes spin {

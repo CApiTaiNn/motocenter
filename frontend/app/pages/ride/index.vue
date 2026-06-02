@@ -38,10 +38,10 @@ const goToForm = async () => {
 
     <RideBrowseMap />
 
-    <UCard class="add-cta">
-      <div class="add-cta-content max-[410px]:justify-center">
+    <UCard class="max-w-[60rem] mx-auto mt-8 mb-16">
+      <div class="flex flex-row flex-wrap items-center gap-4 max-[410px]:justify-center">
         <UIcon name="i-lucide-map-pinned" class="size-10 text-(--ui-primary)" />
-        <div class="add-cta-text">
+        <div class="flex-1 min-w-[12rem]">
           <h4>Pas trouvé votre balade ?</h4>
           <p class="p-mobile">Ajoutez-la pour la partager avec la communauté.</p>
         </div>
@@ -57,22 +57,3 @@ const goToForm = async () => {
     </UCard>
   </div>
 </template>
-<style scoped>
-.add-cta {
-  max-width: 60rem;
-  margin: var(--space-xl) auto var(--space-3xl);
-}
-
-.add-cta-content {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: var(--space-md);
-}
-
-.add-cta-text {
-  flex: 1;
-  min-width: 12rem;
-}
-</style>

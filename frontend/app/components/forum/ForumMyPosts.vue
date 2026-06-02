@@ -57,7 +57,7 @@ watch(
       class="w-full border-[0.5px] border-(--border-gray)"
     >
       <template #header>
-        <div class="header">
+        <div class="flex flex-row items-center justify-between gap-2">
           <h3>Mes posts</h3>
           <UButton
             v-if="!isAuthenticated"
@@ -80,7 +80,7 @@ watch(
           <div
             v-for="post in postOfUser"
             :key="post._id"
-            class="cursor-pointer border-bottom"
+            class="cursor-pointer mb-4 border-b border-solid border-[var(--border-gray)]"
             @click="navigateTo(`/forum/${post._id}`)"
           >
             {{ post.title }}
@@ -91,22 +91,3 @@ watch(
     </UCard>
   </div>
 </template>
-
-<style scoped>
-.header {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-xs);
-}
-
-.cursor-pointer {
-  cursor: pointer;
-}
-
-.border-bottom {
-  margin-bottom: var(--space-md);
-  border-bottom: var(--border-thin) solid var(--border-gray);
-}
-</style>

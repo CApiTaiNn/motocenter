@@ -7,59 +7,24 @@ const props = defineProps<{
 </script>
 
 <template>
-  <div class="resultat">
-    <div class="container-row max-md:w-[95%]! max-lg:w-[80%]! max-md:gap-[10px]!">
-      <div class="left">
+  <div class="resultat flex flex-col items-center gap-3">
+    <div class="container-row flex items-center justify-between w-[60%] gap-6 max-md:w-[95%]! max-lg:w-[80%]! max-md:gap-[10px]!">
+      <div class="left flex flex-row justify-between items-center w-full">
         <img
           v-if="props.firstValue"
           :src="`${props.firstValue}`"
           alt="Image de la moto 1"
         />
-        <p v-else>Pas d'image</p>
+        <p v-else class="text-center w-full">Pas d'image</p>
       </div>
-      <div class="right">
+      <div class="right flex flex-row justify-between items-center w-full">
         <img
           v-if="props.secondValue"
           :src="`${props.secondValue}`"
           alt="Image de la moto 2"
         />
-        <p v-else>Pas d'image</p>
+        <p v-else class="text-center w-full">Pas d'image</p>
       </div>
     </div>
   </div>
 </template>
-
-<style scoped>
-h3 {
-  text-align: center;
-}
-
-.resultat {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-sm);
-}
-
-.container-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 60%;
-  gap: var(--space-lg);
-}
-
-.left,
-.right {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-}
-
-p {
-  text-align: center;
-  width: 100%;
-}
-</style>

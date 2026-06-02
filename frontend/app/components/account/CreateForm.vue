@@ -171,11 +171,11 @@ const handleSubmit = async () => {
 <template>
   <UModal v-model:open="isOpen">
     <template #content>
-      <div class="content">
+      <div class="flex h-[65vh] flex-col overflow-y-auto p-8">
         <h3>S'inscrire</h3>
 
         <!-- Indicateur de progression -->
-        <div class="progress-indicator">
+        <div class="flex justify-center gap-2 mb-8">
           <div class="progress-dot" :class="{ active: currentStep >= 1 }" />
           <div class="progress-dot" :class="{ active: currentStep >= 2 }" />
           <div class="progress-dot" :class="{ active: currentStep >= 3 }" />
@@ -185,20 +185,20 @@ const handleSubmit = async () => {
           ref="form"
           :state="state"
           :errors="formErrors"
-          class="form-container"
+          class="flex flex-1 flex-col gap-6"
           @submit="handleSubmit"
         >
           <!-- ÉTAPE 1 -->
-          <div v-if="currentStep === 1" class="form-step">
-            <div class="step-content">
-              <UFormField name="file" class="avatar-button">
+          <div v-if="currentStep === 1" class="flex flex-col gap-6">
+            <div class="flex flex-col gap-6">
+              <UFormField name="file" class="flex cursor-pointer flex-col items-center gap-4 text-center text-sm text-gray-500 underline transition-colors hover:text-gray-700">
                 <UFileUpload
                   v-model="state.file"
                   accept="image/*"
                   label="Déposez votre avatar"
                   description="PNG ou JPG"
               /></UFormField>
-              <div class="form-field">
+              <div class="flex flex-col gap-2">
                 <UFormField
                   label="Prénom"
                   name="firstname"
@@ -213,7 +213,7 @@ const handleSubmit = async () => {
                   />
                 </UFormField>
               </div>
-              <div class="form-field">
+              <div class="flex flex-col gap-2">
                 <UFormField
                   label="Nom"
                   name="lastname"
@@ -232,8 +232,8 @@ const handleSubmit = async () => {
           </div>
 
           <!-- ÉTAPE 2 -->
-          <div v-if="currentStep === 2" class="form-step">
-            <div class="step-content">
+          <div v-if="currentStep === 2" class="flex flex-col gap-6">
+            <div class="flex flex-col gap-6">
               <UFormField
                 label="Pseudonyme"
                 name="pseudo"
@@ -247,14 +247,14 @@ const handleSubmit = async () => {
                   class="w-full"
                 />
               </UFormField>
-              <div class="experience-section">
-                <label class="experience-label">Je suis :</label>
-                <div class="experience-buttons">
+              <div class="flex flex-col gap-3">
+                <label class="block text-sm font-medium">Je suis :</label>
+                <div class="flex flex-wrap justify-between gap-2">
                   <button
                     v-for="level in experienceLevels"
                     :key="level"
                     type="button"
-                    class="experience-button"
+                    class="experience-button cursor-pointer rounded-full border-2 border-solid border-gray-300 bg-transparent px-4 py-2 text-sm text-gray-700 transition-all hover:border-gray-500"
                     :class="{ active: state.experience === level }"
                     @click="state.experience = level"
                   >
@@ -288,8 +288,8 @@ const handleSubmit = async () => {
           </div>
 
           <!-- ÉTAPE 3 -->
-          <div v-if="currentStep === 3" class="form-step">
-            <div class="step-content">
+          <div v-if="currentStep === 3" class="flex flex-col gap-6">
+            <div class="flex flex-col gap-6">
               <UFormField
                 label="E-mail"
                 name="email"
@@ -359,7 +359,7 @@ const handleSubmit = async () => {
           </div>
 
           <!-- Boutons de navigation -->
-          <div class="button-group">
+          <div class="mt-auto flex gap-3 pt-4">
             <UButton
               v-if="currentStep > 1"
               type="button"
@@ -394,26 +394,11 @@ const handleSubmit = async () => {
 </template>
 
 <style scoped>
-.content {
-  height: 65vh;
-  display: flex;
-  flex-direction: column;
-  padding: var(--space-xl);
-  overflow-y: auto;
-}
-
-.progress-indicator {
-  display: flex;
-  justify-content: center;
-  gap: var(--space-xs);
-  margin-bottom: var(--space-xl);
-}
-
 .progress-dot {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background-color: var(--color-gray-light);
+  background-color: #d1d5db;
   transition: background-color 0.2s ease;
 }
 
@@ -421,141 +406,8 @@ const handleSubmit = async () => {
   background-color: var(--ui-color-error-500);
 }
 
-.form-container {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-lg);
-  flex: 1;
-}
-
-.form-step {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-lg);
-}
-
-.step-content {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-lg);
-}
-
-.form-field {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
-}
-
-.field-label {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--color-gray-dark);
-}
-
-.required {
-  color: var(--ui-color-error-500);
-}
-
-.input-error {
-  border-color: var(--ui-color-error-600) !important;
-}
-
-.field-error {
-  color: var(--ui-color-error-600);
-  font-size: 0.75rem;
-  margin-top: var(--space-2xs);
-}
-
-.avatar-button {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-md);
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--color-gray-mid);
-  font-size: 0.875rem;
-  text-align: center;
-  text-decoration: underline;
-  transition: color 0.2s ease;
-}
-
-.avatar-button:hover {
-  color: var(--color-gray-dark);
-}
-
-.avatar-circle {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  border: var(--border-thick) solid var(--ui-color-error-500);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2.25rem;
-  color: var(--ui-color-error-500);
-}
-
-.experience-section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-sm);
-}
-
-.experience-label {
-  font-size: 0.875rem;
-  font-weight: 500;
-  display: block;
-}
-
-.experience-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-xs);
-  justify-content: space-between;
-}
-
-.experience-button {
-  padding: var(--space-xs) var(--space-md);
-  border-radius: var(--radius-full);
-  font-size: 0.875rem;
-  border: var(--border-thick) solid var(--color-gray-light);
-  background-color: transparent;
-  color: var(--color-gray-dark);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.experience-button:hover {
-  border-color: var(--color-gray-mid);
-}
-
 .experience-button.active {
   border-color: var(--ui-color-error-500);
   color: var(--ui-color-error-500);
-}
-
-.error-message {
-  color: var(--ui-color-error-600);
-  font-size: 0.875rem;
-  padding: var(--space-xs);
-  background-color: var(--ui-color-error-100);
-  border-radius: var(--radius-sm);
-}
-
-.success-message {
-  color: var(--ui-color-success-600);
-  font-size: 0.875rem;
-  padding: var(--space-xs);
-  background-color: var(--ui-color-success-50);
-  border-radius: var(--radius-sm);
-}
-
-.button-group {
-  display: flex;
-  gap: var(--space-sm);
-  padding-top: var(--space-md);
-  margin-top: auto;
 }
 </style>

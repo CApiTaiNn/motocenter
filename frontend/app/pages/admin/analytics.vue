@@ -110,7 +110,7 @@ onMounted(() => {
 
 <template>
   <div>
-    <div class="card-stats-container">
+    <div class="flex justify-center flex-wrap m-4 gap-4">
       <StatsAnalytics
         v-for="item in stats"
         :key="item.title"
@@ -119,41 +119,41 @@ onMounted(() => {
         :percent="item.percent"
       />
     </div>
-    <div class="stats-container">
-      <UCard class="stat-card winner-card">
+    <div class="flex justify-between flex-wrap gap-6 my-6 mx-4">
+      <UCard class="flex-[1_1_300px] max-w-[600px] items-center justify-center border border-solid border-[var(--border-gray)] rounded-lg border-t-[3px] border-t-[var(--ui-color-warning-500)]">
         <template #header>
-          <div class="winner-header">
+          <div class="flex items-center gap-2 mb-1">
             <UIcon name="i-lucide-trophy" class="size-5 text-(--ui-color-warning-500)" />
-            <span class="winner-tag">Top post</span>
+            <span class="winner-tag text-xs tracking-[0.1em] uppercase text-gray-500">Top post</span>
           </div>
           <h4>{{ bestTopic?.title }}</h4>
         </template>
         <template #default>
-          <div class="card-content">
+          <div class="flex justify-center items-center gap-8">
             <p>Nombre de vues : {{ bestTopic?.views }}</p>
             <img
-              class="card-img"
+              class="max-w-[200px] max-h-[100px] rounded-xl"
               :src="`${bestTopic?.image}`"
               :alt="bestTopic?.title"
             />
           </div>
         </template>
       </UCard>
-      <UCard class="stat-card winner-card">
+      <UCard class="flex-[1_1_300px] max-w-[600px] items-center justify-center border border-solid border-[var(--border-gray)] rounded-lg border-t-[3px] border-t-[var(--ui-primary)]">
         <template #header>
-          <div class="winner-header">
+          <div class="flex items-center gap-2 mb-1">
             <UIcon name="i-lucide-crown" class="size-5 text-(--ui-primary)" />
-            <span class="winner-tag">Top moto</span>
+            <span class="winner-tag text-xs tracking-[0.1em] uppercase text-gray-500">Top moto</span>
           </div>
           <h4>{{ bestMotorcycle?.name }}</h4>
         </template>
         <template #default>
-          <div class="card-content">
+          <div class="flex justify-center items-center gap-8">
             <p>
               Nombre de comparaisons : {{ bestMotorcycle?.numberOfComparison }}
             </p>
             <img
-              class="card-img"
+              class="max-w-[200px] max-h-[100px] rounded-xl"
               :src="`${bestMotorcycle?.imageUrl}`"
               :alt="bestMotorcycle?.name"
             />
@@ -161,7 +161,7 @@ onMounted(() => {
         </template>
       </UCard>
     </div>
-    <UCard class="chart-container">
+    <UCard class="my-6 mx-4 border border-solid border-[var(--border-gray)] rounded-lg">
       <template #header>
         <h4>Evolution des utilisateurs</h4>
       </template>
@@ -184,70 +184,7 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.card-stats-container {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  margin: var(--space-md);
-  gap: var(--space-md);
-}
-
-.stats-container {
-  display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: var(--space-lg);
-  margin: var(--space-lg) var(--space-md);
-}
-
-.stat-card {
-  flex: 1 1 300px;
-  max-width: 600px;
-  border: var(--border-thin) solid var(--border-gray);
-  border-radius: var(--radius-sm);
-  align-items: center;
-  justify-content: center;
-}
-
-.winner-card {
-  border-top: 3px solid var(--ui-color-warning-500);
-}
-
-.winner-card:nth-of-type(2) {
-  border-top-color: var(--ui-primary);
-}
-
-.winner-header {
-  display: flex;
-  align-items: center;
-  gap: var(--space-xs);
-  margin-bottom: var(--space-2xs);
-}
-
 .winner-tag {
   font-family: 'Krona One', sans-serif;
-  font-size: 11px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--color-gray-mid);
-}
-
-.card-content {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: var(--space-xl);
-}
-
-.card-img {
-  max-width: 200px;
-  max-height: 100px;
-  border-radius: var(--radius-md);
-}
-
-.chart-container {
-  margin: var(--space-lg) var(--space-md);
-  border: var(--border-thin) solid var(--border-gray);
-  border-radius: var(--radius-sm);
 }
 </style>

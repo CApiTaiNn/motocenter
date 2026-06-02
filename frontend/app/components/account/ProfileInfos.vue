@@ -54,32 +54,32 @@ watch(
 <template>
   <UModal v-model:open="isOpen">
     <template #content>
-      <div class="content">
+      <div class="flex flex-col items-center p-12 overflow-y-auto">
         <h3>Mon Profil</h3>
 
-        <div class="avatar">
-          <img v-if="state.image" :src="state.image" alt="Avatar" />
+        <div class="flex items-center justify-center w-[100px] h-[100px] rounded-full text-4xl font-bold text-[var(--ui-color-error-500)] bg-[var(--ui-color-error-50)] mb-6 overflow-hidden">
+          <img v-if="state.image" :src="state.image" alt="Avatar" class="w-full h-full object-cover" />
           <span v-else>{{ getInitials }}</span>
         </div>
 
-        <div class="user-info">
+        <div class="text-center mb-8">
           <h2>{{ state.firstname }} {{ state.lastname }}</h2>
-          <p class="pseudo">@{{ state.pseudo }}</p>
+          <p class="text-gray-500 text-sm">@{{ state.pseudo }}</p>
         </div>
 
-        <div class="info-section">
-          <div class="info-item">
-            <span class="label">Expérience</span>
+        <div class="w-full max-w-[400px]">
+          <div class="flex justify-between py-3 border-b border-solid border-gray-300 last:border-b-0">
+            <span class="text-gray-500 text-sm">Expérience</span>
             <span class="value">{{ state.experience }}</span>
           </div>
 
-          <div class="info-item">
-            <span class="label">Années de pratique</span>
+          <div class="flex justify-between py-3 border-b border-solid border-gray-300 last:border-b-0">
+            <span class="text-gray-500 text-sm">Années de pratique</span>
             <span class="value">{{ ridingYears }} ans</span>
           </div>
 
-          <div class="info-item">
-            <span class="label">Email</span>
+          <div class="flex justify-between py-3 border-b border-solid border-gray-300 last:border-b-0">
+            <span class="text-gray-500 text-sm">Email</span>
             <span class="value">{{ state.email }}</span>
           </div>
         </div>
@@ -104,66 +104,3 @@ watch(
     </template>
   </UModal>
 </template>
-
-<style scoped>
-.content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: var(--space-2xl);
-
-  overflow-y: auto;
-}
-
-.avatar {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2.5rem;
-  font-weight: bold;
-  color: var(--ui-color-error-500);
-  background-color: var(--ui-color-error-50);
-  margin-bottom: var(--space-lg);
-  overflow: hidden;
-}
-
-.avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.user-info {
-  text-align: center;
-  margin-bottom: var(--space-xl);
-}
-
-.pseudo {
-  color: var(--color-gray-mid);
-  font-size: 0.9rem;
-}
-
-.info-section {
-  width: 100%;
-  max-width: 400px;
-}
-
-.info-item {
-  display: flex;
-  justify-content: space-between;
-  padding: var(--space-sm) 0;
-  border-bottom: var(--border-thin) solid var(--color-gray-light);
-}
-
-.info-item:last-child {
-  border-bottom: none;
-}
-
-.label {
-  color: var(--color-gray-mid);
-  font-size: 0.9rem;
-}
-</style>

@@ -13,9 +13,9 @@ const props = defineProps<{
 </script>
 
 <template>
-  <div class="box max-lg:min-w-[105px] max-lg:border! max-lg:border-(--background-secondary)!">
+  <div class="flex flex-col items-center justify-center text-center gap-4 border-solid border-2 border-[var(--border-gray)] rounded-xl w-[20%] aspect-square max-lg:min-w-[105px] max-lg:border-[var(--background-secondary)]!">
     <img :src="props.urlImg" class="max-lg:w-[40px] max-lg:h-auto" />
-    <p v-if="props.value !== undefined" class="max-lg:text-[10px]">
+    <p v-if="props.value !== undefined" class="max-lg:text-xs">
       <CountUp
         v-if="props.started"
         :end-val="props.value"
@@ -24,25 +24,6 @@ const props = defineProps<{
       <span v-else>0</span>
       {{ props.suffix }}
     </p>
-    <p v-else class="max-lg:text-[10px]">{{ props.content }}</p>
+    <p v-else class="max-lg:text-xs">{{ props.content }}</p>
   </div>
 </template>
-
-<style scoped>
-.box {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-
-  gap: var(--space-md);
-
-  border: solid var(--border-thick) var(--border-gray);
-  border-radius: var(--radius-md);
-
-  width: 20%;
-  aspect-ratio: 1 / 1;
-}
-
-</style>

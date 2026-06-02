@@ -246,62 +246,62 @@ watch(
 </script>
 
 <template>
-  <div v-if="m" class="main-content">
-    <h1 class="title">{{ m.name }}</h1>
-    <img :src="m.imageUrl" :alt="`Image de la moto ${m.name}`" class="img-cover moto-left max-md:w-[90%]! max-lg:w-[70%]!" />
+  <div v-if="m" class="main-content flex flex-col items-center gap-8 pb-16">
+    <h1 class="title flex items-center justify-center mt-4">{{ m.name }}</h1>
+    <img :src="m.imageUrl" :alt="`Image de la moto ${m.name}`" class="img-cover moto-left flex-1 w-1/2 min-w-[38%] h-full object-cover object-center max-md:w-[90%]! max-lg:w-[70%]!" />
 
-    <div class="detail max-md:w-[90%]! max-lg:w-[70%]!">
-      <p><span>Marque:</span> {{ m.brand.name }}</p>
-      <p><span>Modèle:</span> {{ m.name }}</p>
-      <p><span>Année:</span> {{ m.year }}</p>
-      <p><span>Moteur:</span> {{ m.engine_size }} m3</p>
+    <div class="detail flex flex-col gap-2 border border-solid border-[var(--border-gray)] rounded-lg p-4 w-1/2 max-md:w-[90%]! max-lg:w-[70%]!">
+      <p><span class="font-bold">Marque:</span> {{ m.brand.name }}</p>
+      <p><span class="font-bold">Modèle:</span> {{ m.name }}</p>
+      <p><span class="font-bold">Année:</span> {{ m.year }}</p>
+      <p><span class="font-bold">Moteur:</span> {{ m.engine_size }} m3</p>
     </div>
 
-    <div ref="statsRef" class="stats-section max-md:w-[90%]! max-lg:w-[75%]!">
-      <h3>Caractéristiques</h3>
-      <div v-for="group in statsGroups" :key="group.label" class="stats-group">
-        <h4 class="stats-group-label">{{ group.label }}</h4>
-        <div class="stats-grid">
-          <div v-for="stat in group.stats" :key="stat.label" class="stat-card">
-            <span class="stat-label">{{ stat.label }}</span>
+    <div ref="statsRef" class="stats-section w-3/5 max-md:w-[90%]! max-lg:w-[75%]!">
+      <h3 class="text-center mb-4">Caractéristiques</h3>
+      <div v-for="group in statsGroups" :key="group.label" class="stats-group mb-8">
+        <h4 class="stats-group-label mb-3 pl-1 border-l-[3px] border-solid border-[var(--ui-primary)] uppercase text-sm text-gray-500 tracking-[0.08em] font-['Krona_One',sans-serif]">{{ group.label }}</h4>
+        <div class="stats-grid grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-4">
+          <div v-for="stat in group.stats" :key="stat.label" class="stat-card flex flex-col items-center p-4 border border-solid border-gray-300 rounded-lg gap-2">
+            <span class="stat-label text-sm text-gray-500 text-center font-bold">{{ stat.label }}</span>
             <CountUp
               v-if="countStarted"
-              class="stat-value"
+              class="stat-value text-2xl font-bold"
               :end-val="Number(stat.value)"
               :duration="3.5"
               :options="getCountUpOptions(stat.key)"
             />
-            <span v-else class="stat-value">0</span>
-            <div class="bar-outer">
-              <div class="bar-fill" :style="{ width: stat.percent + '%' }"></div>
+            <span v-else class="stat-value text-2xl font-bold">0</span>
+            <div class="bar-outer w-full h-[10px] bg-[var(--color-track-bg)] rounded-lg overflow-hidden">
+              <div class="bar-fill h-full rounded-lg" :style="{ width: stat.percent + '%' }"></div>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <UCard class="sound-section max-md:w-[90%]! max-lg:w-[75%]!">
-      <div class="sound-header">
+    <UCard class="sound-section w-3/5 mt-8 flex flex-col items-center gap-2 max-md:w-[90%]! max-lg:w-[75%]!">
+      <div class="sound-header flex items-center gap-2 mb-4">
         <UIcon name="i-lucide-audio-waveform" class="size-6 text-(--ui-primary)" />
         <h4>Son moteur</h4>
       </div>
       <AudioPlayer v-if="m.soundLink" :src="m.soundLink" />
-      <p v-else class="sound-empty">Aucun extrait audio disponible pour cette moto.</p>
+      <p v-else class="sound-empty text-gray-500 italic text-center py-4">Aucun extrait audio disponible pour cette moto.</p>
     </UCard>
 
     <h4>Commentaires présents sur la moto</h4>
-    <div v-if="commentsMotorcycle.length > 0" class="display-comment max-md:max-w-[95%]! max-lg:max-w-[72%]!">
+    <div v-if="commentsMotorcycle.length > 0" class="display-comment flex-1 border border-solid border-gray-300 rounded-[20px] p-8 max-w-1/2 h-fit max-md:max-w-[95%]! max-lg:max-w-[72%]!">
       <div v-for="motoComment in commentsMotorcycle" :key="motoComment._id">
         <Comment :response="motoComment" />
       </div>
     </div>
     <p v-else>Aucun commentaire sur la moto, ajouter le premier.</p>
 
-    <UCard v-if="!isAuthenticated" class="input-comment-box">
-      <div class="auth-prompt">
+    <UCard v-if="!isAuthenticated" class="input-comment-box relative my-12 mx-[25%] w-1/2 min-h-[25rem] border border-solid border-gray-500 rounded-[20px] max-lg:mx-[12%] max-lg:w-[76%] max-lg:min-h-[auto] max-md:my-6 max-md:mx-4 max-md:w-auto">
+      <div class="auth-prompt flex flex-col items-center gap-4 p-8 text-center">
         <UIcon name="i-lucide-users" class="size-12 text-(--ui-primary)" />
         <h3>Rejoignez la communauté</h3>
-        <p class="auth-prompt-text">
+        <p class="auth-prompt-text text-gray-500 max-w-[28rem]">
           Connectez-vous pour débattre et partager vos avis sur cette moto.
         </p>
         <UButton color="primary" size="xl" class="text-white! cursor-pointer" @click="open()">
@@ -309,22 +309,22 @@ watch(
         </UButton>
       </div>
     </UCard>
-    <div v-else class="input-comment-box">
-      <div v-if="!messagePosted" class="input-comment-container">
-        <h4>
+    <div v-else class="input-comment-box relative my-12 mx-[25%] w-1/2 min-h-[25rem] border border-solid border-gray-500 rounded-[20px] max-lg:mx-[12%] max-lg:w-[76%] max-lg:min-h-[auto] max-md:my-6 max-md:mx-4 max-md:w-auto">
+      <div v-if="!messagePosted" class="input-comment-container flex flex-col justify-between h-full min-h-[25rem] p-8 max-lg:min-h-[auto] max-lg:p-4">
+        <h4 class="text-center">
           Déjà roulé sur cette moto ?<br />
           Faite le savoir à la communauté !
         </h4>
-        <div class="comment-input">
+        <div class="comment-input flex flex-col gap-4">
           <UTextarea
 v-model="comment.content" size="xl"
             placeholder="Un retour d'expérience, un conseil d'entretien ou encore une question" />
         </div>
         <UButton class="rounded-4xl self-end text-xs m-1" size="xl" @click="postComment">Poster</UButton>
       </div>
-      <div v-else class="input-posted-container">
-        <h4>Merci pour votre contribution !</h4>
-        <p>
+      <div v-else class="input-posted-container flex flex-col justify-center h-fit min-h-[25rem] p-8 gap-8 max-lg:min-h-[auto] max-lg:p-4">
+        <h4 class="text-center">Merci pour votre contribution !</h4>
+        <p class="text-center">
           Votre commentaire a été posté avec succès. Il apparaîtra dans la
           section des commentaires correspondante.
         </p>
@@ -334,153 +334,10 @@ v-model="comment.content" size="xl"
 </template>
 
 <style scoped>
-.title {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: var(--space-md);
-}
-
-.main-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-xl);
-  padding-bottom: var(--space-3xl);
-}
-
-.detail {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
-  border: var(--border-thin) solid var(--border-gray);
-  border-radius: var(--radius-sm);
-  padding: var(--space-md);
-  width: 50%;
-}
-
-span {
-  font-weight: bold;
-}
-
-.stats-section {
-  width: 60%;
-}
-
-.stats-section h3 {
-  text-align: center;
-  margin-bottom: var(--space-md);
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: var(--space-md);
-}
-
-.stats-group {
-  margin-bottom: var(--space-xl);
-}
-
-.stats-group-label {
-  font-family: 'Krona One', sans-serif;
-  font-size: 14px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-gray-mid);
-  margin-bottom: var(--space-sm);
-  padding-left: var(--space-2xs);
-  border-left: 3px solid var(--ui-primary);
-}
-
-.sound-section {
-  width: 60%;
-}
-
-.sound-header {
-  display: flex;
-  align-items: center;
-  gap: var(--space-xs);
-  margin-bottom: var(--space-md);
-}
-
-.sound-empty {
-  color: var(--color-gray-mid);
-  font-style: italic;
-  text-align: center;
-  padding: var(--space-md) 0;
-}
-
-.auth-prompt {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-md);
-  padding: var(--space-xl);
-  text-align: center;
-}
-
-.auth-prompt-text {
-  color: var(--color-gray-mid);
-  max-width: 28rem;
-}
-
-.stat-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: var(--space-md);
-  border: var(--border-thin) solid var(--color-gray-light);
-  border-radius: var(--radius-sm);
-  gap: var(--space-xs);
-}
-
-.stat-label {
-  font-size: 0.85em;
-  color: var(--color-gray-mid);
-  text-align: center;
-}
-
-.stat-value {
-  font-size: 1.4em;
-  font-weight: bold;
-}
-
-.sound-section {
-  margin-top: var(--space-xl);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-xs);
-}
-
-.motorcycle-image {
-  max-width: 100%;
-  height: auto;
-  border-radius: var(--radius-sm);
-}
-
-.display-comment {
-  flex: 1;
-  border: var(--border-thin) solid var(--color-gray-light);
-  border-radius: var(--radius-lg);
-  padding: var(--space-xl);
-  max-width: 50%;
-  height: fit-content;
-}
-
-.bar-outer {
-  width: 100%;
-  height: 10px;
-  background-color: var(--color-track-bg);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-}
-
+/* Kept: gradient background (var(--gradient-primary)) + keyframe animation
+   don't map to a single Tailwind utility. */
 .bar-fill {
-  height: 100%;
   background: var(--gradient-primary);
-  border-radius: var(--radius-sm);
   animation: slide-in 2s ease-in-out;
 }
 
@@ -488,103 +345,5 @@ span {
   from {
     width: 0;
   }
-}
-
-.input-comment-box {
-  position: relative;
-  margin: var(--space-2xl) 25%;
-  width: 50%;
-  min-height: 25rem;
-  border: var(--border-thin) solid var(--color-gray-mid);
-  border-radius: var(--radius-lg);
-}
-
-.need-connection {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: var(--z-elevated);
-  text-align: center;
-}
-
-.need-connection h3 {
-  width: 400px;
-}
-
-.input-comment-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  height: 100%;
-  min-height: 25rem;
-  padding: var(--space-xl);
-}
-
-.input-comment-container h4 {
-  text-align: center;
-}
-
-.comment-input {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-md);
-}
-
-.input-posted-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  height: fit-content;
-  min-height: 25rem;
-  padding: var(--space-xl);
-  gap: var(--space-xl);
-}
-
-.input-posted-container h4 {
-  text-align: center;
-}
-
-.input-posted-container p {
-  text-align: center;
-}
-
-/* Tablet/mobile: box shrinks toward full-width as the viewport narrows */
-@media (max-width: 1024px) {
-  .input-comment-box {
-    margin-inline: 12%;
-    width: 76%;
-    min-height: auto;
-  }
-  .input-comment-container,
-  .input-posted-container {
-    min-height: auto;
-    padding: var(--space-md);
-  }
-}
-
-@media (max-width: 768px) {
-  .input-comment-box {
-    margin: var(--space-lg) var(--space-md);
-    width: auto;
-  }
-}
-
-.blurred {
-  filter: blur(3px);
-  pointer-events: none;
-  user-select: none;
-}
-
-.img-cover {
-  flex: 1;
-
-  width: 50%;
-  min-width: 38%;
-  height: 100%;
-
-  object-fit: cover;
-
-  object-position: center;
 }
 </style>

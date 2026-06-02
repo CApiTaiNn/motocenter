@@ -22,13 +22,3 @@ import HeaderInfo from '../../components/global/HeaderInfo.vue'
     <AddRideForm />
   </div>
 </template>
-<style scoped>
-.add-container {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: var(--space-sm);
-  margin-bottom: var(--space-2xl);
-  margin-left: var(--space-lg);
-}
-</style>

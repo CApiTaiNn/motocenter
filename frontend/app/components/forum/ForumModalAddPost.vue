@@ -210,7 +210,7 @@ onMounted(async () => {
 v-if="isNewPost === true" icon="i-lucide-plus" size="sm" color="primary" variant="solid"
         class="cursor-pointer" />
       <template #header>
-        <div class="modal-header">
+        <div class="w-full flex justify-between items-center">
           <h3>{{ modalTitle() }}</h3>
           <UButton
 color="primary" variant="outline" icon="i-lucide-x" class="rounded-full cursor-pointer"
@@ -219,7 +219,7 @@ color="primary" variant="outline" icon="i-lucide-x" class="rounded-full cursor-p
       </template>
       <template #body>
         <div>
-          <UForm :schema :state="state" class="form" @submit="onSubmit">
+          <UForm :schema :state="state" class="w-full flex flex-col gap-2" @submit="onSubmit">
             <UFormField label="Titre du post" required name="title">
               <UInput v-model="state.title" placeholder="Titre du post" size="md" class="w-full" />
             </UFormField>
@@ -258,17 +258,22 @@ v-model="state.brand" placeholder="Sélectionnez la marque du post" :items="bran
               <UFileUpload v-model="state.file" accept="image/*" label="Déposez votre image" description="PNG ou JPG">
                 <template #default="{ open }">
                   <div @click="open" @mouseover="isHover = true" @mouseleave="isHover = false">
-                    <div class="cursor-pointer" :class="isHover ? 'blur-4' : ''">
-                      <img :src="getPreviewUrl()" />
+                    <div class="cursor-pointer" :class="isHover ? 'blur-[2px]' : ''">
+                      <img :src="getPreviewUrl()" class="max-w-[80%]" />
                     </div>
-                    <div v-if="props.isNewPost && getPreviewUrl() === ''" class="border cursor-pointer">
-                      <div class="helper-upload">
+                    <div
+v-if="props.isNewPost && getPreviewUrl() === ''"
+                      class="cursor-pointer text-center min-h-[100px] max-h-[100px] border-2 border-dashed border-[var(--border-gray)] rounded-xl">
+                      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
                         <UIcon name="i-lucide-cloud-upload" class="size-10" />
-                        <p class="text-sm">Sélectionner votre fichier</p>
+                        <p class="text-base">Sélectionner votre fichier</p>
                       </div>
                     </div>
-                    <div v-if="isHover && getPreviewUrl() !== ''" class="helper-upload cursor-pointer" @click="open">
-                      <h4>Cliquer pour modifier la photo</h4>
+                    <div
+v-if="isHover && getPreviewUrl() !== ''"
+                      class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center cursor-pointer"
+                      @click="open">
+                      <h4 class="text-sm p-2 text-[var(--background)] bg-[rgba(128,128,128,0.865)]">Cliquer pour modifier la photo</h4>
                     </div>
                   </div>
                 </template>
@@ -291,57 +296,3 @@ v-model="state.brand" placeholder="Sélectionnez la marque du post" :items="bran
     </UModal>
   </div>
 </template>
-<style scoped>
-.form {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
-}
-
-.modal-header {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.cursor-pointer {
-  cursor: pointer;
-}
-
-.helper-upload {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  text-align: center;
-  transform: translate(-50%, -50%);
-}
-
-.helper-upload p {
-  font-size: 16px;
-}
-
-.helper-upload h4 {
-  font-size: 14px;
-  background-color: rgba(128, 128, 128, 0.865);
-  padding: var(--space-xs);
-  color: var(--background);
-}
-
-.blur-4 {
-  filter: blur(2px);
-}
-
-.border {
-  border: var(--border-thick) dashed var(--border-gray);
-  border-radius: var(--radius-md);
-  text-align: center;
-  min-height: 100px;
-  max-height: 100px;
-}
-
-img {
-  max-width: 80%;
-}
-</style>

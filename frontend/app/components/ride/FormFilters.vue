@@ -103,9 +103,9 @@ const resetFilter = () => {
 </script>
 
 <template>
-  <div class="filters-container max-[480px]:w-[95%]! max-[480px]:min-w-0! max-[480px]:h-auto! max-[480px]:max-h-[80vh]! max-[480px]:left-1/2 max-[480px]:-translate-x-1/2 max-[480px]:m-0!">
-    <h3>Filtres</h3>
-    <div class="container-fields">
+  <div class="filters-container flex flex-col gap-4 ml-3 bg-[var(--background)] w-[20dvw] h-[46rem] min-w-[350px] max-h-[calc(100vh_-_100px)] absolute top-[60px] bottom-[20px] z-[2000] rounded-lg border border-solid border-[var(--border-gray)] shadow-[var(--shadow-md)] p-4 overflow-y-auto max-[480px]:w-[95%]! max-[480px]:min-w-0! max-[480px]:h-auto! max-[480px]:max-h-[80vh]! max-[480px]:left-1/2 max-[480px]:-translate-x-1/2 max-[480px]:m-0!">
+    <h3 class="text-xl font-semibold text-center">Filtres</h3>
+    <div class="container-fields flex flex-col justify-center items-center gap-4 px-4">
       <UFormField label="Titre de la balade">
         <UInput
           v-model="filters.title"
@@ -161,7 +161,7 @@ const resetFilter = () => {
       </UFormField>
 
       <UFormField label="Distance (km)">
-        <div class="value-slider-container">
+        <div class="value-slider-container flex justify-start mb-2 gap-1">
           <UInputNumber
             v-model="filters.distance[0]"
             :min="0"
@@ -186,7 +186,7 @@ const resetFilter = () => {
       </UFormField>
 
       <UFormField label="Durée (h)">
-        <div class="value-slider-container">
+        <div class="value-slider-container flex justify-start mb-2 gap-1">
           <UInputNumber
             v-model="filters.duration[0]"
             :min="0"
@@ -210,7 +210,7 @@ const resetFilter = () => {
         />
       </UFormField>
 
-      <div class="container-bottom-buttons">
+      <div class="container-bottom-buttons flex flex-row gap-3 w-full">
         <UButton
           color="neutral"
           variant="subtle"
@@ -235,26 +235,6 @@ const resetFilter = () => {
 </template>
 
 <style scoped>
-h3 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  text-align: center;
-}
-
-.container-bottom-buttons {
-  display: flex;
-  flex-direction: row;
-  gap: var(--space-sm);
-  width: 100%;
-}
-
-.value-slider-container {
-  display: flex;
-  justify-content: start;
-  margin-bottom: var(--space-xs);
-  gap: var(--space-2xs);
-}
-
 :deep(label) {
   color: var(--label-text) !important;
 }
@@ -263,35 +243,7 @@ h3 {
   opacity: 1;
 }
 
-.container-fields {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: var(--space-md);
-  padding-left: var(--space-md);
-  padding-right: var(--space-md);
-}
-
 .filters-container {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-md);
-  margin-left: var(--space-sm);
-  background-color: var(--background);
-  width: 20dvw;
-  height: 46rem;
-  min-width: 350px;
-  max-height: calc(100vh - 100px);
-  position: absolute;
-  top: 60px;
-  bottom: 20px;
-  z-index: var(--z-modal);
-  border-radius: var(--radius-sm);
-  border: var(--border-thin) solid var(--border-gray);
-  box-shadow: var(--shadow-md);
-  padding: var(--space-md);
-  overflow-y: auto;
   transition:
     left 0.3s,
     transform 0.3s,

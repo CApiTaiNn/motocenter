@@ -26,13 +26,13 @@ const handleFiltersChange = (payload: any) => {
           @click="isOpen = true"
         />
         <template #body>
-          <section class="drawer-section">
-            <h5 class="drawer-section-label">Filtres</h5>
+          <section class="drawer-section flex flex-col gap-3 py-2">
+            <h5 class="drawer-section-label text-xs tracking-[0.1em] uppercase text-gray-500 pl-1 border-l-[3px] border-solid border-[var(--ui-primary)]">Filtres</h5>
             <FilterContent @change="handleFiltersChange" />
           </section>
-          <hr class="drawer-divider" />
-          <section class="drawer-section">
-            <h5 class="drawer-section-label">Mon activité</h5>
+          <hr class="drawer-divider border-0 border-t border-solid border-gray-300 my-4" />
+          <section class="drawer-section flex flex-col gap-3 py-2">
+            <h5 class="drawer-section-label text-xs tracking-[0.1em] uppercase text-gray-500 pl-1 border-l-[3px] border-solid border-[var(--ui-primary)]">Mon activité</h5>
             <div class="panel-mobile flex flex-col gap-[0.5em]">
               <ForumMyPosts />
               <ForumMyFavoritesPost />
@@ -45,27 +45,8 @@ const handleFiltersChange = (payload: any) => {
 </template>
 
 <style scoped>
-.drawer-section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-sm);
-  padding: var(--space-xs) 0;
-}
-
 .drawer-section-label {
   font-family: 'Krona One', sans-serif;
-  font-size: 12px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--color-gray-mid);
-  padding-left: var(--space-2xs);
-  border-left: 3px solid var(--ui-primary);
-}
-
-.drawer-divider {
-  border: 0;
-  border-top: var(--border-thin) solid var(--color-gray-light);
-  margin: var(--space-md) 0;
 }
 </style>
 

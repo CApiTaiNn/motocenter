@@ -73,60 +73,18 @@ onMounted(() => {
 </script>
 
 <template>
-  <main class="admin-container">
-    <h3>Bienvenue {{ userName }}</h3>
-    <div class="stats-grid">
+  <main class="max-w-[80rem] mx-auto my-16 px-6">
+    <h3 class="text-center m-6">Bienvenue {{ userName }}</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div
         v-for="stat in stats"
         :key="stat.title"
-        class="card"
+        class="relative flex flex-col gap-2 py-4 px-6 rounded-xl border border-solid border-gray-300 border-l-4 border-l-[var(--ui-primary)] bg-[var(--background)]"
         :style="{ borderLeftColor: stat.accent }"
       >
-        <UIcon :name="stat.icon" class="stat-icon" :style="{ color: stat.accent }" />
+        <UIcon :name="stat.icon" class="w-[1.75rem] h-[1.75rem]" :style="{ color: stat.accent }" />
         <StatsAnalytics :title="stat.title" :value="stat.value" />
       </div>
     </div>
   </main>
 </template>
-
-<style scoped>
-h3 {
-  text-align: center;
-  margin: var(--space-lg);
-}
-
-.admin-container {
-  max-width: 80rem;
-  margin: var(--space-3xl) auto;
-  padding: 0 var(--space-lg);
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--space-md);
-}
-
-@media (min-width: 768px) {
-  .stats-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-.card {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
-  padding: var(--space-md) var(--space-lg);
-  border-radius: var(--radius-md);
-  border: var(--border-thin) solid var(--color-gray-light);
-  border-left: 4px solid var(--ui-primary);
-  background-color: var(--background);
-}
-
-.stat-icon {
-  width: 1.75rem;
-  height: 1.75rem;
-}
-</style>
