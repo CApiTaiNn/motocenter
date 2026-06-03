@@ -1,11 +1,14 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import request from 'supertest'
+import jwt from 'jsonwebtoken'
 import app from '../app'
 import Brand from '../models/Brand'
 import Motorcycle from '../models/Motorcycle'
+import User from '../models/User'
 
 describe('Motorcycle Routes - /api/v1/motorcycles', () => {
   let brandId: string
+  let adminCookie: string
 
   const motoData = {
     name: 'MT-07',
@@ -22,12 +25,27 @@ describe('Motorcycle Routes - /api/v1/motorcycles', () => {
   beforeEach(async () => {
     const brand = await Brand.create({ name: 'Yamaha', icon: 'yamaha.svg' })
     brandId = brand._id.toString()
+
+    const admin = await User.create({
+      firstname: 'Admin',
+      lastname: 'User',
+      pseudo: 'admin',
+      email: 'admin@test.com',
+      password: 'password123',
+      isAdmin: true
+    })
+    const token = jwt.sign(
+      { id: admin._id.toString(), email: admin.email },
+      process.env.JWT_SECRET!
+    )
+    adminCookie = `accessToken=${token}`
   })
 
   describe('POST /api/v1/motorcycles', () => {
     it('should create a new motorcycle', async () => {
       const res = await request(app)
         .post('/api/v1/motorcycles')
+        .set('Cookie', adminCookie)
         .send({ ...motoData, brand: brandId })
 
       expect(res.status).toBe(201)
@@ -38,6 +56,7 @@ describe('Motorcycle Routes - /api/v1/motorcycles', () => {
     it('should fail without required fields', async () => {
       const res = await request(app)
         .post('/api/v1/motorcycles')
+        .set('Cookie', adminCookie)
         .send({ name: 'Incomplete' })
 
       expect(res.status).toBe(500)
@@ -128,6 +147,7 @@ describe('Motorcycle Routes - /api/v1/motorcycles', () => {
 
       const res = await request(app)
         .put(`/api/v1/motorcycles/${moto._id}`)
+        .set('Cookie', adminCookie)
         .send({ name: 'MT-07 Updated' })
 
       expect(res.status).toBe(200)
@@ -138,6 +158,7 @@ describe('Motorcycle Routes - /api/v1/motorcycles', () => {
       const fakeId = '507f1f77bcf86cd799439011'
       const res = await request(app)
         .put(`/api/v1/motorcycles/${fakeId}`)
+        .set('Cookie', adminCookie)
         .send({ name: 'Ghost' })
 
       expect(res.status).toBe(404)
@@ -148,7 +169,9 @@ describe('Motorcycle Routes - /api/v1/motorcycles', () => {
     it('should delete a motorcycle', async () => {
       const moto = await Motorcycle.create({ ...motoData, brand: brandId })
 
-      const res = await request(app).delete(`/api/v1/motorcycles/${moto._id}`)
+      const res = await request(app)
+        .delete(`/api/v1/motorcycles/${moto._id}`)
+        .set('Cookie', adminCookie)
 
       expect(res.status).toBe(200)
       expect(res.body.message).toBe('Motorcycle deleted successfully')
@@ -159,7 +182,9 @@ describe('Motorcycle Routes - /api/v1/motorcycles', () => {
 
     it('should return 404 for non-existent id', async () => {
       const fakeId = '507f1f77bcf86cd799439011'
-      const res = await request(app).delete(`/api/v1/motorcycles/${fakeId}`)
+      const res = await request(app)
+        .delete(`/api/v1/motorcycles/${fakeId}`)
+        .set('Cookie', adminCookie)
 
       expect(res.status).toBe(404)
     })
