@@ -151,7 +151,9 @@ router.post('/account', async (req: Request, res: Response) => {
       idMoto: ''
     }
 
-    const users = await User.insertOne(newUser)
+    const created = await User.insertOne(newUser)
+    const users = created.toObject() as unknown as Record<string, unknown>
+    delete users.password
 
     res.status(201).json({ users })
   } catch (error) {

@@ -163,11 +163,9 @@ router.patch('/:id/like', async (req: Request<{ id: string }>, res: any) => {
       like: updatedRide.like,
       isLiked: !hasLiked
     })
-  } catch (error: any) {
-    console.error('MONGODB ERROR:', error.message)
-    res
-      .status(500)
-      .json({ error: 'Internal server error', details: error.message })
+  } catch (error) {
+    console.error('Error liking ride:', error)
+    res.status(500).json({ error: 'Internal server error' })
   }
 })
 
@@ -356,10 +354,7 @@ router.post(
       })
     } catch (error) {
       console.error('Error creating ride:', error)
-      res.status(400).json({
-        error: 'Failed to create ride',
-        details: error
-      })
+      res.status(400).json({ error: 'Failed to create ride' })
     }
   }
 )
@@ -461,12 +456,9 @@ router.patch(
         isParticipating: !isParticipating,
         updatedParticipants: updatedRide.participating_user
       })
-    } catch (error: any) {
-      console.error('Participation error:', error.message)
-      res.status(500).json({
-        error: 'Internal server error',
-        details: error.message
-      })
+    } catch (error) {
+      console.error('Participation error:', error)
+      res.status(500).json({ error: 'Internal server error' })
     }
   }
 )

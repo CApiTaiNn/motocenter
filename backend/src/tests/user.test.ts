@@ -36,6 +36,7 @@ describe('User Routes - /api/v1/users', () => {
       expect(res.status).toBe(200)
       expect(res.body.users).toBeDefined()
       expect(res.body.users.email).toBe(userData.email)
+      expect(res.body.users.password).toBeUndefined()
     })
 
     it('should return 401 without token', async () => {
@@ -104,6 +105,22 @@ describe('User Routes - /api/v1/users', () => {
       expect(res.body.stats.length).toBe(12)
       expect(res.body.stats[0]).toHaveProperty('month')
       expect(res.body.stats[0]).toHaveProperty('total')
+    })
+  })
+
+  describe('Query hardening', () => {
+    it('rejects a $where filter with 400', async () => {
+      const res = await request(app).get(
+        `/api/v1/users?filter=${encodeURIComponent('{"$where":"1==1"}')}`
+      )
+
+      expect(res.status).toBe(400)
+    })
+
+    it('rejects a malformed filter with 400', async () => {
+      const res = await request(app).get('/api/v1/users?filter=not-json')
+
+      expect(res.status).toBe(400)
     })
   })
 

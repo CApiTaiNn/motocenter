@@ -250,9 +250,9 @@ router.patch('/', async (req: Request, res: Response) => {
     const result = await Message.findById(messageId).lean()
     if (result) await attachUser([result], 'user')
     res.status(200).json({ populatedMessage: result })
-  } catch (error: any) {
-    console.error('ERREUR MONGODB:', error.message)
-    res.status(500).json({ error: 'Erreur serveur', details: error.message })
+  } catch (error) {
+    console.error('Error updating message reaction:', error)
+    res.status(500).json({ error: 'Internal server error' })
   }
 })
 

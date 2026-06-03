@@ -8,6 +8,7 @@ let mongoServer: MongoMemoryServer
 beforeAll(async () => {
   mongoServer = await MongoMemoryServer.create()
   const uri = mongoServer.getUri()
+  process.env.NODE_ENV = 'test'
   process.env.JWT_SECRET = 'test-secret'
   process.env.PASSWORD_PEPPER = 'your_password_pepper'
 
