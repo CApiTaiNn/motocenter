@@ -2,6 +2,9 @@
   "name": "frontend",
   "type": "module",
   "private": true,
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",

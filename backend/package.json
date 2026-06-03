@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
     "dev": "nodemon --watch \"src/**/*.ts\" --exec \"npx ts-node\" src/server.ts",
     "build": "tsc",
@@ -17,12 +20,6 @@
   "license": "ISC",
   "dependencies": {
     "@supabase/supabase-js": "^2.105.4",
-    "@types/cookie-parser": "^1.4.10",
-    "@types/cors": "^2.8.19",
-    "@types/express": "^5.0.6",
-    "@types/jsonwebtoken": "^9.0.10",
-    "@types/multer": "^2.1.0",
-    "@types/node": "^25.2.3",
     "argon2": "^0.44.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
@@ -33,18 +30,18 @@
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.2.1",
     "multer": "^2.1.1",
-    "nodemon": "^3.1.11",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
-    "ts-node": "^10.9.2",
-    "tsconfig-paths": "^4.2.0",
-    "tsup": "^8.5.1",
-    "typescript": "^5.9.3",
-    "up": "^1.0.2",
     "uuid": "^14.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@types/cookie-parser": "^1.4.10",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/multer": "^2.1.0",
+    "@types/node": "^25.2.3",
     "@types/supertest": "^7.2.0",
     "@types/swagger-jsdoc": "^6.0.4",
     "@types/swagger-ui-express": "^4.1.8",
@@ -53,8 +50,12 @@
     "globals": "^17.3.0",
     "jiti": "^2.6.1",
     "mongodb-memory-server": "^11.0.1",
+    "nodemon": "^3.1.11",
     "prettier": "^3.8.1",
     "supertest": "^7.2.2",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.9.3",
     "typescript-eslint": "^8.56.1",
     "vitest": "^4.1.3"
   }
