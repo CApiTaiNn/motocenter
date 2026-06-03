@@ -132,11 +132,11 @@ router.post('/account', async (req: Request, res: Response) => {
     return res.status(400).json({ error: 'Email and password are required' })
   }
 
-  if (await User.findOne({ email })) {
-    return res.status(409).json({ error: 'User already exists' })
-  }
-
   try {
+    if (await User.findOne({ email })) {
+      return res.status(409).json({ error: 'User already exists' })
+    }
+
     const newUser: IUser = {
       email,
       password: await hash(password),
@@ -243,31 +243,31 @@ router.put(
       }
     })
 
-    if (updateData.pseudo) {
-      const existingUser = await User.findOne({
-        pseudo: updateData.pseudo,
-        _id: { $ne: id }
-      })
-      if (existingUser) {
-        return res.status(409).json({ error: 'Pseudo already taken' })
-      }
-    }
-
-    if (updateData.password) {
-      updateData.password = await hash(updateData.password)
-    }
-
-    if (updateData.ridingStartYear) {
-      const year = Number(updateData.ridingStartYear)
-      const currentYear = new Date().getFullYear()
-      if (isNaN(year) || year < 1950 || year > currentYear) {
-        return res.status(400).json({
-          error: `Riding start year must be between 1950 and ${currentYear}`
-        })
-      }
-    }
-
     try {
+      if (updateData.pseudo) {
+        const existingUser = await User.findOne({
+          pseudo: updateData.pseudo,
+          _id: { $ne: id }
+        })
+        if (existingUser) {
+          return res.status(409).json({ error: 'Pseudo already taken' })
+        }
+      }
+
+      if (updateData.password) {
+        updateData.password = await hash(updateData.password)
+      }
+
+      if (updateData.ridingStartYear) {
+        const year = Number(updateData.ridingStartYear)
+        const currentYear = new Date().getFullYear()
+        if (isNaN(year) || year < 1950 || year > currentYear) {
+          return res.status(400).json({
+            error: `Riding start year must be between 1950 and ${currentYear}`
+          })
+        }
+      }
+
       updateData.updatedAt = new Date()
 
       const users = await User.findByIdAndUpdate(id, updateData, {
