@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import LogoApp from './LogoApp.vue'
+import ToggleSwitch from './ToggleSwitch.vue'
 import { useAuth } from '~/composables/useAuth'
 import { useConnexionModal } from '~/composables/useConnexionModal'
 import { useProfileModal } from '~/composables/useProfileModal'
@@ -11,10 +12,24 @@ const isOpen = ref(false)
 const connexionModal = useConnexionModal()
 const profileModal = useProfileModal()
 
+const isDev = import.meta.dev
+const colorMode = useColorMode()
+const mode = ref(colorMode.value === 'dark')
+
+watch(
+  () => colorMode.value,
+  (newVal) => {
+    mode.value = newVal === 'dark'
+  }
+)
+
+watch(mode, (newVal) => {
+  colorMode.preference = newVal ? 'dark' : 'light'
+})
+
 function toggle_open() {
   isOpen.value = !isOpen.value
 }
-
 </script>
 
 <template>
@@ -22,6 +37,7 @@ function toggle_open() {
     <div class="navbar">
       <div class="list-left">
         <LogoApp />
+        <ToggleSwitch v-if="isDev" v-model="mode" />
       </div>
       <div class="list-right">
         <UButton size="md" color="neutral" variant="ghost" to="/comparo"
@@ -41,7 +57,7 @@ function toggle_open() {
           trailing-icon="i-lucide-arrow-right"
           size="xl"
           color="neutral"
-          class="rounded-full button"
+          class="rounded-full text-sm px-10 py-2.5"
           @click="connexionModal.open()"
           >Connexion
         </UButton>
@@ -60,6 +76,7 @@ function toggle_open() {
     <div class="navbar">
       <div class="list-left">
         <LogoApp />
+        <ToggleSwitch v-if="isDev" v-model="mode" />
       </div>
       <UIcon
         :name="isOpen ? 'i-lucide-chevron-down' : 'i-lucide-menu'"
@@ -72,7 +89,7 @@ function toggle_open() {
         size="md"
         color="neutral"
         variant="ghost"
-        style="justify-content: center"
+        class="justify-center"
         to="/comparo"
         >Comparateur</UButton
       >
@@ -80,7 +97,7 @@ function toggle_open() {
         size="md"
         color="neutral"
         variant="ghost"
-        style="justify-content: center"
+        class="justify-center"
         to="/forum"
         >Forum</UButton
       >
@@ -88,7 +105,7 @@ function toggle_open() {
         size="md"
         color="neutral"
         variant="ghost"
-        style="justify-content: center"
+        class="justify-center"
         to="/ride"
         >Balades</UButton
       >
@@ -96,7 +113,7 @@ function toggle_open() {
         size="md"
         color="neutral"
         variant="ghost"
-        style="justify-content: center"
+        class="justify-center"
         to="/knowUs"
         >Nous connaitre</UButton
       >
@@ -105,7 +122,7 @@ function toggle_open() {
         size="md"
         color="neutral"
         variant="ghost"
-        style="justify-content: center"
+        class="justify-center"
         @click="connexionModal.open()"
         >Connexion</UButton
       >
@@ -114,7 +131,7 @@ function toggle_open() {
         size="md"
         color="neutral"
         variant="ghost"
-        style="justify-content: center"
+        class="justify-center"
         @click="profileModal.open()"
         >Mon profil</UButton
       >
@@ -191,10 +208,5 @@ function toggle_open() {
   text-align: center;
 
   background-color: var(--background);
-}
-
-:deep(.button) {
-  font-size: small;
-  padding: 10px 40px;
 }
 </style>
