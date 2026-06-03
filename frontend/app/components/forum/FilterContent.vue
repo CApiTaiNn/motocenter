@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { IBrand } from '~/types/brand'
-import type { ICategory } from '~/types/category'
+import { POST_CATEGORY_OPTIONS } from '~/utils/postCategory'
 
 const props = defineProps({
   loading: Boolean,
@@ -11,7 +11,7 @@ const props = defineProps({
 })
 const emits = defineEmits(['change'])
 
-const categories = ref<ICategory[]>([])
+const categories = POST_CATEGORY_OPTIONS
 const brands = ref<IBrand[]>([])
 
 const filters = ref({
@@ -36,14 +36,6 @@ watch(
 
 const handleHaveAllPosts = () => {
   navigateTo('/forum')
-}
-
-const getCategories = async () => {
-  const res = await fetch(
-    `${useRuntimeConfig().public.apiBase}categories?project=name,id,icon`
-  )
-  const data = await res.json()
-  categories.value = data.categories
 }
 
 const getBrands = async () => {
@@ -92,7 +84,7 @@ const handleSearch = () => {
 }
 
 onMounted(async () => {
-  await Promise.all([getBrands(), getCategories()])
+  await getBrands()
 })
 </script>
 
@@ -141,15 +133,15 @@ onMounted(async () => {
       <div
         v-for="category in categories"
         v-else
-        :key="category._id"
+        :key="category.value"
         class="flex flex-row items-center my-2 mx-4 p-[0.3em] cursor-pointer hover:bg-[rgba(109,100,100,0.097)] hover:rounded-xl hover:w-fit"
         :class="{
-          'background-selected': filters.categoryIds.includes(category._id)
+          'background-selected': filters.categoryIds.includes(category.value)
         }"
-        @click="handlClickOnCategory(category._id)"
+        @click="handlClickOnCategory(category.value)"
       >
         <UIcon class="size-7 mr-2" :name="category.icon" />
-        <p>{{ category.name }}</p>
+        <p>{{ category.label }}</p>
       </div>
     </div>
   </div>

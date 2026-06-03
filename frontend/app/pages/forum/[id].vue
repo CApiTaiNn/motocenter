@@ -5,6 +5,7 @@ import { useAuth } from '~/composables/useAuth'
 import { useConnexionModal } from '~/composables/useConnexionModal'
 import type { IMessage } from '~/types/messages'
 import type { IPost } from '~/types/post'
+import { POST_CATEGORY_META } from '~/utils/postCategory'
 
 const route = useRoute()
 
@@ -166,7 +167,9 @@ onMounted(async () => {
         <div>
           <div class="flex flex-wrap items-center gap-[0.75rem_1rem] mt-6 mb-4">
             <UBadge size="lg">{{ post?.brand.name }}</UBadge>
-            <UBadge size="lg" variant="subtle">{{ post?.category.name }}</UBadge>
+            <UBadge size="lg" variant="subtle">{{
+              post?.category ? POST_CATEGORY_META[post.category]?.label : ''
+            }}</UBadge>
             <span class="text-gray-300 text-xl leading-none" aria-hidden="true">·</span>
             <div class="flex items-center gap-1 text-gray-500 text-sm">
               <UIcon name="i-lucide-messages-square" class="size-5" />

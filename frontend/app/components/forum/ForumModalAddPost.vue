@@ -2,7 +2,7 @@
 import * as v from 'valibot'
 import { useAuth } from '~/composables/useAuth'
 import type { IBrand } from '~/types/brand'
-import type { ICategory } from '~/types/category'
+import { PostCategory, POST_CATEGORY_OPTIONS } from '~/utils/postCategory'
 import type { IPost } from '~/types/post'
 
 const props = defineProps<{
@@ -11,7 +11,7 @@ const props = defineProps<{
   isSameUser?: boolean
 }>()
 
-const categories = ref<ICategory[]>([])
+const categories = POST_CATEGORY_OPTIONS
 const brands = ref<IBrand[]>([])
 const toast = useToast()
 const { user } = useAuth()
@@ -24,18 +24,6 @@ const initialState = ref({
   brand: '',
   description: ''
 })
-
-const getCategories = async () => {
-  const res = await $fetch<{ categories: ICategory[] }>(
-    `${useRuntimeConfig().public.apiBase}categories`,
-    {
-      params: {
-        project: 'name,_id'
-      }
-    }
-  )
-  categories.value = res.categories
-}
 
 const getBrands = async () => {
   const res = await $fetch<{ brands: IBrand[] }>(
@@ -67,7 +55,7 @@ const schema = v.object({
 
 const state = reactive({
   title: props.post?.title || '',
-  category: props.post?.category.name || '',
+  category: props.post?.category as PostCategory | undefined,
   brand: props.post?.brand.name || '',
   description: props.post?.content || '',
   file: undefined as File | undefined
@@ -154,7 +142,7 @@ const handleCloseModal = () => {
 const resetForm = () => {
   state.brand = props.post?.brand.name || ''
   state.title = props.post?.title || ''
-  state.category = props.post?.category.name || ''
+  state.category = props.post?.category
   state.description = props.post?.content || ''
   state.file = undefined
 }
@@ -178,7 +166,7 @@ const getPreviewUrl = () => {
 const setInitialState = () => {
   initialState.value = {
     title: props.post?.title || '',
-    category: props.post?.category.name || '',
+    category: props.post?.category || '',
     brand: props.post?.brand.name || '',
     description: props.post?.content || ''
   }
@@ -197,7 +185,7 @@ const isSameValues = computed(() => {
 })
 
 onMounted(async () => {
-  await Promise.all([getCategories(), getBrands()])
+  await getBrands()
   setInitialState()
 })
 </script>
@@ -226,7 +214,7 @@ color="primary" variant="outline" icon="i-lucide-x" class="rounded-full cursor-p
             <UFormField label="Catégorie" required name="category">
               <USelectMenu
 v-model="state.category" placeholder="Sélectionnez la catégorie du post" :items="categories"
-                value-key="name" label-key="name" :search-input="{
+                value-key="value" label-key="label" :search-input="{
                   placeholder: 'Rechercher',
                   icon: 'i-lucide-search'
                 }" size="md" class="w-full">

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { IPost } from '~/types/post'
+import { POST_CATEGORY_META } from '~/utils/postCategory'
 
 const props = defineProps<{
   post: IPost
@@ -31,7 +32,7 @@ const handlePostChange = () => {
 <template>
   <UCard
     class="w-full max-w-275 border-[0.5px] border-(--border-gray) category-accent"
-    :style="{ '--category-accent': categoryAccent(props.post.category?.name) }"
+    :style="{ '--category-accent': categoryAccent(props.post.category) }"
     @click="handleOpenAPost(post._id)"
   >
     <div class="postCard w-full flex items-start gap-6 py-3 px-6">
@@ -58,7 +59,9 @@ const handlePostChange = () => {
               <UBadge size="lg" class="margin-2">{{
                 props.post.brand.name
               }}</UBadge>
-              <UBadge size="lg">{{ props.post.category.name }}</UBadge>
+              <UBadge size="lg">{{
+                POST_CATEGORY_META[props.post.category]?.label
+              }}</UBadge>
             </div>
             <p>
               Par {{ props.post.user.pseudo }},
