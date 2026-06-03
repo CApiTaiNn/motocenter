@@ -9,8 +9,9 @@
     "start": "node dist/server.js",
     "seed": "ts-node src/seed/index.ts",
     "test": "vitest run",
+    "typecheck": "tsc --noEmit",
     "lint": "eslint src/",
-    "lint:fix": "eslint src/ --fix  "
+    "lint:fix": "eslint src/ --fix"
   },
   "author": "",
   "license": "ISC",

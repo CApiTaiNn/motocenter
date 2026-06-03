@@ -1,6 +1,6 @@
 import Brand from '../models/Brand'
 import { type Request, Response, Router } from 'express'
-import { prepareQuery, type ReqQuery } from '../utils/find'
+import { prepareQuery } from '../utils/find'
 
 const router = Router()
 

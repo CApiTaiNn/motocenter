@@ -1,7 +1,7 @@
 import Ride from '../models/Ride'
 import { type Request, Router } from 'express'
 import { prepareQuery, type ReqQuery } from '../utils/find'
-import { RideColor, ICreateRideBody, IRide } from '../types/ride'
+import { RideColor, ICreateRideBody } from '../types/ride'
 import { Types } from 'mongoose'
 import { attachUsers } from '../utils/attach'
 
