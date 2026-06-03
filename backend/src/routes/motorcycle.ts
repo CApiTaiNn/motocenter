@@ -163,6 +163,41 @@ router.get('/stats', async (req: Request, res: Response) => {
   }
 })
 
+/**
+ * @openapi
+ * /motorcycles/{id}:
+ *   put:
+ *     summary: Mettre à jour une moto
+ *     tags:
+ *       - Motorcycles
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID de la moto
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/MotorcycleInput'
+ *     responses:
+ *       200:
+ *         description: Moto mise à jour
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 motorcycle:
+ *                   $ref: '#/components/schemas/Motorcycle'
+ *       404:
+ *         description: Moto non trouvée
+ *       500:
+ *         description: Erreur serveur
+ */
 router.put('/:id', authenticateToken, requireAdmin, async (req: Request, res: Response) => {
   try {
     const updatedMotorcycle = await Motorcycle.findByIdAndUpdate(
@@ -179,6 +214,36 @@ router.put('/:id', authenticateToken, requireAdmin, async (req: Request, res: Re
   }
 })
 
+/**
+ * @openapi
+ * /motorcycles/{id}:
+ *   delete:
+ *     summary: Supprimer une moto
+ *     tags:
+ *       - Motorcycles
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID de la moto
+ *     responses:
+ *       200:
+ *         description: Moto supprimée avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Motorcycle deleted successfully
+ *       404:
+ *         description: Moto non trouvée
+ *       500:
+ *         description: Erreur serveur
+ */
 router.delete('/:id', authenticateToken, requireAdmin, async (req: Request, res: Response) => {
   try {
     const deletedMotorcycle = await Motorcycle.findByIdAndDelete(req.params.id)
@@ -258,100 +323,6 @@ router.get('/max-stats', async (req: Request, res: Response) => {
     res.status(200).json(maxStats[0])
   } catch (error) {
     console.error('Error accessing motorcycle route:', error)
-    res.status(500).json({ error: 'Internal server error' })
-  }
-})
-
-/**
- * @openapi
- * /motorcycles/{id}:
- *   put:
- *     summary: Mettre à jour une moto
- *     tags:
- *       - Motorcycles
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: ID de la moto
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/MotorcycleInput'
- *     responses:
- *       200:
- *         description: Moto mise à jour
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 motorcycle:
- *                   $ref: '#/components/schemas/Motorcycle'
- *       404:
- *         description: Moto non trouvée
- *       500:
- *         description: Erreur serveur
- */
-router.put('/:id', authenticateToken, requireAdmin, async (req: Request, res: Response) => {
-  try {
-    const updatedMotorcycle = await Motorcycle.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-    ).populate('brand')
-    if (!updatedMotorcycle) {
-      return res.status(404).json({ error: 'Motorcycle not found' })
-    }
-    res.status(200).json({ motorcycle: updatedMotorcycle })
-  } catch (error) {
-    console.error('Error updating motorcycle:', error)
-    res.status(500).json({ error: 'Internal server error' })
-  }
-})
-
-/**
- * @openapi
- * /motorcycles/{id}:
- *   delete:
- *     summary: Supprimer une moto
- *     tags:
- *       - Motorcycles
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: ID de la moto
- *     responses:
- *       200:
- *         description: Moto supprimée avec succès
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Motorcycle deleted successfully
- *       404:
- *         description: Moto non trouvée
- *       500:
- *         description: Erreur serveur
- */
-router.delete('/:id', authenticateToken, requireAdmin, async (req: Request, res: Response) => {
-  try {
-    const deletedMotorcycle = await Motorcycle.findByIdAndDelete(req.params.id)
-    if (!deletedMotorcycle) {
-      return res.status(404).json({ error: 'Motorcycle not found' })
-    }
-    res.status(200).json({ message: 'Motorcycle deleted successfully' })
-  } catch (error) {
-    console.error('Error deleting motorcycle:', error)
     res.status(500).json({ error: 'Internal server error' })
   }
 })

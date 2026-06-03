@@ -423,8 +423,9 @@ router.post('/', async (req, res) => {
  *                 type: string
  *               content:
  *                 type: string
- *               image:
+ *               url:
  *                 type: string
+ *                 description: URL de l'image du post
  *               brand:
  *                 type: string
  *                 description: Nom de la marque
