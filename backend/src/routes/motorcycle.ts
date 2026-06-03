@@ -1,6 +1,7 @@
 import Motorcycle from '../models/Motorcycle'
 import { type Request, Response, Router } from 'express'
 import { prepareQuery, type ReqQuery } from '../utils/find'
+import { authenticateToken, requireAdmin } from '../utils/auth'
 const router = Router()
 
 /**
@@ -88,7 +89,7 @@ router.get(
  *       500:
  *         description: Erreur serveur
  */
-router.post('/', async (req: Request, res: Response) => {
+router.post('/', authenticateToken, requireAdmin, async (req: Request, res: Response) => {
   try {
     const newMotorcycle = new Motorcycle(req.body)
     const savedMotorcycle = await newMotorcycle.save()
@@ -162,7 +163,7 @@ router.get('/stats', async (req: Request, res: Response) => {
   }
 })
 
-router.put('/:id', async (req: Request, res: Response) => {
+router.put('/:id', authenticateToken, requireAdmin, async (req: Request, res: Response) => {
   try {
     const updatedMotorcycle = await Motorcycle.findByIdAndUpdate(
       req.params.id,
@@ -178,7 +179,7 @@ router.put('/:id', async (req: Request, res: Response) => {
   }
 })
 
-router.delete('/:id', async (req: Request, res: Response) => {
+router.delete('/:id', authenticateToken, requireAdmin, async (req: Request, res: Response) => {
   try {
     const deletedMotorcycle = await Motorcycle.findByIdAndDelete(req.params.id)
     if (!deletedMotorcycle) {
@@ -296,7 +297,7 @@ router.get('/max-stats', async (req: Request, res: Response) => {
  *       500:
  *         description: Erreur serveur
  */
-router.put('/:id', async (req: Request, res: Response) => {
+router.put('/:id', authenticateToken, requireAdmin, async (req: Request, res: Response) => {
   try {
     const updatedMotorcycle = await Motorcycle.findByIdAndUpdate(
       req.params.id,
@@ -342,7 +343,7 @@ router.put('/:id', async (req: Request, res: Response) => {
  *       500:
  *         description: Erreur serveur
  */
-router.delete('/:id', async (req: Request, res: Response) => {
+router.delete('/:id', authenticateToken, requireAdmin, async (req: Request, res: Response) => {
   try {
     const deletedMotorcycle = await Motorcycle.findByIdAndDelete(req.params.id)
     if (!deletedMotorcycle) {
