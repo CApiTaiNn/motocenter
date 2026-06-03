@@ -2,6 +2,7 @@ import Message from '../models/Message'
 import { type Request, Response, Router } from 'express'
 import { prepareQuery, type ReqQuery } from '../utils/find'
 import { attachUser } from '../utils/attach'
+import { authenticateToken } from '../utils/auth'
 
 const router = Router()
 /**
@@ -147,9 +148,16 @@ router.get('/:id/responses', async (req, res) => {
  *       500:
  *         description: Erreur serveur
  */
-router.post('/', async (req: Request, res: Response) => {
+router.post('/', authenticateToken, async (req: Request, res: Response) => {
   try {
-    const message = new Message(req.body)
+    const { id: userId } = req.user as { id: string }
+    const { content, reference, referenceModel } = req.body
+    const message = new Message({
+      content,
+      reference,
+      referenceModel,
+      user: userId
+    })
     await message.save()
     res.status(201).json(message)
   } catch (error) {
@@ -202,11 +210,12 @@ router.post('/', async (req: Request, res: Response) => {
  *       500:
  *         description: Erreur serveur
  */
-router.patch('/', async (req: Request, res: Response) => {
-  const { userId, messageId, like } = req.body
+router.patch('/', authenticateToken, async (req: Request, res: Response) => {
+  const { messageId, like } = req.body
+  const { id: userId } = req.user as { id: string }
 
-  if (!userId || !messageId) {
-    return res.status(400).json({ error: 'userId and messageId are required' })
+  if (!messageId) {
+    return res.status(400).json({ error: 'messageId is required' })
   }
 
   try {

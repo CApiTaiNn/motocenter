@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import * as v from 'valibot'
-import { useAuth } from '~/composables/useAuth'
 import type { IBrand } from '~/types/brand'
 import type { PostCategory} from '~/utils/postCategory';
 import { POST_CATEGORY_OPTIONS } from '~/utils/postCategory'
@@ -15,7 +14,6 @@ const props = defineProps<{
 const categories = POST_CATEGORY_OPTIONS
 const brands = ref<IBrand[]>([])
 const toast = useToast()
-const { user } = useAuth()
 const emit = defineEmits(['added-post'])
 const displayModal = defineModel<boolean>('open', { default: false })
 const isHover = ref(false)
@@ -85,7 +83,6 @@ const onSubmit = async () => {
     category: state.category,
     content: state.description,
     url: currentImageUrl.value,
-    user: user.value?._id,
     isNewMotoComment: false
   }
 
@@ -103,6 +100,7 @@ const onSubmit = async () => {
         `${useRuntimeConfig().public.apiBase}posts`,
         {
           method,
+          credentials: 'include',
           body: payload,
           ...(!props.isNewPost && {
             params: { filter: JSON.stringify({ id: props.post?._id }) }

@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import request from 'supertest'
+import jwt from 'jsonwebtoken'
 import app from '../app'
 import Post from '../models/Post'
 import User from '../models/User'
@@ -10,6 +11,7 @@ import { PostCategory } from '../constants/PostCategory'
 describe('Post Routes - /api/v1/posts', () => {
   let userId: string
   let brandId: string
+  let authCookie: string
 
   beforeEach(async () => {
     const user = await User.create({
@@ -22,6 +24,11 @@ describe('Post Routes - /api/v1/posts', () => {
     const brand = await Brand.create({ name: 'Yamaha', icon: 'yamaha.svg' })
     userId = user._id.toString()
     brandId = brand._id.toString()
+    const token = jwt.sign(
+      { id: userId, email: user.email },
+      process.env.JWT_SECRET!
+    )
+    authCookie = `accessToken=${token}`
   })
 
   describe('GET /api/v1/posts', () => {
@@ -127,28 +134,34 @@ describe('Post Routes - /api/v1/posts', () => {
 
   describe('POST /api/v1/posts', () => {
     it('should create a new post', async () => {
-      const res = await request(app).post('/api/v1/posts').send({
-        title: 'New post',
-        content: 'New content',
-        brand: 'Yamaha',
-        category: PostCategory.RACING,
-        isNewMotoComment: true
-      })
+      const res = await request(app)
+        .post('/api/v1/posts')
+        .set('Cookie', authCookie)
+        .send({
+          title: 'New post',
+          content: 'New content',
+          brand: 'Yamaha',
+          category: PostCategory.RACING,
+          isNewMotoComment: true
+        })
 
       expect(res.status).toBe(201)
       expect(res.body._id).toBeDefined()
     })
 
     it('should fail with non-existent brand', async () => {
-      const res = await request(app).post('/api/v1/posts').send({
-        title: 'Bad post',
-        content: 'Content',
-        brand: 'NonExistent',
-        category: PostCategory.RACING,
-        isNewMotoComment: true
-      })
+      const res = await request(app)
+        .post('/api/v1/posts')
+        .set('Cookie', authCookie)
+        .send({
+          title: 'Bad post',
+          content: 'Content',
+          brand: 'NonExistent',
+          category: PostCategory.RACING,
+          isNewMotoComment: true
+        })
 
-      expect(res.status).toBe(500)
+      expect(res.status).toBe(400)
     })
   })
 
@@ -164,6 +177,7 @@ describe('Post Routes - /api/v1/posts', () => {
 
       const res = await request(app)
         .put(`/api/v1/posts?filter={"id":"${post._id}"}`)
+        .set('Cookie', authCookie)
         .send({
           title: 'New title',
           content: 'New content',
@@ -182,6 +196,7 @@ describe('Post Routes - /api/v1/posts', () => {
       const fakeId = '507f1f77bcf86cd799439011'
       const res = await request(app)
         .put(`/api/v1/posts?filter={"id":"${fakeId}"}`)
+        .set('Cookie', authCookie)
         .send({
           title: 'Ghost',
           content: 'Ghost content',
@@ -191,6 +206,54 @@ describe('Post Routes - /api/v1/posts', () => {
         })
 
       expect(res.status).toBe(404)
+    })
+
+    it('should return 403 when a non-owner non-admin edits a post', async () => {
+      const post = await Post.create({
+        title: 'Owned',
+        content: 'Content',
+        user: userId,
+        brand: brandId,
+        category: PostCategory.RACING
+      })
+      const other = await User.create({
+        firstname: 'Other',
+        lastname: 'User',
+        pseudo: 'other',
+        email: 'other@test.com',
+        password: 'pass',
+        isAdmin: false
+      })
+      const otherToken = jwt.sign(
+        { id: other._id.toString(), email: other.email },
+        process.env.JWT_SECRET!
+      )
+
+      const res = await request(app)
+        .put(`/api/v1/posts?filter={"id":"${post._id}"}`)
+        .set('Cookie', `accessToken=${otherToken}`)
+        .send({
+          title: 'Hijacked',
+          content: 'Nope',
+          brand: 'Yamaha',
+          category: PostCategory.RACING
+        })
+
+      expect(res.status).toBe(403)
+    })
+  })
+
+  describe('Auth required on mutations', () => {
+    it('POST /posts returns 401 without a token', async () => {
+      const res = await request(app).post('/api/v1/posts').send({
+        title: 'X',
+        content: 'Y',
+        brand: 'Yamaha',
+        category: PostCategory.RACING,
+        isNewMotoComment: true
+      })
+
+      expect(res.status).toBe(401)
     })
   })
 })

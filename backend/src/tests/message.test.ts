@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import request from 'supertest'
+import jwt from 'jsonwebtoken'
 import app from '../app'
 import Message from '../models/Message'
 import User from '../models/User'
@@ -10,6 +11,7 @@ import { PostCategory } from '../constants/PostCategory'
 describe('Message Routes - /api/v1/messages', () => {
   let userId: string
   let postId: string
+  let authCookie: string
 
   beforeEach(async () => {
     const user = await User.create({
@@ -29,6 +31,11 @@ describe('Message Routes - /api/v1/messages', () => {
     })
     userId = user._id.toString()
     postId = post._id.toString()
+    const token = jwt.sign(
+      { id: userId, email: user.email },
+      process.env.JWT_SECRET!
+    )
+    authCookie = `accessToken=${token}`
   })
 
   describe('GET /api/v1/messages', () => {
@@ -56,21 +63,33 @@ describe('Message Routes - /api/v1/messages', () => {
 
   describe('POST /api/v1/messages', () => {
     it('should create a new message', async () => {
-      const res = await request(app).post('/api/v1/messages').send({
-        content: 'New message',
-        reference: postId,
-        referenceModel: 'Post',
-        user: userId
-      })
+      const res = await request(app)
+        .post('/api/v1/messages')
+        .set('Cookie', authCookie)
+        .send({
+          content: 'New message',
+          reference: postId,
+          referenceModel: 'Post'
+        })
 
       expect(res.status).toBe(201)
       expect(res.body.content).toBe('New message')
+      expect(res.body.user).toBe(userId)
+    })
+
+    it('should return 401 without a token', async () => {
+      const res = await request(app)
+        .post('/api/v1/messages')
+        .send({ content: 'Nope', reference: postId, referenceModel: 'Post' })
+
+      expect(res.status).toBe(401)
     })
 
     it('should fail without content', async () => {
       const res = await request(app)
         .post('/api/v1/messages')
-        .send({ user: userId })
+        .set('Cookie', authCookie)
+        .send({})
 
       expect(res.status).toBe(500)
     })
@@ -82,6 +101,7 @@ describe('Message Routes - /api/v1/messages', () => {
 
       const res = await request(app)
         .patch('/api/v1/messages')
+        .set('Cookie', authCookie)
         .send({ userId, messageId: msg._id.toString(), like: true })
 
       expect(res.status).toBe(200)
@@ -99,6 +119,7 @@ describe('Message Routes - /api/v1/messages', () => {
 
       const res = await request(app)
         .patch('/api/v1/messages')
+        .set('Cookie', authCookie)
         .send({ userId, messageId: msg._id.toString(), like: true })
 
       expect(res.status).toBe(200)
@@ -111,6 +132,7 @@ describe('Message Routes - /api/v1/messages', () => {
 
       const res = await request(app)
         .patch('/api/v1/messages')
+        .set('Cookie', authCookie)
         .send({ userId, messageId: msg._id.toString(), like: false })
 
       expect(res.status).toBe(200)
@@ -127,6 +149,7 @@ describe('Message Routes - /api/v1/messages', () => {
 
       const res = await request(app)
         .patch('/api/v1/messages')
+        .set('Cookie', authCookie)
         .send({ userId, messageId: msg._id.toString(), like: false })
 
       expect(res.status).toBe(200)
@@ -135,7 +158,10 @@ describe('Message Routes - /api/v1/messages', () => {
     })
 
     it('should return 400 without required fields', async () => {
-      const res = await request(app).patch('/api/v1/messages').send({})
+      const res = await request(app)
+        .patch('/api/v1/messages')
+        .set('Cookie', authCookie)
+        .send({})
 
       expect(res.status).toBe(400)
     })
@@ -144,6 +170,7 @@ describe('Message Routes - /api/v1/messages', () => {
       const fakeId = '507f1f77bcf86cd799439011'
       const res = await request(app)
         .patch('/api/v1/messages')
+        .set('Cookie', authCookie)
         .send({ userId, messageId: fakeId, like: true })
 
       expect(res.status).toBe(404)

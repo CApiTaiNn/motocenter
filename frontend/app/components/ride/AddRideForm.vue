@@ -347,6 +347,7 @@ async function onSubmit() {
 
     await $fetch(`${runtimeConfig.public.apiBase}rides`, {
       method: 'POST',
+      credentials: 'include',
       body: payload
     })
 

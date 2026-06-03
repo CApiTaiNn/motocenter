@@ -4,6 +4,7 @@ import { prepareQuery, type ReqQuery } from '../utils/find'
 import { RideColor, ICreateRideBody } from '../types/ride'
 import { Types } from 'mongoose'
 import { attachUsers } from '../utils/attach'
+import { authenticateToken } from '../utils/auth'
 
 const router = Router()
 
@@ -137,37 +138,39 @@ router.get(
  *       500:
  *         description: Erreur serveur
  */
-router.patch('/:id/like', async (req: Request<{ id: string }>, res: any) => {
-  const { userId } = req.body
-  const rideId = req.params.id
+router.patch(
+  '/:id/like',
+  authenticateToken,
+  async (req: Request<{ id: string }>, res: any) => {
+    const { id: userId } = req.user as { id: string }
+    const rideId = req.params.id
 
-  if (!userId) return res.status(400).json({ error: 'User ID is required' })
+    try {
+      const ride = await Ride.findById(rideId)
+      if (!ride) return res.status(404).json({ error: 'Ride not found' })
 
-  try {
-    const ride = await Ride.findById(rideId)
-    if (!ride) return res.status(404).json({ error: 'Ride not found' })
+      const hasLiked = ride.liked_id.includes(userId.toString())
 
-    const hasLiked = ride.liked_id.includes(userId.toString())
+      const update = hasLiked
+        ? { $pull: { liked_id: userId }, $inc: { like: -1 } }
+        : { $addToSet: { liked_id: userId }, $inc: { like: 1 } }
 
-    const update = hasLiked
-      ? { $pull: { liked_id: userId }, $inc: { like: -1 } }
-      : { $addToSet: { liked_id: userId }, $inc: { like: 1 } }
+      const updatedRide = await Ride.findByIdAndUpdate(rideId, update, {
+        returnDocument: 'after'
+      })
 
-    const updatedRide = await Ride.findByIdAndUpdate(rideId, update, {
-      returnDocument: 'after'
-    })
+      if (!updatedRide) return res.status(404).json({ error: 'Update failed' })
 
-    if (!updatedRide) return res.status(404).json({ error: 'Update failed' })
-
-    res.status(200).json({
-      like: updatedRide.like,
-      isLiked: !hasLiked
-    })
-  } catch (error) {
-    console.error('Error liking ride:', error)
-    res.status(500).json({ error: 'Internal server error' })
+      res.status(200).json({
+        like: updatedRide.like,
+        isLiked: !hasLiked
+      })
+    } catch (error) {
+      console.error('Error liking ride:', error)
+      res.status(500).json({ error: 'Internal server error' })
+    }
   }
-})
+)
 
 /**
  * @openapi
@@ -305,11 +308,13 @@ router.get('/count', async (req, res) => {
  */
 router.post(
   '/',
+  authenticateToken,
   async (
     req: Request<unknown, unknown, ICreateRideBody, ReqQuery>,
     res: any
   ) => {
     try {
+      const { id: userId } = req.user as { id: string }
       const {
         title,
         description,
@@ -319,7 +324,6 @@ router.post(
         endTown,
         rideType,
         imageLink,
-        userId,
         isEvent,
         dateEvent,
         hourEvent,
@@ -419,11 +423,11 @@ router.post(
  */
 router.patch(
   '/:id/participate',
+  authenticateToken,
   async (req: Request<{ id: string }>, res: any) => {
-    const { userId } = req.body
+    const { id: userId } = req.user as { id: string }
     const rideId = req.params.id
 
-    if (!userId) return res.status(400).json({ error: 'User ID is required' })
     if (!Types.ObjectId.isValid(userId))
       return res.status(400).json({ error: 'Invalid User ID format' })
 

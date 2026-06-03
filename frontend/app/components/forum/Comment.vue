@@ -43,8 +43,8 @@ const handleAddLikeOrDislike = async (isLike: boolean, messageId: string) => {
       `${apiBase}messages`,
       {
         method: 'PATCH',
+        credentials: 'include',
         body: {
-          userId: user.value?._id,
           messageId: messageId,
           like: isLike
         }
@@ -68,9 +68,9 @@ const handleAddResponseOfComment = async (commentId: string) => {
   } else {
     const newMessage = await $fetch.raw(`${apiBase}messages`, {
       method: 'POST',
+      credentials: 'include',
       body: {
         content: isResponseOfAcommentValue.value,
-        user: user.value._id,
         reference: commentId,
         referenceModel: 'Message'
       }

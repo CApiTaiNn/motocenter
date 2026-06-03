@@ -53,9 +53,9 @@ const handleAddComment = async () => {
   } else {
     const newMessage = await $fetch.raw(`${apiBase}messages`, {
       method: 'POST',
+      credentials: 'include',
       body: {
         content: newReponseOfPost.value,
-        user: user.value._id,
         reference: route.params.id,
         referenceModel: 'Post'
       }
@@ -87,9 +87,7 @@ const handleAddFavorite = async () => {
       `${apiBase}posts/add-favorite`,
       {
         method: 'POST',
-        body: {
-          userId: user.value._id
-        },
+        credentials: 'include',
         params: {
           filter: JSON.stringify({ _id: post.value?._id })
         }

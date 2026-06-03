@@ -176,22 +176,18 @@ async function postComment() {
     try {
       const newPost = await $fetch<{ _id: string }>(`${apiBase}posts`, {
         method: 'POST',
+        credentials: 'include',
         body: {
           title: m.value?.name,
           brand: m.value?.brand.name,
           category: 'model',
           content: `Discussion autour de la ${m.value?.brand.name} ${m.value?.name}`,
-          isNewMotoComment: true
+          isNewMotoComment: true,
+          motorcycleId: m.value?._id
         }
       })
 
       postId = newPost._id
-      await $fetch(`${apiBase}motorcycles/${m.value?._id}`, {
-        method: 'PUT',
-        body: {
-          post: postId
-        }
-      })
 
       if (m.value) {
         m.value.post = postId
@@ -205,9 +201,9 @@ async function postComment() {
   try {
     await $fetch(`${apiBase}messages`, {
       method: 'POST',
+      credentials: 'include',
       body: {
         content: comment.value.content,
-        user: user.value?._id,
         reference: postId,
         referenceModel: 'Post'
       }

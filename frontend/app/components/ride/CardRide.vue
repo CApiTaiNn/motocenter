@@ -94,7 +94,7 @@ const likeGestion = async () => {
       `${runtimeConfig.public.apiBase}rides/${props.ride._id}/like`,
       {
         method: 'PATCH',
-        body: { userId: userId }
+        credentials: 'include'
       }
     )
 
@@ -121,7 +121,7 @@ const participateGestion = async () => {
       updatedParticipants: any[]
     }>(`${runtimeConfig.public.apiBase}rides/${props.ride._id}/participate`, {
       method: 'PATCH',
-      body: { userId }
+      credentials: 'include'
     })
 
     emit('update:participants', res.updatedParticipants)

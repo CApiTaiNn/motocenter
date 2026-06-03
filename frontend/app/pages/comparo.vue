@@ -46,7 +46,7 @@ const resultatTemplate = useTemplateRef('resultat')
 const carousselBeginnerBikes = ref<IMotorcycle[]>([])
 const carousselSportBikes = ref<IMotorcycle[]>([])
 const carousselAdventureBikes = ref<IMotorcycle[]>([])
-const { isAuthenticated, user } = useAuth()
+const { isAuthenticated } = useAuth()
 const messagePosted = ref<boolean>(false)
 const optionMotorcycles = computed(() => {
   if (!motorcycle1.value || !motorcycle2.value) return []
@@ -204,23 +204,18 @@ async function postComment() {
     try {
       const newPost = await $fetch<{ _id: string }>(`${apiBase}posts`, {
         method: 'POST',
+        credentials: 'include',
         body: {
           title: selectedMotorcycle.name,
           brand: selectedMotorcycle.brand.name,
           category: 'model',
           content: `Discussion autour de la ${selectedMotorcycle.brand.name} ${selectedMotorcycle.name}`,
-          isNewMotoComment: true
+          isNewMotoComment: true,
+          motorcycleId: selectedMotorcycle._id
         }
       })
 
       postId = newPost._id
-      await $fetch(`${apiBase}motorcycles/${selectedMotorcycle._id}`, {
-        method: 'PUT',
-        body: {
-          post: postId
-        }
-      })
-
       selectedMotorcycle.post = postId
     } catch (error) {
       console.error('Error creating post:', error)
@@ -231,9 +226,9 @@ async function postComment() {
   try {
     const newMessage = await $fetch.raw(`${apiBase}messages`, {
       method: 'POST',
+      credentials: 'include',
       body: {
         content: comment.value.content,
-        user: user.value?._id,
         reference: postId,
         referenceModel: 'Post'
       }

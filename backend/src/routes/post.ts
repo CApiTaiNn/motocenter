@@ -4,8 +4,10 @@ import Post from '../models/Post'
 import Message from '../models/Message'
 import Brand from '../models/Brand'
 import User from '../models/User'
+import Motorcycle from '../models/Motorcycle'
 import { PostCategory } from '../constants/PostCategory'
 import { attachUser } from '../utils/attach'
+import { authenticateToken } from '../utils/auth'
 
 const router = Router()
 
@@ -282,9 +284,9 @@ router.post('/add-view', async (req, res) => {
  *       500:
  *         description: Erreur serveur
  */
-router.post('/add-favorite', async (req, res) => {
+router.post('/add-favorite', authenticateToken, async (req: Request, res) => {
   const { filter } = prepareQuery(req.query)
-  const { userId } = req.body
+  const { id: userId } = req.user as { id: string }
   try {
     const post = await Post.findById(filter._id)
 
@@ -362,17 +364,21 @@ router.post('/add-favorite', async (req, res) => {
  *       500:
  *         description: Erreur serveur
  */
-router.post('/', async (req, res) => {
+router.post('/', authenticateToken, async (req: Request, res) => {
   try {
     const body = req.body
+    const { id: authUserId } = req.user as { id: string }
     const brand = await Brand.findOne({ name: body.brand })
-    let user = await User.findOne({ firstname: 'MotoCenter' })
-    if (body.isNewMotoComment === false) {
-      user = await User.findOne({ _id: body.user })
-    }
+
+    // Forum posts are authored by the connected user; auto-generated
+    // motorcycle discussions are authored by the MotoCenter system user.
+    const user =
+      body.isNewMotoComment === false
+        ? await User.findById(authUserId)
+        : await User.findOne({ firstname: 'MotoCenter' })
 
     if (!brand || !user) {
-      return res.status(500).json({ error: 'Internal server error' })
+      return res.status(400).json({ error: 'Unknown brand or user' })
     }
     if (!Object.values(PostCategory).includes(body.category)) {
       return res.status(400).json({ error: 'Invalid category' })
@@ -385,9 +391,19 @@ router.post('/', async (req, res) => {
       category: body.category,
       image: body.url
     })
+
+    // Attach the post to its motorcycle (model discussions) server-side,
+    // so clients don't need write access to the admin-only motorcycle route.
+    if (body.motorcycleId) {
+      await Motorcycle.updateOne(
+        { _id: body.motorcycleId },
+        { post: postCreated._id }
+      )
+    }
+
     res.status(201).json({ _id: postCreated._id })
   } catch (error) {
-    console.error('Error accessing message route:', error)
+    console.error('Error creating post:', error)
     res.status(500).json({ error: 'Internal server error' })
   }
 })
@@ -441,38 +457,45 @@ router.post('/', async (req, res) => {
  *       500:
  *         description: Erreur serveur
  */
-router.put('/', async (req, res) => {
+router.put('/', authenticateToken, async (req: Request, res) => {
   const { filter } = prepareQuery(req.query)
+  const { id: authUserId } = req.user as { id: string }
   try {
     const body = req.body
-    const brand = await Brand.findOne({ name: body.brand })
-    const user = await User.findOne({ _id: body.user })
+    const existing = await Post.findById(filter.id)
+    if (!existing) {
+      return res.status(404).json({ error: 'Post not found' })
+    }
 
-    if (!brand || !user) {
-      return res.status(500).json({ error: 'Internal server error' })
+    // Only the author (or an admin) may edit a post.
+    const requester = await User.findById(authUserId)
+    const isOwner = existing.user?.toString() === authUserId
+    if (!isOwner && !requester?.isAdmin) {
+      return res.status(403).json({ error: 'Forbidden' })
+    }
+
+    const brand = await Brand.findOne({ name: body.brand })
+    if (!brand) {
+      return res.status(400).json({ error: 'Unknown brand' })
     }
     if (!Object.values(PostCategory).includes(body.category)) {
       return res.status(400).json({ error: 'Invalid category' })
     }
 
-    const updatePost = await Post.findByIdAndUpdate(
+    await Post.findByIdAndUpdate(
       filter.id,
       {
         title: body.title,
         content: body.content,
         category: body.category,
-        user: user._id,
         brand: brand._id,
         image: body.url
       },
       { runValidators: true }
     )
-    if (!updatePost) {
-      return res.status(404).json({ error: 'Post not found' })
-    }
     res.status(204).end()
   } catch (error) {
-    console.error('Error updating motorcycle:', error)
+    console.error('Error updating post:', error)
     res.status(500).json({ error: 'Internal server error' })
   }
 })
