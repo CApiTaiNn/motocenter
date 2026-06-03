@@ -104,6 +104,20 @@ const statsNumbers = computed(() => {
     })
 })
 
+const statsGroups = computed(() => {
+  const groups: Record<string, string[]> = {
+    Moteur: ['engine_size', 'horsePower', 'torque'],
+    Performances: ['acceleration', 'speedMax', 'consumption'],
+    'Caractéristiques générales': ['year', 'weight', 'price']
+  }
+  return Object.entries(groups)
+    .map(([label, keys]) => ({
+      label,
+      stats: statsNumbers.value.filter((s) => keys.includes(s.key))
+    }))
+    .filter((g) => g.stats.length > 0)
+})
+
 function getCountUpOptions(key: string) {
   return {
     useEasing: true,
@@ -162,22 +176,18 @@ async function postComment() {
     try {
       const newPost = await $fetch<{ _id: string }>(`${apiBase}posts`, {
         method: 'POST',
+        credentials: 'include',
         body: {
           title: m.value?.name,
           brand: m.value?.brand.name,
-          category: 'Modèle',
+          category: 'model',
           content: `Discussion autour de la ${m.value?.brand.name} ${m.value?.name}`,
-          isNewMotoComment: true
+          isNewMotoComment: true,
+          motorcycleId: m.value?._id
         }
       })
 
       postId = newPost._id
-      await $fetch(`${apiBase}motorcycles/${m.value?._id}`, {
-        method: 'PUT',
-        body: {
-          post: postId
-        }
-      })
 
       if (m.value) {
         m.value.post = postId
@@ -191,9 +201,9 @@ async function postComment() {
   try {
     await $fetch(`${apiBase}messages`, {
       method: 'POST',
+      credentials: 'include',
       body: {
         content: comment.value.content,
-        user: user.value?._id,
         reference: postId,
         referenceModel: 'Post'
       }
@@ -206,8 +216,7 @@ async function postComment() {
 }
 
 onMounted(async () => {
-  await fetchData()
-  await fetchMax()
+  await Promise.all([fetchData(), fetchMax()])
   await fetchMessages()
 })
 
@@ -233,67 +242,85 @@ watch(
 </script>
 
 <template>
-  <div v-if="m" class="main-content">
-    <h1 class="title">{{ m.name }}</h1>
-    <img :src="m.imageUrl" :alt="`Image de la moto ${m.name}`" class="img-cover moto-left" />
+  <div v-if="m" class="main-content flex flex-col items-center gap-8 pb-16">
+    <h1 class="title flex items-center justify-center mt-4">{{ m.name }}</h1>
+    <img :src="m.imageUrl" :alt="`Image de la moto ${m.name}`" class="img-cover moto-left flex-1 w-1/2 min-w-[38%] h-full object-cover object-center max-md:w-[90%]! max-lg:w-[70%]!" />
 
-    <div class="detail">
-      <p><span>Marque:</span> {{ m.brand.name }}</p>
-      <p><span>Modèle:</span> {{ m.name }}</p>
-      <p><span>Année:</span> {{ m.year }}</p>
-      <p><span>Moteur:</span> {{ m.engine_size }} m3</p>
+    <div class="detail flex flex-col gap-2 border border-solid border-[var(--border-gray)] rounded-lg p-4 w-1/2 max-md:w-[90%]! max-lg:w-[70%]!">
+      <p><span class="font-bold">Marque:</span> {{ m.brand.name }}</p>
+      <p><span class="font-bold">Modèle:</span> {{ m.name }}</p>
+      <p><span class="font-bold">Année:</span> {{ m.year }}</p>
+      <p><span class="font-bold">Moteur:</span> {{ m.engine_size }} m3</p>
     </div>
 
-    <div ref="statsRef" class="stats-section">
-      <h3>Caractéristiques</h3>
-      <div class="stats-grid">
-        <div v-for="stat in statsNumbers" :key="stat.label" class="stat-card">
-          <span class="stat-label">{{ stat.label }}</span>
-          <CountUp :key="countStarted ? stat.label : ''" class="stat-value" :end-val="Number(stat.value)" :duration="2"
-            :options="getCountUpOptions(stat.key)" :autoplay="true" />
-          <div class="bar-outer">
-            <div class="bar-fill" :style="{ width: stat.percent + '%' }"></div>
+    <div ref="statsRef" class="stats-section w-3/5 max-md:w-[90%]! max-lg:w-[75%]!">
+      <h3 class="text-center mb-4">Caractéristiques</h3>
+      <div v-for="group in statsGroups" :key="group.label" class="stats-group mb-8">
+        <h4 class="stats-group-label mb-3 pl-1 border-l-[3px] border-solid border-[var(--ui-primary)] uppercase text-sm text-gray-500 tracking-[0.08em] font-['Krona_One',sans-serif]">{{ group.label }}</h4>
+        <div class="stats-grid grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-4">
+          <div v-for="stat in group.stats" :key="stat.label" class="stat-card flex flex-col items-center p-4 border border-solid border-gray-300 rounded-lg gap-2">
+            <span class="stat-label text-sm text-gray-500 text-center font-bold">{{ stat.label }}</span>
+            <CountUp
+              v-if="countStarted"
+              class="stat-value text-2xl font-bold"
+              :end-val="Number(stat.value)"
+              :duration="3.5"
+              :options="getCountUpOptions(stat.key)"
+            />
+            <span v-else class="stat-value text-2xl font-bold">0</span>
+            <div class="bar-outer w-full h-[10px] bg-[var(--color-track-bg)] rounded-lg overflow-hidden">
+              <div class="bar-fill h-full rounded-lg" :style="{ width: stat.percent + '%' }"></div>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="sound-section">
+    <UCard class="sound-section w-3/5 mt-8 flex flex-col items-center gap-2 max-md:w-[90%]! max-lg:w-[75%]!">
+      <div class="sound-header flex items-center gap-2 mb-4">
+        <UIcon name="i-lucide-audio-waveform" class="size-6 text-(--ui-primary)" />
+        <h4>Son moteur</h4>
+      </div>
       <AudioPlayer v-if="m.soundLink" :src="m.soundLink" />
-      <p v-else>Pas d'audio</p>
-    </div>
+      <p v-else class="sound-empty text-gray-500 italic text-center py-4">Aucun extrait audio disponible pour cette moto.</p>
+    </UCard>
 
     <h4>Commentaires présents sur la moto</h4>
-    <div v-if="commentsMotorcycle.length > 0" class="display-comment">
-      <div v-for="comment in commentsMotorcycle" :key="comment._id">
-        <Comment :response="comment" />
+    <div v-if="commentsMotorcycle.length > 0" class="display-comment flex-1 border border-solid border-gray-300 rounded-[20px] p-8 max-w-1/2 h-fit max-md:max-w-[95%]! max-lg:max-w-[72%]!">
+      <div v-for="motoComment in commentsMotorcycle" :key="motoComment._id">
+        <Comment :response="motoComment" />
       </div>
     </div>
     <p v-else>Aucun commentaire sur la moto, ajouter le premier.</p>
 
-    <div class="input-comment-box">
-      <div v-if="!isAuthenticated" class="need-connection">
-        <h3>
-          Rejoignez la communauté pour débattre et partager vos avis sur ces
-          motos !
-        </h3>
-        <UButton color="neutral" class="rounded-4xl self-end text-xs p-2" size="xl" @click="open()">Se connecter
+    <UCard v-if="!isAuthenticated" class="input-comment-box relative my-12 mx-[25%] w-1/2 min-h-[25rem] border border-solid border-gray-500 rounded-[20px] max-lg:mx-[12%] max-lg:w-[76%] max-lg:min-h-[auto] max-md:my-6 max-md:mx-4 max-md:w-auto">
+      <div class="auth-prompt flex flex-col items-center gap-4 p-8 text-center">
+        <UIcon name="i-lucide-users" class="size-12 text-(--ui-primary)" />
+        <h3>Rejoignez la communauté</h3>
+        <p class="auth-prompt-text text-gray-500 max-w-[28rem]">
+          Connectez-vous pour débattre et partager vos avis sur cette moto.
+        </p>
+        <UButton color="primary" size="xl" class="text-white! cursor-pointer" @click="open()">
+          Se connecter
         </UButton>
       </div>
-      <div v-if="!messagePosted" class="input-comment-container" :class="{ blurred: !isAuthenticated }">
-        <h4>
+    </UCard>
+    <div v-else class="input-comment-box relative my-12 mx-[25%] w-1/2 min-h-[25rem] border border-solid border-gray-500 rounded-[20px] max-lg:mx-[12%] max-lg:w-[76%] max-lg:min-h-[auto] max-md:my-6 max-md:mx-4 max-md:w-auto">
+      <div v-if="!messagePosted" class="input-comment-container flex flex-col justify-between h-full min-h-[25rem] p-8 max-lg:min-h-[auto] max-lg:p-4">
+        <h4 class="text-center">
           Déjà roulé sur cette moto ?<br />
           Faite le savoir à la communauté !
         </h4>
-        <div class="comment-input">
-          <UTextarea v-model="comment.content" size="xl"
+        <div class="comment-input flex flex-col gap-4">
+          <UTextarea
+v-model="comment.content" size="xl"
             placeholder="Un retour d'expérience, un conseil d'entretien ou encore une question" />
         </div>
         <UButton class="rounded-4xl self-end text-xs m-1" size="xl" @click="postComment">Poster</UButton>
       </div>
-      <div v-else class="input-posted-container">
-        <h4>Merci pour votre contribution !</h4>
-        <p>
+      <div v-else class="input-posted-container flex flex-col justify-center h-fit min-h-[25rem] p-8 gap-8 max-lg:min-h-[auto] max-lg:p-4">
+        <h4 class="text-center">Merci pour votre contribution !</h4>
+        <p class="text-center">
           Votre commentaire a été posté avec succès. Il apparaîtra dans la
           section des commentaires correspondante.
         </p>
@@ -303,106 +330,10 @@ watch(
 </template>
 
 <style scoped>
-.title {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: 1em;
-}
-
-.main-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2em;
-  padding-bottom: 4em;
-}
-
-.detail {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5em;
-  border: black solid 1px;
-  border-radius: 5px;
-  padding: 1em;
-  width: 50%;
-}
-
-span {
-  font-weight: bold;
-}
-
-.stats-section {
-  width: 60%;
-}
-
-.stats-section h3 {
-  text-align: center;
-  margin-bottom: 1em;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 1em;
-}
-
-.stat-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 1em;
-  border: 1px solid #c0c0c0;
-  border-radius: 8px;
-  gap: 0.5em;
-}
-
-.stat-label {
-  font-size: 0.85em;
-  color: #666;
-  text-align: center;
-}
-
-.stat-value {
-  font-size: 1.4em;
-  font-weight: bold;
-}
-
-.sound-section {
-  margin-top: 2em;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5em;
-}
-
-.motorcycle-image {
-  max-width: 100%;
-  height: auto;
-  border-radius: 8px;
-}
-
-.display-comment {
-  flex: 1;
-  border: 1px solid #c0c0c0;
-  border-radius: 1.25rem;
-  padding: 2rem;
-  max-width: 50%;
-  height: fit-content;
-}
-
-.bar-outer {
-  width: 100%;
-  height: 10px;
-  background-color: #d7d7d7;
-  border-radius: 5px;
-  overflow: hidden;
-}
-
+/* Kept: gradient background (var(--gradient-primary)) + keyframe animation
+   don't map to a single Tailwind utility. */
 .bar-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #ff0000, #990000);
-  border-radius: 5px;
+  background: var(--gradient-primary);
   animation: slide-in 2s ease-in-out;
 }
 
@@ -410,82 +341,5 @@ span {
   from {
     width: 0;
   }
-}
-
-.input-comment-box {
-  position: relative;
-  margin: 3rem 25%;
-  width: 50%;
-  min-height: 25rem;
-  border: 1px solid #757575;
-  border-radius: 1.25rem;
-}
-
-.need-connection {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 10;
-  text-align: center;
-}
-
-.need-connection h3 {
-  width: 400px;
-}
-
-.input-comment-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  height: 100%;
-  min-height: 25rem;
-  padding: 2rem;
-}
-
-.input-comment-container h4 {
-  text-align: center;
-}
-
-.comment-input {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.input-posted-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  height: fit-content;
-  min-height: 25rem;
-  padding: 2rem;
-  gap: 30px;
-}
-
-.input-posted-container h4 {
-  text-align: center;
-}
-
-.input-posted-container p {
-  text-align: center;
-}
-
-.blurred {
-  filter: blur(3px);
-  pointer-events: none;
-  user-select: none;
-}
-
-.img-cover {
-  flex: 1;
-
-  width: 50%;
-  min-width: 38%;
-  height: 100%;
-
-  object-fit: cover;
-
-  object-position: center;
 }
 </style>

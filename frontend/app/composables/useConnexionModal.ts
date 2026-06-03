@@ -1,19 +1,12 @@
 import { useCreateAccountModal } from './useCreateAccountModal'
 
 export const useConnexionModal = () => {
-  const isOpen = useState('connexionModal.isOpen', () => false)
-
-  const open = () => {
-    isOpen.value = true
-  }
-  const close = () => {
-    isOpen.value = false
-  }
+  const modal = useModal('connexionModal.isOpen')
 
   const openCreateAccountModal = () => {
-    close()
+    modal.close()
     useCreateAccountModal().open()
   }
 
-  return { isOpen, open, close, openCreateAccountModal }
+  return { ...modal, openCreateAccountModal }
 }

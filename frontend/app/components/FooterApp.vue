@@ -37,53 +37,52 @@ const contactEmail = 'contact@mgtsoftware.com'
 </script>
 
 <template>
-  <footer class="footer-wrapper">
-    <div class="footer-top-border" />
+  <footer class="mt-20">
+    <div class="footer-top-border h-[3px]" />
 
-    <div class="footer-main">
-      <div class="footer-logo">
+    <div class="footer-main flex justify-between items-start gap-8 pt-16 px-[5%] pb-12 max-w-[1400px] mx-auto max-lg:flex-wrap! max-lg:pt-[2.5rem]! max-lg:px-[6%]! max-lg:pb-[2rem]! max-lg:gap-x-4! max-lg:gap-y-8!">
+      <div class="flex-[1.2] flex flex-col items-start gap-3 max-lg:flex-[1_1_100%]! max-lg:items-center! max-lg:text-center">
         <LogoApp />
-        <p class="footer-tagline">La communauté des passionnés de moto</p>
+        <p class="footer-tagline text-sm font-light text-[var(--label-text)]">La communauté des passionnés de moto</p>
       </div>
 
-      <nav class="footer-col">
-        <h5 class="footer-heading">Guides</h5>
-        <ul class="footer-list">
+      <nav class="flex-1 flex flex-col items-start max-lg:flex-[1_1_45%]!">
+        <h5 class="mb-4 uppercase tracking-[0.08em]">Guides</h5>
+        <ul class="flex flex-col gap-2 list-none pl-0">
           <li
             v-for="(item, idx) in guides"
             :key="`guide-${idx}`"
-            class="footer-list-item"
           >
-            <NuxtLink :to="item.to" class="footer-link">{{
+            <NuxtLink :to="item.to" class="footer-link text-sm font-light text-[var(--text-color)] no-underline transition-colors duration-200 break-all hover:text-[var(--ui-primary)]">{{
               item.label
             }}</NuxtLink>
           </li>
         </ul>
       </nav>
 
-      <div class="footer-col">
-        <h5 class="footer-heading text-hidden">Réseaux sociaux</h5>
-        <ul class="footer-list footer-socials-list">
+      <div class="flex-1 flex flex-col items-start max-lg:flex-[1_1_100%]! max-lg:order-4 max-lg:items-center!">
+        <h5 class="text-hidden mb-4 uppercase tracking-[0.08em] max-lg:hidden">Réseaux sociaux</h5>
+        <ul class="flex flex-col gap-3 list-none pl-0 max-lg:flex-row! max-lg:gap-6! max-lg:justify-center">
           <li v-for="(item, idx) in socials" :key="`social-${idx}`">
             <a
               :href="item.href"
               target="_blank"
               rel="noopener noreferrer"
               :aria-label="`${item.label} (ouvre un nouvel onglet)`"
-              class="footer-social-link"
+              class="footer-social-link flex items-center gap-2 text-[var(--text-color)] no-underline transition-colors duration-200 hover:text-[var(--ui-primary)]"
             >
-              <UIcon :name="item.icon" class="footer-social-icon" />
-              <span class="footer-social-label">{{ item.label }}</span>
+              <UIcon :name="item.icon" class="text-xl shrink-0 max-lg:text-2xl!" />
+              <span class="footer-social-label text-sm font-light max-lg:hidden">{{ item.label }}</span>
             </a>
           </li>
         </ul>
       </div>
 
-      <div class="footer-col">
-        <h5 class="footer-heading">Contact</h5>
-        <ul class="footer-list">
-          <li class="footer-list-item">
-            <a class="footer-link" :href="`mailto:${contactEmail}`">{{
+      <div class="flex-1 flex flex-col items-start max-lg:flex-[1_1_45%]!">
+        <h5 class="mb-4 uppercase tracking-[0.08em]">Contact</h5>
+        <ul class="flex flex-col gap-2 list-none pl-0">
+          <li>
+            <a class="footer-link text-sm font-light text-[var(--text-color)] no-underline transition-colors duration-200 break-all hover:text-[var(--ui-primary)]" :href="`mailto:${contactEmail}`">{{
               contactEmail
             }}</a>
           </li>
@@ -91,29 +90,24 @@ const contactEmail = 'contact@mgtsoftware.com'
       </div>
     </div>
 
-    <div class="footer-separator" />
+    <div class="h-px bg-[var(--border-gray)] max-w-[1400px] mx-auto" />
 
-    <div class="footer-bottom">
-      <p class="footer-bottom-text">
+    <div class="flex justify-between items-center py-4 px-[5%] max-w-[1400px] mx-auto max-lg:flex-col! max-lg:gap-2! max-lg:text-center max-lg:py-4!">
+      <p class="footer-bottom-text text-sm font-light text-[var(--label-text)]">
         &copy; 2026 MotoCenter &mdash; Tout droit réservé
       </p>
-      <div class="footer-bottom-links">
-        <NuxtLink class="footer-bottom-link" to="/">Mentions légales</NuxtLink>
-        <span class="footer-bottom-dot">&middot;</span>
-        <NuxtLink class="footer-bottom-link" to="/">Confidentialité</NuxtLink>
+      <div class="flex items-center gap-2">
+        <NuxtLink class="footer-bottom-link text-sm font-light text-[var(--label-text)] no-underline transition-colors duration-200 hover:text-[var(--ui-primary)]" to="/">Mentions légales</NuxtLink>
+        <span class="footer-bottom-dot text-[var(--label-text)] text-sm">&middot;</span>
+        <NuxtLink class="footer-bottom-link text-sm font-light text-[var(--label-text)] no-underline transition-colors duration-200 hover:text-[var(--ui-primary)]" to="/">Confidentialité</NuxtLink>
       </div>
     </div>
   </footer>
 </template>
 
 <style scoped>
-/* ── Footer wrapper ── */
-.footer-wrapper {
-  margin-top: 5rem;
-}
-
+/* Gradient with no design token — kept as scoped CSS */
 .footer-top-border {
-  height: 3px;
   background: linear-gradient(
     90deg,
     transparent,
@@ -122,199 +116,12 @@ const contactEmail = 'contact@mgtsoftware.com'
   );
 }
 
-/* ── Main grid ── */
-.footer-main {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 2rem;
-  padding: 3.5rem 5% 2.5rem;
-  max-width: 1400px;
-  margin: 0 auto;
-}
-
-/* ── Logo column ── */
-.footer-logo {
-  flex: 1.2;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.8rem;
-}
-
-.footer-tagline {
-  font-family: 'Poppins', sans-serif;
-  font-size: 14px;
-  font-weight: 300;
-  color: var(--label-text);
-}
-
-/* ── Content columns ── */
-.footer-col {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
-
-.footer-heading {
-  margin-bottom: 1rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-
-/* ── Lists ── */
-.footer-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-  list-style: none;
-  padding-left: 0;
-}
-
-.footer-link {
-  font-family: 'Poppins', sans-serif;
-  font-size: 15px;
-  font-weight: 300;
-  color: var(--text-color);
-  text-decoration: none;
-  transition: color 0.2s ease;
-  word-break: break-all;
-}
-
-.footer-link:hover {
-  color: var(--ui-primary);
-}
-
-/* ── Social links ── */
-.footer-socials-list {
-  gap: 0.75rem;
-}
-
-.footer-social-link {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  color: var(--text-color);
-  text-decoration: none;
-  transition: color 0.2s ease;
-}
-
-.footer-social-link:hover {
-  color: var(--ui-primary);
-}
-
-.footer-social-icon {
-  font-size: 22px;
-  flex-shrink: 0;
-}
-
-.footer-social-label {
-  font-family: 'Poppins', sans-serif;
-  font-size: 15px;
-  font-weight: 300;
-}
-
-/* ── Separator ── */
-.footer-separator {
-  height: 1px;
-  background-color: var(--border-gray);
-  margin: 0 5%;
-  max-width: 1400px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-/* ── Bottom bar ── */
-.footer-bottom {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.2rem 5%;
-  max-width: 1400px;
-  margin: 0 auto;
-}
-
-.footer-bottom-text {
-  font-family: 'Poppins', sans-serif;
-  font-size: 13px;
-  font-weight: 300;
-  color: var(--label-text);
-}
-
-.footer-bottom-links {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
+/* font-family is a literal 'Poppins' stack with no matching token */
+.footer-tagline,
+.footer-link,
+.footer-social-label,
+.footer-bottom-text,
 .footer-bottom-link {
   font-family: 'Poppins', sans-serif;
-  font-size: 13px;
-  font-weight: 300;
-  color: var(--label-text);
-  text-decoration: none;
-  transition: color 0.2s ease;
-}
-
-.footer-bottom-link:hover {
-  color: var(--ui-primary);
-}
-
-.footer-bottom-dot {
-  color: var(--label-text);
-  font-size: 13px;
-}
-
-/* ── Mobile ── */
-@media (max-width: 1024px) {
-  .footer-main {
-    flex-wrap: wrap;
-    padding: 2.5rem 6% 2rem;
-    gap: 2rem 1rem;
-  }
-
-  .footer-logo {
-    flex: 1 1 100%;
-    align-items: center;
-    text-align: center;
-  }
-
-  .footer-col {
-    flex: 1 1 45%;
-  }
-
-  /* Socials row in mobile */
-  .footer-col:nth-child(3) {
-    flex: 1 1 100%;
-    order: 4;
-    align-items: center;
-  }
-
-  .footer-col:nth-child(3) .footer-socials-list {
-    flex-direction: row;
-    gap: 1.5rem;
-    justify-content: center;
-  }
-
-  .footer-social-label {
-    display: none;
-  }
-
-  .footer-social-icon {
-    font-size: 26px;
-  }
-
-  .text-hidden {
-    display: none;
-  }
-
-  /* Bottom bar stacked */
-  .footer-bottom {
-    flex-direction: column;
-    gap: 0.5rem;
-    text-align: center;
-    padding: 1rem 5%;
-  }
 }
 </style>

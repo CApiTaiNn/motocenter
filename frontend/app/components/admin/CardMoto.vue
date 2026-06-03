@@ -3,7 +3,6 @@ import * as v from 'valibot'
 import type { FormSubmitEvent } from '@nuxt/ui'
 import type { IBrand } from '~/types/brand'
 import { MotorcycleCategory, type IMotorcycle } from '~/types/motorcycles'
-import { da } from '@nuxt/ui/runtime/locale/index.js'
 
 const apiBase = useRuntimeConfig().public.apiBase
 
@@ -41,7 +40,7 @@ async function onSoundChange(file: File | null | undefined) {
 }
 const props = defineProps({
   mode: { type: String, default: 'create' },
-  moto: { type: Object as () => IMotorcycle | null, default: null },
+  moto: { type: Object as () => { _id: string } | null, default: null },
   onClosePanel: { type: Function, required: true },
   onRefresh: { type: Function, required: true }
 })
@@ -58,6 +57,7 @@ async function fetchMotoDetails(_id: string) {
   )
 
   const m = data.motorcycles[0]
+  if (!m) return
 
   const brand = brandList.value.find((b) => b._id === m.brand._id)
   state.brand = brand?.name ?? ''
@@ -141,11 +141,11 @@ const state = reactive<Schema>({
   name: '',
   year: 2026,
   category: undefined as unknown as MotorcycleCategory,
-  engine_size: undefined,
-  horsePower: undefined,
-  torque: undefined,
-  weight: undefined,
-  consumption: undefined,
+  engine_size: undefined as unknown as number,
+  horsePower: undefined as unknown as number,
+  torque: undefined as unknown as number,
+  weight: undefined as unknown as number,
+  consumption: undefined as unknown as number,
   soundLink: '',
   imageUrl: '',
   isAvailableA2: false,
@@ -233,7 +233,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     })
     props.onClosePanel()
     props.onRefresh()
-  } catch (err) {
+  } catch {
     toast.add({
       title: 'Erreur',
       description: 'Échec de la sauvegarde',
@@ -256,7 +256,7 @@ async function removeMotorcycle() {
     })
     props.onClosePanel()
     props.onRefresh()
-  } catch (err) {
+  } catch {
     toast.add({
       title: 'Erreur',
       description: 'Échec de la suppression',
@@ -267,7 +267,7 @@ async function removeMotorcycle() {
 </script>
 
 <template>
-  <div class="header-cardMoto">
+  <div class="flex justify-between items-center">
     <h3>{{ mode === 'edit' ? 'Modifier la moto' : "Ajout d'une moto" }}</h3>
     <UIcon
       name="i-lucide-x"
@@ -369,7 +369,7 @@ async function removeMotorcycle() {
       <USwitch v-model="state.is_public" label="Public" />
     </UFormField>
 
-    <div class="form-end">
+    <div class="flex justify-between items-center">
       <UButton type="submit" color="primary"> Enregistrer </UButton>
       <UIcon
         v-if="mode === 'edit'"
@@ -380,23 +380,3 @@ async function removeMotorcycle() {
     </div>
   </UForm>
 </template>
-
-<style scoped>
-.form-div {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.header-cardMoto {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.form-end {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-</style>

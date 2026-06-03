@@ -1,9 +1,28 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import request from 'supertest'
+import jwt from 'jsonwebtoken'
 import app from '../app'
 import Ride from '../models/Ride'
+import User from '../models/User'
 
 describe('Ride Routes - /api/v1/rides', () => {
+  let authCookie: string
+
+  beforeEach(async () => {
+    const user = await User.create({
+      firstname: 'Rider',
+      lastname: 'One',
+      pseudo: 'rider1',
+      email: 'rider@test.com',
+      password: 'pass'
+    })
+    const token = jwt.sign(
+      { id: user._id.toString(), email: user.email },
+      process.env.JWT_SECRET!
+    )
+    authCookie = `accessToken=${token}`
+  })
+
   const rideData = {
     title: 'Balade en Bretagne',
     description: 'Superbe route côtière',
@@ -69,6 +88,7 @@ describe('Ride Routes - /api/v1/rides', () => {
     it('should create a new ride', async () => {
       const res = await request(app)
         .post('/api/v1/rides')
+        .set('Cookie', authCookie)
         .send({
           title: 'New ride',
           description: 'Description',
@@ -89,9 +109,18 @@ describe('Ride Routes - /api/v1/rides', () => {
       expect(res.body.ride.end_town).toBe('Nantes')
     })
 
+    it('should return 401 without a token', async () => {
+      const res = await request(app)
+        .post('/api/v1/rides')
+        .send({ title: 'No auth' })
+
+      expect(res.status).toBe(401)
+    })
+
     it('should fail without required fields', async () => {
       const res = await request(app)
         .post('/api/v1/rides')
+        .set('Cookie', authCookie)
         .send({ title: 'Incomplete' })
 
       expect(res.status).toBe(400)

@@ -12,7 +12,10 @@ const isSidebarOpen = ref(false) // État du volet latéral (ouvert/fermé)
 </script>
 
 <template>
-  <div class="sidebar" :class="{ 'is-open': isSidebarOpen }">
+  <div
+    class="sidebar flex absolute top-[80px] bottom-[20px] right-0 w-[40dvw] max-md:w-[90dvw]! max-lg:w-[60dvw]! bg-[var(--background)] backdrop-blur-[8px] z-[1020] transition-transform duration-300 ease-in-out translate-x-full border-l border-solid border-gray-300 rounded-l-xl rounded-r-none"
+    :class="{ 'is-open': isSidebarOpen }"
+  >
     <div class="absolute -left-10 top-1/2 -translate-y-1/2 h-10 w-10 z-1002">
       <UButton
         :icon="
@@ -25,13 +28,13 @@ const isSidebarOpen = ref(false) // État du volet latéral (ouvert/fermé)
       />
     </div>
 
-    <div class="sidebar-content">
-      <h3 class="sidebar-title">Liste des balades</h3>
-      <div class="ride-container">
+    <div class="flex-1 p-6 overflow-y-auto font-sans">
+      <h3 class="text-lg font-bold mb-4 text-[var(--text-color)]">Liste des balades</h3>
+      <div class="flex flex-col gap-6 pb-6">
         <div
           v-for="ride in props.filteredRides"
           :key="ride._id"
-          class="ride-item"
+          class="rounded-xl h-auto w-full"
         >
           <CardRide
             :ride="ride"
@@ -47,56 +50,7 @@ const isSidebarOpen = ref(false) // État du volet latéral (ouvert/fermé)
 </template>
 
 <style scoped>
-.ride-container {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  padding-bottom: 20px;
-}
-
-.ride-item {
-  border-radius: 12px;
-  height: auto;
-  width: 100%;
-}
-
-.sidebar {
-  display: flex;
-  position: absolute;
-  top: 80px;
-  bottom: 20px;
-  right: 0;
-  width: 40dvw;
-  background-color: var(--background);
-  backdrop-filter: blur(8px);
-  z-index: 1020;
-  transition: transform 0.3s ease-in-out;
-  transform: translateX(100%);
-  border-left: 1px solid #e5e7eb;
-  border-radius: 12px 0 0 12px;
-}
-
 .sidebar.is-open {
   transform: translateX(0);
-}
-
-.sidebar-content {
-  flex: 1;
-  padding: 20px;
-  overflow-y: auto;
-  font-family: sans-serif;
-}
-
-.sidebar-title {
-  font-size: 1.125rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
-  color: var(--text-color);
-}
-
-@media (max-width: 1024px) {
-  .sidebar {
-    width: 90dvw;
-  }
 }
 </style>

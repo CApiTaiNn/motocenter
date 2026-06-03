@@ -42,7 +42,7 @@ const selectTime = (h: number) => {
           class="px-0 cursor-pointer"
         />
         <template #content>
-          <div class="hours-popover-container">
+          <div class="flex flex-col gap-1 p-2 h-48 overflow-y-auto">
             <UButton
               v-for="h in 24"
               :key="h"
@@ -58,14 +58,3 @@ const selectTime = (h: number) => {
     </template>
   </UInputTime>
 </template>
-
-<style scoped>
-.hours-popover-container {
-  padding: 0.5rem;
-  height: 12rem;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-</style>

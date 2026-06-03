@@ -5,26 +5,53 @@ import {
   type Response
 } from 'express'
 import multer, { MulterError } from 'multer'
-import { extname } from 'path'
+import rateLimit from 'express-rate-limit'
 import { v4 as uuidv4 } from 'uuid'
 import { getSupabase } from '../utils/supabase'
 
 const BUCKET = 'userProfilImages'
 const MAX_FILE_SIZE = 5 * 1024 * 1024
-const ALLOWED_MIMETYPES = new Set([
-  'image/jpeg',
-  'image/png',
-  'image/webp',
-  'image/gif'
-])
+
+// Allowed image types keyed by extension, with their canonical mime type.
+const IMAGE_TYPES = {
+  jpg: 'image/jpeg',
+  png: 'image/png',
+  webp: 'image/webp',
+  gif: 'image/gif'
+} as const
+type ImageExt = keyof typeof IMAGE_TYPES
+
+// Detect the real image type from the file's magic bytes rather than
+// trusting the client-supplied mimetype or filename extension.
+function detectImageType(buffer: Buffer): ImageExt | null {
+  if (buffer.length >= 3 && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) {
+    return 'jpg'
+  }
+  if (
+    buffer.length >= 8 &&
+    buffer[0] === 0x89 &&
+    buffer[1] === 0x50 &&
+    buffer[2] === 0x4e &&
+    buffer[3] === 0x47
+  ) {
+    return 'png'
+  }
+  if (buffer.length >= 4 && buffer.toString('ascii', 0, 4) === 'GIF8') {
+    return 'gif'
+  }
+  if (
+    buffer.length >= 12 &&
+    buffer.toString('ascii', 0, 4) === 'RIFF' &&
+    buffer.toString('ascii', 8, 12) === 'WEBP'
+  ) {
+    return 'webp'
+  }
+  return null
+}
 
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: MAX_FILE_SIZE, files: 1 },
-  fileFilter: (_req, file, cb) => {
-    if (ALLOWED_MIMETYPES.has(file.mimetype)) cb(null, true)
-    else cb(new Error('Unsupported file type'))
-  }
+  limits: { fileSize: MAX_FILE_SIZE, files: 1 }
 })
 
 const handleUpload = (req: Request, res: Response, next: NextFunction) => {
@@ -38,9 +65,17 @@ const handleUpload = (req: Request, res: Response, next: NextFunction) => {
   })
 }
 
+const uploadLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: () => process.env.NODE_ENV === 'test'
+})
+
 const router = Router()
 
-router.post('/', handleUpload, async (req, res) => {
+router.post('/', uploadLimiter, handleUpload, async (req, res) => {
   try {
     const file = req.file
     if (!file) {
@@ -48,14 +83,19 @@ router.post('/', handleUpload, async (req, res) => {
       return
     }
 
-    const ext = extname(file.originalname).slice(1).toLowerCase() || 'bin'
+    const ext = detectImageType(file.buffer)
+    if (!ext) {
+      res.status(400).json({ message: 'Unsupported file type' })
+      return
+    }
+
     const fileName = `${uuidv4()}.${ext}`
 
     const supabase = getSupabase()
     const { data, error } = await supabase.storage
       .from(BUCKET)
       .upload(fileName, file.buffer, {
-        contentType: file.mimetype,
+        contentType: IMAGE_TYPES[ext],
         upsert: false
       })
 

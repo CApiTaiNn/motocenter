@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import type { IUser } from '@/types/users'
+import type { IUser } from '~/types/users'
 import StatsAnalytics from '~/components/admin/StatsAnalytics.vue'
 
 interface Stat {
   title: string
   value: number
+  icon: string
+  accent: string
 }
 
 definePageMeta({
@@ -18,36 +20,46 @@ const stats = ref<Stat[]>([])
 
 async function fetchStats() {
   try {
-    const totalUsers = await $fetch<number>(`${apiBase}users/count`)
-    const totalBikes = await $fetch<number>(`${apiBase}motorcycles/count`)
-
     const today = new Date()
     today.setHours(0, 0, 0, 0)
 
-    const resToday = await $fetch<{ users: IUser[] }>(
-      `${apiBase}users?filter=${JSON.stringify({ createdAt: { $gte: today } })}`
-    )
-
-    const resPostsToday = await $fetch<{ posts: any[] }>(
-      `${apiBase}posts?filter=${JSON.stringify({ createdAt: { $gte: today } })}`
+    const [totalUsers, totalBikes, resToday, resPostsToday] = await Promise.all(
+      [
+        $fetch<number>(`${apiBase}users/count`),
+        $fetch<number>(`${apiBase}motorcycles/count`),
+        $fetch<{ users: IUser[] }>(
+          `${apiBase}users?filter=${JSON.stringify({ createdAt: { $gte: today } })}`
+        ),
+        $fetch<{ posts: any[] }>(
+          `${apiBase}posts?filter=${JSON.stringify({ createdAt: { $gte: today } })}`
+        )
+      ]
     )
 
     stats.value = [
       {
         title: 'Utilisateurs',
-        value: totalUsers ?? 0
+        value: totalUsers ?? 0,
+        icon: 'i-lucide-users',
+        accent: 'var(--ui-color-info-500)'
       },
       {
         title: 'Motos',
-        value: totalBikes ?? 0
+        value: totalBikes ?? 0,
+        icon: 'i-lucide-bike',
+        accent: 'var(--ui-primary)'
       },
       {
         title: "Nouveaux utilisateurs aujourd'hui",
-        value: resToday.users.length ?? 0
+        value: resToday.users.length ?? 0,
+        icon: 'i-lucide-user-plus',
+        accent: 'var(--ui-color-success-600)'
       },
       {
         title: "Posts créés aujourd'hui",
-        value: resPostsToday.posts.length ?? 0
+        value: resPostsToday.posts.length ?? 0,
+        icon: 'i-lucide-message-square-plus',
+        accent: 'var(--ui-color-warning-500)'
       }
     ]
   } catch (error) {
@@ -61,27 +73,18 @@ onMounted(() => {
 </script>
 
 <template>
-  <main>
-    <h3>Bienvenue {{ userName }}</h3>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pl-40 pr-40">
-      <div v-for="stat in stats" :key="stat.title" class="card">
+  <main class="max-w-[80rem] mx-auto my-16 px-6">
+    <h3 class="text-center m-6">Bienvenue {{ userName }}</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div
+        v-for="stat in stats"
+        :key="stat.title"
+        class="relative flex flex-col gap-2 py-4 px-6 rounded-xl border border-solid border-gray-300 border-l-4 border-l-[var(--ui-primary)] bg-[var(--background)]"
+        :style="{ borderLeftColor: stat.accent }"
+      >
+        <UIcon :name="stat.icon" class="w-[1.75rem] h-[1.75rem]" :style="{ color: stat.accent }" />
         <StatsAnalytics :title="stat.title" :value="stat.value" />
       </div>
     </div>
   </main>
 </template>
-
-<style scoped>
-h3 {
-  text-align: center;
-  margin: 20px;
-}
-
-main {
-  margin: 100px 20px;
-}
-
-.card {
-  border-radius: 10px;
-}
-</style>

@@ -1,3 +1,5 @@
+import { HttpError } from './errors'
+
 export interface ReqQuery {
   project?: string
   sort?: string
@@ -6,11 +8,44 @@ export interface ReqQuery {
   deep?: string
 }
 
+// Mongo operators that can execute server-side JavaScript. They must never
+// be accepted from a client-supplied filter/sort.
+const FORBIDDEN_OPERATORS = new Set([
+  '$where',
+  '$function',
+  '$accumulator',
+  '$expr'
+])
+
+function assertNoCodeOperators(value: unknown): void {
+  if (Array.isArray(value)) {
+    value.forEach(assertNoCodeOperators)
+  } else if (value && typeof value === 'object') {
+    for (const [key, nested] of Object.entries(value)) {
+      if (FORBIDDEN_OPERATORS.has(key)) {
+        throw new HttpError(400, `Operator ${key} is not allowed`)
+      }
+      assertNoCodeOperators(nested)
+    }
+  }
+}
+
+function parseJsonParam(raw: string, label: string): any {
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(raw)
+  } catch {
+    throw new HttpError(400, `Invalid ${label} parameter`)
+  }
+  assertNoCodeOperators(parsed)
+  return parsed
+}
+
 const defaultLimit = 10
 const defaultSort = {
   createdAt: -1
 }
-const defaultProject = 'id'
+const defaultProject = '_id'
 const defaultFilter = {}
 
 export function prepareQuery(query: ReqQuery) {
@@ -33,8 +68,10 @@ export function prepareQuery(query: ReqQuery) {
   }
 
   const limit = query.limit ? Number(query.limit) : defaultLimit
-  const filter = query.filter ? JSON.parse(query.filter) : defaultFilter
-  const sort = query.sort ? JSON.parse(query.sort) : defaultSort
+  const filter = query.filter
+    ? parseJsonParam(query.filter, 'filter')
+    : defaultFilter
+  const sort = query.sort ? parseJsonParam(query.sort, 'sort') : defaultSort
 
   const deep = query.deep ? true : false
 

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { IBrand } from '~/types/brand'
-import type { ICategory } from '~/types/category'
+import { POST_CATEGORY_OPTIONS } from '~/utils/postCategory'
 
 const props = defineProps({
   loading: Boolean,
@@ -11,12 +11,12 @@ const props = defineProps({
 })
 const emits = defineEmits(['change'])
 
-const categories = ref<ICategory[]>([])
+const categories = POST_CATEGORY_OPTIONS
 const brands = ref<IBrand[]>([])
 
 const filters = ref({
   brandIds: [...(props.activeFilters?.brandIds || [])],
-  categoryIds: [...(props.activeFilters?.categoriesIds || [])],
+  categoryIds: [...(props.activeFilters?.categoryIds || [])],
   onlyMyPost: props.activeFilters?.onlyMyPost || false,
   searchBar: ''
 })
@@ -38,17 +38,9 @@ const handleHaveAllPosts = () => {
   navigateTo('/forum')
 }
 
-const getCategories = async () => {
-  const res = await fetch(
-    `${useRuntimeConfig().public.apiBase}categories?project=name,id,icon`
-  )
-  const data = await res.json()
-  categories.value = data.categories
-}
-
 const getBrands = async () => {
   const res = await fetch(
-    `${useRuntimeConfig().public.apiBase}brand?project=name,icon`
+    `${useRuntimeConfig().public.apiBase}brands?project=name,icon`
   )
   const data = await res.json()
   brands.value = data.brands
@@ -63,9 +55,7 @@ const emitFilters = () => {
   })
 }
 
-const handleHaveMyFavorites = () => {
-  console.log('Myfavorite')
-}
+const handleHaveMyFavorites = () => {}
 
 const handlClickOnCategory = (filterCategoryId: string) => {
   if (filters.value.categoryIds.includes(filterCategoryId)) {
@@ -94,7 +84,7 @@ const handleSearch = () => {
 }
 
 onMounted(async () => {
-  await Promise.all([getBrands(), getCategories()])
+  await getBrands()
 })
 </script>
 
@@ -119,51 +109,54 @@ onMounted(async () => {
       />
     </template>
   </UInput>
-  <div class="icon-and-text filter cursor-pointer" @click="handleHaveAllPosts">
-    <UIcon class="size-7 margin-0_5" name="i-lucide-messages-square" />
+  <div
+    class="flex flex-row items-center my-8 mx-8 max-lg:my-3! max-lg:mx-4! cursor-pointer"
+    @click="handleHaveAllPosts"
+  >
+    <UIcon class="size-7 mr-2" name="i-lucide-messages-square" />
     <p>Tous les posts</p>
   </div>
   <div
-    class="icon-and-text filter cursor-pointer"
+    class="flex flex-row items-center my-8 mx-8 max-lg:my-3! max-lg:mx-4! cursor-pointer"
     @click="handleHaveMyFavorites"
   >
-    <UIcon class="size-7 margin-0_5" name="i-lucide-star" />
+    <UIcon class="size-7 mr-2" name="i-lucide-star" />
     <p>Mes favoris</p>
   </div>
-  <div class="filter">
-    <div class="icon-and-text">
-      <UIcon class="size-7 margin-0_5" name="i-lucide-grid-2x2-check" />
+  <div class="my-8 mx-8 max-lg:my-3! max-lg:mx-4!">
+    <div class="flex flex-row items-center">
+      <UIcon class="size-7 mr-2" name="i-lucide-grid-2x2-check" />
       <p>Catégories</p>
     </div>
-    <div class="filter">
+    <div class="my-8 mx-8 max-lg:my-3! max-lg:mx-4!">
       <USkeleton v-if="props.loading" class="size-12 rounded-full" />
       <div
         v-for="category in categories"
         v-else
-        :key="category._id"
-        class="icon-and-text sub-filter cursor-pointer"
+        :key="category.value"
+        class="flex flex-row items-center my-2 mx-4 p-[0.3em] cursor-pointer hover:bg-[rgba(109,100,100,0.097)] hover:rounded-xl hover:w-fit"
         :class="{
-          'background-selected': filters.categoryIds.includes(category._id)
+          'background-selected': filters.categoryIds.includes(category.value)
         }"
-        @click="handlClickOnCategory(category._id)"
+        @click="handlClickOnCategory(category.value)"
       >
-        <UIcon class="size-7 margin-0_5" :name="category.icon" />
-        <p>{{ category.name }}</p>
+        <UIcon class="size-7 mr-2" :name="category.icon" />
+        <p>{{ category.label }}</p>
       </div>
     </div>
   </div>
-  <div class="filter">
-    <div class="icon-and-text">
-      <UIcon class="size-7 margin-0_5" name="i-lucide-warehouse" />
+  <div class="my-8 mx-8 max-lg:my-3! max-lg:mx-4!">
+    <div class="flex flex-row items-center">
+      <UIcon class="size-7 mr-2" name="i-lucide-warehouse" />
       <p>Marques</p>
     </div>
-    <div class="filter">
+    <div class="my-8 mx-8 max-lg:my-3! max-lg:mx-4!">
       <USkeleton v-if="props.loading" class="size-12 rounded-full" />
       <div
-        v-else
         v-for="brand in brands"
+        v-else
         :key="brand._id"
-        class="icon-and-text sub-filter cursor-pointer"
+        class="flex flex-row items-center my-2 mx-4 p-[0.3em] cursor-pointer hover:bg-[rgba(109,100,100,0.097)] hover:rounded-xl hover:w-fit"
         :class="{ 'background-selected': filters.brandIds.includes(brand._id) }"
         @click="handleClickOnBrand(brand._id)"
       >
@@ -173,7 +166,7 @@ onMounted(async () => {
           :title="brand.name"
           width="40"
           height="40"
-          class="margin-0_5"
+          class="mr-2"
         />
         <p>{{ brand.name }}</p>
       </div>
@@ -182,45 +175,16 @@ onMounted(async () => {
   <USwitch
     v-model="filters.onlyMyPost"
     label="Uniquement mes posts"
-    class="filter"
+    class="my-8 mx-8 max-lg:my-3! max-lg:mx-4!"
   />
 </template>
 
 <style scoped>
-.icon-and-text {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-}
-
-.filter {
-  margin: 2em;
-}
-
-.sub-filter {
-  margin: 0.5em 1em;
-  padding: 0.3em;
-}
-
-.margin-0_5 {
-  margin-right: 0.5em;
-}
-
 .background-selected {
   background-color: rgba(109, 100, 100, 0.325);
-  border-radius: 10px;
+  border-radius: 12px;
   padding-right: 0.3em;
   padding-left: 0.3em;
   width: fit-content;
-}
-
-.sub-filter:hover {
-  background-color: rgba(109, 100, 100, 0.097);
-  border-radius: 10px;
-  width: fit-content;
-}
-
-.custom-border {
-  border: 0.5px solid var(--border-gray);
 }
 </style>

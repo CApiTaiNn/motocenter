@@ -50,20 +50,17 @@ const resetForm = () => {
   error.value = ''
 }
 
-watch(
-  () => isOpen.value,
-  (newVal) => {
-    if (!newVal) {
-      resetForm()
-    }
+watch(isOpen, (newVal) => {
+  if (!newVal) {
+    resetForm()
   }
-)
+})
 </script>
 
 <template>
   <UModal v-model:open="isOpen">
     <template #content>
-      <div class="content">
+      <div class="flex flex-col items-center justify-center m-20">
         <h3>Se connecter</h3>
 
         <UForm
@@ -102,34 +99,12 @@ watch(
         </UForm>
         <p class="text-sm">
           Nouveau sur ce site ?
-          <span class="new-account" @click="openCreateAccountModal"
+          <span class="underline cursor-pointer" @click="openCreateAccountModal"
             >S'inscrire</span
           >
         </p>
-        <p class="error-message">{{ error }}</p>
+        <p class="text-[red] text-xs m-4">{{ error }}</p>
       </div>
     </template>
   </UModal>
 </template>
-
-<style scoped>
-.content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-
-  margin: 5rem;
-}
-
-.error-message {
-  color: red;
-  font-size: 0.8em;
-  margin: 1rem;
-}
-
-.new-account {
-  text-decoration: underline;
-  cursor: pointer;
-}
-</style>

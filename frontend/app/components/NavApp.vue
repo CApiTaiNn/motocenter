@@ -6,6 +6,7 @@ import { useConnexionModal } from '~/composables/useConnexionModal'
 import { useProfileModal } from '~/composables/useProfileModal'
 
 const { isAuthenticated, user } = useAuth()
+const route = useRoute()
 
 const isOpen = ref(false)
 
@@ -27,39 +28,67 @@ watch(mode, (newVal) => {
   colorMode.preference = newVal ? 'dark' : 'light'
 })
 
-function toggle_open() {
+watch(() => route.path, () => {
+  isOpen.value = false
+})
+
+const navItems = [
+  { label: 'Comparateur', to: '/comparo' },
+  { label: 'Forum', to: '/forum' },
+  { label: 'Balades', to: '/ride' },
+  { label: 'Nous connaitre', to: '/knowUs' },
+] as const
+
+function isActive(to: string): boolean {
+  return route.path === to || route.path.startsWith(`${to}/`)
+}
+
+function toggleOpen() {
   isOpen.value = !isOpen.value
 }
 </script>
 
 <template>
-  <div id="navbar-pc">
-    <div class="navbar">
-      <div class="list-left">
+  <header
+    class="sticky top-0 z-[9999] w-full bg-[var(--background)]"
+  >
+    <!-- Desktop -->
+    <nav
+      class="hidden lg:flex flex-row justify-between p-[10px] bg-[var(--background)]"
+    >
+      <div class="flex flex-row items-center gap-[10px] mx-[2%]">
         <LogoApp />
         <ToggleSwitch v-if="isDev" v-model="mode" />
       </div>
-      <div class="list-right">
-        <UButton size="md" color="neutral" variant="ghost" to="/comparo"
-          >Comparateur</UButton
+      <div class="flex flex-row items-center gap-10 mx-[2%]">
+        <div
+          v-for="item in navItems"
+          :key="item.to"
+          class="relative flex flex-col items-center"
         >
-        <UButton size="md" color="neutral" variant="ghost" to="/forum"
-          >Forum</UButton
-        >
-        <UButton size="md" color="neutral" variant="ghost" to="/ride"
-          >Balades</UButton
-        >
-        <UButton size="md" color="neutral" variant="ghost" to="/knowUs"
-          >Nous connaitre</UButton
-        >
+          <UButton
+            size="md"
+            color="neutral"
+            variant="ghost"
+            :to="item.to"
+            :class="isActive(item.to) ? 'font-semibold text-[var(--ui-primary)]!' : ''"
+          >
+            {{ item.label }}
+          </UButton>
+          <span
+            class="absolute -bottom-1 left-1/2 -translate-x-1/2 h-[2px] w-6 rounded-full bg-[var(--ui-primary)] transition-opacity duration-200"
+            :class="isActive(item.to) ? 'opacity-100' : 'opacity-0'"
+          />
+        </div>
         <UButton
           v-if="!isAuthenticated"
           trailing-icon="i-lucide-arrow-right"
           size="xl"
           color="neutral"
-          class="rounded-full text-sm px-10 py-2.5"
+          class="rounded-full text-sm! px-10! py-[10px]!"
           @click="connexionModal.open()"
-          >Connexion
+        >
+          Connexion
         </UButton>
         <UAvatar
           v-else
@@ -67,146 +96,66 @@ function toggle_open() {
           :src="user?.image"
           size="xl"
           loading="lazy"
+          class="cursor-pointer"
           @click="profileModal.open()"
         />
       </div>
-    </div>
-  </div>
-  <div id="navbar-mobile">
-    <div class="navbar">
-      <div class="list-left">
-        <LogoApp />
-        <ToggleSwitch v-if="isDev" v-model="mode" />
+    </nav>
+
+    <!-- Mobile -->
+    <nav class="flex flex-col lg:hidden bg-[var(--background)]">
+      <div class="flex flex-row justify-between items-center p-[10px]">
+        <div class="flex flex-row items-center gap-[10px] mx-[2%]">
+          <LogoApp />
+          <ToggleSwitch v-if="isDev" v-model="mode" />
+        </div>
+        <UIcon
+          :name="isOpen ? 'i-lucide-chevron-down' : 'i-lucide-menu'"
+          class="size-10 cursor-pointer"
+          @click="toggleOpen"
+        />
       </div>
-      <UIcon
-        :name="isOpen ? 'i-lucide-chevron-down' : 'i-lucide-menu'"
-        class="size-10"
-        @click="toggle_open"
-      />
-    </div>
-    <div v-if="isOpen" class="list-mobile">
-      <UButton
-        size="md"
-        color="neutral"
-        variant="ghost"
-        class="justify-center"
-        to="/comparo"
-        >Comparateur</UButton
+      <div
+        v-if="isOpen"
+        class="flex flex-col gap-[10px] text-center pb-2"
       >
-      <UButton
-        size="md"
-        color="neutral"
-        variant="ghost"
-        class="justify-center"
-        to="/forum"
-        >Forum</UButton
-      >
-      <UButton
-        size="md"
-        color="neutral"
-        variant="ghost"
-        class="justify-center"
-        to="/ride"
-        >Balades</UButton
-      >
-      <UButton
-        size="md"
-        color="neutral"
-        variant="ghost"
-        class="justify-center"
-        to="/knowUs"
-        >Nous connaitre</UButton
-      >
-      <UButton
-        v-if="!isAuthenticated"
-        size="md"
-        color="neutral"
-        variant="ghost"
-        class="justify-center"
-        @click="connexionModal.open()"
-        >Connexion</UButton
-      >
-      <UButton
-        v-if="isAuthenticated"
-        size="md"
-        color="neutral"
-        variant="ghost"
-        class="justify-center"
-        @click="profileModal.open()"
-        >Mon profil</UButton
-      >
-    </div>
-  </div>
+        <UButton
+          v-for="item in navItems"
+          :key="item.to"
+          size="md"
+          color="neutral"
+          variant="ghost"
+          :to="item.to"
+          class="justify-center border-l-4 transition-colors"
+          :class="
+            isActive(item.to)
+              ? 'border-[var(--ui-primary)] font-semibold text-[var(--ui-primary)]!'
+              : 'border-transparent'
+          "
+        >
+          {{ item.label }}
+        </UButton>
+        <UButton
+          v-if="!isAuthenticated"
+          size="md"
+          color="neutral"
+          variant="ghost"
+          class="justify-center"
+          @click="connexionModal.open()"
+        >
+          Connexion
+        </UButton>
+        <UButton
+          v-else
+          size="md"
+          color="neutral"
+          variant="ghost"
+          class="justify-center"
+          @click="profileModal.open()"
+        >
+          Mon profil
+        </UButton>
+      </div>
+    </nav>
+  </header>
 </template>
-
-<style scoped>
-.navbar {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  background-color: var(--background);
-
-  padding: 10px;
-}
-
-#navbar-mobile,
-#navbar-pc {
-  position: sticky;
-  top: 0;
-  width: 100%;
-  z-index: 9999;
-}
-
-.logo {
-  font-size: 1rem;
-  font-weight: bold;
-  font-family: 'Krona-one';
-
-  padding: 10px 25px;
-
-  color: white;
-}
-
-.list-left {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 10px;
-
-  margin: 0 2%;
-}
-
-.list-right {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 40px;
-
-  margin: 0 2%;
-}
-
-/** Style version PC */
-@media (max-width: 1024px) {
-  #navbar-pc {
-    display: none;
-  }
-}
-
-/** Style version mobile */
-
-@media (min-width: 1024px) {
-  #navbar-mobile {
-    display: none;
-  }
-}
-
-.list-mobile {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-
-  text-align: center;
-
-  background-color: var(--background);
-}
-</style>

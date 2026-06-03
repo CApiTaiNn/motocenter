@@ -94,7 +94,7 @@ const likeGestion = async () => {
       `${runtimeConfig.public.apiBase}rides/${props.ride._id}/like`,
       {
         method: 'PATCH',
-        body: { userId: userId }
+        credentials: 'include'
       }
     )
 
@@ -121,7 +121,7 @@ const participateGestion = async () => {
       updatedParticipants: any[]
     }>(`${runtimeConfig.public.apiBase}rides/${props.ride._id}/participate`, {
       method: 'PATCH',
-      body: { userId }
+      credentials: 'include'
     })
 
     emit('update:participants', res.updatedParticipants)
@@ -167,26 +167,29 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="card-image" :style="{ backgroundImage: `url(${imageUrl})` }">
-    <div class="overlay"></div>
+  <div
+    class="relative flex w-full h-auto min-h-[220px] flex-col overflow-visible rounded-xl bg-cover bg-center shadow-[0_4px_12px_rgba(0,0,0,0.15)]"
+    :style="{ backgroundImage: `url(${imageUrl})` }"
+  >
+    <div class="overlay absolute inset-0 z-[1] rounded-xl bg-gradient-to-t from-black/95 via-black/70 to-black/40"></div>
 
-    <div class="card-content">
-      <header class="card-header">
-        <div class="title-wrapper">
+    <div class="card-content relative z-[2] flex flex-col gap-2 p-4 text-white md:p-6!">
+      <header class="flex w-full flex-wrap items-center justify-between gap-3">
+        <div class="flex min-w-0 flex-1 flex-row flex-wrap items-center gap-2">
           <span
-            class="dot"
+            class="h-[14px] w-[14px] rounded-full shadow-[0_0_10px_rgba(255,255,255,0.3)]"
             :style="{ backgroundColor: props.ride.color || '#3b82f6' }"
             aria-hidden="true"
           ></span>
 
-          <h2 class="title">{{ props.ride.title }}</h2>
+          <h2 class="m-0 shrink overflow-hidden text-ellipsis whitespace-normal text-xl font-bold [text-shadow:0_2px_4px_rgba(0,0,0,0.5)] md:text-2xl!">{{ props.ride.title }}</h2>
 
           <UBadge
             v-if="props.ride.is_event"
             variant="subtle"
             size="md"
             icon="i-lucide-calendar-days"
-            class="bg-white/15 backdrop-blur-xs text-white border border-white/20 text-[0.7rem] py-0.5 px-2 whitespace-nowrap shrink-0"
+            class="bg-white/15 backdrop-blur-xs text-white border border-white/20 text-xs py-0.5 px-2 whitespace-nowrap shrink-0"
           >
             {{ dateEvent.toLocaleDateString('fr-FR') }}
             •
@@ -214,10 +217,10 @@ onMounted(async () => {
         />
       </header>
 
-      <p class="description">{{ props.ride.description }}</p>
+      <p class="mt-1 mb-3 line-clamp-2 text-sm opacity-85">{{ props.ride.description }}</p>
 
       <footer>
-        <div class="info-grid">
+        <div class="mb-3 flex flex-wrap gap-x-3 gap-y-1">
           <UBadge
             variant="subtle"
             size="lg"
@@ -252,8 +255,8 @@ onMounted(async () => {
           </UBadge>
         </div>
 
-        <div class="card-footer-container">
-          <div class="card-footer-item">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-t border border-white/10 pt-3 text-sm max-[480px]:flex-col! max-[480px]:items-stretch! max-[480px]:gap-3!">
+          <div class="flex items-center gap-3 max-[480px]:w-full max-[480px]:justify-start max-[480px]:flex-wrap">
             <template v-if="creator">
               <UAvatar
                 :alt="`Avatar de ${creator.pseudo || 'MotoCenter'}`"
@@ -270,17 +273,18 @@ onMounted(async () => {
             </template>
           </div>
 
-          <div v-if="ride.is_event" class="card-footer-item">
+          <div v-if="ride.is_event" class="flex items-center gap-3 max-[480px]:w-full max-[480px]:justify-start max-[480px]:flex-wrap">
             <UButton
               :label="isParticipating ? 'Ne plus participer' : 'Participer'"
               :color="isParticipating ? 'neutral' : 'error'"
               :variant="isParticipating ? 'subtle' : 'solid'"
               size="lg"
               class="px-5 font-bold max-[480px]:flex-1 max-[480px]:justify-center cursor-pointer"
+              :class="!isParticipating ? 'text-white!' : ''"
               @click="participateGestion"
             />
 
-            <div v-if="participatingCount > 0" class="participants-list">
+            <div v-if="participatingCount > 0" class="flex items-center gap-2 rounded-[20px] bg-white/90 py-1 pr-3 pl-2 text-gray-700">
               <UAvatarGroup size="xs" :max="3">
                 <UAvatar
                   v-for="(avatar, index) in participantsAvatars"
@@ -288,12 +292,12 @@ onMounted(async () => {
                   v-bind="avatar"
                 />
               </UAvatarGroup>
-              <span class="participants-count">
+              <span class="text-xs font-extrabold">
                 {{ participatingCount }}
               </span>
             </div>
 
-            <span v-else class="no-participants">Aucun participant </span>
+            <span v-else class="text-xs italic opacity-70">Aucun participant </span>
           </div>
         </div>
       </footer>
@@ -302,103 +306,7 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-/* --- CONTENEUR GLOBAL & OVERLAY --- */
-.card-image {
-  position: relative;
-  width: 100%;
-  height: auto;
-  min-height: 220px;
-  background-size: cover;
-  background-position: center;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  display: flex;
-  flex-direction: column;
-  overflow: visible;
-}
-
-.overlay {
-  position: absolute;
-  border-radius: 12px;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  background: linear-gradient(
-    to top,
-    rgba(0, 0, 0, 0.95) 0%,
-    rgba(0, 0, 0, 0.7) 50%,
-    rgba(0, 0, 0, 0.4) 100%
-  );
-  z-index: 1;
-}
-
-.card-content {
-  position: relative;
-  z-index: 2;
-  padding: 16px;
-  color: white;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-/* --- HEADER : TITRE & LIKE --- */
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 12px;
-  width: 100%;
-}
-
-.title-wrapper {
-  display: flex;
-  flex-wrap: wrap;
-  flex-direction: row;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-  flex: 1;
-}
-
-.title {
-  font-size: 1.25rem;
-  font-weight: 700;
-  margin: 0;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-  white-space: normal;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  flex-shrink: 1;
-}
-
-.dot {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
-}
-
-/* --- CORPS : DESCRIPTION & GRILLE D'INFOS --- */
-.description {
-  font-size: 0.9rem;
-  opacity: 0.85;
-  margin: 4px 0 12px 0;
-  display: -webkit-box;
-  line-clamp: 2;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.info-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 12px;
-  margin-bottom: 12px;
-}
-
-/* Style partagé pour tous les badges d'info */
+/* Style partagé pour tous les badges d'info : override des internes Nuxt UI */
 .invisible-background,
 :deep(.invisible-background) {
   background-color: transparent !important;
@@ -406,73 +314,10 @@ onMounted(async () => {
   border: none !important;
   box-shadow: none !important;
   padding-left: 0 !important;
-  padding-right: 12px !important;
+  padding-right: 0.75rem !important;
 }
 
 :deep(.invisible-background .pointer-events-none) {
   color: white !important;
-}
-
-/* --- FOOTER : CREATEUR & PARTICIPATION --- */
-.card-footer-container {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 10px;
-  padding-top: 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  font-size: 0.85rem;
-}
-
-.card-footer-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.no-participants {
-  font-size: 0.75rem;
-  opacity: 0.7;
-  font-style: italic;
-}
-
-.participants-list {
-  background-color: rgba(255, 255, 255, 0.9);
-  padding: 4px 10px 4px 6px;
-  border-radius: 20px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: #111;
-}
-
-.participants-count {
-  font-size: 0.75rem;
-  font-weight: 800;
-}
-
-/* --- RESPONSIVE --- */
-@media (min-width: 768px) {
-  .title {
-    font-size: 1.5rem;
-  }
-  .card-content {
-    padding: 24px;
-  }
-}
-
-@media (max-width: 480px) {
-  .card-footer-container {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 12px;
-  }
-
-  .card-footer-item {
-    width: 100%;
-    justify-content: flex-start;
-    flex-wrap: wrap;
-  }
 }
 </style>

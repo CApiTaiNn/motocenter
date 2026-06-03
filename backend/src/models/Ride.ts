@@ -1,5 +1,5 @@
 import type { IRide } from '../types/ride'
-import { model, Schema, Types } from 'mongoose'
+import { model, Schema } from 'mongoose'
 
 const rideSchema = new Schema({
   title: {

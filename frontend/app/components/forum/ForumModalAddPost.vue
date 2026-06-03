@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import * as v from 'valibot'
-import { useAuth } from '~/composables/useAuth'
 import type { IBrand } from '~/types/brand'
-import type { ICategory } from '~/types/category'
+import type { PostCategory} from '~/utils/postCategory';
+import { POST_CATEGORY_OPTIONS } from '~/utils/postCategory'
 import type { IPost } from '~/types/post'
 
 const props = defineProps<{
@@ -11,10 +11,9 @@ const props = defineProps<{
   isSameUser?: boolean
 }>()
 
-const categories = ref<ICategory[]>([])
+const categories = POST_CATEGORY_OPTIONS
 const brands = ref<IBrand[]>([])
 const toast = useToast()
-const { user } = useAuth()
 const emit = defineEmits(['added-post'])
 const displayModal = defineModel<boolean>('open', { default: false })
 const isHover = ref(false)
@@ -25,21 +24,9 @@ const initialState = ref({
   description: ''
 })
 
-const getCategories = async () => {
-  const res = await $fetch<{ categories: ICategory[] }>(
-    `${useRuntimeConfig().public.apiBase}categories`,
-    {
-      params: {
-        project: 'name,_id'
-      }
-    }
-  )
-  categories.value = res.categories
-}
-
 const getBrands = async () => {
   const res = await $fetch<{ brands: IBrand[] }>(
-    `${useRuntimeConfig().public.apiBase}brand`,
+    `${useRuntimeConfig().public.apiBase}brands`,
     {
       params: {
         project: 'name,_id'
@@ -67,7 +54,7 @@ const schema = v.object({
 
 const state = reactive({
   title: props.post?.title || '',
-  category: props.post?.category.name || '',
+  category: props.post?.category as PostCategory | undefined,
   brand: props.post?.brand.name || '',
   description: props.post?.content || '',
   file: undefined as File | undefined
@@ -96,7 +83,6 @@ const onSubmit = async () => {
     category: state.category,
     content: state.description,
     url: currentImageUrl.value,
-    user: user.value?._id,
     isNewMotoComment: false
   }
 
@@ -114,6 +100,7 @@ const onSubmit = async () => {
         `${useRuntimeConfig().public.apiBase}posts`,
         {
           method,
+          credentials: 'include',
           body: payload,
           ...(!props.isNewPost && {
             params: { filter: JSON.stringify({ id: props.post?._id }) }
@@ -154,7 +141,7 @@ const handleCloseModal = () => {
 const resetForm = () => {
   state.brand = props.post?.brand.name || ''
   state.title = props.post?.title || ''
-  state.category = props.post?.category.name || ''
+  state.category = props.post?.category
   state.description = props.post?.content || ''
   state.file = undefined
 }
@@ -178,7 +165,7 @@ const getPreviewUrl = () => {
 const setInitialState = () => {
   initialState.value = {
     title: props.post?.title || '',
-    category: props.post?.category.name || '',
+    category: props.post?.category || '',
     brand: props.post?.brand.name || '',
     description: props.post?.content || ''
   }
@@ -197,7 +184,7 @@ const isSameValues = computed(() => {
 })
 
 onMounted(async () => {
-  await Promise.all([getCategories(), getBrands()])
+  await getBrands()
   setInitialState()
 })
 </script>
@@ -206,24 +193,27 @@ onMounted(async () => {
   <div>
     <UModal v-model:open="displayModal" :close="true">
       <UIcon v-if="isSameUser && isNewPost === false" class="size-6" name="i-lucide-square-pen" @click.stop />
-      <UButton v-if="isNewPost === true" icon="i-lucide-plus" size="sm" color="primary" variant="solid"
+      <UButton
+v-if="isNewPost === true" icon="i-lucide-plus" size="sm" color="primary" variant="solid"
         class="cursor-pointer" />
       <template #header>
-        <div class="modal-header">
+        <div class="w-full flex justify-between items-center">
           <h3>{{ modalTitle() }}</h3>
-          <UButton color="primary" variant="outline" icon="i-lucide-x" class="rounded-full cursor-pointer"
+          <UButton
+color="primary" variant="outline" icon="i-lucide-x" class="rounded-full cursor-pointer"
             @click="handleCloseModal" />
         </div>
       </template>
       <template #body>
         <div>
-          <UForm :schema :state="state" @submit="onSubmit" class="form">
+          <UForm :schema :state="state" class="w-full flex flex-col gap-2" @submit="onSubmit">
             <UFormField label="Titre du post" required name="title">
               <UInput v-model="state.title" placeholder="Titre du post" size="md" class="w-full" />
             </UFormField>
             <UFormField label="Catégorie" required name="category">
-              <USelectMenu v-model="state.category" placeholder="Sélectionnez la catégorie du post" :items="categories"
-                value-key="name" label-key="name" :search-input="{
+              <USelectMenu
+v-model="state.category" placeholder="Sélectionnez la catégorie du post" :items="categories"
+                value-key="value" label-key="label" :search-input="{
                   placeholder: 'Rechercher',
                   icon: 'i-lucide-search'
                 }" size="md" class="w-full">
@@ -235,7 +225,8 @@ onMounted(async () => {
               </USelectMenu>
             </UFormField>
             <UFormField label="Marque" required name="brand">
-              <USelectMenu v-model="state.brand" placeholder="Sélectionnez la marque du post" :items="brands"
+              <USelectMenu
+v-model="state.brand" placeholder="Sélectionnez la marque du post" :items="brands"
                 value-key="name" label-key="name" :search-input="{
                   placeholder: 'Rechercher',
                   icon: 'i-lucide-search'
@@ -248,23 +239,28 @@ onMounted(async () => {
               </USelectMenu>
             </UFormField>
             <UFormField label="Description" required name="description">
-              <UTextarea size="md" v-model="state.description" placeholder="Ecrivez votre description" class="w-full" />
+              <UTextarea v-model="state.description" size="md" placeholder="Ecrivez votre description" class="w-full" />
             </UFormField>
             <UFormField required :label="onImageTitle()" name="file">
               <UFileUpload v-model="state.file" accept="image/*" label="Déposez votre image" description="PNG ou JPG">
                 <template #default="{ open }">
-                  <div @click="open" @mouseover="isHover = true" @mouseleave="isHover = false">
-                    <div class="cursor-pointer" :class="isHover ? 'blur-4' : ''">
-                      <img :src="getPreviewUrl()" />
+                  <div @click="() => open()" @mouseover="isHover = true" @mouseleave="isHover = false">
+                    <div class="cursor-pointer" :class="isHover ? 'blur-[2px]' : ''">
+                      <img :src="getPreviewUrl()" class="max-w-[80%]" />
                     </div>
-                    <div v-if="props.isNewPost && getPreviewUrl() === ''" class="border cursor-pointer">
-                      <div class="helper-upload">
+                    <div
+v-if="props.isNewPost && getPreviewUrl() === ''"
+                      class="cursor-pointer text-center min-h-[100px] max-h-[100px] border-2 border-dashed border-[var(--border-gray)] rounded-xl">
+                      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
                         <UIcon name="i-lucide-cloud-upload" class="size-10" />
-                        <p class="text-sm">Sélectionner votre fichier</p>
+                        <p class="text-base">Sélectionner votre fichier</p>
                       </div>
                     </div>
-                    <div v-if="isHover && getPreviewUrl() !== ''" class="helper-upload cursor-pointer" @click="open">
-                      <h4>Cliquer pour modifier la photo</h4>
+                    <div
+v-if="isHover && getPreviewUrl() !== ''"
+                      class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center cursor-pointer"
+                      @click="() => open()">
+                      <h4 class="text-sm p-2 text-[var(--background)] bg-[rgba(128,128,128,0.865)]">Cliquer pour modifier la photo</h4>
                     </div>
                   </div>
                 </template>
@@ -287,57 +283,3 @@ onMounted(async () => {
     </UModal>
   </div>
 </template>
-<style scoped>
-.form {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5em;
-}
-
-.modal-header {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.cursor-pointer {
-  cursor: pointer;
-}
-
-.helper-upload {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  text-align: center;
-  transform: translate(-50%, -50%);
-}
-
-.helper-upload p {
-  font-size: 16px;
-}
-
-.helper-upload h4 {
-  font-size: 14px;
-  background-color: rgba(128, 128, 128, 0.865);
-  padding: 0.5em;
-  color: var(--background);
-}
-
-.blur-4 {
-  filter: blur(2px);
-}
-
-.border {
-  border: 2px dashed var(--border-gray);
-  border-radius: 10px;
-  text-align: center;
-  min-height: 100px;
-  max-height: 100px;
-}
-
-img {
-  max-width: 80%;
-}
-</style>

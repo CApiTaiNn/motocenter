@@ -1,15 +1,10 @@
 import type { IMotorcycle } from '../types/motorcycle'
 import { Schema, Types, model } from 'mongoose'
+import { MotorcycleCategory } from '../constants/MotorcycleCategory'
 
-export enum MotorcycleCategory {
-  SPORTSBIKE = 'sportsbike',
-  ROADSTER = 'roadster',
-  ADVENTURE = 'adventure',
-  CUSTOM = 'custom',
-  TOURING = 'touring',
-  SPORT_TOURING = 'sport-touring',
-  SUPERMOTARD = 'supermotard'
-}
+// Re-exported for back-compat: existing imports of MotorcycleCategory from
+// this model keep working. The enum now lives in constants/MotorcycleCategory.ts.
+export { MotorcycleCategory }
 
 const motorcycleSchema = new Schema({
   brand: {

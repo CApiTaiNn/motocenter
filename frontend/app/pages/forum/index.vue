@@ -96,18 +96,29 @@ onMounted(async () => {
         </p>
       </template>
     </HeaderInfo>
-    <div id="forum" class="forum-filters">
-      <div class="panel-filters">
+    <div id="forum" class="forum-filters flex flex-row items-start m-[2em] gap-[0.5em] md:gap-[1.25em] lg:gap-[2em]">
+      <div class="sticky top-[70px]">
         <ForumPanel :loading :active-filter="filters" @filters="handleFilter" />
       </div>
-      <div class="posts">
+      <div class="flex-1 min-w-0 flex flex-col gap-6">
         <USkeleton v-if="loading" class="size-12 rounded-full" />
-        <div
+        <UCard
           v-if="loading === false && posts.length === 0"
-          class="center add-post-empty"
+          class="empty-state"
         >
-          <p>Aucun post disponible, ajouter le premier</p>
-        </div>
+          <div class="flex flex-col items-center gap-4 py-8 text-center">
+            <UIcon
+              name="i-lucide-message-square-plus"
+              class="size-16 text-(--color-gray-mid)"
+            />
+            <div class="flex flex-col gap-1">
+              <h4>Aucun post pour le moment</h4>
+              <p class="text-sm text-(--color-gray-mid)">
+                Soyez le premier à lancer la discussion.
+              </p>
+            </div>
+          </div>
+        </UCard>
         <div v-for="post in posts" :key="post._id">
           <ForumPost
             :post="post"
@@ -117,101 +128,10 @@ onMounted(async () => {
           />
         </div>
       </div>
-      <div class="panel">
+      <div class="panel hidden lg:flex lg:flex-col lg:gap-6 lg:w-[300px] lg:sticky lg:top-[70px] lg:right-0">
         <ForumMyPosts @new-post="getPosts()" />
         <ForumMyFavoritesPost />
       </div>
     </div>
   </div>
 </template>
-
-<style scoped>
-/** Style version PC */
-@media (max-width: 1024px) {
-  #navbar-pc {
-    display: none;
-  }
-
-  .panel {
-    display: none;
-  }
-
-  .forum-filters {
-    display: flex;
-    flex-direction: row;
-    align-items: start;
-    margin: 2em;
-    gap: 0.5em;
-  }
-}
-
-/** Style version mobile */
-
-@media (min-width: 1024px) {
-  #navbar-mobile {
-    display: none;
-  }
-
-  .panel {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    width: 300px;
-    position: sticky;
-    top: 70px;
-    right: 0;
-  }
-
-  .forum-filters {
-    display: flex;
-    flex-direction: row;
-    align-items: start;
-    margin: 2em;
-    gap: 2em;
-  }
-}
-
-.panel-filters {
-  position: sticky;
-  top: 70px;
-}
-
-.center {
-  text-align: center;
-}
-
-.add-post-empty {
-  display: flex;
-  gap: 0.5em;
-  margin: auto;
-}
-
-.forum {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-}
-
-.loading {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 25vh;
-  gap: 1em;
-}
-
-.cursor-pointer {
-  cursor: pointer;
-}
-
-.forum-filters > div:nth-child(2) {
-  flex: 1;
-  min-width: 0;
-}
-
-.posts {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5em;
-}
-</style>

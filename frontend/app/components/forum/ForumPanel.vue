@@ -11,26 +11,33 @@ const handleFiltersChange = (payload: any) => {
 
 <template>
   <div>
-    <div id="dekstop-filters">
+    <div id="dekstop-filters" class="max-lg:hidden">
       <UCard class="border-[0.5px] border-(--border-gray) filters">
         <FilterContent @change="handleFiltersChange" />
       </UCard>
     </div>
-    <div id="mobile-filters">
+    <div id="mobile-filters" class="lg:hidden">
       <USlideover side="left">
         <UButton
           color="neutral"
           variant="subtle"
-          class="button-mobile"
+          class="max-lg:fixed max-lg:left-0 max-lg:bottom-1/2 max-lg:-translate-y-1/2"
           icon="i-lucide-arrow-right"
           @click="isOpen = true"
         />
         <template #body>
-          <FilterContent @change="handleFiltersChange" />
-          <div class="panel-mobile">
-            <ForumMyPosts />
-            <ForumMyFavoritesPost />
-          </div>
+          <section class="drawer-section flex flex-col gap-3 py-2">
+            <h5 class="drawer-section-label text-xs tracking-[0.1em] uppercase text-gray-500 pl-1 border-l-[3px] border-solid border-[var(--ui-primary)]">Filtres</h5>
+            <FilterContent @change="handleFiltersChange" />
+          </section>
+          <hr class="drawer-divider border-0 border-t border-solid border-gray-300 my-4" />
+          <section class="drawer-section flex flex-col gap-3 py-2">
+            <h5 class="drawer-section-label text-xs tracking-[0.1em] uppercase text-gray-500 pl-1 border-l-[3px] border-solid border-[var(--ui-primary)]">Mon activité</h5>
+            <div class="panel-mobile flex flex-col gap-[0.5em]">
+              <ForumMyPosts />
+              <ForumMyFavoritesPost />
+            </div>
+          </section>
         </template>
       </USlideover>
     </div>
@@ -38,34 +45,8 @@ const handleFiltersChange = (payload: any) => {
 </template>
 
 <style scoped>
-/** Style version mobile */
-@media (max-width: 1024px) {
-  #mobile-filter {
-    display: block;
-  }
-
-  #dekstop-filters {
-    display: none;
-  }
-
-  .button-mobile {
-    position: fixed;
-    left: 0;
-    bottom: 50%;
-    transform: translateY(-50%);
-  }
-
-  .panel-mobile {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5em;
-  }
-}
-
-/** Style version PC */
-@media (min-width: 1024px) {
-  #mobile-filters {
-    display: none;
-  }
+.drawer-section-label {
+  font-family: 'Krona One', sans-serif;
 }
 </style>
+

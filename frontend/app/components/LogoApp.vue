@@ -5,7 +5,7 @@ const appName: string = useRuntimeConfig().public.appName
   <UButton
     size="md"
     color="primary"
-    class="font-[krona-one] text-[1.2rem] text-white!"
+    class="font-[krona-one] text-xl text-white!"
     to="/"
   >
     {{ appName }}

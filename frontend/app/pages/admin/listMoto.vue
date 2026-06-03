@@ -1,10 +1,21 @@
 <script setup lang="ts">
-import Header from '~/components/admin/Header.vue'
 import { h, resolveComponent } from 'vue'
 import CardMoto from '../../components/admin/CardMoto.vue'
 import type { IMotorcycle } from '~/types/motorcycles'
 import { getPaginationRowModel } from '@tanstack/vue-table'
 import type { ColumnDef } from '@tanstack/vue-table'
+import type { TableRow } from '@nuxt/ui'
+
+// The table only displays a flattened subset of a motorcycle; CardMoto
+// refetches the full record by _id when editing.
+interface MotoRow {
+  _id: string
+  brand: string
+  name: string
+  year: string | number
+  is_public?: boolean
+  withAllField?: boolean
+}
 
 definePageMeta({
   layout: 'admin',
@@ -13,14 +24,14 @@ definePageMeta({
 const table = useTemplateRef('table')
 const UBadge = resolveComponent('UBadge')
 const apiBase = useRuntimeConfig().public.apiBase
-const motos = ref<IMotorcycle[]>([])
-const selectedMoto = ref<IMotorcycle | null>(null)
+const motos = ref<MotoRow[]>([])
+const selectedMoto = ref<MotoRow | null>(null)
 const search = ref<string>('')
 const panelOpen = ref<boolean>(false)
 const refreshing = ref<boolean>(false)
 const UButton = resolveComponent('UButton')
 
-const columns: ColumnDef<IMotorcycle>[] = [
+const columns: ColumnDef<MotoRow>[] = [
   {
     accessorKey: 'brand',
     header: ({ column }) =>
@@ -126,9 +137,8 @@ async function fetchData() {
     const data = await $fetch<{ motorcycles: IMotorcycle[] }>(
       `${apiBase}motorcycles`,
       {
-        //http://localhost:5000/api/v1/motorcycles?project=name,year,is_new,withAllField
         params: {
-          project: 'name,year,is_public,withAllField',
+          project: 'name,year,is_public,withAllField,brand',
           limit: 10000
         }
       }
@@ -163,10 +173,8 @@ async function refreshAll() {
   refreshing.value = false
 }
 
-function onRowClick(row) {
-  const rowIndex = row.srcElement.parentElement.rowIndex
-
-  const moto = listMotosearch.value[rowIndex - 2]
+function onRowClick(_e: Event, row: TableRow<MotoRow>) {
+  const moto = row.original
 
   if (!moto) return console.error('moto introuvable')
   selectedMoto.value = moto
@@ -207,7 +215,7 @@ watch(
 <template>
   <div>
     <main>
-      <div class="header-page">
+      <div class="flex justify-between items-center m-12">
         <UInput
           v-model="search"
           icon="i-lucide-search"
@@ -220,9 +228,9 @@ watch(
         >
       </div>
 
-      <h3 class="header-list">Liste des motos</h3>
-      <div class="main-content">
-        <div class="table-moto">
+      <h3 class="ml-4">Liste des motos</h3>
+      <div class="flex justify-between items-start max-lg:flex-col">
+        <div class="flex-1 p-4">
           <UTable
             ref="table"
             v-model:pagination="pagination"
@@ -263,7 +271,21 @@ watch(
             />
           </div>
         </div>
-        <div v-if="panelOpen" class="panel-moto">
+        <div
+          v-if="panelOpen"
+          class="m-8 border border-solid border-[var(--border-gray)] rounded-xl p-4 h-[calc(150vh-200px)] overflow-y-auto sticky top-[60px] max-lg:w-full! max-lg:static!"
+        >
+          <header
+            class="flex items-center gap-2 pb-3 mb-4 border-b border-solid border-gray-300"
+          >
+            <UIcon
+              :name="selectedMoto ? 'i-lucide-pencil' : 'i-lucide-plus-circle'"
+              class="size-5 text-(--ui-primary)"
+            />
+            <h4>
+              {{ selectedMoto ? `Modifier · ${selectedMoto.name}` : 'Nouvelle moto' }}
+            </h4>
+          </header>
           <CardMoto
             :key="selectedMoto?._id ?? 'create'"
             :mode="selectedMoto ? 'edit' : 'create'"
@@ -276,44 +298,3 @@ watch(
     </main>
   </div>
 </template>
-
-<style scoped>
-.header-page {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 3rem;
-}
-
-.table-moto {
-  flex: 1;
-  padding: 1em;
-}
-.panel-moto {
-  margin: 2em;
-  border: 1px solid var(--border-gray);
-  border-radius: 15px;
-  padding: 1em;
-}
-
-.main-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-}
-
-.header-list {
-  margin-left: 1em;
-}
-
-.panel-moto {
-  margin: 2em;
-  border: 1px solid var(--border-gray);
-  border-radius: 15px;
-  padding: 1em;
-  height: calc(150vh - 200px);
-  overflow-y: auto;
-  position: sticky;
-  top: 60px;
-}
-</style>

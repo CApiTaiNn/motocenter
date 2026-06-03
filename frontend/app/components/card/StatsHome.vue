@@ -1,47 +1,29 @@
 <script setup lang="ts">
+import CountUp from 'vue-countup-v3'
+
 const props = defineProps<{
-  content: string
   urlImg: string
+  // Text mode (e.g. "Base de données complètes")
+  content?: string
+  // Numeric mode: counts up to `value` (only once `started` is true)
+  value?: number
+  suffix?: string
+  started?: boolean
 }>()
 </script>
 
 <template>
-  <div class="box">
-    <img :src="props.urlImg" />
-    <p>{{ props.content }}</p>
+  <div class="flex flex-col items-center justify-center text-center gap-4 border-solid border-2 border-[var(--border-gray)] rounded-xl w-[20%] aspect-square max-lg:flex-1 max-lg:min-w-0! max-lg:aspect-[3/4]! max-lg:gap-2! max-lg:p-1 max-lg:border-[var(--background-secondary)]!">
+    <img :src="props.urlImg" class="max-lg:w-[40px] max-lg:h-auto" />
+    <p v-if="props.value !== undefined" class="max-lg:text-xs! max-lg:leading-tight">
+      <CountUp
+        v-if="props.started"
+        :end-val="props.value"
+        :duration="3.5"
+      />
+      <span v-else>0</span>
+      {{ props.suffix }}
+    </p>
+    <p v-else class="max-lg:text-xs! max-lg:leading-tight">{{ props.content }}</p>
   </div>
 </template>
-
-<style scoped>
-.box {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-
-  gap: 1rem;
-
-  border: solid 2px var(--border-gray);
-  border-radius: 10px;
-
-  width: 20%;
-  aspect-ratio: 1 / 1;
-}
-
-@media (max-width: 1024px) {
-  .box {
-    min-width: 105px;
-    border: 1px solid var(--background-secondary);
-  }
-
-  img {
-    width: 40px;
-    height: auto;
-  }
-
-  p {
-    font-size: 10px;
-  }
-}
-</style>

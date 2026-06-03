@@ -6,7 +6,54 @@ import { argon2PasswordHasher } from '../utils/hash'
 const { verify } = argon2PasswordHasher
 
 const router = Router()
-router.post('/', async (req: Request<unknown, unknown>, res: Response) => {
+/**
+ * @openapi
+ * /auth:
+ *   post:
+ *     summary: Connexion à MotoCenter
+ *     tags:
+ *       - Auth
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: user@email.com
+ *               password:
+ *                 type: string
+ *                 example: mypassword123
+ *     responses:
+ *       200:
+ *         description: Connected
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Connected
+ *       401:
+ *         description: Email ou mot de passe incorrect
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Email ou mot de passe incorrect
+ *       500:
+ *         description: Internal server error
+ */
+router.post('/', async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body
 
@@ -34,10 +81,29 @@ router.post('/', async (req: Request<unknown, unknown>, res: Response) => {
     res.status(200).json({ message: 'Connected' })
   } catch (error) {
     console.error('Login error:', error)
-    res.status(500).json({ message: 'Server error' })
+    res.status(500).json({ message: 'Internal server error' })
   }
 })
 
+/**
+ * @openapi
+ * /auth/logout:
+ *   post:
+ *     summary: Connexion à MotoCenter
+ *     tags:
+ *       - Auth
+ *     responses:
+ *       200:
+ *         description: Connected
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Connected
+ */
 router.post('/logout', (req: Request, res: Response) => {
   const isProd = process.env.NODE_ENV === 'production'
   res.clearCookie('accessToken', {

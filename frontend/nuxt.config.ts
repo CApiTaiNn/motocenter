@@ -5,6 +5,13 @@ export default defineNuxtConfig({
   compatibilityDate: '2026-05-12',
   devtools: { enabled: true },
 
+  // vue-countup-v3's package "main" is a UMD build with no ESM exports, which
+  // breaks `import CountUp from 'vue-countup-v3'` during SSR. Transpiling it
+  // makes Vite bundle the ESM build (which does export a default) instead.
+  build: {
+    transpile: ['vue-countup-v3']
+  },
+
   alias: {
     '@': fileURLToPath(new URL('./app/assets', import.meta.url)),
   },

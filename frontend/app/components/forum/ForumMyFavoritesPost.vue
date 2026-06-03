@@ -17,16 +17,17 @@ const getFavoritesPostsOfUser = async () => {
       }
     })
 
-    if (user.value?._id) {
+    const userId = user.value?._id
+    if (userId) {
       myFavoritesPosts.value = response.posts.filter((post) =>
-        post.userFavoritePost?.includes(user.value._id)
+        post.userFavoritePost?.includes(userId)
       )
     }
   } catch {
     toast.add({
       title: 'Erreur',
-      description: "Les favoris n'ont pas été chargé.",
-      color: 'success'
+      description: "Les favoris n'ont pas pu être chargés.",
+      color: 'error'
     })
   }
 }
@@ -38,12 +39,6 @@ watch(user, async (newUser) => {
     myFavoritesPosts.value = []
   }
 }, { immediate: true })
-
-onMounted(async () => {
-  if (user.value) {
-    await getFavoritesPostsOfUser()
-  }
-})
 </script>
 
 <template>
@@ -57,7 +52,7 @@ onMounted(async () => {
           <div
             v-for="post in myFavoritesPosts"
             :key="post._id"
-            class="cursor-pointer border-bottom"
+            class="cursor-pointer mb-4 border-b border-solid border-[var(--border-gray)]"
             @click="navigateTo(`/forum/${post._id}`)"
           >
             {{ post.title }}
@@ -68,14 +63,3 @@ onMounted(async () => {
     </UCard>
   </div>
 </template>
-
-<style scoped>
-.cursor-pointer {
-  cursor: pointer;
-}
-
-.border-bottom {
-  margin-bottom: 1em;
-  border-bottom: 1px solid var(--border-gray);
-}
-</style>

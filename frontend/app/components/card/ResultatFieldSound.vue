@@ -9,13 +9,13 @@ const props = defineProps<{
 </script>
 
 <template>
-  <div class="resultat">
-    <div class="container-row">
-      <div class="left">
+  <div class="flex flex-col items-center gap-3">
+    <div class="flex items-center justify-center w-[80%] gap-6 max-md:w-[95%]! max-lg:w-[88%]! max-md:gap-[10px]!">
+      <div class="flex flex-row justify-center items-center w-full">
         <AudioPlayer v-if="props.firstValue" :src="props.firstValue" />
         <p v-else>Pas d'audio</p>
       </div>
-      <div class="right">
+      <div class="flex flex-row justify-center items-center w-full">
         <AudioPlayer v-if="props.secondValue" :src="props.secondValue" />
         <p v-else>Pas d'audio</p>
       </div>
@@ -24,38 +24,7 @@ const props = defineProps<{
 </template>
 
 <style scoped>
-.resultat {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-}
-
-.container-row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 80%;
-  gap: 20px;
-}
-
 audio {
   background-color: var(--background);
-}
-
-.left,
-.right {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-}
-
-@media (max-width: 1024px) {
-  .container-row {
-    width: 95%;
-    gap: 10px;
-  }
 }
 </style>

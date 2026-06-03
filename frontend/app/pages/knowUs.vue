@@ -1,4 +1,12 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+const team = [
+  { name: 'Sloan Morgant', role: 'Chef de projet' },
+  { name: 'Loris Caruhel', role: 'Expert BDD' },
+  { name: 'Léo Bruneau-Gache', role: 'Développeur' },
+  { name: 'Milio Lintanff-Castel', role: 'Développeur' },
+  { name: 'Nominoë Barbotaud', role: 'Stagiaire' }
+]
+</script>
 
 <template>
   <div class="page">
@@ -10,42 +18,56 @@
         </h1>
       </template>
       <template #subtitle>
-        <p>Découvrez notre histoire et nos engagements</p>
+        <p class="max-lg:text-xs! max-lg:text-center max-lg:font-[var(--font-main)]">Découvrez notre histoire et nos engagements</p>
       </template>
     </HeaderInfo>
 
-    <div id="content" class="content">
-      <h3 class="subtitle h3-mobile">En quelques mots</h3>
+    <div id="content" class="max-w-[1000px] mx-auto mt-[10dvh]">
+      <h3 class="text-center mb-12 h3-mobile max-lg:font-[var(--font-main)] max-lg:text-base! max-lg:font-semibold max-lg:text-center">En quelques mots</h3>
       <br />
 
-      <section class="section">
-        <article class="row">
-          <p class="first-p">
-            <strong>Sloan Morgant</strong> a eu cette idée de projet en 2025 et
-            il a créé notre équipe les Breizh Devs.<br /><br />
-            Elle est composée de notre chef de projet :
-            <strong>Sloan Morgant</strong>.<br /><br />
-            De notre expert BDD : <strong>Loris Caruhel</strong>.<br /><br />
-            Nos 2 devs : <strong>Léo Bruneau-Gache</strong> et
-            <strong>Milio Lintanff-Castel</strong>.<br /><br />
-            Et enfin notre stagiaire :
-            <strong>Nominoë Barbotaud</strong>.
-          </p>
+      <section class="mb-16">
+        <h4 class="font-['Krona_One',sans-serif] text-sm tracking-[0.08em] uppercase text-gray-500 mb-6 pl-2 border-l-[3px] border-solid border-[var(--ui-primary)]">L'équipe</h4>
+        <article class="flex items-center gap-12 max-lg:flex-col!">
+          <div class="flex flex-col gap-6 flex-1">
+            <p class="max-lg:font-[var(--font-main)] max-lg:text-xs! max-lg:text-center max-lg:m-[2em]">
+              <strong>Sloan Morgant</strong> a eu cette idée de projet en 2025 et
+              il a créé notre équipe les <strong>Breizh Devs</strong>.
+            </p>
+            <div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-3">
+              <div v-for="member in team" :key="member.name" class="flex items-center gap-3 px-3 py-2 border border-solid border-gray-300 rounded-xl bg-[var(--background)]">
+                <UAvatar
+                  :alt="member.name"
+                  :ui="{ root: 'bg-(--ui-primary) text-white' }"
+                  size="lg"
+                >
+                  {{ member.name.split(' ').map((p) => p[0]).join('') }}
+                </UAvatar>
+                <div class="flex flex-col">
+                  <p class="font-semibold text-sm leading-[1.2]">{{ member.name }}</p>
+                  <p class="text-gray-500 text-xs">{{ member.role }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
 
           <img
             src="../assets/images/knowUs/Teamwork.png"
             alt="Image de travail d'équipe"
+            class="w-[500px] h-auto max-lg:w-full! max-lg:max-w-[500px]"
           />
         </article>
       </section>
 
-      <section class="section">
-        <article class="row reverse">
+      <section class="mb-16">
+        <h4 class="font-['Krona_One',sans-serif] text-sm tracking-[0.08em] uppercase text-gray-500 mb-6 pl-2 border-l-[3px] border-solid border-[var(--ui-primary)]">La mission</h4>
+        <article class="flex items-center gap-12 max-lg:flex-col-reverse!">
           <img
             src="../assets/images/knowUs/Gsxr.png"
             alt="image du gsxr de Sloan"
+            class="w-[500px] h-auto max-lg:w-full! max-lg:max-w-[500px]"
           />
-          <p class="second-p">
+          <p class="flex-1 w-[70dvw] max-lg:font-[var(--font-main)] max-lg:text-xs! max-lg:text-center max-lg:w-full!">
             <strong>MotoCenter</strong> vise à se positionner comme une
             plateforme centrale et cohérente, combinant l'aide au choix d'une moto
             et partage communautaire.
@@ -57,85 +79,6 @@
 </template>
 
 <style scoped>
-.center {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  margin-top: 100px;
-}
-
-.button-container {
-  display: flex;
-  justify-content: center;
-  margin: 40px 0;
-}
-
-.content {
-  max-width: 1000px;
-  margin: auto;
-  margin-top: 10dvh;
-}
-
-.subtitle {
-  text-align: center;
-  margin-bottom: 40px;
-}
-
-.section {
-  margin-bottom: 60px;
-}
-
-.row {
-  display: flex;
-  align-items: center;
-  gap: 40px;
-}
-
-.row img {
-  width: 500px;
-  height: auto;
-}
-
-.row p {
-  flex: 1;
-}
-
-.second-p {
-  width: 70dvw;
-}
-
-/* Mobile layout  */
-@media (max-width: 1024px) {
-  .row {
-    flex-direction: column;
-  }
-
-  .row.reverse {
-    flex-direction: column-reverse;
-  }
-
-  .row img {
-    width: 100%;
-    max-width: 500px;
-  }
-  .h3-mobile,
-  .subtitle {
-    font-family: 'Poppins', sans-serif;
-    font-size: 16px;
-    font-weight: 600;
-    text-align: center;
-  }
-  p {
-    font-family: 'Poppins', sans-serif;
-    font-size: 12px;
-    text-align: center;
-  }
-  .first-p {
-    margin: 2em;
-  }
-}
-
 strong {
   font-weight: bold;
 }

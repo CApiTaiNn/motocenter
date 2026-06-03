@@ -36,6 +36,7 @@ describe('User Routes - /api/v1/users', () => {
       expect(res.status).toBe(200)
       expect(res.body.users).toBeDefined()
       expect(res.body.users.email).toBe(userData.email)
+      expect(res.body.users.password).toBeUndefined()
     })
 
     it('should return 401 without token', async () => {
@@ -104,6 +105,54 @@ describe('User Routes - /api/v1/users', () => {
       expect(res.body.stats.length).toBe(12)
       expect(res.body.stats[0]).toHaveProperty('month')
       expect(res.body.stats[0]).toHaveProperty('total')
+    })
+  })
+
+  describe('Query hardening', () => {
+    it('rejects a $where filter with 400', async () => {
+      const res = await request(app).get(
+        `/api/v1/users?filter=${encodeURIComponent('{"$where":"1==1"}')}`
+      )
+
+      expect(res.status).toBe(400)
+    })
+
+    it('rejects a malformed filter with 400', async () => {
+      const res = await request(app).get('/api/v1/users?filter=not-json')
+
+      expect(res.status).toBe(400)
+    })
+  })
+
+  describe('DELETE /api/v1/users/account', () => {
+    it('should delete the authenticated user account', async () => {
+      const res = await request(app)
+        .delete('/api/v1/users/account')
+        .set('Cookie', authCookie)
+
+      expect(res.status).toBe(200)
+      expect(res.body.message).toBe('User deleted successfully')
+
+      const deleted = await User.findById(userId)
+      expect(deleted).toBeNull()
+    })
+
+    it('should return 401 without token', async () => {
+      const res = await request(app).delete('/api/v1/users/account')
+
+      expect(res.status).toBe(401)
+      expect(res.body.message).toBe('Non authentifié')
+    })
+
+    it('should return 404 if the user no longer exists', async () => {
+      await User.findByIdAndDelete(userId)
+
+      const res = await request(app)
+        .delete('/api/v1/users/account')
+        .set('Cookie', authCookie)
+
+      expect(res.status).toBe(404)
+      expect(res.body.error).toBe('User not found')
     })
   })
 })

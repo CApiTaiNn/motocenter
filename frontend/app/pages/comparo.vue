@@ -46,7 +46,7 @@ const resultatTemplate = useTemplateRef('resultat')
 const carousselBeginnerBikes = ref<IMotorcycle[]>([])
 const carousselSportBikes = ref<IMotorcycle[]>([])
 const carousselAdventureBikes = ref<IMotorcycle[]>([])
-const { isAuthenticated, user } = useAuth()
+const { isAuthenticated } = useAuth()
 const messagePosted = ref<boolean>(false)
 const optionMotorcycles = computed(() => {
   if (!motorcycle1.value || !motorcycle2.value) return []
@@ -152,83 +152,41 @@ async function fetchMotocycles() {
 async function fetchCarrouselMotorcycles() {
   const project = 'name,horsePower,torque,price, imageUrl'
   const limit = 10
-  // SportsBikes for Carrousel
-  const sportBikesData = await $fetch<{ motorcycles: IMotorcycle[] }>(
-    `${apiBase}motorcycles`,
-    {
-      params: {
-        filter: JSON.stringify({
-          category: 'sportsbike'
-        }),
-        project,
-        limit
-      }
-    }
+  const groups = [
+    { target: carousselSportBikes, filter: { category: 'sportsbike' } },
+    { target: carousselBeginnerBikes, filter: { isAvailableA2: true } },
+    { target: carousselAdventureBikes, filter: { category: 'adventure' } }
+  ]
+  await Promise.all(
+    groups.map(async ({ target, filter }) => {
+      const data = await $fetch<{ motorcycles: IMotorcycle[] }>(
+        `${apiBase}motorcycles`,
+        { params: { filter: JSON.stringify(filter), project, limit } }
+      )
+      target.value = data.motorcycles
+    })
   )
-  // Beginners Bikes for Carrousel
-  const beginnerBikesData = await $fetch<{ motorcycles: IMotorcycle[] }>(
-    `${apiBase}motorcycles`,
-    {
-      params: {
-        filter: JSON.stringify({
-          isAvailableA2: true
-        }),
-        project,
-        limit
-      }
-    }
-  )
-  // Adventure Bikes for Carrousel
-  const adventureBikesData = await $fetch<{ motorcycles: IMotorcycle[] }>(
-    `${apiBase}motorcycles`,
-    {
-      params: {
-        filter: JSON.stringify({
-          category: 'adventure'
-        }),
-        project,
-        limit
-      }
-    }
-  )
-  carousselSportBikes.value = sportBikesData.motorcycles
-  carousselBeginnerBikes.value = beginnerBikesData.motorcycles
-  carousselAdventureBikes.value = adventureBikesData.motorcycles
 }
 
 async function fetchMessages() {
+  const loadComments = (postId: string) =>
+    $fetch<{ messages: IMessage[] }>(`${apiBase}posts/${postId}/responses`, {
+      params: {
+        project:
+          'content, user, createdAt, like, dislike,usersLikeId,usersDislikeId',
+        deep: true,
+        limit: 5
+      }
+    })
+
   const post1 = motorcycle1.value?.post
   const post2 = motorcycle2.value?.post
-
-  if (post1) {
-    const data = await $fetch<{ messages: IMessage[] }>(
-      `${apiBase}posts/${post1}/responses`,
-      {
-        params: {
-          project:
-            'content, user, createdAt, like, dislike,usersLikeId,usersDislikeId',
-          deep: true,
-          limit: 5
-        }
-      }
-    )
-    commentsMotorcycle1.value = data.messages
-  }
-
-  if (post2) {
-    const data = await $fetch<{ messages: IMessage[] }>(
-      `${apiBase}posts/${post2}/responses`,
-      {
-        params: {
-          project:
-            'content, user, createdAt, like, dislike,usersLikeId,usersDislikeId',
-          deep: true,
-          limit: 5
-        }
-      }
-    )
-    commentsMotorcycle2.value = data.messages
-  }
+  const [data1, data2] = await Promise.all([
+    post1 ? loadComments(post1) : null,
+    post2 ? loadComments(post2) : null
+  ])
+  if (data1) commentsMotorcycle1.value = data1.messages
+  if (data2) commentsMotorcycle2.value = data2.messages
 }
 
 async function postComment() {
@@ -246,23 +204,18 @@ async function postComment() {
     try {
       const newPost = await $fetch<{ _id: string }>(`${apiBase}posts`, {
         method: 'POST',
+        credentials: 'include',
         body: {
           title: selectedMotorcycle.name,
           brand: selectedMotorcycle.brand.name,
-          category: 'Modèle',
+          category: 'model',
           content: `Discussion autour de la ${selectedMotorcycle.brand.name} ${selectedMotorcycle.name}`,
-          isNewMotoComment: true
+          isNewMotoComment: true,
+          motorcycleId: selectedMotorcycle._id
         }
       })
 
       postId = newPost._id
-      await $fetch(`${apiBase}motorcycles/${selectedMotorcycle._id}`, {
-        method: 'PUT',
-        body: {
-          post: postId
-        }
-      })
-
       selectedMotorcycle.post = postId
     } catch (error) {
       console.error('Error creating post:', error)
@@ -273,9 +226,9 @@ async function postComment() {
   try {
     const newMessage = await $fetch.raw(`${apiBase}messages`, {
       method: 'POST',
+      credentials: 'include',
       body: {
         content: comment.value.content,
-        user: user.value?._id,
         reference: postId,
         referenceModel: 'Post'
       }
@@ -330,6 +283,26 @@ function handleDelete(side?: 'left' | 'right') {
 onMounted(() => {
   fetchCarrouselMotorcycles()
 })
+
+// Auto-trigger comparison the moment both motorcycles are picked
+watch([motorcycle1Id, motorcycle2Id], ([id1, id2]) => {
+  if (id1 && id2) {
+    fetchMotocycles()
+  } else {
+    showResultat.value = false
+  }
+})
+
+const resultTabs = computed(() => {
+  const tabs: { label: string; key: 'stats' | 'images' | 'sons' | 'comments' }[] = []
+  if (resultatNumber.length > 0) tabs.push({ label: 'Performances', key: 'stats' })
+  if (resultatImg.length > 0) tabs.push({ label: 'Look', key: 'images' })
+  if (resultatSound.length > 0) tabs.push({ label: 'Son', key: 'sons' })
+  tabs.push({ label: 'Avis', key: 'comments' })
+  return tabs
+})
+
+const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
 </script>
 
 <template>
@@ -338,7 +311,7 @@ onMounted(() => {
       <template #title>
         <h1 class="h1-mobile">
           Comparez. Choisissez. <br />
-          <span class="text-red">Pilotez</span>
+          <span class="text-[red]">Pilotez</span>
         </h1>
       </template>
       <template #subtitle>
@@ -348,24 +321,43 @@ onMounted(() => {
         </p>
       </template>
     </HeaderInfo>
-    <div class="container-form">
-      <div id="form" class="form-button">
-        <div class="form">
+    <div class="container-form flex flex-col gap-16 mt-24 justify-center">
+      <div id="form" class="flex flex-col justify-center items-center gap-6">
+        <div class="flex justify-center gap-8 max-lg:flex-col! max-lg:items-center">
           <MotocyclesForm v-model="motorcycle1Id" form-title="Moto 1" />
+          <UIcon
+            name="i-lucide-arrow-left-right"
+            class="size-8 text-(--ui-primary) self-center max-lg:rotate-90"
+            aria-hidden="true"
+          />
           <MotocyclesForm v-model="motorcycle2Id" form-title="Moto 2" />
         </div>
-        <UButton
-          icon="i-lucide-arrow-left-right"
-          class="w-fit rounded-4xl text-white"
-          :disabled="!motorcycle1Id || !motorcycle2Id"
-          @click="fetchMotocycles"
-          >Comparer</UButton
-        >
+        <p v-if="!motorcycle1Id || !motorcycle2Id" class="text-center text-gray-500 text-sm italic">
+          Sélectionnez deux motos pour lancer la comparaison.
+        </p>
       </div>
       <Transition>
-        <div v-if="showResultat" ref="resultat" class="resultat-section">
-          <div v-if="resultatNumber.length > 0">
-            <h3>Résultats</h3>
+        <div v-if="showResultat" ref="resultat" class="scroll-mt-24">
+          <nav class="flex flex-wrap gap-1 w-fit max-w-full mx-auto mb-12 p-1 bg-[var(--background)] border border-[var(--border-gray)] rounded-full justify-center" role="tablist">
+            <button
+              v-for="tab in resultTabs"
+              :key="tab.key"
+              type="button"
+              :class="[
+                'px-6 py-2 bg-transparent border-none rounded-full cursor-pointer font-[\'Poppins\',sans-serif] text-base font-medium whitespace-nowrap transition-[background-color,color] duration-200 ease-[ease]',
+                activeResultTab === tab.key
+                  ? 'bg-[var(--ui-primary)]/10 text-[var(--ui-primary)] font-semibold'
+                  : 'text-[var(--ui-primary)] hover:bg-[var(--ui-primary)]/5'
+              ]"
+              role="tab"
+              :aria-selected="activeResultTab === tab.key"
+              @click="activeResultTab = tab.key"
+            >
+              {{ tab.label }}
+            </button>
+          </nav>
+
+          <div v-show="activeResultTab === 'stats'" class="tab-panel">
             <div v-for="field in resultatNumber" :key="field.fieldName">
               <ResultatFieldNumber
                 :field-name="field.fieldName"
@@ -375,8 +367,7 @@ onMounted(() => {
               <br />
             </div>
           </div>
-          <div v-if="resultatImg.length > 0">
-            <h3>Images</h3>
+          <div v-show="activeResultTab === 'images'" class="tab-panel">
             <div v-for="field in resultatImg" :key="field.fieldName">
               <ResultatFieldImg
                 :field-name="field.fieldName"
@@ -385,8 +376,7 @@ onMounted(() => {
               />
             </div>
           </div>
-          <div v-if="resultatSound.length > 0">
-            <h3>Sons</h3>
+          <div v-show="activeResultTab === 'sons'" class="tab-panel">
             <div v-for="field in resultatSound" :key="field.fieldName">
               <ResultatFieldSound
                 :field-name="field.fieldName"
@@ -395,35 +385,43 @@ onMounted(() => {
               />
             </div>
           </div>
-          <div class="display-comment-container">
-            <div class="left-display-comment">
-              <h4>Commentaires sur la {{ motorcycle1?.name }}</h4>
-              <template v-if="commentsMotorcycle1.length > 0">
-                <div
-                  v-for="comment1 in commentsMotorcycle1"
-                  :key="comment1._id"
-                >
-                  <Comment :response="comment1" />
-                </div>
-              </template>
-              <p v-else>Postez le premier commentaire !</p>
-            </div>
-            <div class="right-display-comment">
-              <h4>Commentaires sur la {{ motorcycle2?.name }}</h4>
-              <template v-if="commentsMotorcycle2.length > 0">
-                <div
-                  v-for="comment2 in commentsMotorcycle2"
-                  :key="comment2._id"
-                >
-                  <Comment :response="comment2" />
-                </div>
-              </template>
-              <p v-else>Postez le premier commentaire !</p>
+          <div v-show="activeResultTab === 'comments'" class="tab-panel">
+            <div class="flex gap-8 items-start max-lg:flex-col max-lg:items-center!">
+              <div class="flex-1 min-w-0 flex flex-col gap-3">
+                <h4 class="text-center mb-2">
+                  {{ motorcycle1?.name ?? 'Moto 1' }}
+                </h4>
+                <template v-if="commentsMotorcycle1.length > 0">
+                  <Comment
+                    v-for="comment1 in commentsMotorcycle1"
+                    :key="comment1._id"
+                    :response="comment1"
+                  />
+                </template>
+                <p v-else class="text-gray-500 italic text-center py-4">
+                  Postez le premier commentaire !
+                </p>
+              </div>
+              <div class="flex-1 min-w-0 flex flex-col gap-3">
+                <h4 class="text-center mb-2">
+                  {{ motorcycle2?.name ?? 'Moto 2' }}
+                </h4>
+                <template v-if="commentsMotorcycle2.length > 0">
+                  <Comment
+                    v-for="comment2 in commentsMotorcycle2"
+                    :key="comment2._id"
+                    :response="comment2"
+                  />
+                </template>
+                <p v-else class="text-gray-500 italic text-center py-4">
+                  Postez le premier commentaire !
+                </p>
+              </div>
             </div>
           </div>
-          <div class="input-comment-box">
-            <div v-if="!isAuthenticated" class="need-connection">
-              <h3 class="h3-mobile">
+          <div class="relative my-12 mx-[25%] w-1/2 min-h-[25rem] border border-solid border-gray-500 rounded-[20px] max-lg:mx-[12%]! max-lg:w-[76%]! max-lg:min-h-[auto]! max-md:my-6! max-md:mx-4! max-md:w-auto!">
+            <div v-if="!isAuthenticated" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 text-center max-lg:w-[90%]! max-lg:flex! max-lg:flex-col max-lg:items-center! max-lg:gap-4">
+              <h3 class="h3-mobile w-[400px] max-lg:w-auto! max-lg:text-lg!">
                 Rejoignez la communauté pour débattre et partager vos avis sur
                 ces motos !
               </h3>
@@ -437,14 +435,14 @@ onMounted(() => {
             </div>
             <div
               v-if="!messagePosted"
-              class="input-comment-container"
-              :class="{ blurred: !isAuthenticated }"
+              class="flex flex-col justify-between h-full min-h-[25rem] p-8 max-lg:min-h-[auto]! max-lg:p-4!"
+              :class="{ 'blur-[3px] pointer-events-none select-none': !isAuthenticated }"
             >
-              <h4>
+              <h4 class="text-center">
                 Déjà roulé une de ces motos ?<br />
                 Faite le savoir à la communauté !
               </h4>
-              <div class="comment-input">
+              <div class="flex flex-col gap-4">
                 <USelect
                   v-model="comment.motorcycleId"
                   size="lg"
@@ -467,11 +465,11 @@ onMounted(() => {
             </div>
             <div
               v-else
-              class="input-posted-container"
-              :class="{ blurred: !isAuthenticated }"
+              class="flex flex-col justify-center h-fit min-h-[25rem] p-8 gap-8 max-lg:min-h-[auto]! max-lg:p-4!"
+              :class="{ 'blur-[3px] pointer-events-none select-none': !isAuthenticated }"
             >
-              <h4>Merci pour votre contribution !</h4>
-              <p>
+              <h4 class="text-center">Merci pour votre contribution !</h4>
+              <p class="text-center">
                 Votre commentaire a été posté avec succès. Il apparaîtra dans la
                 section des commentaires correspondante.
               </p>
@@ -479,7 +477,7 @@ onMounted(() => {
           </div>
         </div>
       </Transition>
-      <div class="caroussel-container">
+      <div class="caroussel-container flex flex-col gap-20 mx-[10%] max-md:mx-4! max-lg:mx-[6%]!">
         <div>
           <h3 class="h3-mobile">Pour la performance</h3>
           <CarrouselMotorcycles
@@ -501,13 +499,12 @@ onMounted(() => {
             @selected="handleCaroussel"
           />
         </div>
-        <div class="dual-container">
+        <div class="dual-container sticky bottom-0 flex justify-center pointer-events-none">
           <DualMotorcycle
             :left-motorcycle-url="motorcycle1PreviewUrl"
             :right-motorcycle-url="motorcycle2PreviewUrl"
             :left-name="motorcycle1?.name"
             :right-name="motorcycle2?.name"
-            @compare="fetchMotocycles"
             @delete="handleDelete"
           />
         </div>
@@ -518,157 +515,29 @@ onMounted(() => {
 </template>
 
 <style scoped>
-/* Layout principal */
-.container-form {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-  margin-top: 6rem;
-  justify-content: center;
-}
-
+/* Bare-element descendant rules: apply to all section headings */
 .container-form h3 {
   text-align: center;
-  margin: 1.25rem;
-}
-
-/* Formulaire */
-.form-button {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 3rem;
-}
-
-.form {
-  display: flex;
-  justify-content: center;
-  gap: 2rem;
-}
-
-/* Résultats */
-.resultat-section {
-  scroll-margin-top: 6rem;
-}
-
-/* Carrousel */
-.caroussel-container {
-  display: flex;
-  flex-direction: column;
-  gap: 5rem;
-  margin: 0 10%;
+  margin: 1.5rem;
 }
 
 .caroussel-container h3 {
   text-align: left;
 }
 
-/* Commentaires Display */
-.display-comment-container {
-  display: flex;
-  gap: 2rem;
-  margin: 3rem 10%;
-  justify-content: center;
+/* Animation on tab switch */
+.tab-panel {
+  animation: tab-fade 0.2s ease-out;
 }
 
-.left-display-comment,
-.right-display-comment {
-  flex: 1;
-  border: 1px solid #c0c0c0;
-  border-radius: 1.25rem;
-  padding: 2rem;
-  max-width: 50%;
-  height: fit-content;
+@keyframes tab-fade {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.left-display-comment h4,
-.right-display-comment h4 {
-  text-align: center;
-  margin-bottom: 1.5rem;
-}
-
-.left-display-comment p,
-.right-display-comment p {
-  text-align: center;
-}
-
-/* Commentaires Input */
-.input-comment-box {
-  position: relative;
-  margin: 3rem 25%;
-  width: 50%;
-  min-height: 25rem;
-  border: 1px solid #757575;
-  border-radius: 1.25rem;
-}
-
-.input-comment-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  height: 100%;
-  min-height: 25rem;
-  padding: 2rem;
-}
-
-.input-comment-container h4 {
-  text-align: center;
-}
-
-.input-posted-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  height: fit-content;
-  min-height: 25rem;
-  padding: 2rem;
-  gap: 30px;
-}
-
-.input-posted-container h4 {
-  text-align: center;
-}
-
-.input-posted-container p {
-  text-align: center;
-}
-
-.comment-input {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.need-connection {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 10;
-  text-align: center;
-}
-
-.need-connection h3 {
-  width: 400px;
-}
-
-.blurred {
-  filter: blur(3px);
-  pointer-events: none;
-  user-select: none;
-}
-
-.dual-container {
-  position: sticky;
-  bottom: 0;
-  display: flex;
-  justify-content: center;
-}
-
-/* Utilitaires */
-.text-red {
-  color: red;
+/* Container lets clicks pass through its empty zones; only the panel is interactive */
+.dual-container > * {
+  pointer-events: auto;
 }
 
 /* Transitions */
@@ -680,57 +549,5 @@ onMounted(() => {
 .v-enter-from,
 .v-leave-to {
   opacity: 0;
-}
-
-@media (max-width: 1024px) {
-  .form {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .display-comment-container {
-    flex-direction: column;
-  }
-
-  .left-display-comment,
-  .right-display-comment {
-    max-width: 100%;
-  }
-
-  .input-comment-box {
-    margin: 1.5rem 1rem;
-    width: auto;
-  }
-
-  .caroussel-container {
-    margin: 0 1rem;
-  }
-
-  .need-connection {
-    width: 90%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-  }
-
-  .need-connection h3 {
-    width: auto;
-    font-size: 18px;
-  }
-
-  .input-comment-box {
-    min-height: auto;
-  }
-
-  .input-comment-container {
-    min-height: auto;
-    padding: 1rem;
-  }
-
-  .input-posted-container {
-    min-height: auto;
-    padding: 1rem;
-  }
 }
 </style>

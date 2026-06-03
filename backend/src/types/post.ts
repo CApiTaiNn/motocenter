@@ -1,11 +1,11 @@
 import { IBrand } from './brand'
-import { ICategory } from './category'
+import { PostCategory } from '../constants/PostCategory'
 import { IUser } from './user'
 
 export interface IPost {
   title: string
   content: string
-  category: ICategory
+  category: PostCategory
   user: IUser
   brand: IBrand
   views: number

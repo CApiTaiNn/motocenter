@@ -30,6 +30,25 @@
   --overlay-loading-background: rgba(199, 199, 199, 0.7);
   --label-text: rgba(0, 0, 0, 0.49);
 
+  /* Track background for progress/range fills (no exact Tailwind gray match) */
+  --color-track-bg: #d7d7d7;
+
+  /* Spacing, radius, border-width, z-index and the gray scale now use
+     Tailwind's built-in utilities (p-4, rounded-lg, border, z-10, gray-500…)
+     instead of custom tokens. */
+
+  /* Shadows */
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+
+  /* Gradients */
+  --gradient-primary: linear-gradient(
+    90deg,
+    var(--ui-primary),
+    color-mix(in srgb, var(--ui-primary) 60%, black)
+  );
+
   /* Map leaflet */
   --circle-draw-line: #ffffff;
   --circle-draw-line-outline: #00000028;
@@ -37,9 +56,6 @@
 
   /* Font */
   --font-main: 'Poppins', sans-serif;
-
-  /* Breakpoints */
-  --breakpoint-mobile-desktop: 1024px;
 }
 
 .dark {
@@ -148,14 +164,5 @@ p {
   p {
     font-family: 'Poppins', sans-serif;
     font-size: 16px;
-  }
-  p-footer {
-    font-family: 'Poppins', sans-serif;
-    font-size: 10px;
-  }
-  placeholder {
-    font-family: 'Poppins', sans-serif;
-    font-size: 12px;
-    font-weight: 300;
   }
 }

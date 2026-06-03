@@ -26,11 +26,6 @@ const state = reactive({
 const imagePreview = ref<string>('')
 const experienceOptions = ['Débutant', 'Confirmé', 'Expert', 'Autre']
 
-const isValidEmail = (email: string) => {
-  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  return re.test(email)
-}
-
 const fillProfil = () => {
   state.firstname = user.value?.firstname || ''
   state.lastname = user.value?.lastname || ''
@@ -174,18 +169,25 @@ watch(
 <template>
   <UModal v-model:open="isOpen">
     <template #content>
-      <div class="content">
+      <div
+        class="flex flex-col p-8 overflow-y-auto max-h-[80vh]"
+      >
         <h3>Modifier mon profil</h3>
 
         <UForm
           ref="form"
           :state="state"
           :errors="formErrors"
-          class="form-container"
+          class="flex flex-col gap-6 flex-1"
           @submit="handleSave"
         >
-          <div class="avatar-section">
-            <UFormField name="file" class="avatar-upload">
+          <div
+            class="flex flex-col items-center gap-4 mb-2"
+          >
+            <UFormField
+              name="file"
+              class="flex flex-col items-center text-center"
+            >
               <UFileUpload
                 v-model="state.file"
                 accept="image/*"
@@ -195,8 +197,8 @@ watch(
             </UFormField>
           </div>
 
-          <div class="form-fields">
-            <div class="form-row">
+          <div class="flex flex-col gap-6">
+            <div class="grid grid-cols-2 gap-4">
               <UFormField
                 label="Prénom"
                 name="firstname"
@@ -244,15 +246,19 @@ watch(
               </UInput>
             </UFormField>
 
-            <div class="experience-section">
-              <label class="experience-label">Expérience :</label>
-              <div class="experience-buttons">
+            <div class="flex flex-col gap-3">
+              <label class="block text-sm font-medium">Expérience :</label>
+              <div class="flex flex-wrap gap-2">
                 <button
                   v-for="option in experienceOptions"
                   :key="option"
                   type="button"
-                  class="experience-button"
-                  :class="{ active: state.experience === option }"
+                  class="flex-1 min-w-fit cursor-pointer rounded-full border-2 border-solid bg-transparent px-4 py-2 text-sm transition-all duration-200 ease-in-out"
+                  :class="
+                    state.experience === option
+                      ? 'border-[var(--ui-color-error-500)] text-[var(--ui-color-error-500)]'
+                      : 'border-gray-300 text-gray-700 hover:border-gray-500'
+                  "
                   @click="state.experience = option"
                 >
                   {{ option }}
@@ -343,7 +349,7 @@ watch(
             </UFormField>
           </div>
 
-          <div class="button-group">
+          <div class="flex gap-3 pt-4 mt-auto">
             <UButton
               type="button"
               label="Annuler"
@@ -366,104 +372,3 @@ watch(
     </template>
   </UModal>
 </template>
-
-<style scoped>
-.content {
-  display: flex;
-  flex-direction: column;
-  padding: 2rem;
-  overflow-y: auto;
-  max-height: 80vh;
-}
-
-.form-container {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  flex: 1;
-}
-
-.avatar-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 8px;
-}
-
-.avatar:hover {
-  opacity: 0.8;
-}
-
-.avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.avatar-upload {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-}
-
-.form-fields {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-
-.experience-section {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.experience-label {
-  font-size: 0.875rem;
-  font-weight: 500;
-  display: block;
-}
-
-.experience-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.experience-button {
-  padding: 8px 16px;
-  border-radius: 9999px;
-  font-size: 0.875rem;
-  border: 2px solid #d1d5db;
-  background-color: transparent;
-  color: #374151;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  flex: 1;
-  min-width: fit-content;
-}
-
-.experience-button:hover {
-  border-color: #9ca3af;
-}
-
-.experience-button.active {
-  border-color: #ef4444;
-  color: #ef4444;
-}
-
-.button-group {
-  display: flex;
-  gap: 12px;
-  padding-top: 16px;
-  margin-top: auto;
-}
-</style>
