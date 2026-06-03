@@ -4,7 +4,7 @@ import Post from '../models/Post'
 import Message from '../models/Message'
 import Brand from '../models/Brand'
 import User from '../models/User'
-import Category from '../models/Category'
+import { PostCategory } from '../constants/PostCategory'
 import { attachUser } from '../utils/attach'
 
 const router = Router()
@@ -64,7 +64,7 @@ router.get(
     try {
       let query = Post.find(filter).select(project).sort(sort).limit(limit)
       if (deep) {
-        query = query.populate('brand').populate('category')
+        query = query.populate('brand')
       }
       const posts = await query.lean()
       if (deep) {
@@ -366,21 +366,23 @@ router.post('/', async (req, res) => {
   try {
     const body = req.body
     const brand = await Brand.findOne({ name: body.brand })
-    const category = await Category.findOne({ name: body.category })
     let user = await User.findOne({ firstname: 'MotoCenter' })
     if (body.isNewMotoComment === false) {
       user = await User.findOne({ _id: body.user })
     }
 
-    if (!brand || !category || !user) {
+    if (!brand || !user) {
       return res.status(500).json({ error: 'Internal server error' })
+    }
+    if (!Object.values(PostCategory).includes(body.category)) {
+      return res.status(400).json({ error: 'Invalid category' })
     }
     const postCreated = await Post.insertOne({
       title: body.title,
       content: body.content,
       user: user,
       brand: brand,
-      category: category,
+      category: body.category,
       image: body.url
     })
     res.status(201).json({ _id: postCreated._id })
@@ -443,20 +445,22 @@ router.put('/', async (req, res) => {
   try {
     const body = req.body
     const brand = await Brand.findOne({ name: body.brand })
-    const category = await Category.findOne({ name: body.category })
     const user = await User.findOne({ _id: body.user })
 
-    if (!brand || !category || !user) {
+    if (!brand || !user) {
       return res.status(500).json({ error: 'Internal server error' })
+    }
+    if (!Object.values(PostCategory).includes(body.category)) {
+      return res.status(400).json({ error: 'Invalid category' })
     }
 
     const updatePost = await Post.findByIdAndUpdate(filter.id, {
       title: body.title,
       content: body.content,
-      category: category._id,
+      category: body.category,
       user: user._id,
       brand: brand._id,
-      url: body.url
+      image: body.url
     })
     if (!updatePost) {
       return res.status(500).json()

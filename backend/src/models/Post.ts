@@ -1,5 +1,6 @@
 import { model, Schema, Types } from 'mongoose'
 import type { IPost } from '../types/post'
+import { PostCategory } from '../constants/PostCategory'
 
 const postSchema = new Schema({
   title: {
@@ -11,8 +12,8 @@ const postSchema = new Schema({
     required: true
   },
   category: {
-    type: Types.ObjectId,
-    ref: 'Category',
+    type: String,
+    enum: Object.values(PostCategory),
     required: true
   },
   user: {

@@ -5,7 +5,6 @@ import seedBrand from './brand'
 import seedMessage from './messages'
 import seedMotorcycles from './motorcycle'
 import seedPost from './post'
-import seedCategory from './category'
 import seedRide from './ride'
 
 const connectToMongo = async () => {
@@ -20,7 +19,6 @@ const seed = async () => {
 
     await seedUser()
     await seedBrand()
-    await seedCategory()
     await seedRide()
     await seedMotorcycles()
     await seedPost()

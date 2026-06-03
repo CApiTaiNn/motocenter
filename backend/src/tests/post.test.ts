@@ -4,13 +4,12 @@ import app from '../app'
 import Post from '../models/Post'
 import User from '../models/User'
 import Brand from '../models/Brand'
-import Category from '../models/Category'
 import Message from '../models/Message'
+import { PostCategory } from '../constants/PostCategory'
 
 describe('Post Routes - /api/v1/posts', () => {
   let userId: string
   let brandId: string
-  let categoryId: string
 
   beforeEach(async () => {
     const user = await User.create({
@@ -21,10 +20,8 @@ describe('Post Routes - /api/v1/posts', () => {
       password: 'pass'
     })
     const brand = await Brand.create({ name: 'Yamaha', icon: 'yamaha.svg' })
-    const category = await Category.create({ name: 'Sport', icon: 'sport.svg' })
     userId = user._id.toString()
     brandId = brand._id.toString()
-    categoryId = category._id.toString()
   })
 
   describe('GET /api/v1/posts', () => {
@@ -34,7 +31,7 @@ describe('Post Routes - /api/v1/posts', () => {
         content: 'Content',
         user: userId,
         brand: brandId,
-        category: categoryId
+        category: PostCategory.RACING
       })
 
       const res = await request(app).get('/api/v1/posts?project=all')
@@ -50,14 +47,14 @@ describe('Post Routes - /api/v1/posts', () => {
         content: 'Content',
         user: userId,
         brand: brandId,
-        category: categoryId
+        category: PostCategory.RACING
       })
 
       const res = await request(app).get('/api/v1/posts?project=all&deep=true')
 
       expect(res.status).toBe(200)
       expect(res.body.posts[0].brand.name).toBe('Yamaha')
-      expect(res.body.posts[0].category.name).toBe('Sport')
+      expect(res.body.posts[0].category).toBe(PostCategory.RACING)
       expect(res.body.posts[0].user.pseudo).toBe('admin')
     })
   })
@@ -79,7 +76,7 @@ describe('Post Routes - /api/v1/posts', () => {
         content: 'Content',
         user: userId,
         brand: brandId,
-        category: categoryId
+        category: PostCategory.RACING
       })
 
       await Message.create({
@@ -116,7 +113,7 @@ describe('Post Routes - /api/v1/posts', () => {
         content: 'Content',
         user: userId,
         brand: brandId,
-        category: categoryId
+        category: PostCategory.RACING
       })
 
       await request(app).post(
@@ -134,7 +131,7 @@ describe('Post Routes - /api/v1/posts', () => {
         title: 'New post',
         content: 'New content',
         brand: 'Yamaha',
-        category: 'Sport',
+        category: PostCategory.RACING,
         isNewMotoComment: true
       })
 
@@ -147,7 +144,7 @@ describe('Post Routes - /api/v1/posts', () => {
         title: 'Bad post',
         content: 'Content',
         brand: 'NonExistent',
-        category: 'Sport',
+        category: PostCategory.RACING,
         isNewMotoComment: true
       })
 

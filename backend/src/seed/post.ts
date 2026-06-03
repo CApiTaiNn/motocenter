@@ -1,9 +1,9 @@
 import { connectToMongo } from '.'
 import Brand from '../models/Brand'
-import Category from '../models/Category'
 import Motorcycle from '../models/Motorcycle'
 import Post from '../models/Post'
 import User from '../models/User'
+import { PostCategory } from '../constants/PostCategory'
 
 const seedPost = async () => {
   await connectToMongo()
@@ -11,9 +11,6 @@ const seedPost = async () => {
 
   const user = await User.findOne({ firstname: 'Alice' })
   const motocenterUser = await User.findOne({ firstname: 'MotoCenter' })
-  const category1 = await Category.findOne({ name: 'Réparation' })
-  const category2 = await Category.findOne({ name: 'Entretien' })
-  const categoryModele = await Category.findOne({ name: 'Modèle' })
   const brandHonda = await Brand.findOne({ name: 'Honda' })
 
   // Posts liés aux motos du comparo + mise à jour des motos
@@ -23,9 +20,6 @@ const seedPost = async () => {
 
   if (
     !user ||
-    !category1 ||
-    !category2 ||
-    !categoryModele ||
     !brandHonda ||
     !gsxr ||
     !cbr ||
@@ -40,7 +34,7 @@ const seedPost = async () => {
       title: 'Quelle est la meilleure moto pour débuter ?',
       content:
         "Je cherche une bonne moto pour commencer, j'ai vu Malo, Loris, Sloan et Cyril. Ils m'ont donné envie.",
-      category: category1._id,
+      category: PostCategory.REPAIR,
       user: user._id,
       brand: brandHonda._id,
       views: 12,
@@ -51,7 +45,7 @@ const seedPost = async () => {
       title: 'Quelle est la meilleure marque de moto ?',
       content:
         "Des personnes diront que c'est Suzuki ou Honda, mais vraiment c'est quoi la meilleure ?",
-      category: category2._id,
+      category: PostCategory.MAINTENANCE,
       user: user._id,
       brand: brandHonda._id,
       image: '/images/posts/test2.png',
@@ -63,7 +57,7 @@ const seedPost = async () => {
     const post = await new Post({
       title: 'GSX-R600',
       content: 'GSX-R600',
-      category: categoryModele._id,
+      category: PostCategory.MODEL,
       brand: gsxr.brand,
       user: motocenterUser._id
     }).save()
@@ -74,7 +68,7 @@ const seedPost = async () => {
     const post = await new Post({
       title: 'CBR1000RR-R Fireblade',
       content: 'CBR1000RR-R Fireblade',
-      category: categoryModele._id,
+      category: PostCategory.MODEL,
       brand: cbr.brand,
       user: motocenterUser._id
     }).save()
@@ -85,7 +79,7 @@ const seedPost = async () => {
     const post = await new Post({
       title: 'MT-07',
       content: 'MT-07',
-      category: categoryModele._id,
+      category: PostCategory.MODEL,
       brand: mt07.brand,
       user: motocenterUser._id
     }).save()

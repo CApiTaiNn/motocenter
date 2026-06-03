@@ -5,7 +5,7 @@ import Message from '../models/Message'
 import User from '../models/User'
 import Post from '../models/Post'
 import Brand from '../models/Brand'
-import Category from '../models/Category'
+import { PostCategory } from '../constants/PostCategory'
 
 describe('Message Routes - /api/v1/messages', () => {
   let userId: string
@@ -20,13 +20,12 @@ describe('Message Routes - /api/v1/messages', () => {
       password: 'pass'
     })
     const brand = await Brand.create({ name: 'Yamaha', icon: 'yamaha.svg' })
-    const category = await Category.create({ name: 'Sport', icon: 'sport.svg' })
     const post = await Post.create({
       title: 'Test Post',
       content: 'Content',
       user: user._id,
       brand: brand._id,
-      category: category._id
+      category: PostCategory.RACING
     })
     userId = user._id.toString()
     postId = post._id.toString()
