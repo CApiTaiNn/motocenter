@@ -16,7 +16,7 @@ const brands = ref<IBrand[]>([])
 
 const filters = ref({
   brandIds: [...(props.activeFilters?.brandIds || [])],
-  categoryIds: [...(props.activeFilters?.categoriesIds || [])],
+  categoryIds: [...(props.activeFilters?.categoryIds || [])],
   onlyMyPost: props.activeFilters?.onlyMyPost || false,
   searchBar: ''
 })
@@ -40,7 +40,7 @@ const handleHaveAllPosts = () => {
 
 const getBrands = async () => {
   const res = await fetch(
-    `${useRuntimeConfig().public.apiBase}brand?project=name,icon`
+    `${useRuntimeConfig().public.apiBase}brands?project=name,icon`
   )
   const data = await res.json()
   brands.value = data.brands

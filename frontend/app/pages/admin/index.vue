@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { IUser } from '@/types/users'
+import type { IUser } from '~/types/users'
 import StatsAnalytics from '~/components/admin/StatsAnalytics.vue'
 
 interface Stat {

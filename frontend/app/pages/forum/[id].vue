@@ -16,13 +16,13 @@ const { user } = useAuth()
 const { open } = useConnexionModal()
 const newReponseOfPost = ref('')
 const toast = useToast()
-const isLoading = ref(false)
+const isLoaded = ref(false)
 const isSolidStar = computed(
   () => user.value && post.value?.userFavoritePost?.includes(user.value._id)
 )
 
 const getPost = async () => {
-  const data = await $fetch<{ data: IPost }>(`${apiBase}posts`, {
+  const data = await $fetch<{ posts: IPost[] }>(`${apiBase}posts`, {
     params: {
       filter: JSON.stringify({ _id: route.params.id }),
       project: 'image,content,title,createdAt,views,userFavoritePost',
@@ -121,9 +121,18 @@ const handleAddFavorite = async () => {
 }
 
 onMounted(async () => {
-  await Promise.all([getPost(), getResponsesOfPost()])
-  isLoading.value = true
-  scrollToMap('post')
+  try {
+    await Promise.all([getPost(), getResponsesOfPost()])
+  } catch {
+    toast.add({
+      title: 'Erreur',
+      description: "Le post n'a pas pu être chargé.",
+      color: 'error'
+    })
+  } finally {
+    isLoaded.value = true
+    scrollToMap('post')
+  }
 })
 </script>
 
@@ -144,7 +153,7 @@ onMounted(async () => {
       <div class="shrink-0">
         <ForumPanel />
       </div>
-      <USkeleton v-if="isLoading === false" class="size-20 rounded-full flex-1 min-w-0" />
+      <USkeleton v-if="!isLoaded" class="size-20 rounded-full flex-1 min-w-0" />
       <div v-else class="flex-1 min-w-0">
         <div class="title-mobile-version flex flex-row items-center gap-3 my-4">
           <UAvatar

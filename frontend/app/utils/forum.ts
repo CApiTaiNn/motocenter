@@ -15,10 +15,11 @@ export function categoryAccent(name: string | undefined): string {
   for (let i = 0; i < name.length; i++) {
     hash = (hash * 31 + name.charCodeAt(i)) | 0
   }
-  return CATEGORY_PALETTE[Math.abs(hash) % CATEGORY_PALETTE.length]
+  return CATEGORY_PALETTE[Math.abs(hash) % CATEGORY_PALETTE.length] ?? CATEGORY_PALETTE[0]
 }
 
 export function formatTimeAgo(dateString: string | undefined): string {
+  if (!dateString) return ''
   const now = Date.now()
   const past = new Date(dateString).getTime()
   const diff = now - past

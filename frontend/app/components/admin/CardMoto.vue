@@ -40,7 +40,7 @@ async function onSoundChange(file: File | null | undefined) {
 }
 const props = defineProps({
   mode: { type: String, default: 'create' },
-  moto: { type: Object as () => IMotorcycle | null, default: null },
+  moto: { type: Object as () => { _id: string } | null, default: null },
   onClosePanel: { type: Function, required: true },
   onRefresh: { type: Function, required: true }
 })
@@ -57,6 +57,7 @@ async function fetchMotoDetails(_id: string) {
   )
 
   const m = data.motorcycles[0]
+  if (!m) return
 
   const brand = brandList.value.find((b) => b._id === m.brand._id)
   state.brand = brand?.name ?? ''
@@ -140,11 +141,11 @@ const state = reactive<Schema>({
   name: '',
   year: 2026,
   category: undefined as unknown as MotorcycleCategory,
-  engine_size: undefined,
-  horsePower: undefined,
-  torque: undefined,
-  weight: undefined,
-  consumption: undefined,
+  engine_size: undefined as unknown as number,
+  horsePower: undefined as unknown as number,
+  torque: undefined as unknown as number,
+  weight: undefined as unknown as number,
+  consumption: undefined as unknown as number,
   soundLink: '',
   imageUrl: '',
   isAvailableA2: false,

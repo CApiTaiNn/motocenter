@@ -8,6 +8,7 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
+    "typecheck": "nuxt typecheck",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
   },
@@ -35,6 +36,7 @@
     "prettier": "^3.8.1",
     "typescript": "^5.9.3",
     "vite-tsconfig-paths": "^6.1.1",
+    "vue-tsc": "^3.3.3",
     "yaml": "^2.8.4"
   }
 }

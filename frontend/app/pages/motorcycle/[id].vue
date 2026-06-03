@@ -179,7 +179,7 @@ async function postComment() {
         body: {
           title: m.value?.name,
           brand: m.value?.brand.name,
-          category: 'Modèle',
+          category: 'model',
           content: `Discussion autour de la ${m.value?.brand.name} ${m.value?.name}`,
           isNewMotoComment: true
         }

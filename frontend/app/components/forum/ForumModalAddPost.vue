@@ -2,7 +2,8 @@
 import * as v from 'valibot'
 import { useAuth } from '~/composables/useAuth'
 import type { IBrand } from '~/types/brand'
-import { PostCategory, POST_CATEGORY_OPTIONS } from '~/utils/postCategory'
+import type { PostCategory} from '~/utils/postCategory';
+import { POST_CATEGORY_OPTIONS } from '~/utils/postCategory'
 import type { IPost } from '~/types/post'
 
 const props = defineProps<{
@@ -27,7 +28,7 @@ const initialState = ref({
 
 const getBrands = async () => {
   const res = await $fetch<{ brands: IBrand[] }>(
-    `${useRuntimeConfig().public.apiBase}brand`,
+    `${useRuntimeConfig().public.apiBase}brands`,
     {
       params: {
         project: 'name,_id'
@@ -245,7 +246,7 @@ v-model="state.brand" placeholder="Sélectionnez la marque du post" :items="bran
             <UFormField required :label="onImageTitle()" name="file">
               <UFileUpload v-model="state.file" accept="image/*" label="Déposez votre image" description="PNG ou JPG">
                 <template #default="{ open }">
-                  <div @click="open" @mouseover="isHover = true" @mouseleave="isHover = false">
+                  <div @click="() => open()" @mouseover="isHover = true" @mouseleave="isHover = false">
                     <div class="cursor-pointer" :class="isHover ? 'blur-[2px]' : ''">
                       <img :src="getPreviewUrl()" class="max-w-[80%]" />
                     </div>
@@ -260,7 +261,7 @@ v-if="props.isNewPost && getPreviewUrl() === ''"
                     <div
 v-if="isHover && getPreviewUrl() !== ''"
                       class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center cursor-pointer"
-                      @click="open">
+                      @click="() => open()">
                       <h4 class="text-sm p-2 text-[var(--background)] bg-[rgba(128,128,128,0.865)]">Cliquer pour modifier la photo</h4>
                     </div>
                   </div>

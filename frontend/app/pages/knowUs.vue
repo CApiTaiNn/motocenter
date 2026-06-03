@@ -38,7 +38,7 @@ const team = [
               <div v-for="member in team" :key="member.name" class="flex items-center gap-3 px-3 py-2 border border-solid border-gray-300 rounded-xl bg-[var(--background)]">
                 <UAvatar
                   :alt="member.name"
-                  :ui="{ base: 'bg-(--ui-primary) text-white' }"
+                  :ui="{ root: 'bg-(--ui-primary) text-white' }"
                   size="lg"
                 >
                   {{ member.name.split(' ').map((p) => p[0]).join('') }}

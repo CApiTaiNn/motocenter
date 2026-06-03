@@ -207,7 +207,7 @@ async function postComment() {
         body: {
           title: selectedMotorcycle.name,
           brand: selectedMotorcycle.brand.name,
-          category: 'Modèle',
+          category: 'model',
           content: `Discussion autour de la ${selectedMotorcycle.brand.name} ${selectedMotorcycle.name}`,
           isNewMotoComment: true
         }

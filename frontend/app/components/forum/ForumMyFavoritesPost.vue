@@ -17,16 +17,17 @@ const getFavoritesPostsOfUser = async () => {
       }
     })
 
-    if (user.value?._id) {
+    const userId = user.value?._id
+    if (userId) {
       myFavoritesPosts.value = response.posts.filter((post) =>
-        post.userFavoritePost?.includes(user.value._id)
+        post.userFavoritePost?.includes(userId)
       )
     }
   } catch {
     toast.add({
       title: 'Erreur',
-      description: "Les favoris n'ont pas été chargé.",
-      color: 'success'
+      description: "Les favoris n'ont pas pu être chargés.",
+      color: 'error'
     })
   }
 }

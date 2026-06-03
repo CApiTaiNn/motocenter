@@ -4,6 +4,18 @@ import CardMoto from '../../components/admin/CardMoto.vue'
 import type { IMotorcycle } from '~/types/motorcycles'
 import { getPaginationRowModel } from '@tanstack/vue-table'
 import type { ColumnDef } from '@tanstack/vue-table'
+import type { TableRow } from '@nuxt/ui'
+
+// The table only displays a flattened subset of a motorcycle; CardMoto
+// refetches the full record by _id when editing.
+interface MotoRow {
+  _id: string
+  brand: string
+  name: string
+  year: string | number
+  is_public?: boolean
+  withAllField?: boolean
+}
 
 definePageMeta({
   layout: 'admin',
@@ -12,14 +24,14 @@ definePageMeta({
 const table = useTemplateRef('table')
 const UBadge = resolveComponent('UBadge')
 const apiBase = useRuntimeConfig().public.apiBase
-const motos = ref<IMotorcycle[]>([])
-const selectedMoto = ref<IMotorcycle | null>(null)
+const motos = ref<MotoRow[]>([])
+const selectedMoto = ref<MotoRow | null>(null)
 const search = ref<string>('')
 const panelOpen = ref<boolean>(false)
 const refreshing = ref<boolean>(false)
 const UButton = resolveComponent('UButton')
 
-const columns: ColumnDef<IMotorcycle>[] = [
+const columns: ColumnDef<MotoRow>[] = [
   {
     accessorKey: 'brand',
     header: ({ column }) =>
@@ -125,9 +137,8 @@ async function fetchData() {
     const data = await $fetch<{ motorcycles: IMotorcycle[] }>(
       `${apiBase}motorcycles`,
       {
-        //http://localhost:5000/api/v1/motorcycles?project=name,year,is_new,withAllField
         params: {
-          project: 'name,year,is_public,withAllField',
+          project: 'name,year,is_public,withAllField,brand',
           limit: 10000
         }
       }
@@ -162,10 +173,8 @@ async function refreshAll() {
   refreshing.value = false
 }
 
-function onRowClick(row) {
-  const rowIndex = row.srcElement.parentElement.rowIndex
-
-  const moto = listMotosearch.value[rowIndex - 2]
+function onRowClick(_e: Event, row: TableRow<MotoRow>) {
+  const moto = row.original
 
   if (!moto) return console.error('moto introuvable')
   selectedMoto.value = moto

@@ -643,12 +643,12 @@ watch(
                 class="w-full"
                 :items="listCommunes"
                 placeholder="Chercher une ville..."
-                :search-input="{
+                :search-input="({
                   placeholder: 'Rechercher...',
                   modelValue: startTownSearch,
                   'onUpdate:modelValue': (val: string) =>
                     (startTownSearch = val)
-                }"
+                } as any)"
                 size="xl"
                 option-attribute="label"
                 :loading="isSelectLoading"
@@ -675,11 +675,11 @@ watch(
                 class="w-full"
                 :items="listCommunes"
                 placeholder="Chercher une ville..."
-                :search-input="{
+                :search-input="({
                   placeholder: 'Rechercher...',
                   modelValue: endTownSearch,
                   'onUpdate:modelValue': (val: string) => (endTownSearch = val)
-                }"
+                } as any)"
                 size="xl"
                 option-attribute="label"
                 :loading="isSelectLoading"
