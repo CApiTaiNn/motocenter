@@ -154,7 +154,7 @@ router.patch('/:id/like', async (req: Request<{ id: string }>, res: any) => {
       : { $addToSet: { liked_id: userId }, $inc: { like: 1 } }
 
     const updatedRide = await Ride.findByIdAndUpdate(rideId, update, {
-      new: true
+      returnDocument: 'after'
     })
 
     if (!updatedRide) return res.status(404).json({ error: 'Update failed' })
@@ -198,9 +198,9 @@ router.patch('/:id/like', async (req: Request<{ id: string }>, res: any) => {
 router.get('/count', async (req, res) => {
   try {
     const now = new Date()
-    const start = new Date(now.getFullYear(), now.getMonth() - 2, 1)
-    const intermediate = new Date(now.getFullYear(), now.getMonth() - 1, 1)
-    const end = new Date()
+    const start = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+    const intermediate = new Date(now.getFullYear(), now.getMonth(), 1)
+    const end = now
     const countFirstPeriod = await Ride.countDocuments({
       createdAt: { $gte: start, $lt: intermediate }
     })
@@ -449,7 +449,7 @@ router.patch(
         : { $addToSet: { participating_user: userId } }
 
       const updatedRide = await Ride.findByIdAndUpdate(rideId, update, {
-        new: true
+        returnDocument: 'after'
       }).lean()
 
       if (!updatedRide) return res.status(404).json({ error: 'Update failed' })

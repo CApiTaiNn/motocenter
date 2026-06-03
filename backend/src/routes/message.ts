@@ -241,14 +241,15 @@ router.patch('/', async (req: Request, res: Response) => {
     await Message.findByIdAndUpdate(messageId, update)
 
     const finalMessage = await Message.findById(messageId)
-    if (finalMessage) {
-      finalMessage.like = finalMessage.usersLikeId.length
-      finalMessage.dislike = finalMessage.usersDislikeId.length
-      await finalMessage.save()
-      const result = await Message.findById(messageId).lean()
-      if (result) await attachUser([result], 'user')
-      res.status(200).json({ populatedMessage: result })
+    if (!finalMessage) {
+      return res.status(404).json({ error: 'Message not found' })
     }
+    finalMessage.like = finalMessage.usersLikeId.length
+    finalMessage.dislike = finalMessage.usersDislikeId.length
+    await finalMessage.save()
+    const result = await Message.findById(messageId).lean()
+    if (result) await attachUser([result], 'user')
+    res.status(200).json({ populatedMessage: result })
   } catch (error: any) {
     console.error('ERREUR MONGODB:', error.message)
     res.status(500).json({ error: 'Erreur serveur', details: error.message })

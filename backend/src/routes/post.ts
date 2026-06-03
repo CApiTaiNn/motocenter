@@ -105,9 +105,9 @@ router.get(
 router.get('/count', async (req, res) => {
   try {
     const now = new Date()
-    const start = new Date(now.getFullYear(), now.getMonth() - 2, 1)
-    const intermediate = new Date(now.getFullYear(), now.getMonth() - 1, 1)
-    const end = new Date()
+    const start = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+    const intermediate = new Date(now.getFullYear(), now.getMonth(), 1)
+    const end = now
     const countFirstPeriod = await Post.countDocuments({
       createdAt: { $gte: start, $lt: intermediate }
     })
@@ -233,7 +233,7 @@ router.post('/add-view', async (req, res) => {
   const { filter } = prepareQuery(req.query)
   try {
     await Post.updateOne({ _id: filter.id }, { $inc: { views: 1 } })
-    res.status(204).json()
+    res.status(204).end()
   } catch (error) {
     console.error('Error accessing message route:', error)
     res.status(500).json({ error: 'Internal server error' })
@@ -455,18 +455,22 @@ router.put('/', async (req, res) => {
       return res.status(400).json({ error: 'Invalid category' })
     }
 
-    const updatePost = await Post.findByIdAndUpdate(filter.id, {
-      title: body.title,
-      content: body.content,
-      category: body.category,
-      user: user._id,
-      brand: brand._id,
-      image: body.url
-    })
+    const updatePost = await Post.findByIdAndUpdate(
+      filter.id,
+      {
+        title: body.title,
+        content: body.content,
+        category: body.category,
+        user: user._id,
+        brand: brand._id,
+        image: body.url
+      },
+      { runValidators: true }
+    )
     if (!updatePost) {
-      return res.status(500).json()
+      return res.status(404).json({ error: 'Post not found' })
     }
-    res.status(204).json({ error: 'Internal server error' })
+    res.status(204).end()
   } catch (error) {
     console.error('Error updating motorcycle:', error)
     res.status(500).json({ error: 'Internal server error' })

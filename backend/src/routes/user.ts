@@ -153,7 +153,7 @@ router.post('/account', async (req: Request, res: Response) => {
 
     const users = await User.insertOne(newUser)
 
-    res.status(200).json({ users })
+    res.status(201).json({ users })
   } catch (error) {
     console.error('Error accessing user route:', error)
     res.status(500).json({ error: 'Internal server error' })
@@ -271,7 +271,7 @@ router.put(
       updateData.updatedAt = new Date()
 
       const users = await User.findByIdAndUpdate(id, updateData, {
-        new: true,
+        returnDocument: 'after',
         runValidators: true
       }).select('-password') // Ne pas retourner le mot de passe
 

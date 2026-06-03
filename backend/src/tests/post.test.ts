@@ -151,4 +151,46 @@ describe('Post Routes - /api/v1/posts', () => {
       expect(res.status).toBe(500)
     })
   })
+
+  describe('PUT /api/v1/posts', () => {
+    it('should update an existing post and return 204', async () => {
+      const post = await Post.create({
+        title: 'Old title',
+        content: 'Old content',
+        user: userId,
+        brand: brandId,
+        category: PostCategory.RACING
+      })
+
+      const res = await request(app)
+        .put(`/api/v1/posts?filter={"id":"${post._id}"}`)
+        .send({
+          title: 'New title',
+          content: 'New content',
+          brand: 'Yamaha',
+          category: PostCategory.RACING,
+          user: userId
+        })
+
+      expect(res.status).toBe(204)
+      expect(res.body).toEqual({})
+      const updated = await Post.findById(post._id)
+      expect(updated!.title).toBe('New title')
+    })
+
+    it('should return 404 for a non-existent post', async () => {
+      const fakeId = '507f1f77bcf86cd799439011'
+      const res = await request(app)
+        .put(`/api/v1/posts?filter={"id":"${fakeId}"}`)
+        .send({
+          title: 'Ghost',
+          content: 'Ghost content',
+          brand: 'Yamaha',
+          category: PostCategory.RACING,
+          user: userId
+        })
+
+      expect(res.status).toBe(404)
+    })
+  })
 })

@@ -10,7 +10,7 @@ const defaultLimit = 10
 const defaultSort = {
   createdAt: -1
 }
-const defaultProject = 'id'
+const defaultProject = '_id'
 const defaultFilter = {}
 
 export function prepareQuery(query: ReqQuery) {

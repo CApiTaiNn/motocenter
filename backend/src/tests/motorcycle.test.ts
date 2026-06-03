@@ -205,6 +205,22 @@ describe('Motorcycle Routes - /api/v1/motorcycles', () => {
     })
   })
 
+  describe('Stats on an empty collection', () => {
+    it('GET /stats returns 0 when there are no motorcycles', async () => {
+      const res = await request(app).get('/api/v1/motorcycles/stats')
+
+      expect(res.status).toBe(200)
+      expect(res.body).toBe(0)
+    })
+
+    it('GET /max-stats returns {} when there are no motorcycles', async () => {
+      const res = await request(app).get('/api/v1/motorcycles/max-stats')
+
+      expect(res.status).toBe(200)
+      expect(res.body).toEqual({})
+    })
+  })
+
   describe('Admin authorization on mutation routes', () => {
     it('POST should return 401 without a token', async () => {
       const res = await request(app)

@@ -156,7 +156,7 @@ router.get('/stats', async (req: Request, res: Response) => {
         }
       }
     ])
-    res.status(200).json(totalHorsePower[0].totalHorsePower)
+    res.status(200).json(totalHorsePower[0]?.totalHorsePower ?? 0)
   } catch (error) {
     console.error('Error accessing motorcycle route:', error)
     res.status(500).json({ error: 'Internal server error' })
@@ -202,7 +202,8 @@ router.put('/:id', authenticateToken, requireAdmin, async (req: Request, res: Re
   try {
     const updatedMotorcycle = await Motorcycle.findByIdAndUpdate(
       req.params.id,
-      req.body
+      req.body,
+      { returnDocument: 'after', runValidators: true }
     ).populate('brand')
     if (!updatedMotorcycle) {
       return res.status(404).json({ error: 'Motorcycle not found' })
@@ -314,13 +315,13 @@ router.get('/max-stats', async (req: Request, res: Response) => {
           maxTorque: { $max: '$torque' },
           maxWeight: { $max: '$weight' },
           maxConsumption: { $max: '$consumption' },
-          maxAcceleration: { $max: '$acceleration' },
+          maxAcceleration: { $max: '$acceleration.time_0_100' },
           maxSpeedMax: { $max: '$speedMax' },
           maxPrice: { $max: '$price' }
         }
       }
     ])
-    res.status(200).json(maxStats[0])
+    res.status(200).json(maxStats[0] ?? {})
   } catch (error) {
     console.error('Error accessing motorcycle route:', error)
     res.status(500).json({ error: 'Internal server error' })
