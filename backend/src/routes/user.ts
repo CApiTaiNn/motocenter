@@ -133,6 +133,14 @@ router.post('/account', async (req: Request, res: Response) => {
     return res.status(400).json({ error: 'Email and password are required' })
   }
 
+  // The model requires these; check here so a bad payload gets a 400
+  // instead of a Mongoose validation 500.
+  if (!firstname || !lastname || !pseudo) {
+    return res
+      .status(400)
+      .json({ error: 'Firstname, lastname and pseudo are required' })
+  }
+
   try {
     if (await User.findOne({ email })) {
       return res.status(409).json({ error: 'User already exists' })
@@ -264,7 +272,9 @@ router.put(
         updateData.password = await hash(updateData.password)
       }
 
-      if (updateData.ridingStartYear) {
+      // !== undefined (not truthiness): 0 or '' must be validated, not
+      // silently written through.
+      if (updateData.ridingStartYear !== undefined) {
         const year = Number(updateData.ridingStartYear)
         const currentYear = new Date().getFullYear()
         if (isNaN(year) || year < 1950 || year > currentYear) {
