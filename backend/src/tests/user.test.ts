@@ -152,7 +152,8 @@ describe('User Routes - /api/v1/users', () => {
     })
 
     it('should reject a missing email with 400', async () => {
-      const { email, ...rest } = newUser
+      const rest: Partial<typeof newUser> = { ...newUser }
+      delete rest.email
       const res = await request(app).post('/api/v1/users/account').send(rest)
 
       expect(res.status).toBe(400)
@@ -160,7 +161,8 @@ describe('User Routes - /api/v1/users', () => {
     })
 
     it('should reject a missing password with 400', async () => {
-      const { password, ...rest } = newUser
+      const rest: Partial<typeof newUser> = { ...newUser }
+      delete rest.password
       const res = await request(app).post('/api/v1/users/account').send(rest)
 
       expect(res.status).toBe(400)
@@ -186,7 +188,8 @@ describe('User Routes - /api/v1/users', () => {
     })
 
     it('should reject missing profile fields with 400 (not 500)', async () => {
-      const { pseudo, ...rest } = newUser
+      const rest: Partial<typeof newUser> = { ...newUser }
+      delete rest.pseudo
       const res = await request(app).post('/api/v1/users/account').send(rest)
 
       expect(res.status).toBe(400)
