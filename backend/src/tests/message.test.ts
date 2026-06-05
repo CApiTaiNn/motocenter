@@ -61,6 +61,37 @@ describe('Message Routes - /api/v1/messages', () => {
     })
   })
 
+  describe('GET /api/v1/messages/:id/responses', () => {
+    it('should return responses for a message', async () => {
+      const parent = await Message.create({ content: 'Parent', user: userId })
+      await Message.create({
+        content: 'A response',
+        user: userId,
+        reference: parent._id,
+        referenceModel: 'Message'
+      })
+
+      const res = await request(app).get(
+        `/api/v1/messages/${parent._id.toString()}/responses`
+      )
+
+      expect(res.status).toBe(200)
+      expect(res.body.messages).toBeInstanceOf(Array)
+      expect(res.body.messages.length).toBe(1)
+      expect(res.body.messages[0].content).toBe('A response')
+    })
+
+    it('should return 404 for an unknown message', async () => {
+      const fakeId = '507f1f77bcf86cd799439011'
+      const res = await request(app).get(
+        `/api/v1/messages/${fakeId}/responses`
+      )
+
+      expect(res.status).toBe(404)
+      expect(res.body.error).toBe('Message not found')
+    })
+  })
+
   describe('POST /api/v1/messages', () => {
     it('should create a new message', async () => {
       const res = await request(app)
@@ -174,6 +205,34 @@ describe('Message Routes - /api/v1/messages', () => {
         .send({ userId, messageId: fakeId, like: true })
 
       expect(res.status).toBe(404)
+    })
+
+    it('should return 401 without a token', async () => {
+      const msg = await Message.create({ content: 'Guarded', user: userId })
+
+      const res = await request(app)
+        .patch('/api/v1/messages')
+        .send({ userId, messageId: msg._id.toString(), like: true })
+
+      expect(res.status).toBe(401)
+    })
+
+    it('should toggle dislike off', async () => {
+      const msg = await Message.create({
+        content: 'Disliked',
+        user: userId,
+        usersDislikeId: [userId],
+        dislike: 1
+      })
+
+      const res = await request(app)
+        .patch('/api/v1/messages')
+        .set('Cookie', authCookie)
+        .send({ userId, messageId: msg._id.toString(), like: false })
+
+      expect(res.status).toBe(200)
+      expect(res.body.populatedMessage.dislike).toBe(0)
+      expect(res.body.populatedMessage.usersDislikeId).not.toContain(userId)
     })
   })
 })

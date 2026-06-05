@@ -4,8 +4,10 @@ import jwt from 'jsonwebtoken'
 import app from '../app'
 import Ride from '../models/Ride'
 import User from '../models/User'
+import { RideColor } from '../types/ride'
 
 describe('Ride Routes - /api/v1/rides', () => {
+  let userId: string
   let authCookie: string
 
   beforeEach(async () => {
@@ -16,8 +18,9 @@ describe('Ride Routes - /api/v1/rides', () => {
       email: 'rider@test.com',
       password: 'pass'
     })
+    userId = user._id.toString()
     const token = jwt.sign(
-      { id: user._id.toString(), email: user.email },
+      { id: userId, email: user.email },
       process.env.JWT_SECRET!
     )
     authCookie = `accessToken=${token}`
@@ -70,6 +73,79 @@ describe('Ride Routes - /api/v1/rides', () => {
       expect(res.status).toBe(200)
       expect(res.body.rides).toEqual([])
     })
+
+    it('should project only requested fields', async () => {
+      await Ride.create(rideData)
+
+      const res = await request(app).get('/api/v1/rides?project=title')
+
+      expect(res.status).toBe(200)
+      expect(res.body.rides.length).toBe(1)
+      expect(res.body.rides[0].title).toBe('Balade en Bretagne')
+      // Not requested -> absent from projection
+      expect(res.body.rides[0].distance).toBeUndefined()
+      expect(res.body.rides[0].start_town).toBeUndefined()
+    })
+
+    it('should sort and limit results', async () => {
+      await Ride.create({ ...rideData, title: 'First' })
+      await Ride.create({ ...rideData, title: 'Second' })
+      await Ride.create({ ...rideData, title: 'Third' })
+
+      const res = await request(app).get(
+        `/api/v1/rides?project=title&limit=2&sort=${encodeURIComponent(
+          JSON.stringify({ title: 1 })
+        )}`
+      )
+
+      expect(res.status).toBe(200)
+      expect(res.body.rides.length).toBe(2)
+      expect(res.body.rides[0].title).toBe('First')
+      expect(res.body.rides[1].title).toBe('Second')
+    })
+
+    it('should attach participating users when deep=true', async () => {
+      const ride = await Ride.create({
+        ...rideData,
+        is_event: true,
+        date_event: '2999-01-01',
+        hour_event: '10:00',
+        participating_user: [userId]
+      })
+
+      const res = await request(app).get('/api/v1/rides?project=all&deep=true')
+
+      expect(res.status).toBe(200)
+      const out = res.body.rides.find(
+        (r: any) => r._id === ride._id.toString()
+      )
+      expect(out.participating_user).toBeInstanceOf(Array)
+      expect(out.participating_user.length).toBe(1)
+      // attachUsers replaces the ObjectId with USER_PUBLIC_FIELDS (_id pseudo image)
+      expect(out.participating_user[0]._id).toBe(userId)
+      expect(out.participating_user[0].pseudo).toBe('rider1')
+      expect(out.participating_user[0].password).toBeUndefined()
+    })
+
+    it('should flip a past event to is_event=false on read', async () => {
+      const ride = await Ride.create({
+        ...rideData,
+        is_event: true,
+        date_event: '2000-01-01',
+        hour_event: '10:00'
+      })
+
+      const res = await request(app).get('/api/v1/rides?project=all')
+
+      expect(res.status).toBe(200)
+      const out = res.body.rides.find(
+        (r: any) => r._id === ride._id.toString()
+      )
+      expect(out.is_event).toBe(false)
+
+      const reloaded = await Ride.findById(ride._id)
+      expect(reloaded!.is_event).toBe(false)
+    })
   })
 
   describe('GET /api/v1/rides/count', () => {
@@ -82,31 +158,98 @@ describe('Ride Routes - /api/v1/rides', () => {
       expect(res.body).toHaveProperty('count')
       expect(typeof res.body.count).toBe('number')
     })
+
+    it('should compute count and percent against previous month', async () => {
+      const now = new Date()
+      const thisMonth = new Date(now.getFullYear(), now.getMonth(), 5)
+      const prevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 5)
+
+      // 1 ride previous month, 2 rides current month -> +100%
+      await Ride.create({ ...rideData, createdAt: prevMonth })
+      await Ride.create({ ...rideData, createdAt: thisMonth })
+      await Ride.create({ ...rideData, createdAt: thisMonth })
+
+      const res = await request(app).get('/api/v1/rides/count')
+
+      expect(res.status).toBe(200)
+      expect(res.body.count).toBe(2)
+      expect(res.body.percent).toBe(100)
+    })
+
+    it('should return percent = count*100 when previous month is empty', async () => {
+      const now = new Date()
+      const thisMonth = new Date(now.getFullYear(), now.getMonth(), 5)
+
+      await Ride.create({ ...rideData, createdAt: thisMonth })
+      await Ride.create({ ...rideData, createdAt: thisMonth })
+
+      const res = await request(app).get('/api/v1/rides/count')
+
+      expect(res.status).toBe(200)
+      expect(res.body.count).toBe(2)
+      expect(res.body.percent).toBe(200)
+    })
   })
 
   describe('POST /api/v1/rides', () => {
+    const validBody = {
+      title: 'New ride',
+      description: 'Description',
+      duration: 60,
+      distance: 40,
+      startTown: { value: 'Rennes' },
+      endTown: { value: 'Nantes' },
+      rideType: 'highway',
+      userId: 'ignored-client-value',
+      imageLink: 'https://example.com/ride.jpg',
+      geom: rideData.geom
+    }
+
     it('should create a new ride', async () => {
       const res = await request(app)
         .post('/api/v1/rides')
         .set('Cookie', authCookie)
-        .send({
-          title: 'New ride',
-          description: 'Description',
-          duration: 60,
-          distance: 40,
-          startTown: { value: 'Rennes' },
-          endTown: { value: 'Nantes' },
-          rideType: 'highway',
-          userId: '507f1f77bcf86cd799439011',
-          imageLink: 'https://example.com/ride.jpg',
-          geom: rideData.geom
-        })
+        .send(validBody)
 
       expect(res.status).toBe(201)
+      expect(res.body.message).toBe('Ride created successfully')
       expect(res.body.ride.title).toBe('New ride')
-      expect(res.body.ride.color).toBeDefined()
       expect(res.body.ride.start_town).toBe('Rennes')
       expect(res.body.ride.end_town).toBe('Nantes')
+    })
+
+    it('should derive user_id from the token, not the request body', async () => {
+      const res = await request(app)
+        .post('/api/v1/rides')
+        .set('Cookie', authCookie)
+        .send(validBody)
+
+      expect(res.status).toBe(201)
+      // user_id comes from the JWT, never from body.userId
+      expect(res.body.ride.user_id).toBe(userId)
+    })
+
+    it('should auto-assign a color from the RideColor palette', async () => {
+      const res = await request(app)
+        .post('/api/v1/rides')
+        .set('Cookie', authCookie)
+        .send(validBody)
+
+      expect(res.status).toBe(201)
+      expect(Object.values(RideColor)).toContain(res.body.ride.color)
+    })
+
+    it('should default like/liked_id/participating_user/is_event', async () => {
+      const res = await request(app)
+        .post('/api/v1/rides')
+        .set('Cookie', authCookie)
+        .send(validBody)
+
+      expect(res.status).toBe(201)
+      expect(res.body.ride.like).toBe(0)
+      expect(res.body.ride.liked_id).toEqual([])
+      expect(res.body.ride.participating_user).toEqual([])
+      expect(res.body.ride.is_event).toBe(false)
     })
 
     it('should return 401 without a token', async () => {
@@ -124,6 +267,193 @@ describe('Ride Routes - /api/v1/rides', () => {
         .send({ title: 'Incomplete' })
 
       expect(res.status).toBe(400)
+      expect(res.body.error).toBe('Failed to create ride')
+    })
+
+    it('should fail when an event has an empty date/hour string', async () => {
+      const res = await request(app)
+        .post('/api/v1/rides')
+        .set('Cookie', authCookie)
+        .send({
+          ...validBody,
+          isEvent: true,
+          dateEvent: '',
+          hourEvent: ''
+        })
+
+      expect(res.status).toBe(400)
+      expect(res.body.error).toBe('Failed to create ride')
+    })
+
+    it('should fail when an event omits date/hour entirely', async () => {
+      const res = await request(app)
+        .post('/api/v1/rides')
+        .set('Cookie', authCookie)
+        .send({
+          ...validBody,
+          isEvent: true
+        })
+
+      expect(res.status).toBe(400)
+      expect(res.body.error).toBe('Failed to create ride')
+    })
+
+    it('should create an event with a date/hour', async () => {
+      const res = await request(app)
+        .post('/api/v1/rides')
+        .set('Cookie', authCookie)
+        .send({
+          ...validBody,
+          isEvent: true,
+          dateEvent: '2999-01-01',
+          hourEvent: '10:00'
+        })
+
+      expect(res.status).toBe(201)
+      expect(res.body.ride.is_event).toBe(true)
+      expect(res.body.ride.date_event).toBe('2999-01-01')
+      expect(res.body.ride.hour_event).toBe('10:00')
+    })
+  })
+
+  describe('PATCH /api/v1/rides/:id/like', () => {
+    it('should return 401 without a token', async () => {
+      const ride = await Ride.create(rideData)
+
+      const res = await request(app).patch(
+        `/api/v1/rides/${ride._id}/like`
+      )
+
+      expect(res.status).toBe(401)
+    })
+
+    it('should toggle like then unlike', async () => {
+      const ride = await Ride.create(rideData)
+
+      const liked = await request(app)
+        .patch(`/api/v1/rides/${ride._id}/like`)
+        .set('Cookie', authCookie)
+
+      expect(liked.status).toBe(200)
+      expect(liked.body.isLiked).toBe(true)
+      expect(liked.body.like).toBe(1)
+
+      const afterLike = await Ride.findById(ride._id)
+      expect(afterLike!.liked_id).toContain(userId)
+      expect(afterLike!.like).toBe(1)
+
+      const unliked = await request(app)
+        .patch(`/api/v1/rides/${ride._id}/like`)
+        .set('Cookie', authCookie)
+
+      expect(unliked.status).toBe(200)
+      expect(unliked.body.isLiked).toBe(false)
+      expect(unliked.body.like).toBe(0)
+
+      const afterUnlike = await Ride.findById(ride._id)
+      expect(afterUnlike!.liked_id).not.toContain(userId)
+      expect(afterUnlike!.like).toBe(0)
+    })
+
+    it('should return 404 for an unknown ride id', async () => {
+      const res = await request(app)
+        .patch('/api/v1/rides/507f1f77bcf86cd799439099/like')
+        .set('Cookie', authCookie)
+
+      expect(res.status).toBe(404)
+      expect(res.body.error).toBe('Ride not found')
+    })
+  })
+
+  describe('PATCH /api/v1/rides/:id/participate', () => {
+    const eventData = {
+      ...rideData,
+      is_event: true,
+      date_event: '2999-01-01',
+      hour_event: '10:00'
+    }
+
+    it('should return 401 without a token', async () => {
+      const ride = await Ride.create(eventData)
+
+      const res = await request(app).patch(
+        `/api/v1/rides/${ride._id}/participate`
+      )
+
+      expect(res.status).toBe(401)
+    })
+
+    it('should toggle join then leave', async () => {
+      const ride = await Ride.create(eventData)
+
+      const joined = await request(app)
+        .patch(`/api/v1/rides/${ride._id}/participate`)
+        .set('Cookie', authCookie)
+
+      expect(joined.status).toBe(200)
+      expect(joined.body.isParticipating).toBe(true)
+      expect(joined.body.participatingCount).toBe(1)
+      expect(joined.body.updatedParticipants.length).toBe(1)
+      expect(joined.body.updatedParticipants[0]._id).toBe(userId)
+      expect(joined.body.updatedParticipants[0].pseudo).toBe('rider1')
+
+      const afterJoin = await Ride.findById(ride._id)
+      expect(afterJoin!.participating_user.map(String)).toContain(userId)
+
+      const left = await request(app)
+        .patch(`/api/v1/rides/${ride._id}/participate`)
+        .set('Cookie', authCookie)
+
+      expect(left.status).toBe(200)
+      expect(left.body.isParticipating).toBe(false)
+      expect(left.body.participatingCount).toBe(0)
+      expect(left.body.updatedParticipants).toEqual([])
+
+      const afterLeave = await Ride.findById(ride._id)
+      expect(afterLeave!.participating_user.map(String)).not.toContain(userId)
+    })
+
+    it('should return 400 when the ride is not an event', async () => {
+      const ride = await Ride.create(rideData)
+
+      const res = await request(app)
+        .patch(`/api/v1/rides/${ride._id}/participate`)
+        .set('Cookie', authCookie)
+
+      expect(res.status).toBe(400)
+      expect(res.body.error).toBe('This ride is not an event')
+    })
+
+    it('should return 404 for an unknown ride id', async () => {
+      const res = await request(app)
+        .patch('/api/v1/rides/507f1f77bcf86cd799439099/participate')
+        .set('Cookie', authCookie)
+
+      expect(res.status).toBe(404)
+      expect(res.body.error).toBe('Ride not found')
+    })
+
+    it('should return 400 when the token user id is not a valid ObjectId', async () => {
+      const ride = await Ride.create(eventData)
+      const badToken = jwt.sign(
+        { id: 'not-an-object-id', email: 'x@test.com' },
+        process.env.JWT_SECRET!
+      )
+
+      const res = await request(app)
+        .patch(`/api/v1/rides/${ride._id}/participate`)
+        .set('Cookie', `accessToken=${badToken}`)
+
+      expect(res.status).toBe(400)
+      expect(res.body.error).toBe('Invalid User ID format')
+    })
+
+    it('should return 500 for an invalid ride ObjectId', async () => {
+      const res = await request(app)
+        .patch('/api/v1/rides/not-a-valid-id/participate')
+        .set('Cookie', authCookie)
+
+      expect(res.status).toBe(500)
     })
   })
 })

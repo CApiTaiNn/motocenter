@@ -178,6 +178,32 @@ describe('Motorcycle Routes - /api/v1/motorcycles', () => {
 
       expect(res.status).toBe(404)
     })
+
+    it('should ignore createdAt, _id and unknown fields (mass-assignment guard)', async () => {
+      const moto = await Motorcycle.create({ ...motoData, brand: brandId })
+      const originalId = moto._id.toString()
+      const originalCreatedAt = moto.createdAt!.toISOString()
+      const fakeId = '507f1f77bcf86cd799439011'
+
+      const res = await request(app)
+        .put(`/api/v1/motorcycles/${moto._id}`)
+        .set('Cookie', adminCookie)
+        .send({
+          name: 'MT-07 Renamed',
+          _id: fakeId,
+          createdAt: '2000-01-01T00:00:00.000Z',
+          hackerField: 'pwned'
+        })
+
+      expect(res.status).toBe(200)
+      expect(res.body.motorcycle.name).toBe('MT-07 Renamed')
+
+      const updated = await Motorcycle.findById(originalId)
+      expect(updated).not.toBeNull()
+      expect(updated!._id.toString()).toBe(originalId)
+      expect(updated!.createdAt!.toISOString()).toBe(originalCreatedAt)
+      expect((updated!.toObject() as Record<string, unknown>).hackerField).toBeUndefined()
+    })
   })
 
   describe('DELETE /api/v1/motorcycles/:id', () => {

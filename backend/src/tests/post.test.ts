@@ -6,6 +6,7 @@ import Post from '../models/Post'
 import User from '../models/User'
 import Brand from '../models/Brand'
 import Message from '../models/Message'
+import Motorcycle from '../models/Motorcycle'
 import { PostCategory } from '../constants/PostCategory'
 
 describe('Post Routes - /api/v1/posts', () => {
@@ -111,6 +112,32 @@ describe('Post Routes - /api/v1/posts', () => {
 
       expect(res.status).toBe(404)
     })
+
+    it('should deep-attach the user on returned messages', async () => {
+      const post = await Post.create({
+        title: 'Post with deep responses',
+        content: 'Content',
+        user: userId,
+        brand: brandId,
+        category: PostCategory.RACING
+      })
+
+      await Message.create({
+        content: 'Deep reply',
+        reference: post._id,
+        referenceModel: 'Post',
+        user: userId
+      })
+
+      const res = await request(app).get(
+        `/api/v1/posts/${post._id}/responses?project=all&deep=true`
+      )
+
+      expect(res.status).toBe(200)
+      expect(res.body.messages.length).toBe(1)
+      expect(res.body.messages[0].user._id).toBe(userId)
+      expect(res.body.messages[0].user.pseudo).toBe('admin')
+    })
   })
 
   describe('POST /api/v1/posts/add-view', () => {
@@ -129,6 +156,54 @@ describe('Post Routes - /api/v1/posts', () => {
 
       const updated = await Post.findById(post._id)
       expect(updated!.views).toBe(1)
+    })
+  })
+
+  describe('POST /api/v1/posts/add-favorite', () => {
+    it('should return 401 without a token', async () => {
+      const post = await Post.create({
+        title: 'Fav post',
+        content: 'Content',
+        user: userId,
+        brand: brandId,
+        category: PostCategory.RACING
+      })
+
+      const res = await request(app)
+        .post(`/api/v1/posts/add-favorite?filter={"_id":"${post._id}"}`)
+        .send({})
+
+      expect(res.status).toBe(401)
+    })
+
+    it('should toggle a favorite on then off', async () => {
+      const post = await Post.create({
+        title: 'Fav post',
+        content: 'Content',
+        user: userId,
+        brand: brandId,
+        category: PostCategory.RACING
+      })
+
+      const addRes = await request(app)
+        .post(`/api/v1/posts/add-favorite?filter={"_id":"${post._id}"}`)
+        .set('Cookie', authCookie)
+        .send({})
+
+      expect(addRes.status).toBe(200)
+      expect(addRes.body.isAdded).toBe(true)
+      const afterAdd = await Post.findById(post._id)
+      expect(afterAdd!.userFavoritePost).toContain(userId)
+
+      const removeRes = await request(app)
+        .post(`/api/v1/posts/add-favorite?filter={"_id":"${post._id}"}`)
+        .set('Cookie', authCookie)
+        .send({})
+
+      expect(removeRes.status).toBe(200)
+      expect(removeRes.body.isAdded).toBe(false)
+      const afterRemove = await Post.findById(post._id)
+      expect(afterRemove!.userFavoritePost).not.toContain(userId)
     })
   })
 
@@ -162,6 +237,81 @@ describe('Post Routes - /api/v1/posts', () => {
         })
 
       expect(res.status).toBe(400)
+    })
+
+    it('should fail with an invalid category', async () => {
+      const res = await request(app)
+        .post('/api/v1/posts')
+        .set('Cookie', authCookie)
+        .send({
+          title: 'Bad category',
+          content: 'Content',
+          brand: 'Yamaha',
+          category: 'not-a-real-category',
+          isNewMotoComment: true
+        })
+
+      expect(res.status).toBe(400)
+    })
+
+    it('should link the created post to its motorcycle when motorcycleId is provided', async () => {
+      const moto = await Motorcycle.create({
+        name: 'MT-07',
+        year: 2024,
+        category: 'roadster',
+        engine_size: 689,
+        horsePower: 73,
+        torque: 67,
+        weight: 184,
+        consumption: 4.5,
+        price: 7699,
+        brand: brandId
+      })
+
+      const res = await request(app)
+        .post('/api/v1/posts')
+        .set('Cookie', authCookie)
+        .send({
+          title: 'Model discussion',
+          content: 'Content',
+          brand: 'Yamaha',
+          category: PostCategory.MODEL,
+          isNewMotoComment: true,
+          motorcycleId: moto._id.toString()
+        })
+
+      expect(res.status).toBe(201)
+      const updatedMoto = await Motorcycle.findById(moto._id)
+      expect(updatedMoto!.post!.toString()).toBe(res.body._id)
+    })
+
+    it('should author the post with the connected user when isNewMotoComment is false', async () => {
+      const author = await User.create({
+        firstname: 'Real',
+        lastname: 'Author',
+        pseudo: 'author',
+        email: 'author@test.com',
+        password: 'pass'
+      })
+      const authorToken = jwt.sign(
+        { id: author._id.toString(), email: author.email },
+        process.env.JWT_SECRET!
+      )
+
+      const res = await request(app)
+        .post('/api/v1/posts')
+        .set('Cookie', `accessToken=${authorToken}`)
+        .send({
+          title: 'Authored by me',
+          content: 'Content',
+          brand: 'Yamaha',
+          category: PostCategory.OPINION,
+          isNewMotoComment: false
+        })
+
+      expect(res.status).toBe(201)
+      const created = await Post.findById(res.body._id)
+      expect(created!.user.toString()).toBe(author._id.toString())
     })
   })
 
@@ -240,6 +390,95 @@ describe('Post Routes - /api/v1/posts', () => {
         })
 
       expect(res.status).toBe(403)
+    })
+
+    it('should let an admin edit another user post (204)', async () => {
+      const owner = await User.create({
+        firstname: 'Owner',
+        lastname: 'User',
+        pseudo: 'owner',
+        email: 'owner@test.com',
+        password: 'pass',
+        isAdmin: false
+      })
+      const post = await Post.create({
+        title: 'Owned by someone',
+        content: 'Content',
+        user: owner._id,
+        brand: brandId,
+        category: PostCategory.RACING
+      })
+      const admin = await User.create({
+        firstname: 'Super',
+        lastname: 'Admin',
+        pseudo: 'superadmin',
+        email: 'superadmin@test.com',
+        password: 'pass',
+        isAdmin: true
+      })
+      const adminToken = jwt.sign(
+        { id: admin._id.toString(), email: admin.email },
+        process.env.JWT_SECRET!
+      )
+
+      const res = await request(app)
+        .put(`/api/v1/posts?filter={"id":"${post._id}"}`)
+        .set('Cookie', `accessToken=${adminToken}`)
+        .send({
+          title: 'Edited by admin',
+          content: 'New content',
+          brand: 'Yamaha',
+          category: PostCategory.OPINION
+        })
+
+      expect(res.status).toBe(204)
+      const updated = await Post.findById(post._id)
+      expect(updated!.title).toBe('Edited by admin')
+      expect(updated!.category).toBe(PostCategory.OPINION)
+    })
+
+    it('should return 400 with an unknown brand', async () => {
+      const post = await Post.create({
+        title: 'Old',
+        content: 'Content',
+        user: userId,
+        brand: brandId,
+        category: PostCategory.RACING
+      })
+
+      const res = await request(app)
+        .put(`/api/v1/posts?filter={"id":"${post._id}"}`)
+        .set('Cookie', authCookie)
+        .send({
+          title: 'New',
+          content: 'New content',
+          brand: 'NonExistent',
+          category: PostCategory.RACING
+        })
+
+      expect(res.status).toBe(400)
+    })
+
+    it('should return 400 with an invalid category', async () => {
+      const post = await Post.create({
+        title: 'Old',
+        content: 'Content',
+        user: userId,
+        brand: brandId,
+        category: PostCategory.RACING
+      })
+
+      const res = await request(app)
+        .put(`/api/v1/posts?filter={"id":"${post._id}"}`)
+        .set('Cookie', authCookie)
+        .send({
+          title: 'New',
+          content: 'New content',
+          brand: 'Yamaha',
+          category: 'not-valid'
+        })
+
+      expect(res.status).toBe(400)
     })
   })
 
