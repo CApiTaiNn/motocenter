@@ -18,6 +18,13 @@ export const authenticateToken = (req: any, res: any, next: any) => {
   }
 }
 
+// For owner-or-admin checks inside handlers (requireAdmin can't express
+// "or owner"). Always re-reads isAdmin from the DB, never from the JWT.
+export const isAdminUser = async (userId: string): Promise<boolean> => {
+  const user = await User.findById(userId).select('isAdmin')
+  return user?.isAdmin === true
+}
+
 export const requireAdmin = async (req: any, res: any, next: any) => {
   try {
     const { id } = (req.user as { id: string }) ?? {}

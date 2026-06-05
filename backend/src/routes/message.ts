@@ -2,7 +2,8 @@ import Message from '../models/Message'
 import { type Request, Response, Router } from 'express'
 import { prepareQuery, type ReqQuery } from '../utils/find'
 import { attachUser } from '../utils/attach'
-import { authenticateToken } from '../utils/auth'
+import { authenticateToken, isAdminUser } from '../utils/auth'
+import { isValidObjectId } from 'mongoose'
 
 const router = Router()
 /**
@@ -56,12 +57,12 @@ const router = Router()
 router.get(
   '/',
   async (req: Request<unknown, unknown, unknown, ReqQuery>, res) => {
-    const { project, sort, limit, filter, deep } = prepareQuery(req.query)
+    const { project, sort, limit, skip, filter, deep } = prepareQuery(req.query)
     try {
       const messages = await Message.find(filter)
         .select(project)
         .sort(sort)
-        .limit(limit)
+        .skip(skip).limit(limit)
         .lean()
       if (deep) {
         await attachUser(messages, 'user')
@@ -264,5 +265,65 @@ router.patch('/', authenticateToken, async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Internal server error' })
   }
 })
+
+/**
+ * @openapi
+ * /messages/{id}:
+ *   delete:
+ *     summary: Supprimer un message (auteur ou admin) et ses réponses
+ *     tags:
+ *       - Messages
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID du message
+ *     responses:
+ *       204:
+ *         description: Message supprimé
+ *       401:
+ *         description: Non authentifié
+ *       403:
+ *         description: Non autorisé (ni auteur ni admin)
+ *       404:
+ *         description: Message non trouvé
+ *       500:
+ *         description: Erreur serveur
+ */
+router.delete(
+  '/:id',
+  authenticateToken,
+  async (req: Request<{ id: string }>, res: Response) => {
+    const { id: authUserId } = req.user as { id: string }
+    try {
+      if (!isValidObjectId(req.params.id)) {
+        return res.status(404).json({ error: 'Message not found' })
+      }
+      const message = await Message.findById(req.params.id)
+      if (!message) {
+        return res.status(404).json({ error: 'Message not found' })
+      }
+
+      // Only the author (or an admin) may delete a message.
+      const isOwner = message.user?.toString() === authUserId
+      if (!isOwner && !(await isAdminUser(authUserId))) {
+        return res.status(403).json({ error: 'Forbidden' })
+      }
+
+      // Cascade: remove direct responses so they don't become orphans.
+      await Message.deleteMany({
+        reference: message._id,
+        referenceModel: 'Message'
+      })
+      await message.deleteOne()
+      res.status(204).end()
+    } catch (error) {
+      console.error('Error deleting message:', error)
+      res.status(500).json({ error: 'Internal server error' })
+    }
+  }
+)
 
 export default router

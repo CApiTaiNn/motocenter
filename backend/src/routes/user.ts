@@ -404,7 +404,7 @@ router.get(
     // collection can't be probed on private fields like email or isAdmin.
     const allowedFilterKeys = ['_id', 'createdAt']
 
-    const { project, sort, limit, filter } = prepareQuery(req.query)
+    const { project, sort, limit, skip, filter } = prepareQuery(req.query)
 
     const forbiddenKey = Object.keys(filter).find(
       (key) => !allowedFilterKeys.includes(key)
@@ -426,7 +426,7 @@ router.get(
       const users = await User.find(filter)
         .select(finalProject)
         .sort(sort)
-        .limit(limit)
+        .skip(skip).limit(limit)
       res.status(200).json({ users })
     } catch (error) {
       console.error('Error accessing user route:', error)

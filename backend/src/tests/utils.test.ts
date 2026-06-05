@@ -123,6 +123,45 @@ describe('utils/find prepareQuery', () => {
       expect((e as HttpError).status).toBe(400)
     }
   })
+
+  it('parses a valid skip parameter', () => {
+    const { skip } = prepareQuery({ skip: '20' })
+    expect(skip).toBe(20)
+  })
+
+  it('defaults skip to 0 when none is given', () => {
+    const { skip } = prepareQuery({})
+    expect(skip).toBe(0)
+  })
+
+  it('rejects a negative skip (400)', () => {
+    try {
+      prepareQuery({ skip: '-1' })
+      throw new Error('should have thrown')
+    } catch (e) {
+      expect(e).toBeInstanceOf(HttpError)
+      expect((e as HttpError).status).toBe(400)
+      expect((e as HttpError).message).toBe('Invalid skip parameter')
+    }
+  })
+
+  it('rejects a non-integer skip (400)', () => {
+    try {
+      prepareQuery({ skip: '1.5' })
+      throw new Error('should have thrown')
+    } catch (e) {
+      expect((e as HttpError).status).toBe(400)
+    }
+  })
+
+  it('rejects a non-numeric skip (400)', () => {
+    try {
+      prepareQuery({ skip: 'abc' })
+      throw new Error('should have thrown')
+    } catch (e) {
+      expect((e as HttpError).status).toBe(400)
+    }
+  })
 })
 
 describe('utils/hash argon2PasswordHasher', () => {

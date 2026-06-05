@@ -50,12 +50,12 @@ const router = Router()
 router.get(
   '/',
   async (req: Request, res: Response) => {
-    const { project, sort, limit, filter } = prepareQuery(req.query)
+    const { project, sort, limit, skip, filter } = prepareQuery(req.query)
     try {
       const brands = await Brand.find(filter)
         .select(project)
         .sort(sort)
-        .limit(limit)
+        .skip(skip).limit(limit)
       res.status(200).json({ brands })
     } catch (error) {
       console.error('Error accessing brand route:', error)

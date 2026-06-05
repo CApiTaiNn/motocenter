@@ -113,7 +113,7 @@ async function fetchMotorcyclesByBrand() {
       {
         params: {
           project: '_id,name,year',
-          filter: JSON.stringify({ brand: motorcycle.value.brand?._id })
+          filter: JSON.stringify({ 'brand._id': motorcycle.value.brand?._id })
         }
       }
     )

@@ -116,4 +116,7 @@ const rideSchema = new Schema({
   }
 })
 
+// createdAt: default list sort + the /count month-range queries.
+rideSchema.index({ createdAt: -1 })
+
 export default model<IRide>('Ride', rideSchema)

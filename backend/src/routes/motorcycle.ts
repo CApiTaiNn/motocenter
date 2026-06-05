@@ -1,8 +1,20 @@
 import Motorcycle from '../models/Motorcycle'
+import Brand, { toBrandSnapshot } from '../models/Brand'
 import { type Request, Response, Router } from 'express'
+import { isValidObjectId } from 'mongoose'
 import { prepareQuery, type ReqQuery } from '../utils/find'
 import { authenticateToken, requireAdmin } from '../utils/auth'
 const router = Router()
+
+// Resolve the client-sent brand (an id string, or an object carrying _id)
+// to the embedded snapshot. Never trusts a client-built snapshot.
+const resolveBrandSnapshot = async (value: unknown) => {
+  const brandId =
+    typeof value === 'string' ? value : (value as { _id?: string } | null)?._id
+  if (!brandId || !isValidObjectId(brandId)) return null
+  const brand = await Brand.findById(brandId)
+  return brand ? toBrandSnapshot(brand) : null
+}
 
 // Fields an admin may set through the API — everything except _id/createdAt,
 // so the raw body is never mass-assigned into the document.
@@ -81,14 +93,14 @@ const pickEditableFields = (body: Record<string, unknown>) =>
 router.get(
   '/',
   async (req: Request<unknown, unknown, unknown, ReqQuery>, res: Response) => {
-    const { project, sort, limit, filter } = prepareQuery(req.query)
+    const { project, sort, limit, skip, filter } = prepareQuery(req.query)
     try {
+      // brand is embedded on the document — no populate needed.
       const motorcycles = await Motorcycle.find()
         .where(filter)
         .select(project)
         .sort(sort)
-        .limit(limit)
-        .populate('brand')
+        .skip(skip).limit(limit)
       res.status(200).json({ motorcycles })
     } catch (error) {
       console.error('Error accessing motorcycle route:', error)
@@ -122,7 +134,13 @@ router.get(
  */
 router.post('/', authenticateToken, requireAdmin, async (req: Request, res: Response) => {
   try {
-    const newMotorcycle = new Motorcycle(pickEditableFields(req.body))
+    const fields = pickEditableFields(req.body)
+    const brand = await resolveBrandSnapshot(fields.brand)
+    if (!brand) {
+      return res.status(400).json({ error: 'Unknown brand' })
+    }
+    fields.brand = brand
+    const newMotorcycle = new Motorcycle(fields)
     const savedMotorcycle = await newMotorcycle.save()
     res.status(201).json(savedMotorcycle)
   } catch (error) {
@@ -231,11 +249,19 @@ router.get('/stats', async (req: Request, res: Response) => {
  */
 router.put('/:id', authenticateToken, requireAdmin, async (req: Request, res: Response) => {
   try {
+    const fields = pickEditableFields(req.body)
+    if (fields.brand !== undefined) {
+      const brand = await resolveBrandSnapshot(fields.brand)
+      if (!brand) {
+        return res.status(400).json({ error: 'Unknown brand' })
+      }
+      fields.brand = brand
+    }
     const updatedMotorcycle = await Motorcycle.findByIdAndUpdate(
       req.params.id,
-      pickEditableFields(req.body),
+      fields,
       { returnDocument: 'after', runValidators: true }
-    ).populate('brand')
+    )
     if (!updatedMotorcycle) {
       return res.status(404).json({ error: 'Motorcycle not found' })
     }

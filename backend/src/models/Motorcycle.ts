@@ -1,15 +1,17 @@
 import type { IMotorcycle } from '../types/motorcycle'
 import { Schema, Types, model } from 'mongoose'
 import { MotorcycleCategory } from '../constants/MotorcycleCategory'
+import { brandSnapshotSchema } from './Brand'
 
 // Re-exported for back-compat: existing imports of MotorcycleCategory from
 // this model keep working. The enum now lives in constants/MotorcycleCategory.ts.
 export { MotorcycleCategory }
 
 const motorcycleSchema = new Schema({
+  // Embedded snapshot (not a ref): brand display data is stable, so it's
+  // denormalized for read speed. Resolved server-side on write.
   brand: {
-    type: Types.ObjectId,
-    ref: 'Brand',
+    type: brandSnapshotSchema,
     required: true
   },
   name: {
@@ -86,5 +88,8 @@ const motorcycleSchema = new Schema({
     ref: 'Post'
   }
 })
+
+// brand._id: the "motorcycles of this brand" lookup in the admin form.
+motorcycleSchema.index({ 'brand._id': 1 })
 
 export default model<IMotorcycle>('Motorcycle', motorcycleSchema)

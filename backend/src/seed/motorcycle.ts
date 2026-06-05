@@ -1,13 +1,13 @@
 import Motorcycle from '../models/Motorcycle'
 import { MotorcycleCategory } from '../models/Motorcycle'
-import Brand from '../models/Brand'
+import Brand, { toBrandSnapshot } from '../models/Brand'
 import { connectToMongo } from '.'
 
 const seedMotorcycles = async () => {
   await connectToMongo()
   await Motorcycle.deleteMany({})
 
-  // Récupérer les brands pour avoir leurs vrais _id MongoDB
+  // Récupérer les brands pour construire les snapshots embarqués
   const brands = await Brand.find()
   const brandByName = (name: string) => {
     const brand = brands.find((b) => b.name === name)
@@ -15,7 +15,7 @@ const seedMotorcycles = async () => {
       throw new Error(
         `Brand "${name}" introuvable. Lancez le seed brand d'abord.`
       )
-    return brand._id
+    return toBrandSnapshot(brand)
   }
 
   await Motorcycle.insertMany([

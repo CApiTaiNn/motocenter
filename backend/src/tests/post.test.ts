@@ -12,6 +12,7 @@ import { PostCategory } from '../constants/PostCategory'
 describe('Post Routes - /api/v1/posts', () => {
   let userId: string
   let brandId: string
+  let brandSnapshot: { _id: unknown; name: string; icon: string }
   let authCookie: string
 
   beforeEach(async () => {
@@ -25,6 +26,7 @@ describe('Post Routes - /api/v1/posts', () => {
     const brand = await Brand.create({ name: 'Yamaha', icon: 'yamaha.svg' })
     userId = user._id.toString()
     brandId = brand._id.toString()
+    brandSnapshot = { _id: brand._id, name: brand.name, icon: brand.icon }
     const token = jwt.sign(
       { id: userId, email: user.email },
       process.env.JWT_SECRET!
@@ -38,7 +40,7 @@ describe('Post Routes - /api/v1/posts', () => {
         title: 'Test post',
         content: 'Content',
         user: userId,
-        brand: brandId,
+        brand: brandSnapshot,
         category: PostCategory.RACING
       })
 
@@ -54,7 +56,7 @@ describe('Post Routes - /api/v1/posts', () => {
         title: 'Deep post',
         content: 'Content',
         user: userId,
-        brand: brandId,
+        brand: brandSnapshot,
         category: PostCategory.RACING
       })
 
@@ -83,7 +85,7 @@ describe('Post Routes - /api/v1/posts', () => {
         title: 'Post with responses',
         content: 'Content',
         user: userId,
-        brand: brandId,
+        brand: brandSnapshot,
         category: PostCategory.RACING
       })
 
@@ -118,7 +120,7 @@ describe('Post Routes - /api/v1/posts', () => {
         title: 'Post with deep responses',
         content: 'Content',
         user: userId,
-        brand: brandId,
+        brand: brandSnapshot,
         category: PostCategory.RACING
       })
 
@@ -146,7 +148,7 @@ describe('Post Routes - /api/v1/posts', () => {
         title: 'Viewable post',
         content: 'Content',
         user: userId,
-        brand: brandId,
+        brand: brandSnapshot,
         category: PostCategory.RACING
       })
 
@@ -165,7 +167,7 @@ describe('Post Routes - /api/v1/posts', () => {
         title: 'Fav post',
         content: 'Content',
         user: userId,
-        brand: brandId,
+        brand: brandSnapshot,
         category: PostCategory.RACING
       })
 
@@ -181,7 +183,7 @@ describe('Post Routes - /api/v1/posts', () => {
         title: 'Fav post',
         content: 'Content',
         user: userId,
-        brand: brandId,
+        brand: brandSnapshot,
         category: PostCategory.RACING
       })
 
@@ -265,7 +267,7 @@ describe('Post Routes - /api/v1/posts', () => {
         weight: 184,
         consumption: 4.5,
         price: 7699,
-        brand: brandId
+        brand: brandSnapshot
       })
 
       const res = await request(app)
@@ -321,7 +323,7 @@ describe('Post Routes - /api/v1/posts', () => {
         title: 'Old title',
         content: 'Old content',
         user: userId,
-        brand: brandId,
+        brand: brandSnapshot,
         category: PostCategory.RACING
       })
 
@@ -363,7 +365,7 @@ describe('Post Routes - /api/v1/posts', () => {
         title: 'Owned',
         content: 'Content',
         user: userId,
-        brand: brandId,
+        brand: brandSnapshot,
         category: PostCategory.RACING
       })
       const other = await User.create({
@@ -405,7 +407,7 @@ describe('Post Routes - /api/v1/posts', () => {
         title: 'Owned by someone',
         content: 'Content',
         user: owner._id,
-        brand: brandId,
+        brand: brandSnapshot,
         category: PostCategory.RACING
       })
       const admin = await User.create({
@@ -442,7 +444,7 @@ describe('Post Routes - /api/v1/posts', () => {
         title: 'Old',
         content: 'Content',
         user: userId,
-        brand: brandId,
+        brand: brandSnapshot,
         category: PostCategory.RACING
       })
 
@@ -464,7 +466,7 @@ describe('Post Routes - /api/v1/posts', () => {
         title: 'Old',
         content: 'Content',
         user: userId,
-        brand: brandId,
+        brand: brandSnapshot,
         category: PostCategory.RACING
       })
 
@@ -493,6 +495,216 @@ describe('Post Routes - /api/v1/posts', () => {
       })
 
       expect(res.status).toBe(401)
+    })
+  })
+
+  describe('GET /api/v1/posts pagination', () => {
+    it('should paginate with limit/skip/sort/project', async () => {
+      await Post.create([
+        {
+          title: 'Alpha',
+          content: 'A',
+          user: userId,
+          brand: brandSnapshot,
+          category: PostCategory.RACING
+        },
+        {
+          title: 'Bravo',
+          content: 'B',
+          user: userId,
+          brand: brandSnapshot,
+          category: PostCategory.RACING
+        },
+        {
+          title: 'Charlie',
+          content: 'C',
+          user: userId,
+          brand: brandSnapshot,
+          category: PostCategory.RACING
+        }
+      ])
+
+      const res = await request(app).get(
+        '/api/v1/posts?limit=1&skip=1&sort={"title":1}&project=title'
+      )
+
+      expect(res.status).toBe(200)
+      expect(res.body.posts.length).toBe(1)
+      // sorted asc -> Alpha, Bravo, Charlie; skip=1 -> Bravo
+      expect(res.body.posts[0].title).toBe('Bravo')
+    })
+
+    it('should return 400 for a negative skip', async () => {
+      const res = await request(app).get('/api/v1/posts?skip=-1')
+
+      expect(res.status).toBe(400)
+    })
+  })
+
+  describe('POST /api/v1/posts brand snapshot', () => {
+    it('should store brand as an embedded snapshot rather than a bare id', async () => {
+      const res = await request(app)
+        .post('/api/v1/posts')
+        .set('Cookie', authCookie)
+        .send({
+          title: 'Snapshot post',
+          content: 'Content',
+          brand: 'Yamaha',
+          category: PostCategory.RACING,
+          isNewMotoComment: true
+        })
+
+      expect(res.status).toBe(201)
+      const created = await Post.findById(res.body._id).lean()
+      expect(created!.brand).toMatchObject({
+        _id: expect.anything(),
+        name: 'Yamaha',
+        icon: 'yamaha.svg'
+      })
+      expect(created!.brand._id.toString()).toBe(brandId)
+    })
+  })
+
+  describe('DELETE /api/v1/posts/:id', () => {
+    it('should return 401 without a token', async () => {
+      const post = await Post.create({
+        title: 'To delete',
+        content: 'Content',
+        user: userId,
+        brand: brandSnapshot,
+        category: PostCategory.RACING
+      })
+
+      const res = await request(app).delete(`/api/v1/posts/${post._id}`)
+
+      expect(res.status).toBe(401)
+    })
+
+    it('should return 404 for an unknown id', async () => {
+      const fakeId = '507f1f77bcf86cd799439011'
+      const res = await request(app)
+        .delete(`/api/v1/posts/${fakeId}`)
+        .set('Cookie', authCookie)
+
+      expect(res.status).toBe(404)
+    })
+
+    it('should return 404 for an invalid (non-ObjectId) id', async () => {
+      const res = await request(app)
+        .delete('/api/v1/posts/not-an-object-id')
+        .set('Cookie', authCookie)
+
+      expect(res.status).toBe(404)
+    })
+
+    it('should return 403 when a non-owner non-admin deletes a post', async () => {
+      const post = await Post.create({
+        title: 'Owned',
+        content: 'Content',
+        user: userId,
+        brand: brandSnapshot,
+        category: PostCategory.RACING
+      })
+      const other = await User.create({
+        firstname: 'Other',
+        lastname: 'User',
+        pseudo: 'other',
+        email: 'other@test.com',
+        password: 'pass',
+        isAdmin: false
+      })
+      const otherToken = jwt.sign(
+        { id: other._id.toString(), email: other.email },
+        process.env.JWT_SECRET!
+      )
+
+      const res = await request(app)
+        .delete(`/api/v1/posts/${post._id}`)
+        .set('Cookie', `accessToken=${otherToken}`)
+
+      expect(res.status).toBe(403)
+      expect(await Post.findById(post._id)).not.toBeNull()
+    })
+
+    it('owner delete should cascade messages and unset the motorcycle link (204)', async () => {
+      const post = await Post.create({
+        title: 'Cascade',
+        content: 'Content',
+        user: userId,
+        brand: brandSnapshot,
+        category: PostCategory.MODEL
+      })
+      await Message.create({
+        content: 'On the post',
+        reference: post._id,
+        referenceModel: 'Post',
+        user: userId
+      })
+      const moto = await Motorcycle.create({
+        name: 'MT-09',
+        year: 2024,
+        category: 'roadster',
+        engine_size: 889,
+        horsePower: 117,
+        torque: 93,
+        weight: 189,
+        consumption: 5,
+        price: 9999,
+        brand: brandSnapshot,
+        post: post._id.toString()
+      })
+
+      const res = await request(app)
+        .delete(`/api/v1/posts/${post._id}`)
+        .set('Cookie', authCookie)
+
+      expect(res.status).toBe(204)
+      expect(await Post.findById(post._id)).toBeNull()
+      expect(
+        await Message.countDocuments({
+          reference: post._id,
+          referenceModel: 'Post'
+        })
+      ).toBe(0)
+      const updatedMoto = await Motorcycle.findById(moto._id)
+      expect(updatedMoto!.post).toBeUndefined()
+    })
+
+    it('should let an admin delete another user post (204)', async () => {
+      const owner = await User.create({
+        firstname: 'Owner',
+        lastname: 'User',
+        pseudo: 'owner',
+        email: 'owner@test.com',
+        password: 'pass',
+        isAdmin: false
+      })
+      const post = await Post.create({
+        title: 'Owned by someone',
+        content: 'Content',
+        user: owner._id,
+        brand: brandSnapshot,
+        category: PostCategory.RACING
+      })
+      const admin = await User.create({
+        firstname: 'Super',
+        lastname: 'Admin',
+        pseudo: 'superadmin',
+        email: 'superadmin@test.com',
+        password: 'pass',
+        isAdmin: true
+      })
+      const adminToken = jwt.sign(
+        { id: admin._id.toString(), email: admin.email },
+        process.env.JWT_SECRET!
+      )
+
+      const res = await request(app)
+        .delete(`/api/v1/posts/${post._id}`)
+        .set('Cookie', `accessToken=${adminToken}`)
+
+      expect(res.status).toBe(204)
+      expect(await Post.findById(post._id)).toBeNull()
     })
   })
 })

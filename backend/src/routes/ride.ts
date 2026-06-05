@@ -4,7 +4,7 @@ import { prepareQuery, type ReqQuery } from '../utils/find'
 import { RideColor, ICreateRideBody } from '../types/ride'
 import { Types } from 'mongoose'
 import { attachUsers } from '../utils/attach'
-import { authenticateToken } from '../utils/auth'
+import { authenticateToken, isAdminUser } from '../utils/auth'
 
 const router = Router()
 
@@ -54,9 +54,9 @@ const router = Router()
 router.get(
   '/',
   async (req: Request<unknown, unknown, unknown, ReqQuery>, res: any) => {
-    const { project, sort, limit, deep } = prepareQuery(req.query)
+    const { project, sort, limit, skip, deep } = prepareQuery(req.query)
     try {
-      const rides = await Ride.find().select(project).sort(sort).limit(limit)
+      const rides = await Ride.find().select(project).sort(sort).skip(skip).limit(limit)
       const now = new Date(
         new Date().toLocaleString('en-US', { timeZone: 'Europe/Paris' })
       )
@@ -462,6 +462,61 @@ router.patch(
       })
     } catch (error) {
       console.error('Participation error:', error)
+      res.status(500).json({ error: 'Internal server error' })
+    }
+  }
+)
+
+/**
+ * @openapi
+ * /rides/{id}:
+ *   delete:
+ *     summary: Supprimer une balade (créateur ou admin)
+ *     tags:
+ *       - Rides
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID de la balade
+ *     responses:
+ *       204:
+ *         description: Balade supprimée
+ *       401:
+ *         description: Non authentifié
+ *       403:
+ *         description: Non autorisé (ni créateur ni admin)
+ *       404:
+ *         description: Balade non trouvée
+ *       500:
+ *         description: Erreur serveur
+ */
+router.delete(
+  '/:id',
+  authenticateToken,
+  async (req: Request<{ id: string }>, res) => {
+    const { id: authUserId } = req.user as { id: string }
+    try {
+      if (!Types.ObjectId.isValid(req.params.id)) {
+        return res.status(404).json({ error: 'Ride not found' })
+      }
+      const ride = await Ride.findById(req.params.id)
+      if (!ride) {
+        return res.status(404).json({ error: 'Ride not found' })
+      }
+
+      // Only the creator (or an admin) may delete a ride.
+      const isOwner = ride.user_id === authUserId
+      if (!isOwner && !(await isAdminUser(authUserId))) {
+        return res.status(403).json({ error: 'Forbidden' })
+      }
+
+      await ride.deleteOne()
+      res.status(204).end()
+    } catch (error) {
+      console.error('Error deleting ride:', error)
       res.status(500).json({ error: 'Internal server error' })
     }
   }

@@ -22,11 +22,12 @@ describe('Message Routes - /api/v1/messages', () => {
       password: 'pass'
     })
     const brand = await Brand.create({ name: 'Yamaha', icon: 'yamaha.svg' })
+    const brandSnapshot = { _id: brand._id, name: brand.name, icon: brand.icon }
     const post = await Post.create({
       title: 'Test Post',
       content: 'Content',
       user: user._id,
-      brand: brand._id,
+      brand: brandSnapshot,
       category: PostCategory.RACING
     })
     userId = user._id.toString()
@@ -233,6 +234,110 @@ describe('Message Routes - /api/v1/messages', () => {
       expect(res.status).toBe(200)
       expect(res.body.populatedMessage.dislike).toBe(0)
       expect(res.body.populatedMessage.usersDislikeId).not.toContain(userId)
+    })
+  })
+
+  describe('DELETE /api/v1/messages/:id', () => {
+    it('should return 401 without a token', async () => {
+      const msg = await Message.create({ content: 'To delete', user: userId })
+
+      const res = await request(app).delete(`/api/v1/messages/${msg._id}`)
+
+      expect(res.status).toBe(401)
+    })
+
+    it('should return 404 for an unknown id', async () => {
+      const fakeId = '507f1f77bcf86cd799439011'
+      const res = await request(app)
+        .delete(`/api/v1/messages/${fakeId}`)
+        .set('Cookie', authCookie)
+
+      expect(res.status).toBe(404)
+    })
+
+    it('should return 403 when a non-owner non-admin deletes a message', async () => {
+      const msg = await Message.create({ content: 'Owned', user: userId })
+      const other = await User.create({
+        firstname: 'Other',
+        lastname: 'User',
+        pseudo: 'other',
+        email: 'other@test.com',
+        password: 'pass',
+        isAdmin: false
+      })
+      const otherToken = jwt.sign(
+        { id: other._id.toString(), email: other.email },
+        process.env.JWT_SECRET!
+      )
+
+      const res = await request(app)
+        .delete(`/api/v1/messages/${msg._id}`)
+        .set('Cookie', `accessToken=${otherToken}`)
+
+      expect(res.status).toBe(403)
+      expect(await Message.findById(msg._id)).not.toBeNull()
+    })
+
+    it('owner delete should cascade direct responses but spare unrelated messages (204)', async () => {
+      const parent = await Message.create({ content: 'Parent', user: userId })
+      await Message.create({
+        content: 'Response',
+        user: userId,
+        reference: parent._id,
+        referenceModel: 'Message'
+      })
+      const unrelated = await Message.create({
+        content: 'Unrelated',
+        user: userId
+      })
+
+      const res = await request(app)
+        .delete(`/api/v1/messages/${parent._id}`)
+        .set('Cookie', authCookie)
+
+      expect(res.status).toBe(204)
+      expect(await Message.findById(parent._id)).toBeNull()
+      expect(
+        await Message.countDocuments({
+          reference: parent._id,
+          referenceModel: 'Message'
+        })
+      ).toBe(0)
+      expect(await Message.findById(unrelated._id)).not.toBeNull()
+    })
+
+    it('should let an admin delete another user message (204)', async () => {
+      const owner = await User.create({
+        firstname: 'Owner',
+        lastname: 'User',
+        pseudo: 'owner',
+        email: 'owner@test.com',
+        password: 'pass',
+        isAdmin: false
+      })
+      const msg = await Message.create({
+        content: 'Owned by someone',
+        user: owner._id
+      })
+      const admin = await User.create({
+        firstname: 'Super',
+        lastname: 'Admin',
+        pseudo: 'superadmin',
+        email: 'superadmin@test.com',
+        password: 'pass',
+        isAdmin: true
+      })
+      const adminToken = jwt.sign(
+        { id: admin._id.toString(), email: admin.email },
+        process.env.JWT_SECRET!
+      )
+
+      const res = await request(app)
+        .delete(`/api/v1/messages/${msg._id}`)
+        .set('Cookie', `accessToken=${adminToken}`)
+
+      expect(res.status).toBe(204)
+      expect(await Message.findById(msg._id)).toBeNull()
     })
   })
 })

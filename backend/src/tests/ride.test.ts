@@ -456,4 +456,91 @@ describe('Ride Routes - /api/v1/rides', () => {
       expect(res.status).toBe(500)
     })
   })
+
+  describe('DELETE /api/v1/rides/:id', () => {
+    it('should return 401 without a token', async () => {
+      const ride = await Ride.create({ ...rideData, user_id: userId })
+
+      const res = await request(app).delete(`/api/v1/rides/${ride._id}`)
+
+      expect(res.status).toBe(401)
+    })
+
+    it('should return 404 for an unknown ride id', async () => {
+      const res = await request(app)
+        .delete('/api/v1/rides/507f1f77bcf86cd799439099')
+        .set('Cookie', authCookie)
+
+      expect(res.status).toBe(404)
+      expect(res.body.error).toBe('Ride not found')
+    })
+
+    it('should return 404 for an invalid (non-ObjectId) ride id', async () => {
+      const res = await request(app)
+        .delete('/api/v1/rides/not-a-valid-id')
+        .set('Cookie', authCookie)
+
+      expect(res.status).toBe(404)
+      expect(res.body.error).toBe('Ride not found')
+    })
+
+    it('should return 403 when a non-creator non-admin deletes', async () => {
+      // Ride owned by someone other than the authenticated user.
+      const ride = await Ride.create({
+        ...rideData,
+        user_id: '507f1f77bcf86cd799439011'
+      })
+
+      const res = await request(app)
+        .delete(`/api/v1/rides/${ride._id}`)
+        .set('Cookie', authCookie)
+
+      expect(res.status).toBe(403)
+      expect(res.body.error).toBe('Forbidden')
+
+      const stillThere = await Ride.findById(ride._id)
+      expect(stillThere).not.toBeNull()
+    })
+
+    it('should let the creator delete their ride (204) and remove it', async () => {
+      const ride = await Ride.create({ ...rideData, user_id: userId })
+
+      const res = await request(app)
+        .delete(`/api/v1/rides/${ride._id}`)
+        .set('Cookie', authCookie)
+
+      expect(res.status).toBe(204)
+      expect(res.body).toEqual({})
+
+      const gone = await Ride.findById(ride._id)
+      expect(gone).toBeNull()
+    })
+
+    it('should let an admin delete someone else’s ride (204)', async () => {
+      const admin = await User.create({
+        firstname: 'Admin',
+        lastname: 'User',
+        pseudo: 'admin1',
+        email: 'admin@test.com',
+        password: 'pass',
+        isAdmin: true
+      })
+      const adminToken = jwt.sign(
+        { id: admin._id.toString(), email: admin.email },
+        process.env.JWT_SECRET!
+      )
+
+      // Ride owned by the original (non-admin) user.
+      const ride = await Ride.create({ ...rideData, user_id: userId })
+
+      const res = await request(app)
+        .delete(`/api/v1/rides/${ride._id}`)
+        .set('Cookie', `accessToken=${adminToken}`)
+
+      expect(res.status).toBe(204)
+
+      const gone = await Ride.findById(ride._id)
+      expect(gone).toBeNull()
+    })
+  })
 })

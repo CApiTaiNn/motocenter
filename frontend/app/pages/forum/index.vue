@@ -17,7 +17,8 @@ const filter = computed(() => {
 
   if (filters.value.brandIds.length) {
     conditions.push({
-      brand: { $in: filters.value.brandIds }
+      // brand is an embedded snapshot; filter on its source id
+      'brand._id': { $in: filters.value.brandIds }
     })
   }
 

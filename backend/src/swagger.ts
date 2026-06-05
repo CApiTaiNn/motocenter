@@ -64,13 +64,23 @@ const options: swaggerJsdoc.Options = {
             createdAt: { type: 'string', format: 'date-time' },
           },
         },
+        // --- SNAPSHOT BRAND (embarqué sur Post/Motorcycle) ---
+        BrandSnapshot: {
+          type: 'object',
+          required: ['_id', 'name', 'icon'],
+          properties: {
+            _id: { type: 'string', description: 'ID de la marque source' },
+            name: { type: 'string' },
+            icon: { type: 'string' },
+          },
+        },
         // --- MODÈLE MOTORCYCLE ---
         Motorcycle: {
           type: 'object',
           required: ['brand', 'name', 'year', 'category', 'price'],
           properties: {
             _id: { type: 'string' },
-            brand: { type: 'string', description: 'ID de la marque' },
+            brand: { $ref: '#/components/schemas/BrandSnapshot' },
             name: { type: 'string' },
             year: { type: 'integer' },
             category: {
@@ -110,7 +120,7 @@ const options: swaggerJsdoc.Options = {
             content: { type: 'string' },
             category: { type: 'string', description: 'ID de la catégorie' },
             user: { type: 'string', description: 'ID de l’utilisateur' },
-            brand: { type: 'string', description: 'ID de la marque' },
+            brand: { $ref: '#/components/schemas/BrandSnapshot' },
             views: { type: 'integer' },
             image: { type: 'string' },
             isNewMotoComment: { type: 'boolean' },

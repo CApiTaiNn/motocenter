@@ -1,10 +1,10 @@
-import { IBrand } from './brand'
+import { IBrandSnapshot } from './brand'
 
 import { IAcceleration } from './accelerations'
 import { MotorcycleCategory } from '../models/Motorcycle'
 
 export interface IMotorcycle {
-  brand: IBrand
+  brand: IBrandSnapshot
   name: string
   year: number
   category: MotorcycleCategory

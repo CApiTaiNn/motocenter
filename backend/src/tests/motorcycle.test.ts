@@ -8,6 +8,7 @@ import User from '../models/User'
 
 describe('Motorcycle Routes - /api/v1/motorcycles', () => {
   let brandId: string
+  let brandSnapshot: { _id: unknown; name: string; icon: string }
   let adminCookie: string
   let userCookie: string
 
@@ -26,6 +27,7 @@ describe('Motorcycle Routes - /api/v1/motorcycles', () => {
   beforeEach(async () => {
     const brand = await Brand.create({ name: 'Yamaha', icon: 'yamaha.svg' })
     brandId = brand._id.toString()
+    brandSnapshot = { _id: brand._id, name: brand.name, icon: brand.icon }
 
     const admin = await User.create({
       firstname: 'Admin',
@@ -69,18 +71,20 @@ describe('Motorcycle Routes - /api/v1/motorcycles', () => {
     })
 
     it('should fail without required fields', async () => {
+      // No brand at all -> rejected up front by the brand resolution.
       const res = await request(app)
         .post('/api/v1/motorcycles')
         .set('Cookie', adminCookie)
         .send({ name: 'Incomplete' })
 
-      expect(res.status).toBe(500)
+      expect(res.status).toBe(400)
+      expect(res.body.error).toBe('Unknown brand')
     })
   })
 
   describe('GET /api/v1/motorcycles', () => {
     beforeEach(async () => {
-      await Motorcycle.create({ ...motoData, brand: brandId })
+      await Motorcycle.create({ ...motoData, brand: brandSnapshot })
     })
 
     it('should return motorcycles with populated brand', async () => {
@@ -93,7 +97,7 @@ describe('Motorcycle Routes - /api/v1/motorcycles', () => {
     })
 
     it('should respect limit', async () => {
-      await Motorcycle.create({ ...motoData, name: 'MT-09', brand: brandId })
+      await Motorcycle.create({ ...motoData, name: 'MT-09', brand: brandSnapshot })
       const res = await request(app).get(
         '/api/v1/motorcycles?project=all&limit=1'
       )
@@ -112,7 +116,7 @@ describe('Motorcycle Routes - /api/v1/motorcycles', () => {
     })
 
     it('should return correct count', async () => {
-      await Motorcycle.create({ ...motoData, brand: brandId })
+      await Motorcycle.create({ ...motoData, brand: brandSnapshot })
       const res = await request(app).get('/api/v1/motorcycles/count')
 
       expect(res.status).toBe(200)
@@ -122,12 +126,12 @@ describe('Motorcycle Routes - /api/v1/motorcycles', () => {
 
   describe('GET /api/v1/motorcycles/stats', () => {
     it('should return total horsePower sum', async () => {
-      await Motorcycle.create({ ...motoData, brand: brandId })
+      await Motorcycle.create({ ...motoData, brand: brandSnapshot })
       await Motorcycle.create({
         ...motoData,
         name: 'R1',
         horsePower: 200,
-        brand: brandId
+        brand: brandSnapshot
       })
 
       const res = await request(app).get('/api/v1/motorcycles/stats')
@@ -139,13 +143,13 @@ describe('Motorcycle Routes - /api/v1/motorcycles', () => {
 
   describe('GET /api/v1/motorcycles/max-stats', () => {
     it('should return max values for numeric fields', async () => {
-      await Motorcycle.create({ ...motoData, brand: brandId })
+      await Motorcycle.create({ ...motoData, brand: brandSnapshot })
       await Motorcycle.create({
         ...motoData,
         name: 'R1',
         horsePower: 200,
         price: 20000,
-        brand: brandId
+        brand: brandSnapshot
       })
 
       const res = await request(app).get('/api/v1/motorcycles/max-stats')
@@ -158,7 +162,7 @@ describe('Motorcycle Routes - /api/v1/motorcycles', () => {
 
   describe('PUT /api/v1/motorcycles/:id', () => {
     it('should update a motorcycle', async () => {
-      const moto = await Motorcycle.create({ ...motoData, brand: brandId })
+      const moto = await Motorcycle.create({ ...motoData, brand: brandSnapshot })
 
       const res = await request(app)
         .put(`/api/v1/motorcycles/${moto._id}`)
@@ -180,7 +184,7 @@ describe('Motorcycle Routes - /api/v1/motorcycles', () => {
     })
 
     it('should ignore createdAt, _id and unknown fields (mass-assignment guard)', async () => {
-      const moto = await Motorcycle.create({ ...motoData, brand: brandId })
+      const moto = await Motorcycle.create({ ...motoData, brand: brandSnapshot })
       const originalId = moto._id.toString()
       const originalCreatedAt = moto.createdAt!.toISOString()
       const fakeId = '507f1f77bcf86cd799439011'
@@ -208,7 +212,7 @@ describe('Motorcycle Routes - /api/v1/motorcycles', () => {
 
   describe('DELETE /api/v1/motorcycles/:id', () => {
     it('should delete a motorcycle', async () => {
-      const moto = await Motorcycle.create({ ...motoData, brand: brandId })
+      const moto = await Motorcycle.create({ ...motoData, brand: brandSnapshot })
 
       const res = await request(app)
         .delete(`/api/v1/motorcycles/${moto._id}`)
@@ -266,7 +270,7 @@ describe('Motorcycle Routes - /api/v1/motorcycles', () => {
     })
 
     it('PUT should return 401 without a token', async () => {
-      const moto = await Motorcycle.create({ ...motoData, brand: brandId })
+      const moto = await Motorcycle.create({ ...motoData, brand: brandSnapshot })
       const res = await request(app)
         .put(`/api/v1/motorcycles/${moto._id}`)
         .send({ name: 'Hacked' })
@@ -275,7 +279,7 @@ describe('Motorcycle Routes - /api/v1/motorcycles', () => {
     })
 
     it('PUT should return 403 for a non-admin user', async () => {
-      const moto = await Motorcycle.create({ ...motoData, brand: brandId })
+      const moto = await Motorcycle.create({ ...motoData, brand: brandSnapshot })
       const res = await request(app)
         .put(`/api/v1/motorcycles/${moto._id}`)
         .set('Cookie', userCookie)
@@ -285,14 +289,14 @@ describe('Motorcycle Routes - /api/v1/motorcycles', () => {
     })
 
     it('DELETE should return 401 without a token', async () => {
-      const moto = await Motorcycle.create({ ...motoData, brand: brandId })
+      const moto = await Motorcycle.create({ ...motoData, brand: brandSnapshot })
       const res = await request(app).delete(`/api/v1/motorcycles/${moto._id}`)
 
       expect(res.status).toBe(401)
     })
 
     it('DELETE should return 403 for a non-admin user', async () => {
-      const moto = await Motorcycle.create({ ...motoData, brand: brandId })
+      const moto = await Motorcycle.create({ ...motoData, brand: brandSnapshot })
       const res = await request(app)
         .delete(`/api/v1/motorcycles/${moto._id}`)
         .set('Cookie', userCookie)

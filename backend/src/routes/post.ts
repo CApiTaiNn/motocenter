@@ -2,13 +2,14 @@ import { Request, Router } from 'express'
 import { prepareQuery, ReqQuery } from '../utils/find'
 import Post from '../models/Post'
 import Message from '../models/Message'
-import Brand from '../models/Brand'
+import Brand, { toBrandSnapshot } from '../models/Brand'
 import User from '../models/User'
 import Motorcycle from '../models/Motorcycle'
 import { PostCategory } from '../constants/PostCategory'
 import { attachUser } from '../utils/attach'
-import { authenticateToken } from '../utils/auth'
+import { authenticateToken, isAdminUser } from '../utils/auth'
 import { makeRateLimiter } from '../utils/rateLimit'
+import { isValidObjectId } from 'mongoose'
 
 const router = Router()
 
@@ -66,13 +67,14 @@ const isValidCategory = (value: unknown): value is PostCategory =>
 router.get(
   '/',
   async (req: Request<unknown, unknown, unknown, ReqQuery>, res: any) => {
-    const { project, sort, deep, limit, filter } = prepareQuery(req.query)
+    const { project, sort, deep, limit, skip, filter } = prepareQuery(req.query)
     try {
-      let query = Post.find(filter).select(project).sort(sort).limit(limit)
-      if (deep) {
-        query = query.populate('brand')
-      }
-      const posts = await query.lean()
+      // brand is embedded on the document; only users need resolving.
+      const posts = await Post.find(filter)
+        .select(project)
+        .sort(sort)
+        .skip(skip).limit(limit)
+        .lean()
       if (deep) {
         await attachUser(posts, 'user')
       }
@@ -187,7 +189,7 @@ router.get('/count', async (req, res) => {
 router.get(
   '/:id/responses',
   async (req: Request<{ id: string }, unknown, unknown, ReqQuery>, res) => {
-    const { project, sort, deep, limit } = prepareQuery(req.query)
+    const { project, sort, deep, limit, skip } = prepareQuery(req.query)
     try {
       const post = await Post.findOne({ _id: req.params.id })
       if (!post) {
@@ -200,7 +202,7 @@ router.get(
       })
         .select(project)
         .sort(sort)
-        .limit(limit)
+        .skip(skip).limit(limit)
         .lean()
 
       if (deep) {
@@ -393,7 +395,7 @@ router.post('/', authenticateToken, async (req: Request, res) => {
       title: body.title,
       content: body.content,
       user: user,
-      brand: brand,
+      brand: toBrandSnapshot(brand),
       category: body.category,
       image: body.url
     })
@@ -494,7 +496,7 @@ router.put('/', authenticateToken, async (req: Request, res) => {
         title: body.title,
         content: body.content,
         category: body.category,
-        brand: brand._id,
+        brand: toBrandSnapshot(brand),
         image: body.url
       },
       { runValidators: true }
@@ -505,5 +507,66 @@ router.put('/', authenticateToken, async (req: Request, res) => {
     res.status(500).json({ error: 'Internal server error' })
   }
 })
+
+/**
+ * @openapi
+ * /posts/{id}:
+ *   delete:
+ *     summary: Supprimer un post (auteur ou admin), ses messages et son lien moto
+ *     tags:
+ *       - Posts
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID du post
+ *     responses:
+ *       204:
+ *         description: Post supprimé
+ *       401:
+ *         description: Non authentifié
+ *       403:
+ *         description: Non autorisé (ni auteur ni admin)
+ *       404:
+ *         description: Post non trouvé
+ *       500:
+ *         description: Erreur serveur
+ */
+router.delete(
+  '/:id',
+  authenticateToken,
+  async (req: Request<{ id: string }>, res) => {
+    const { id: authUserId } = req.user as { id: string }
+    try {
+      if (!isValidObjectId(req.params.id)) {
+        return res.status(404).json({ error: 'Post not found' })
+      }
+      const post = await Post.findById(req.params.id)
+      if (!post) {
+        return res.status(404).json({ error: 'Post not found' })
+      }
+
+      // Only the author (or an admin) may delete a post.
+      const isOwner = post.user?.toString() === authUserId
+      if (!isOwner && !(await isAdminUser(authUserId))) {
+        return res.status(403).json({ error: 'Forbidden' })
+      }
+
+      // Cascade: drop the post's messages and detach it from its motorcycle.
+      await Message.deleteMany({ reference: post._id, referenceModel: 'Post' })
+      await Motorcycle.updateMany(
+        { post: post._id.toString() },
+        { $unset: { post: 1 } }
+      )
+      await post.deleteOne()
+      res.status(204).end()
+    } catch (error) {
+      console.error('Error deleting post:', error)
+      res.status(500).json({ error: 'Internal server error' })
+    }
+  }
+)
 
 export default router

@@ -51,4 +51,7 @@ const messageSchema = new Schema(
   }
 )
 
+// The responses lookups always filter on both fields together.
+messageSchema.index({ reference: 1, referenceModel: 1 })
+
 export default model<IMessage>('Message', messageSchema)

@@ -4,6 +4,7 @@ export interface ReqQuery {
   project?: string
   sort?: string
   limit?: string
+  skip?: string
   filter?: string
   deep?: string
 }
@@ -77,6 +78,12 @@ export function prepareQuery(query: ReqQuery) {
     throw new HttpError(400, 'Invalid limit parameter')
   }
   const limit = Math.min(rawLimit, maxLimit)
+
+  // Offset pagination: page N = ?skip=N*limit&limit=limit.
+  const skip = query.skip ? Number(query.skip) : 0
+  if (!Number.isInteger(skip) || skip < 0) {
+    throw new HttpError(400, 'Invalid skip parameter')
+  }
   const filter = query.filter
     ? parseJsonParam(query.filter, 'filter')
     : defaultFilter
@@ -84,5 +91,5 @@ export function prepareQuery(query: ReqQuery) {
 
   const deep = query.deep ? true : false
 
-  return { project, sort, limit, filter, deep }
+  return { project, sort, limit, skip, filter, deep }
 }

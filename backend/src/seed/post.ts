@@ -1,5 +1,5 @@
 import { connectToMongo } from '.'
-import Brand from '../models/Brand'
+import Brand, { toBrandSnapshot } from '../models/Brand'
 import Motorcycle from '../models/Motorcycle'
 import Post from '../models/Post'
 import User from '../models/User'
@@ -36,7 +36,7 @@ const seedPost = async () => {
         "Je cherche une bonne moto pour commencer, j'ai vu Malo, Loris, Sloan et Cyril. Ils m'ont donné envie.",
       category: PostCategory.REPAIR,
       user: user._id,
-      brand: brandHonda._id,
+      brand: toBrandSnapshot(brandHonda),
       views: 12,
       image: '/images/posts/test1.png',
       userFavoritePost: []
@@ -47,7 +47,7 @@ const seedPost = async () => {
         "Des personnes diront que c'est Suzuki ou Honda, mais vraiment c'est quoi la meilleure ?",
       category: PostCategory.MAINTENANCE,
       user: user._id,
-      brand: brandHonda._id,
+      brand: toBrandSnapshot(brandHonda),
       image: '/images/posts/test2.png',
       userFavoritePost: []
     }
