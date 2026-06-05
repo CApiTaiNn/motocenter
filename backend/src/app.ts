@@ -6,10 +6,10 @@ import express, {
 import routes from './routes'
 import cors from 'cors'
 import helmet from 'helmet'
-import rateLimit from 'express-rate-limit'
 import swaggerUi from 'swagger-ui-express'
 import { swaggerSpec } from './swagger'
 import { HttpError } from './utils/errors'
+import { makeRateLimiter } from './utils/rateLimit'
 
 import cookieParser from 'cookie-parser'
 
@@ -26,14 +26,7 @@ app.use(express.json({ limit: '100kb' }))
 app.use(cookieParser())
 
 // Throttle authentication attempts to slow credential brute forcing.
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 20,
-  standardHeaders: true,
-  legacyHeaders: false,
-  skip: () => process.env.NODE_ENV === 'test'
-})
-app.use('/api/v1/auth', authLimiter)
+app.use('/api/v1/auth', makeRateLimiter(20))
 
 app.use('/api/v1', routes)
 

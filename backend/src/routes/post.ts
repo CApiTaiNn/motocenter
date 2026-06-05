@@ -11,6 +11,9 @@ import { authenticateToken } from '../utils/auth'
 
 const router = Router()
 
+const isValidCategory = (value: unknown): value is PostCategory =>
+  Object.values(PostCategory).includes(value as PostCategory)
+
 /**
  * @openapi
  * /posts:
@@ -380,7 +383,7 @@ router.post('/', authenticateToken, async (req: Request, res) => {
     if (!brand || !user) {
       return res.status(400).json({ error: 'Unknown brand or user' })
     }
-    if (!Object.values(PostCategory).includes(body.category)) {
+    if (!isValidCategory(body.category)) {
       return res.status(400).json({ error: 'Invalid category' })
     }
     const postCreated = await Post.insertOne({
@@ -478,7 +481,7 @@ router.put('/', authenticateToken, async (req: Request, res) => {
     if (!brand) {
       return res.status(400).json({ error: 'Unknown brand' })
     }
-    if (!Object.values(PostCategory).includes(body.category)) {
+    if (!isValidCategory(body.category)) {
       return res.status(400).json({ error: 'Invalid category' })
     }
 

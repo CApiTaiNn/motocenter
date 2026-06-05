@@ -5,9 +5,9 @@ import {
   type Response
 } from 'express'
 import multer, { MulterError } from 'multer'
-import rateLimit from 'express-rate-limit'
 import { v4 as uuidv4 } from 'uuid'
 import { getSupabase } from '../utils/supabase'
+import { makeRateLimiter } from '../utils/rateLimit'
 
 const BUCKET = 'userProfilImages'
 const MAX_FILE_SIZE = 5 * 1024 * 1024
@@ -65,13 +65,7 @@ const handleUpload = (req: Request, res: Response, next: NextFunction) => {
   })
 }
 
-const uploadLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 30,
-  standardHeaders: true,
-  legacyHeaders: false,
-  skip: () => process.env.NODE_ENV === 'test'
-})
+const uploadLimiter = makeRateLimiter(30)
 
 const router = Router()
 

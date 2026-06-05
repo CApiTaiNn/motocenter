@@ -1,4 +1,5 @@
 import swaggerJsdoc from 'swagger-jsdoc'
+import { MotorcycleCategory } from './constants/MotorcycleCategory'
 
 const options: swaggerJsdoc.Options = {
   definition: {
@@ -63,16 +64,6 @@ const options: swaggerJsdoc.Options = {
             createdAt: { type: 'string', format: 'date-time' },
           },
         },
-        // --- MODÈLE CATEGORY ---
-        Category: {
-          type: 'object',
-          required: ['name', 'icon'],
-          properties: {
-            _id: { type: 'string' },
-            name: { type: 'string' },
-            icon: { type: 'string' },
-          },
-        },
         // --- MODÈLE MOTORCYCLE ---
         Motorcycle: {
           type: 'object',
@@ -84,15 +75,7 @@ const options: swaggerJsdoc.Options = {
             year: { type: 'integer' },
             category: {
               type: 'string',
-              enum: [
-                'sportsbike',
-                'roadster',
-                'adventure',
-                'custom',
-                'touring',
-                'sport-touring',
-                'supermotard',
-              ],
+              enum: Object.values(MotorcycleCategory),
             },
             engine_size: { type: 'number' },
             horsePower: { type: 'number' },
