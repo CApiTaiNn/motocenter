@@ -24,6 +24,13 @@ definePageMeta({
 const table = useTemplateRef('table')
 const UBadge = resolveComponent('UBadge')
 const apiBase = useRuntimeConfig().public.apiBase
+// Variant names describe the icon color: the white icon for dark mode.
+const colorMode = useColorMode()
+const motorcycleIcon = computed(() =>
+  colorMode.value === 'dark'
+    ? '/svg/motorcycleIcon_light.svg'
+    : '/svg/motorcycleIcon_dark.svg'
+)
 const motos = ref<MotoRow[]>([])
 const selectedMoto = ref<MotoRow | null>(null)
 const search = ref<string>('')
@@ -249,7 +256,7 @@ watch(
               <div
                 class="flex flex-col items-center justify-center gap-2 py-10 text-gray-400"
               >
-                <img src="/svg/motorcycleIcon.svg" width="46" height="25" />
+                <img :src="motorcycleIcon" width="46" height="25" />
 
                 <p>Aucune moto trouvée</p>
               </div>

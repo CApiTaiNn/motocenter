@@ -83,8 +83,9 @@ const isOpen = ref(true)
 /* Placeholder bike: tinted with the theme foreground so it stays visible
    on the box's --background (white skeleton in dark mode, black in light).
    Kept in scoped CSS: -webkit-mask / mask have no Tailwind utility. */
+/* Only the alpha channel matters for a mask, so either color variant works. */
 .skeleton-icon {
-  -webkit-mask: url('/svg/motorcycleIcon.svg') center / contain no-repeat;
-  mask: url('/svg/motorcycleIcon.svg') center / contain no-repeat;
+  -webkit-mask: url('/svg/motorcycleIcon_light.svg') center / contain no-repeat;
+  mask: url('/svg/motorcycleIcon_light.svg') center / contain no-repeat;
 }
 </style>
