@@ -120,12 +120,12 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="comment-wrapper flex flex-col ml-4 max-md:ml-1! max-lg:ml-2!">
+  <div class="ml-4 flex flex-col max-lg:ml-2! max-md:ml-1!">
     <div
-      class="comment flex flex-row gap-4 mb-4 relative max-lg:min-w-0"
+      class="relative mb-4 flex flex-row gap-4 max-lg:min-w-0"
       :class="responsesOfComment.length === 0 ? 'ml-4' : ''"
     >
-      <div class="avatar flex flex-row items-center gap-2 h-fit">
+      <div class="flex h-fit flex-row items-center gap-2">
         <div>
           <UIcon
             v-if="responsesOfComment.length !== 0"
@@ -142,15 +142,15 @@ onMounted(async () => {
           class="mr-2"
         />
       </div>
-      <div class="comment-content flex flex-col gap-2 flex-1">
-        <div class="comment-header flex items-center gap-2">
+      <div class="flex flex-1 flex-col gap-2">
+        <div class="flex items-center gap-2">
           <p class="font-bold">{{ message.user.pseudo }},&nbsp;</p>
           <p>{{ formatTimeAgo(message.createdAt) }}</p>
         </div>
-        <p class="comment-text m-0 leading-[1.5]">{{ message.content }}</p>
-        <div class="comment-actions flex items-center gap-6 mt-1">
+        <p class="m-0 leading-normal">{{ message.content }}</p>
+        <div class="mt-1 flex items-center gap-6">
           <div
-            class="action-button flex items-center gap-2 cursor-pointer"
+            class="flex cursor-pointer items-center gap-2"
             @click="handleAddLikeOrDislike(true, message._id)"
           >
             <UIcon
@@ -164,7 +164,7 @@ onMounted(async () => {
             <p>{{ message.like }}</p>
           </div>
           <div
-            class="action-button flex items-center gap-2 cursor-pointer"
+            class="flex cursor-pointer items-center gap-2"
             @click="handleAddLikeOrDislike(false, message._id)"
           >
             <UIcon
@@ -178,14 +178,14 @@ onMounted(async () => {
             <p>{{ message.dislike }}</p>
           </div>
           <div
-            class="action-button flex items-center gap-2 cursor-pointer"
+            class="flex cursor-pointer items-center gap-2"
             @click="handleSeeInputToAddResponseOfComment"
           >
             <UIcon name="i-lucide-messages-square" class="size-6" />
             <p>Répondre</p>
           </div>
         </div>
-        <div v-if="isResponseOfAcomment" class="add-reponse-comment flex flex-col gap-2 w-full">
+        <div v-if="isResponseOfAcomment" class="flex w-full flex-col gap-2">
           <UTextarea
             v-model="isResponseOfAcommentValue"
             placeholder="Ecrivez votre réponse"
@@ -209,8 +209,8 @@ onMounted(async () => {
         <div
           :class="
             props.deep >= MAX_DEEP
-              ? 'ml-2 pl-0 border-l-0 mt-4 max-md:ml-0! max-lg:ml-1! max-md:pl-2! max-lg:pl-3!'
-              : 'ml-4 pl-4 mt-3 border-l-2 border-solid border-[var(--border-gray)] max-md:ml-2! max-lg:ml-3! max-md:pl-2! max-lg:pl-3! max-lg:border-l-2!'
+              ? 'mt-4 ml-2 border-l-0 pl-0 max-lg:ml-1! max-lg:pl-3! max-md:ml-0! max-md:pl-2!'
+              : 'mt-3 ml-4 border-l-2 border-solid border-(--border-gray) pl-4 max-lg:ml-3! max-lg:border-l-2! max-lg:pl-3! max-md:ml-2! max-md:pl-2!'
           "
         >
           <Comment

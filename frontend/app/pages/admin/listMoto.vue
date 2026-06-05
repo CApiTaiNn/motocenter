@@ -215,7 +215,7 @@ watch(
 <template>
   <div>
     <main>
-      <div class="flex justify-between items-center m-12">
+      <div class="m-12 flex items-center justify-between">
         <UInput
           v-model="search"
           icon="i-lucide-search"
@@ -229,7 +229,7 @@ watch(
       </div>
 
       <h3 class="ml-4">Liste des motos</h3>
-      <div class="flex justify-between items-start max-lg:flex-col">
+      <div class="flex items-start justify-between max-lg:flex-col">
         <div class="flex-1 p-4">
           <UTable
             ref="table"
@@ -247,7 +247,7 @@ watch(
           >
             <template #empty>
               <div
-                class="flex flex-col items-center justify-center py-10 gap-2 text-gray-400"
+                class="flex flex-col items-center justify-center gap-2 py-10 text-gray-400"
               >
                 <img src="/svg/motorcycleIcon.svg" width="46" height="25" />
 
@@ -260,7 +260,7 @@ watch(
             <USelect v-model="pagination.pageSize" :items="items" />
           </div>
 
-          <div class="flex justify-end border-t border-default pt-4 px-4">
+          <div class="flex justify-end border-t border-default px-4 pt-4">
             <UPagination
               :page="
                 (table?.tableApi?.getState().pagination.pageIndex || 0) + 1
@@ -273,10 +273,10 @@ watch(
         </div>
         <div
           v-if="panelOpen"
-          class="m-8 border border-solid border-[var(--border-gray)] rounded-xl p-4 h-[calc(150vh-200px)] overflow-y-auto sticky top-[60px] max-lg:w-full! max-lg:static!"
+          class="sticky top-[60px] m-8 h-[calc(150vh-200px)] overflow-y-auto rounded-xl border border-solid border-(--border-gray) p-4 max-lg:static! max-lg:w-full!"
         >
           <header
-            class="flex items-center gap-2 pb-3 mb-4 border-b border-solid border-gray-300"
+            class="mb-4 flex items-center gap-2 border-b border-solid border-gray-300 pb-3"
           >
             <UIcon
               :name="selectedMoto ? 'i-lucide-pencil' : 'i-lucide-plus-circle'"

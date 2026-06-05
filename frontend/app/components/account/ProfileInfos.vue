@@ -54,45 +54,45 @@ watch(
 <template>
   <UModal v-model:open="isOpen">
     <template #content>
-      <div class="flex flex-col items-center p-12 overflow-y-auto">
+      <div class="flex flex-col items-center overflow-y-auto p-12">
         <h3>Mon Profil</h3>
 
-        <div class="flex items-center justify-center w-[100px] h-[100px] rounded-full text-4xl font-bold text-[var(--ui-color-error-500)] bg-[var(--ui-color-error-50)] mb-6 overflow-hidden">
-          <img v-if="state.image" :src="state.image" alt="Avatar" class="w-full h-full object-cover" />
+        <div class="mb-6 flex size-[100px] items-center justify-center overflow-hidden rounded-full bg-(--ui-color-error-50) text-4xl font-bold text-(--ui-color-error-500)">
+          <img v-if="state.image" :src="state.image" alt="Avatar" class="size-full object-cover" />
           <span v-else>{{ getInitials }}</span>
         </div>
 
-        <div class="text-center mb-8">
+        <div class="mb-8 text-center">
           <h2>{{ state.firstname }} {{ state.lastname }}</h2>
-          <p class="text-gray-500 text-sm">@{{ state.pseudo }}</p>
+          <p class="text-sm text-gray-500">@{{ state.pseudo }}</p>
         </div>
 
         <div class="w-full max-w-[400px]">
-          <div class="flex justify-between py-3 border-b border-solid border-gray-300 last:border-b-0">
-            <span class="text-gray-500 text-sm">Expérience</span>
-            <span class="value">{{ state.experience }}</span>
+          <div class="flex justify-between border-b border-solid border-gray-300 py-3 last:border-b-0">
+            <span class="text-sm text-gray-500">Expérience</span>
+            <span>{{ state.experience }}</span>
           </div>
 
-          <div class="flex justify-between py-3 border-b border-solid border-gray-300 last:border-b-0">
-            <span class="text-gray-500 text-sm">Années de pratique</span>
-            <span class="value">{{ ridingYears }} ans</span>
+          <div class="flex justify-between border-b border-solid border-gray-300 py-3 last:border-b-0">
+            <span class="text-sm text-gray-500">Années de pratique</span>
+            <span>{{ ridingYears }} ans</span>
           </div>
 
-          <div class="flex justify-between py-3 border-b border-solid border-gray-300 last:border-b-0">
-            <span class="text-gray-500 text-sm">Email</span>
-            <span class="value">{{ state.email }}</span>
+          <div class="flex justify-between border-b border-solid border-gray-300 py-3 last:border-b-0">
+            <span class="text-sm text-gray-500">Email</span>
+            <span>{{ state.email }}</span>
           </div>
         </div>
         <UButton
           label="Modifier mon profil"
-          class="rounded-full mt-6 w-full justify-center"
+          class="mt-6 w-full justify-center rounded-full"
           variant="soft"
           color="neutral"
           @click="useProfileEditModal().open"
         />
         <UButton
           label="Se déconnecter"
-          class="rounded-full mt-6 w-full justify-center text-white"
+          class="mt-6 w-full justify-center rounded-full text-white"
           @click="
             () => {
               logout()

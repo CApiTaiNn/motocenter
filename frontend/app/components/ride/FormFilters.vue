@@ -103,9 +103,9 @@ const resetFilter = () => {
 </script>
 
 <template>
-  <div class="filters-container flex flex-col gap-4 ml-3 bg-[var(--background)] w-[20dvw] h-[46rem] min-w-[350px] max-h-[calc(100vh_-_100px)] absolute top-[60px] bottom-[20px] z-[2000] rounded-lg border border-solid border-[var(--border-gray)] shadow-[var(--shadow-md)] p-4 overflow-y-auto max-[480px]:w-[95%]! max-[480px]:min-w-0! max-[480px]:h-auto! max-[480px]:max-h-[80vh]! max-[480px]:left-1/2 max-[480px]:-translate-x-1/2 max-[480px]:m-0!">
-    <h3 class="text-xl font-semibold text-center">Filtres</h3>
-    <div class="container-fields flex flex-col justify-center items-center gap-4 px-4">
+  <div class="absolute top-[60px] bottom-[20px] z-2000 ml-3 flex h-184 max-h-[calc(100vh-100px)] w-[20dvw] min-w-[350px] flex-col gap-4 overflow-y-auto rounded-lg border border-solid border-(--border-gray) bg-(--background) p-4 shadow-(--shadow-md) transition-[left,transform,width] duration-300 max-[480px]:left-1/2 max-[480px]:m-0! max-[480px]:h-auto! max-[480px]:max-h-[80vh]! max-[480px]:w-[95%]! max-[480px]:min-w-0! max-[480px]:-translate-x-1/2">
+    <h3 class="text-center text-xl font-semibold">Filtres</h3>
+    <div class="flex flex-col items-center justify-center gap-4 px-4">
       <UFormField label="Titre de la balade">
         <UInput
           v-model="filters.title"
@@ -161,7 +161,7 @@ const resetFilter = () => {
       </UFormField>
 
       <UFormField label="Distance (km)">
-        <div class="value-slider-container flex justify-start mb-2 gap-1">
+        <div class="mb-2 flex justify-start gap-1">
           <UInputNumber
             v-model="filters.distance[0]"
             :min="0"
@@ -186,7 +186,7 @@ const resetFilter = () => {
       </UFormField>
 
       <UFormField label="Durée (h)">
-        <div class="value-slider-container flex justify-start mb-2 gap-1">
+        <div class="mb-2 flex justify-start gap-1">
           <UInputNumber
             v-model="filters.duration[0]"
             :min="0"
@@ -210,11 +210,11 @@ const resetFilter = () => {
         />
       </UFormField>
 
-      <div class="container-bottom-buttons flex flex-row gap-3 w-full">
+      <div class="flex w-full flex-row gap-3">
         <UButton
           color="neutral"
           variant="subtle"
-          class="w-80 hover:bg-red-400 hover:text-white transition-colors cursor-pointer"
+          class="w-80 cursor-pointer transition-colors hover:bg-red-400 hover:text-white"
           block
           @click="resetFilter"
         >
@@ -241,12 +241,5 @@ const resetFilter = () => {
 
 :deep(input::placeholder) {
   opacity: 1;
-}
-
-.filters-container {
-  transition:
-    left 0.3s,
-    transform 0.3s,
-    width 0.3s;
 }
 </style>

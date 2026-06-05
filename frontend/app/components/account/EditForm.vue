@@ -170,7 +170,7 @@ watch(
   <UModal v-model:open="isOpen">
     <template #content>
       <div
-        class="flex flex-col p-8 overflow-y-auto max-h-[80vh]"
+        class="flex max-h-[80vh] flex-col overflow-y-auto p-8"
       >
         <h3>Modifier mon profil</h3>
 
@@ -178,11 +178,11 @@ watch(
           ref="form"
           :state="state"
           :errors="formErrors"
-          class="flex flex-col gap-6 flex-1"
+          class="flex flex-1 flex-col gap-6"
           @submit="handleSave"
         >
           <div
-            class="flex flex-col items-center gap-4 mb-2"
+            class="mb-2 flex flex-col items-center gap-4"
           >
             <UFormField
               name="file"
@@ -253,10 +253,10 @@ watch(
                   v-for="option in experienceOptions"
                   :key="option"
                   type="button"
-                  class="flex-1 min-w-fit cursor-pointer rounded-full border-2 border-solid bg-transparent px-4 py-2 text-sm transition-all duration-200 ease-in-out"
+                  class="min-w-fit flex-1 cursor-pointer rounded-full border-2 border-solid bg-transparent px-4 py-2 text-sm transition-all duration-200 ease-in-out"
                   :class="
                     state.experience === option
-                      ? 'border-[var(--ui-color-error-500)] text-[var(--ui-color-error-500)]'
+                      ? 'border-(--ui-color-error-500) text-(--ui-color-error-500)'
                       : 'border-gray-300 text-gray-700 hover:border-gray-500'
                   "
                   @click="state.experience = option"
@@ -349,7 +349,7 @@ watch(
             </UFormField>
           </div>
 
-          <div class="flex gap-3 pt-4 mt-auto">
+          <div class="mt-auto flex gap-3 pt-4">
             <UButton
               type="button"
               label="Annuler"
@@ -362,7 +362,7 @@ watch(
               type="submit"
               label="Sauvegarder"
               color="neutral"
-              class="font-bold w-1/2"
+              class="w-1/2 font-bold"
               :loading="isLoading"
               :disabled="isLoading"
             />

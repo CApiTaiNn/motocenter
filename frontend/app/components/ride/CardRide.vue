@@ -168,28 +168,28 @@ onMounted(async () => {
 
 <template>
   <div
-    class="relative flex w-full h-auto min-h-[220px] flex-col overflow-visible rounded-xl bg-cover bg-center shadow-[0_4px_12px_rgba(0,0,0,0.15)]"
+    class="relative flex h-auto min-h-[220px] w-full flex-col overflow-visible rounded-xl bg-cover bg-center shadow-[0_4px_12px_rgba(0,0,0,0.15)]"
     :style="{ backgroundImage: `url(${imageUrl})` }"
   >
-    <div class="overlay absolute inset-0 z-[1] rounded-xl bg-gradient-to-t from-black/95 via-black/70 to-black/40"></div>
+    <div class="absolute inset-0 z-1 rounded-xl bg-linear-to-t from-black/95 via-black/70 to-black/40"></div>
 
-    <div class="card-content relative z-[2] flex flex-col gap-2 p-4 text-white md:p-6!">
+    <div class="relative z-2 flex flex-col gap-2 p-4 text-white md:p-6!">
       <header class="flex w-full flex-wrap items-center justify-between gap-3">
         <div class="flex min-w-0 flex-1 flex-row flex-wrap items-center gap-2">
           <span
-            class="h-[14px] w-[14px] rounded-full shadow-[0_0_10px_rgba(255,255,255,0.3)]"
+            class="size-[14px] rounded-full shadow-[0_0_10px_rgba(255,255,255,0.3)]"
             :style="{ backgroundColor: props.ride.color || '#3b82f6' }"
             aria-hidden="true"
           ></span>
 
-          <h2 class="m-0 shrink overflow-hidden text-ellipsis whitespace-normal text-xl font-bold [text-shadow:0_2px_4px_rgba(0,0,0,0.5)] md:text-2xl!">{{ props.ride.title }}</h2>
+          <h2 class="m-0 shrink overflow-hidden text-xl font-bold text-ellipsis whitespace-normal [text-shadow:0_2px_4px_rgba(0,0,0,0.5)] md:text-2xl!">{{ props.ride.title }}</h2>
 
           <UBadge
             v-if="props.ride.is_event"
             variant="subtle"
             size="md"
             icon="i-lucide-calendar-days"
-            class="bg-white/15 backdrop-blur-xs text-white border border-white/20 text-xs py-0.5 px-2 whitespace-nowrap shrink-0"
+            class="shrink-0 border border-white/20 bg-white/15 px-2 py-0.5 text-xs whitespace-nowrap text-white backdrop-blur-xs"
           >
             {{ dateEvent.toLocaleDateString('fr-FR') }}
             •
@@ -212,7 +212,7 @@ onMounted(async () => {
           variant="subtle"
           color="neutral"
           size="md"
-          class="text-white! font-bold transition-transform active:scale-120 cursor-pointer"
+          class="cursor-pointer font-bold text-white! transition-transform active:scale-120"
           @click="likeGestion"
         />
       </header>
@@ -255,8 +255,8 @@ onMounted(async () => {
           </UBadge>
         </div>
 
-        <div class="flex flex-wrap items-center justify-between gap-3 border-t border border-white/10 pt-3 text-sm max-[480px]:flex-col! max-[480px]:items-stretch! max-[480px]:gap-3!">
-          <div class="flex items-center gap-3 max-[480px]:w-full max-[480px]:justify-start max-[480px]:flex-wrap">
+        <div class="flex flex-wrap items-center justify-between gap-3 border border-t border-white/10 pt-3 text-sm max-[480px]:flex-col! max-[480px]:items-stretch! max-[480px]:gap-3!">
+          <div class="flex items-center gap-3 max-[480px]:w-full max-[480px]:flex-wrap max-[480px]:justify-start">
             <template v-if="creator">
               <UAvatar
                 :alt="`Avatar de ${creator.pseudo || 'MotoCenter'}`"
@@ -273,13 +273,13 @@ onMounted(async () => {
             </template>
           </div>
 
-          <div v-if="ride.is_event" class="flex items-center gap-3 max-[480px]:w-full max-[480px]:justify-start max-[480px]:flex-wrap">
+          <div v-if="ride.is_event" class="flex items-center gap-3 max-[480px]:w-full max-[480px]:flex-wrap max-[480px]:justify-start">
             <UButton
               :label="isParticipating ? 'Ne plus participer' : 'Participer'"
               :color="isParticipating ? 'neutral' : 'error'"
               :variant="isParticipating ? 'subtle' : 'solid'"
               size="lg"
-              class="px-5 font-bold max-[480px]:flex-1 max-[480px]:justify-center cursor-pointer"
+              class="cursor-pointer px-5 font-bold max-[480px]:flex-1 max-[480px]:justify-center"
               :class="!isParticipating ? 'text-white!' : ''"
               @click="participateGestion"
             />

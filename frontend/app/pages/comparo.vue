@@ -13,10 +13,7 @@ import { useConnexionModal } from '~/composables/useConnexionModal'
 
 interface ICommentInput {
   motorcycleId: string
-  motorcycleName: string
-  brand: string
   content: string
-  user: string
 }
 
 const apiBase = useRuntimeConfig().public.apiBase
@@ -57,10 +54,7 @@ const optionMotorcycles = computed(() => {
 })
 const comment = ref<ICommentInput>({
   motorcycleId: '',
-  motorcycleName: '',
-  brand: '',
-  content: '',
-  user: ''
+  content: ''
 })
 // Tableau pour chaque Categories
 const resultatNumber = reactive<
@@ -309,45 +303,45 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
   <div>
     <HeaderInfo :scroll-to-element-id="'form'">
       <template #title>
-        <h1 class="h1-mobile">
+        <h1>
           Comparez. Choisissez. <br />
           <span class="text-[red]">Pilotez</span>
         </h1>
       </template>
       <template #subtitle>
-        <p class="p-mobile">
+        <p>
           Comparez facilement les performances, prix et caractéristiques de vos
           motos préférées.
         </p>
       </template>
     </HeaderInfo>
-    <div class="container-form flex flex-col gap-16 mt-24 justify-center">
-      <div id="form" class="flex flex-col justify-center items-center gap-6">
+    <div class="mt-24 flex flex-col justify-center gap-16">
+      <div id="form" class="flex flex-col items-center justify-center gap-6">
         <div class="flex justify-center gap-8 max-lg:flex-col! max-lg:items-center">
           <MotocyclesForm v-model="motorcycle1Id" form-title="Moto 1" />
           <UIcon
             name="i-lucide-arrow-left-right"
-            class="size-8 text-(--ui-primary) self-center max-lg:rotate-90"
+            class="size-8 self-center text-(--ui-primary) max-lg:rotate-90"
             aria-hidden="true"
           />
           <MotocyclesForm v-model="motorcycle2Id" form-title="Moto 2" />
         </div>
-        <p v-if="!motorcycle1Id || !motorcycle2Id" class="text-center text-gray-500 text-sm italic">
+        <p v-if="!motorcycle1Id || !motorcycle2Id" class="text-center text-sm text-gray-500 italic">
           Sélectionnez deux motos pour lancer la comparaison.
         </p>
       </div>
       <Transition>
         <div v-if="showResultat" ref="resultat" class="scroll-mt-24">
-          <nav class="flex flex-wrap gap-1 w-fit max-w-full mx-auto mb-12 p-1 bg-[var(--background)] border border-[var(--border-gray)] rounded-full justify-center" role="tablist">
+          <nav class="mx-auto mb-12 flex w-fit max-w-full flex-wrap justify-center gap-1 rounded-full border border-(--border-gray) bg-(--background) p-1" role="tablist">
             <button
               v-for="tab in resultTabs"
               :key="tab.key"
               type="button"
               :class="[
-                'px-6 py-2 bg-transparent border-none rounded-full cursor-pointer font-[\'Poppins\',sans-serif] text-base font-medium whitespace-nowrap transition-[background-color,color] duration-200 ease-[ease]',
+                'cursor-pointer rounded-full border-none bg-transparent px-6 py-2 font-[\'Poppins\',sans-serif] text-base font-medium whitespace-nowrap transition-[background-color,color] duration-200 ease-[ease]',
                 activeResultTab === tab.key
-                  ? 'bg-[var(--ui-primary)]/10 text-[var(--ui-primary)] font-semibold'
-                  : 'text-[var(--ui-primary)] hover:bg-[var(--ui-primary)]/5'
+                  ? 'bg-(--ui-primary)/10 font-semibold text-(--ui-primary)'
+                  : 'text-(--ui-primary) hover:bg-(--ui-primary)/5'
               ]"
               role="tab"
               :aria-selected="activeResultTab === tab.key"
@@ -386,9 +380,9 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
             </div>
           </div>
           <div v-show="activeResultTab === 'comments'" class="tab-panel">
-            <div class="flex gap-8 items-start max-lg:flex-col max-lg:items-center!">
-              <div class="flex-1 min-w-0 flex flex-col gap-3">
-                <h4 class="text-center mb-2">
+            <div class="flex items-start gap-8 max-lg:flex-col max-lg:items-center!">
+              <div class="flex min-w-0 flex-1 flex-col gap-3">
+                <h4 class="mb-2 text-center">
                   {{ motorcycle1?.name ?? 'Moto 1' }}
                 </h4>
                 <template v-if="commentsMotorcycle1.length > 0">
@@ -398,12 +392,12 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
                     :response="comment1"
                   />
                 </template>
-                <p v-else class="text-gray-500 italic text-center py-4">
+                <p v-else class="py-4 text-center text-gray-500 italic">
                   Postez le premier commentaire !
                 </p>
               </div>
-              <div class="flex-1 min-w-0 flex flex-col gap-3">
-                <h4 class="text-center mb-2">
+              <div class="flex min-w-0 flex-1 flex-col gap-3">
+                <h4 class="mb-2 text-center">
                   {{ motorcycle2?.name ?? 'Moto 2' }}
                 </h4>
                 <template v-if="commentsMotorcycle2.length > 0">
@@ -413,21 +407,21 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
                     :response="comment2"
                   />
                 </template>
-                <p v-else class="text-gray-500 italic text-center py-4">
+                <p v-else class="py-4 text-center text-gray-500 italic">
                   Postez le premier commentaire !
                 </p>
               </div>
             </div>
           </div>
-          <div class="relative my-12 mx-[25%] w-1/2 min-h-[25rem] border border-solid border-gray-500 rounded-[20px] max-lg:mx-[12%]! max-lg:w-[76%]! max-lg:min-h-[auto]! max-md:my-6! max-md:mx-4! max-md:w-auto!">
-            <div v-if="!isAuthenticated" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 text-center max-lg:w-[90%]! max-lg:flex! max-lg:flex-col max-lg:items-center! max-lg:gap-4">
-              <h3 class="h3-mobile w-[400px] max-lg:w-auto! max-lg:text-lg!">
+          <div class="relative mx-[25%] my-12 min-h-100 w-1/2 rounded-[20px] border border-solid border-gray-500 max-lg:mx-[12%]! max-lg:min-h-auto! max-lg:w-[76%]! max-md:mx-4! max-md:my-6! max-md:w-auto!">
+            <div v-if="!isAuthenticated" class="absolute top-1/2 left-1/2 z-10 -translate-1/2 text-center max-lg:flex! max-lg:w-[90%]! max-lg:flex-col max-lg:items-center! max-lg:gap-4">
+              <h3 class="m-6 w-[400px] text-center max-lg:w-auto! max-lg:text-lg!">
                 Rejoignez la communauté pour débattre et partager vos avis sur
                 ces motos !
               </h3>
               <UButton
                 color="neutral"
-                class="rounded-4xl self-end text-xs p-2"
+                class="self-end rounded-4xl p-2 text-xs"
                 size="xl"
                 @click="open()"
                 >Se connecter
@@ -435,8 +429,8 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
             </div>
             <div
               v-if="!messagePosted"
-              class="flex flex-col justify-between h-full min-h-[25rem] p-8 max-lg:min-h-[auto]! max-lg:p-4!"
-              :class="{ 'blur-[3px] pointer-events-none select-none': !isAuthenticated }"
+              class="flex h-full min-h-100 flex-col justify-between p-8 max-lg:min-h-auto! max-lg:p-4!"
+              :class="{ 'pointer-events-none blur-[3px] select-none': !isAuthenticated }"
             >
               <h4 class="text-center">
                 Déjà roulé une de ces motos ?<br />
@@ -457,7 +451,7 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
                 />
               </div>
               <UButton
-                class="rounded-4xl self-end text-xs m-1"
+                class="m-1 self-end rounded-4xl text-xs"
                 size="xl"
                 @click="postComment"
                 >Poster</UButton
@@ -465,8 +459,8 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
             </div>
             <div
               v-else
-              class="flex flex-col justify-center h-fit min-h-[25rem] p-8 gap-8 max-lg:min-h-[auto]! max-lg:p-4!"
-              :class="{ 'blur-[3px] pointer-events-none select-none': !isAuthenticated }"
+              class="flex h-fit min-h-100 flex-col justify-center gap-8 p-8 max-lg:min-h-auto! max-lg:p-4!"
+              :class="{ 'pointer-events-none blur-[3px] select-none': !isAuthenticated }"
             >
               <h4 class="text-center">Merci pour votre contribution !</h4>
               <p class="text-center">
@@ -477,30 +471,31 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
           </div>
         </div>
       </Transition>
-      <div class="caroussel-container flex flex-col gap-20 mx-[10%] max-md:mx-4! max-lg:mx-[6%]!">
+      <div class="mx-[10%] flex flex-col gap-20 max-lg:mx-[6%]! max-md:mx-4!">
         <div>
-          <h3 class="h3-mobile">Pour la performance</h3>
+          <h3 class="m-6 text-left">Pour la performance</h3>
           <CarrouselMotorcycles
             :items="carousselSportBikes"
             @selected="handleCaroussel"
           />
         </div>
         <div>
-          <h3 class="h3-mobile">Pour le A2</h3>
+          <h3 class="m-6 text-left">Pour le A2</h3>
           <CarrouselMotorcycles
             :items="carousselBeginnerBikes"
             @selected="handleCaroussel"
           />
         </div>
         <div>
-          <h3 class="h3-mobile">Pour l'aventure</h3>
+          <h3 class="m-6 text-left">Pour l'aventure</h3>
           <CarrouselMotorcycles
             :items="carousselAdventureBikes"
             @selected="handleCaroussel"
           />
         </div>
-        <div class="dual-container sticky bottom-0 flex justify-center pointer-events-none">
+        <div class="pointer-events-none sticky bottom-0 flex justify-center">
           <DualMotorcycle
+            class="pointer-events-auto"
             :left-motorcycle-url="motorcycle1PreviewUrl"
             :right-motorcycle-url="motorcycle2PreviewUrl"
             :left-name="motorcycle1?.name"
@@ -515,16 +510,6 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
 </template>
 
 <style scoped>
-/* Bare-element descendant rules: apply to all section headings */
-.container-form h3 {
-  text-align: center;
-  margin: 1.5rem;
-}
-
-.caroussel-container h3 {
-  text-align: left;
-}
-
 /* Animation on tab switch */
 .tab-panel {
   animation: tab-fade 0.2s ease-out;
@@ -533,11 +518,6 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
 @keyframes tab-fade {
   from { opacity: 0; transform: translateY(4px); }
   to { opacity: 1; transform: translateY(0); }
-}
-
-/* Container lets clicks pass through its empty zones; only the panel is interactive */
-.dual-container > * {
-  pointer-events: auto;
 }
 
 /* Transitions */

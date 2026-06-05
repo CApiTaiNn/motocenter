@@ -175,7 +175,7 @@ const handleSubmit = async () => {
         <h3>S'inscrire</h3>
 
         <!-- Indicateur de progression -->
-        <div class="flex justify-center gap-2 mb-8">
+        <div class="mb-8 flex justify-center gap-2">
           <div class="progress-dot" :class="{ active: currentStep >= 1 }" />
           <div class="progress-dot" :class="{ active: currentStep >= 2 }" />
           <div class="progress-dot" :class="{ active: currentStep >= 3 }" />
@@ -374,7 +374,7 @@ const handleSubmit = async () => {
               type="button"
               label="Suivant"
               color="neutral"
-              class="w-1/2 ml-auto"
+              class="ml-auto w-1/2"
               @click="nextStep"
             />
             <UButton
@@ -382,7 +382,7 @@ const handleSubmit = async () => {
               type="submit"
               label="Confirmer"
               color="neutral"
-              class="font-bold w-1/2 ml-auto"
+              class="ml-auto w-1/2 font-bold"
               :loading="isLoading"
               :disabled="isLoading"
             />

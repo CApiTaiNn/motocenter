@@ -10,12 +10,12 @@ const props = defineProps<{
 
 <template>
   <div class="flex flex-col items-center gap-3">
-    <div class="flex items-center justify-center w-[80%] gap-6 max-md:w-[95%]! max-lg:w-[88%]! max-md:gap-[10px]!">
-      <div class="flex flex-row justify-center items-center w-full">
+    <div class="flex w-[80%] items-center justify-center gap-6 max-lg:w-[88%]! max-md:w-[95%]! max-md:gap-[10px]!">
+      <div class="flex w-full flex-row items-center justify-center">
         <AudioPlayer v-if="props.firstValue" :src="props.firstValue" />
         <p v-else>Pas d'audio</p>
       </div>
-      <div class="flex flex-row justify-center items-center w-full">
+      <div class="flex w-full flex-row items-center justify-center">
         <AudioPlayer v-if="props.secondValue" :src="props.secondValue" />
         <p v-else>Pas d'audio</p>
       </div>

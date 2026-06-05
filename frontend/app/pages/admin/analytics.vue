@@ -110,7 +110,7 @@ onMounted(() => {
 
 <template>
   <div>
-    <div class="flex justify-center flex-wrap m-4 gap-4">
+    <div class="m-4 flex flex-wrap justify-center gap-4">
       <StatsAnalytics
         v-for="item in stats"
         :key="item.title"
@@ -119,41 +119,41 @@ onMounted(() => {
         :percent="item.percent"
       />
     </div>
-    <div class="flex justify-between flex-wrap gap-6 my-6 mx-4">
-      <UCard class="flex-[1_1_300px] max-w-[600px] items-center justify-center border border-solid border-[var(--border-gray)] rounded-lg border-t-[3px] border-t-[var(--ui-color-warning-500)]">
+    <div class="mx-4 my-6 flex flex-wrap justify-between gap-6">
+      <UCard class="max-w-[600px] flex-[1_1_300px] items-center justify-center rounded-lg border border-t-[3px] border-solid border-(--border-gray) border-t-(--ui-color-warning-500)">
         <template #header>
-          <div class="flex items-center gap-2 mb-1">
+          <div class="mb-1 flex items-center gap-2">
             <UIcon name="i-lucide-trophy" class="size-5 text-(--ui-color-warning-500)" />
-            <span class="winner-tag text-xs tracking-[0.1em] uppercase text-gray-500">Top post</span>
+            <span class="font-['Krona_One',sans-serif] text-xs tracking-widest text-gray-500 uppercase">Top post</span>
           </div>
           <h4>{{ bestTopic?.title }}</h4>
         </template>
         <template #default>
-          <div class="flex justify-center items-center gap-8">
+          <div class="flex items-center justify-center gap-8">
             <p>Nombre de vues : {{ bestTopic?.views }}</p>
             <img
-              class="max-w-[200px] max-h-[100px] rounded-xl"
+              class="max-h-[100px] max-w-[200px] rounded-xl"
               :src="`${bestTopic?.image}`"
               :alt="bestTopic?.title"
             />
           </div>
         </template>
       </UCard>
-      <UCard class="flex-[1_1_300px] max-w-[600px] items-center justify-center border border-solid border-[var(--border-gray)] rounded-lg border-t-[3px] border-t-[var(--ui-primary)]">
+      <UCard class="max-w-[600px] flex-[1_1_300px] items-center justify-center rounded-lg border border-t-[3px] border-solid border-(--border-gray) border-t-(--ui-primary)">
         <template #header>
-          <div class="flex items-center gap-2 mb-1">
+          <div class="mb-1 flex items-center gap-2">
             <UIcon name="i-lucide-crown" class="size-5 text-(--ui-primary)" />
-            <span class="winner-tag text-xs tracking-[0.1em] uppercase text-gray-500">Top moto</span>
+            <span class="font-['Krona_One',sans-serif] text-xs tracking-widest text-gray-500 uppercase">Top moto</span>
           </div>
           <h4>{{ bestMotorcycle?.name }}</h4>
         </template>
         <template #default>
-          <div class="flex justify-center items-center gap-8">
+          <div class="flex items-center justify-center gap-8">
             <p>
               Nombre de comparaisons : {{ bestMotorcycle?.numberOfComparison }}
             </p>
             <img
-              class="max-w-[200px] max-h-[100px] rounded-xl"
+              class="max-h-[100px] max-w-[200px] rounded-xl"
               :src="`${bestMotorcycle?.imageUrl}`"
               :alt="bestMotorcycle?.name"
             />
@@ -161,7 +161,7 @@ onMounted(() => {
         </template>
       </UCard>
     </div>
-    <UCard class="my-6 mx-4 border border-solid border-[var(--border-gray)] rounded-lg">
+    <UCard class="mx-4 my-6 rounded-lg border border-solid border-(--border-gray)">
       <template #header>
         <h4>Evolution des utilisateurs</h4>
       </template>
@@ -182,9 +182,3 @@ onMounted(() => {
     </UCard>
   </div>
 </template>
-
-<style scoped>
-.winner-tag {
-  font-family: 'Krona One', sans-serif;
-}
-</style>

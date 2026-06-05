@@ -85,27 +85,24 @@ onMounted(async () => {
   <div>
     <HeaderInfo :scroll-to-element-id="'forum'">
       <template #title>
-        <h1 class="h1-mobile">
+        <h1>
           Bienvenue sur le <br />
           <span style="color: red">Forum</span>
         </h1>
       </template>
       <template #subtitle>
-        <p class="p-mobile">
+        <p>
           Échanger librement sur votre sujet favori en lien avec la moto.
         </p>
       </template>
     </HeaderInfo>
-    <div id="forum" class="forum-filters flex flex-row items-start m-[2em] gap-[0.5em] md:gap-[1.25em] lg:gap-[2em]">
+    <div id="forum" class="m-[2em] flex flex-row items-start gap-[0.5em] md:gap-[1.25em] lg:gap-[2em]">
       <div class="sticky top-[70px]">
         <ForumPanel :loading :active-filter="filters" @filters="handleFilter" />
       </div>
-      <div class="flex-1 min-w-0 flex flex-col gap-6">
+      <div class="flex min-w-0 flex-1 flex-col gap-6">
         <USkeleton v-if="loading" class="size-12 rounded-full" />
-        <UCard
-          v-if="loading === false && posts.length === 0"
-          class="empty-state"
-        >
+        <UCard v-if="loading === false && posts.length === 0">
           <div class="flex flex-col items-center gap-4 py-8 text-center">
             <UIcon
               name="i-lucide-message-square-plus"
@@ -128,7 +125,7 @@ onMounted(async () => {
           />
         </div>
       </div>
-      <div class="panel hidden lg:flex lg:flex-col lg:gap-6 lg:w-[300px] lg:sticky lg:top-[70px] lg:right-0">
+      <div class="hidden lg:sticky lg:top-[70px] lg:right-0 lg:flex lg:w-[300px] lg:flex-col lg:gap-6">
         <ForumMyPosts @new-post="getPosts()" />
         <ForumMyFavoritesPost />
       </div>

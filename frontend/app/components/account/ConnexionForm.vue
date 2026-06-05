@@ -60,7 +60,7 @@ watch(isOpen, (newVal) => {
 <template>
   <UModal v-model:open="isOpen">
     <template #content>
-      <div class="flex flex-col items-center justify-center m-20">
+      <div class="m-20 flex flex-col items-center justify-center">
         <h3>Se connecter</h3>
 
         <UForm
@@ -94,16 +94,16 @@ watch(isOpen, (newVal) => {
           <UButton
             type="submit"
             label="Se connecter"
-            class="rounded-full w-full justify-center text-white"
+            class="w-full justify-center rounded-full text-white"
           />
         </UForm>
         <p class="text-sm">
           Nouveau sur ce site ?
-          <span class="underline cursor-pointer" @click="openCreateAccountModal"
+          <span class="cursor-pointer underline" @click="openCreateAccountModal"
             >S'inscrire</span
           >
         </p>
-        <p class="text-[red] text-xs m-4">{{ error }}</p>
+        <p class="m-4 text-xs text-[red]">{{ error }}</p>
       </div>
     </template>
   </UModal>

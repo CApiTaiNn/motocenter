@@ -40,49 +40,49 @@ const contactEmail = 'contact@mgtsoftware.com'
   <footer class="mt-20">
     <div class="footer-top-border h-[3px]" />
 
-    <div class="footer-main flex justify-between items-start gap-8 pt-16 px-[5%] pb-12 max-w-[1400px] mx-auto max-lg:flex-wrap! max-lg:pt-[2.5rem]! max-lg:px-[6%]! max-lg:pb-[2rem]! max-lg:gap-x-4! max-lg:gap-y-8!">
-      <div class="flex-[1.2] flex flex-col items-start gap-3 max-lg:flex-[1_1_100%]! max-lg:items-center! max-lg:text-center">
+    <div class="mx-auto flex max-w-[1400px] items-start justify-between gap-8 px-[5%] pt-16 pb-12 max-lg:flex-wrap! max-lg:gap-x-4! max-lg:gap-y-8! max-lg:px-[6%]! max-lg:pt-10! max-lg:pb-8!">
+      <div class="flex flex-[1.2] flex-col items-start gap-3 max-lg:flex-[1_1_100%]! max-lg:items-center! max-lg:text-center">
         <LogoApp />
-        <p class="footer-tagline text-sm font-light text-[var(--label-text)]">La communauté des passionnés de moto</p>
+        <p class="footer-tagline text-sm font-light text-(--label-text)">La communauté des passionnés de moto</p>
       </div>
 
-      <nav class="flex-1 flex flex-col items-start max-lg:flex-[1_1_45%]!">
-        <h5 class="mb-4 uppercase tracking-[0.08em]">Guides</h5>
-        <ul class="flex flex-col gap-2 list-none pl-0">
+      <nav class="flex flex-1 flex-col items-start max-lg:flex-[1_1_45%]!">
+        <h5 class="mb-4 tracking-[0.08em] uppercase">Guides</h5>
+        <ul class="flex list-none flex-col gap-2 pl-0">
           <li
             v-for="(item, idx) in guides"
             :key="`guide-${idx}`"
           >
-            <NuxtLink :to="item.to" class="footer-link text-sm font-light text-[var(--text-color)] no-underline transition-colors duration-200 break-all hover:text-[var(--ui-primary)]">{{
+            <NuxtLink :to="item.to" class="footer-link text-sm font-light break-all text-(--text-color) no-underline transition-colors duration-200 hover:text-(--ui-primary)">{{
               item.label
             }}</NuxtLink>
           </li>
         </ul>
       </nav>
 
-      <div class="flex-1 flex flex-col items-start max-lg:flex-[1_1_100%]! max-lg:order-4 max-lg:items-center!">
-        <h5 class="text-hidden mb-4 uppercase tracking-[0.08em] max-lg:hidden">Réseaux sociaux</h5>
-        <ul class="flex flex-col gap-3 list-none pl-0 max-lg:flex-row! max-lg:gap-6! max-lg:justify-center">
+      <div class="flex flex-1 flex-col items-start max-lg:order-4 max-lg:flex-[1_1_100%]! max-lg:items-center!">
+        <h5 class="mb-4 tracking-[0.08em] uppercase max-lg:hidden">Réseaux sociaux</h5>
+        <ul class="flex list-none flex-col gap-3 pl-0 max-lg:flex-row! max-lg:justify-center max-lg:gap-6!">
           <li v-for="(item, idx) in socials" :key="`social-${idx}`">
             <a
               :href="item.href"
               target="_blank"
               rel="noopener noreferrer"
               :aria-label="`${item.label} (ouvre un nouvel onglet)`"
-              class="footer-social-link flex items-center gap-2 text-[var(--text-color)] no-underline transition-colors duration-200 hover:text-[var(--ui-primary)]"
+              class="flex items-center gap-2 text-(--text-color) no-underline transition-colors duration-200 hover:text-(--ui-primary)"
             >
-              <UIcon :name="item.icon" class="text-xl shrink-0 max-lg:text-2xl!" />
+              <UIcon :name="item.icon" class="shrink-0 text-xl max-lg:text-2xl!" />
               <span class="footer-social-label text-sm font-light max-lg:hidden">{{ item.label }}</span>
             </a>
           </li>
         </ul>
       </div>
 
-      <div class="flex-1 flex flex-col items-start max-lg:flex-[1_1_45%]!">
-        <h5 class="mb-4 uppercase tracking-[0.08em]">Contact</h5>
-        <ul class="flex flex-col gap-2 list-none pl-0">
+      <div class="flex flex-1 flex-col items-start max-lg:flex-[1_1_45%]!">
+        <h5 class="mb-4 tracking-[0.08em] uppercase">Contact</h5>
+        <ul class="flex list-none flex-col gap-2 pl-0">
           <li>
-            <a class="footer-link text-sm font-light text-[var(--text-color)] no-underline transition-colors duration-200 break-all hover:text-[var(--ui-primary)]" :href="`mailto:${contactEmail}`">{{
+            <a class="footer-link text-sm font-light break-all text-(--text-color) no-underline transition-colors duration-200 hover:text-(--ui-primary)" :href="`mailto:${contactEmail}`">{{
               contactEmail
             }}</a>
           </li>
@@ -90,16 +90,16 @@ const contactEmail = 'contact@mgtsoftware.com'
       </div>
     </div>
 
-    <div class="h-px bg-[var(--border-gray)] max-w-[1400px] mx-auto" />
+    <div class="mx-auto h-px max-w-[1400px] bg-(--border-gray)" />
 
-    <div class="flex justify-between items-center py-4 px-[5%] max-w-[1400px] mx-auto max-lg:flex-col! max-lg:gap-2! max-lg:text-center max-lg:py-4!">
-      <p class="footer-bottom-text text-sm font-light text-[var(--label-text)]">
+    <div class="mx-auto flex max-w-[1400px] items-center justify-between px-[5%] py-4 max-lg:flex-col! max-lg:gap-2! max-lg:py-4! max-lg:text-center">
+      <p class="footer-bottom-text text-sm font-light text-(--label-text)">
         &copy; 2026 MotoCenter &mdash; Tout droit réservé
       </p>
       <div class="flex items-center gap-2">
-        <NuxtLink class="footer-bottom-link text-sm font-light text-[var(--label-text)] no-underline transition-colors duration-200 hover:text-[var(--ui-primary)]" to="/">Mentions légales</NuxtLink>
-        <span class="footer-bottom-dot text-[var(--label-text)] text-sm">&middot;</span>
-        <NuxtLink class="footer-bottom-link text-sm font-light text-[var(--label-text)] no-underline transition-colors duration-200 hover:text-[var(--ui-primary)]" to="/">Confidentialité</NuxtLink>
+        <NuxtLink class="footer-bottom-link text-sm font-light text-(--label-text) no-underline transition-colors duration-200 hover:text-(--ui-primary)" to="/">Mentions légales</NuxtLink>
+        <span class="text-sm text-(--label-text)">&middot;</span>
+        <NuxtLink class="footer-bottom-link text-sm font-light text-(--label-text) no-underline transition-colors duration-200 hover:text-(--ui-primary)" to="/">Confidentialité</NuxtLink>
       </div>
     </div>
   </footer>

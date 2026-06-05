@@ -35,10 +35,10 @@ function handleCompareClick(itemId: string, imgUrl: string) {
     }"
   >
     <article
-      class="flex flex-col items-center justify-between text-center h-full w-[230px] gap-2 py-3 mx-2 border-2 border-solid border-[var(--background-secondary)] rounded-[20px] cursor-pointer max-lg:w-[180px]! md:max-lg:w-[205px]!"
+      class="mx-2 flex h-full w-[230px] cursor-pointer flex-col items-center justify-between gap-2 rounded-[20px] border-2 border-solid border-(--background-secondary) py-3 text-center max-lg:w-[180px]! md:max-lg:w-[205px]!"
       @click="navigateTo(`/motorcycle/${item._id}`)"
     >
-      <h5 class="select-none h5-mobile">{{ item.name }}</h5>
+      <h5 class="select-none">{{ item.name }}</h5>
       <img
         :src="`${item.imageUrl}`"
         width="100"
@@ -58,7 +58,7 @@ function handleCompareClick(itemId: string, imgUrl: string) {
         <UButton
           size="sm"
           color="primary"
-          class="rounded-full cursor-pointer text-white"
+          class="cursor-pointer rounded-full text-white"
           icon="i-lucide-arrow-left-right"
           @click.stop="
             () =>

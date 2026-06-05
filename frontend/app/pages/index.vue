@@ -100,8 +100,8 @@ onMounted(async () => {
 </script>
 <template>
   <main class="flex flex-col gap-24 overflow-x-hidden">
-    <section class="relative flex flex-col justify-center items-center h-screen max-lg:h-[60vh]! max-lg:gap-8! max-lg:mx-[5%]!">
-      <h1 class="text-center h1-mobile">
+    <section class="relative flex h-screen flex-col items-center justify-center max-lg:mx-[5%]! max-lg:h-[60vh]! max-lg:gap-8!">
+      <h1 class="text-center">
         Trouver <span style="color: var(--ui-primary)">la moto</span>
         <br />
         qui vous convient
@@ -111,7 +111,7 @@ onMounted(async () => {
         <UButton
           size="xl"
           color="primary"
-          class="rounded-full button max-lg:px-[30px]! max-lg:py-[10px]! max-lg:text-sm!"
+          class="button rounded-full max-lg:px-[30px]! max-lg:py-[10px]! max-lg:text-sm!"
           style="color: white"
           to="/comparo"
           >Essayer</UButton
@@ -120,7 +120,7 @@ onMounted(async () => {
           v-if="!isAuthenticated"
           size="xl"
           color="neutral"
-          class="rounded-full button cursor-pointer max-lg:px-[30px]! max-lg:py-[10px]! max-lg:text-sm!"
+          class="button cursor-pointer rounded-full max-lg:px-[30px]! max-lg:py-[10px]! max-lg:text-sm!"
           trailing-icon="i-lucide-arrow-right"
           variant="outline"
           @click="connexionModal.open()"
@@ -128,29 +128,29 @@ onMounted(async () => {
         >
       </div>
 
-      <div class="relative flex flex-row justify-center items-end gap-4">
+      <div class="relative flex flex-row items-end justify-center gap-4">
         <img
           src="/images/accueil/R1_fond.png"
           alt="Moto"
-          class="moto-left flex-[1.1] w-full min-w-[38%] h-auto max-h-[80vh] object-contain object-bottom"
+          class="moto-left h-auto max-h-[80vh] w-full min-w-[38%] flex-[1.1] object-contain object-bottom"
         />
         <img
           src="/images/accueil/BMW_fond.png"
           alt="Moto"
-          class="moto-right flex-1 w-full min-w-[38%] h-auto max-h-[80vh] object-contain object-bottom"
+          class="moto-right h-auto max-h-[80vh] w-full min-w-[38%] flex-1 object-contain object-bottom"
         />
       </div>
       <UIcon
         name="i-lucide-chevron-down"
-        class="scroll-cue absolute bottom-8 opacity-70 size-8 text-(--ui-primary)"
+        class="scroll-cue absolute bottom-8 size-8 text-(--ui-primary) opacity-70"
         aria-hidden="true"
       />
     </section>
-    <section class="max-md:mx-[5%]! max-lg:mx-[8%]!">
+    <section class="max-lg:mx-[8%]! max-md:mx-[5%]!">
       <div class="flex flex-row items-center gap-4">
         <article>
-          <h2 class="h2-mobile max-lg:text-start">Un peu d'histoire</h2>
-          <p class="p-mobile max-lg:text-xs!">
+          <h2 class="max-lg:text-start">Un peu d'histoire</h2>
+          <p class="max-lg:text-xs!">
             Depuis que l'homme a inventé le moteur thermique, il a toujours
             cherché à repousser ses limites : plus de
             <span class="font-bold">puissance</span>, plus de
@@ -161,17 +161,17 @@ onMounted(async () => {
             mieux à ce que tu recherches...
           </p>
         </article>
-        <img src="/images/accueil/Hornet.png" alt="Moto" class="flex-1 w-full min-w-[38%] h-auto max-h-[80vh] object-contain object-bottom" />
+        <img src="/images/accueil/Hornet.png" alt="Moto" class="h-auto max-h-[80vh] w-full min-w-[38%] flex-1 object-contain object-bottom" />
       </div>
     </section>
-    <section class="flex flex-col gap-8 max-md:mx-[5%]! max-lg:mx-[8%]!">
-      <h2 class="h2-mobile" style="text-align: center">
+    <section class="flex flex-col gap-8 max-lg:mx-[8%]! max-md:mx-[5%]!">
+      <h2 style="text-align: center">
         <span style="color: var(--ui-primary)">Motocenter</span>
         en quelques chiffres
       </h2>
       <article class="flex flex-col gap-16">
         <div class="flex flex-col gap-4">
-          <div ref="statsRow" class="flex flex-row justify-center gap-16 mx-[5%] max-lg:gap-4!">
+          <div ref="statsRow" class="mx-[5%] flex flex-row justify-center gap-16 max-lg:gap-4!">
             <StatsHome
               v-for="item in dynamicStats"
               :key="item.suffix"
@@ -183,7 +183,7 @@ onMounted(async () => {
           </div>
         </div>
         <div class="flex flex-col gap-4">
-          <div class="flex flex-row justify-center gap-16 mx-[5%] max-lg:gap-4!">
+          <div class="mx-[5%] flex flex-row justify-center gap-16 max-lg:gap-4!">
             <StatsHome
               v-for="item in itemsTab"
               :key="item.content"
@@ -194,13 +194,13 @@ onMounted(async () => {
         </div>
       </article>
     </section>
-    <section class="flex flex-col gap-8 max-md:mx-[5%]! max-lg:mx-[8%]!">
-      <h2 class="h2-mobile" style="text-align: center">Les best-sellers</h2>
+    <section class="flex flex-col gap-8 max-lg:mx-[8%]! max-md:mx-[5%]!">
+      <h2 style="text-align: center">Les best-sellers</h2>
       <ClientOnly>
         <CarrouselMotorcycles :items="itemsCaroussel" />
       </ClientOnly>
     </section>
-    <section class="invitation relative flex flex-col justify-center items-center gap-12 mx-[20%] p-16 rounded-[20px] border-2 border-solid border-[var(--border-gray)] overflow-hidden max-md:mx-[10%]! max-lg:mx-[15%]! max-md:p-8! max-md:gap-8!">
+    <section class="invitation relative mx-[20%] flex flex-col items-center justify-center gap-12 overflow-hidden rounded-[20px] border-2 border-solid border-(--border-gray) p-16 max-lg:mx-[15%]! max-md:mx-[10%]! max-md:gap-8! max-md:p-8!">
       <div class="carb-anim" aria-hidden="true">
         <span class="air air-1" />
         <span class="air air-2" />
@@ -212,31 +212,31 @@ onMounted(async () => {
         <span class="fuel fuel-3" />
         <span class="fuel fuel-4" />
       </div>
-      <h3 class="h3-mobile" style="text-align: center">
+      <h3 style="text-align: center">
         Tester le comparateur dès maintenant !
       </h3>
       <div>
         <UButton
           size="xl"
           color="primary"
-          class="rounded-full button max-lg:px-[30px]! max-lg:py-[10px]! max-lg:text-sm!"
+          class="button rounded-full max-lg:px-[30px]! max-lg:py-[10px]! max-lg:text-sm!"
           style="color: white"
           to="/comparo"
           >Essayer</UButton
         >
       </div>
     </section>
-    <section class="flex flex-col gap-8 max-md:mx-[5%]! max-lg:mx-[8%]!">
-      <h2 class="h2-mobile" style="text-align: center">
+    <section class="flex flex-col gap-8 max-lg:mx-[8%]! max-md:mx-[5%]!">
+      <h2 style="text-align: center">
         Ils nous font confiance
       </h2>
       <CarrouselSponsors />
     </section>
-    <section class="flex justify-center max-md:mx-[5%]! max-lg:mx-[8%]!">
+    <section class="flex justify-center max-lg:mx-[8%]! max-md:mx-[5%]!">
       <UButton
         size="xl"
         color="neutral"
-        class="rounded-full button max-lg:px-[30px]! max-lg:py-[10px]! max-lg:text-sm!"
+        class="button rounded-full max-lg:px-[30px]! max-lg:py-[10px]! max-lg:text-sm!"
         icon="i-lucide-badge-check"
         style="margin-bottom: 20vh"
         >Approuvé par 100 utilisateurs</UButton

@@ -128,7 +128,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="form-container border min-w-0 flex flex-col gap-4 p-4 w-full max-w-[340px] rounded-xl bg-[var(--background)] shadow-[20px_20px_5em_var(--border-gray)] max-lg:max-w-[300px]! md:max-lg:max-w-[320px]!">
+  <div class="flex w-full max-w-[340px] min-w-0 flex-col gap-4 rounded-xl border bg-(--background) p-4 shadow-[20px_20px_5em_var(--border-gray)] max-lg:max-w-[300px]! md:max-lg:max-w-[320px]!">
     <h3 class="text-center">{{ props.formTitle }}</h3>
     <UFormField label="Marque" name="brand">
       <UInputMenu

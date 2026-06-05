@@ -110,54 +110,58 @@ onMounted(async () => {
     </template>
   </UInput>
   <div
-    class="flex flex-row items-center my-8 mx-8 max-lg:my-3! max-lg:mx-4! cursor-pointer"
+    class="m-8 flex cursor-pointer flex-row items-center max-lg:mx-4! max-lg:my-3!"
     @click="handleHaveAllPosts"
   >
-    <UIcon class="size-7 mr-2" name="i-lucide-messages-square" />
+    <UIcon class="mr-2 size-7" name="i-lucide-messages-square" />
     <p>Tous les posts</p>
   </div>
   <div
-    class="flex flex-row items-center my-8 mx-8 max-lg:my-3! max-lg:mx-4! cursor-pointer"
+    class="m-8 flex cursor-pointer flex-row items-center max-lg:mx-4! max-lg:my-3!"
     @click="handleHaveMyFavorites"
   >
-    <UIcon class="size-7 mr-2" name="i-lucide-star" />
+    <UIcon class="mr-2 size-7" name="i-lucide-star" />
     <p>Mes favoris</p>
   </div>
-  <div class="my-8 mx-8 max-lg:my-3! max-lg:mx-4!">
+  <div class="m-8 max-lg:mx-4! max-lg:my-3!">
     <div class="flex flex-row items-center">
-      <UIcon class="size-7 mr-2" name="i-lucide-grid-2x2-check" />
+      <UIcon class="mr-2 size-7" name="i-lucide-grid-2x2-check" />
       <p>Catégories</p>
     </div>
-    <div class="my-8 mx-8 max-lg:my-3! max-lg:mx-4!">
+    <div class="m-8 max-lg:mx-4! max-lg:my-3!">
       <USkeleton v-if="props.loading" class="size-12 rounded-full" />
       <div
         v-for="category in categories"
         v-else
         :key="category.value"
-        class="flex flex-row items-center my-2 mx-4 p-[0.3em] cursor-pointer hover:bg-[rgba(109,100,100,0.097)] hover:rounded-xl hover:w-fit"
+        class="mx-4 my-2 flex cursor-pointer flex-row items-center p-[0.3em] hover:w-fit hover:rounded-xl hover:bg-[rgba(109,100,100,0.097)]"
         :class="{
-          'background-selected': filters.categoryIds.includes(category.value)
+          'w-fit rounded-xl bg-[rgba(109,100,100,0.325)] px-[0.3em]':
+            filters.categoryIds.includes(category.value)
         }"
         @click="handlClickOnCategory(category.value)"
       >
-        <UIcon class="size-7 mr-2" :name="category.icon" />
+        <UIcon class="mr-2 size-7" :name="category.icon" />
         <p>{{ category.label }}</p>
       </div>
     </div>
   </div>
-  <div class="my-8 mx-8 max-lg:my-3! max-lg:mx-4!">
+  <div class="m-8 max-lg:mx-4! max-lg:my-3!">
     <div class="flex flex-row items-center">
-      <UIcon class="size-7 mr-2" name="i-lucide-warehouse" />
+      <UIcon class="mr-2 size-7" name="i-lucide-warehouse" />
       <p>Marques</p>
     </div>
-    <div class="my-8 mx-8 max-lg:my-3! max-lg:mx-4!">
+    <div class="m-8 max-lg:mx-4! max-lg:my-3!">
       <USkeleton v-if="props.loading" class="size-12 rounded-full" />
       <div
         v-for="brand in brands"
         v-else
         :key="brand._id"
-        class="flex flex-row items-center my-2 mx-4 p-[0.3em] cursor-pointer hover:bg-[rgba(109,100,100,0.097)] hover:rounded-xl hover:w-fit"
-        :class="{ 'background-selected': filters.brandIds.includes(brand._id) }"
+        class="mx-4 my-2 flex cursor-pointer flex-row items-center p-[0.3em] hover:w-fit hover:rounded-xl hover:bg-[rgba(109,100,100,0.097)]"
+        :class="{
+          'w-fit rounded-xl bg-[rgba(109,100,100,0.325)] px-[0.3em]':
+            filters.brandIds.includes(brand._id)
+        }"
         @click="handleClickOnBrand(brand._id)"
       >
         <img
@@ -175,16 +179,6 @@ onMounted(async () => {
   <USwitch
     v-model="filters.onlyMyPost"
     label="Uniquement mes posts"
-    class="my-8 mx-8 max-lg:my-3! max-lg:mx-4!"
+    class="m-8 max-lg:mx-4! max-lg:my-3!"
   />
 </template>
-
-<style scoped>
-.background-selected {
-  background-color: rgba(109, 100, 100, 0.325);
-  border-radius: 12px;
-  padding-right: 0.3em;
-  padding-left: 0.3em;
-  width: fit-content;
-}
-</style>

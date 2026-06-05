@@ -14,56 +14,56 @@ const isOpen = ref(true)
 </script>
 
 <template>
-  <div class="wrapper w-[400px] flex flex-col items-center max-md:w-[90vw]! max-lg:w-[400px]!">
-    <div v-if="isOpen" class="dual-motorcycle flex flex-col items-center justify-center w-[400px] max-lg:w-full!">
-      <div class="slot-container flex items-end justify-between w-full gap-4">
-        <div class="motorcycle-left -rotate-[10deg] flex flex-1 flex-col items-center justify-center w-full h-[150px] border border-dashed border-[var(--text-color)] p-4 rounded-lg bg-[var(--background)] z-[1] max-lg:h-[100px]! max-lg:p-[5px]!">
+  <div class="flex w-[400px] flex-col items-center max-lg:w-[400px]! max-md:w-[90vw]!">
+    <div v-if="isOpen" class="flex w-[400px] flex-col items-center justify-center max-lg:w-full!">
+      <div class="flex w-full items-end justify-between gap-4">
+        <div class="z-1 flex h-[150px] w-full flex-1 rotate-[-10deg] flex-col items-center justify-center rounded-lg border border-dashed border-(--text-color) bg-(--background) p-4 max-lg:h-[100px]! max-lg:p-[5px]!">
           <UIcon
             name="i-lucide-circle-x"
-            class="absolute top-2 right-2 size-5 self-end cursor-pointer"
+            class="absolute top-2 right-2 size-5 cursor-pointer self-end"
             @click="emit('delete', 'left')"
           />
           <img
             v-if="props.leftMotorcycleUrl"
             :src="props.leftMotorcycleUrl"
             alt="Left Motorcycle"
-            class="min-h-0 max-h-full max-w-full flex-1 object-contain"
+            class="max-h-full min-h-0 max-w-full flex-1 object-contain"
           />
           <span
             v-if="!props.leftMotorcycleUrl"
-            class="skeleton-icon inline-block size-20 bg-[var(--text-color)]"
+            class="skeleton-icon inline-block size-20 bg-(--text-color)"
             aria-hidden="true"
           />
           <p class="text-sm">{{ props.leftName }}</p>
         </div>
         <UButton
           icon="i-lucide-arrow-left-right"
-          class="text-white rounded-4xl m-1 max-lg:text-[0.7rem]! max-lg:px-2! max-lg:py-1!"
+          class="m-1 rounded-4xl text-white max-lg:px-2! max-lg:py-1! max-lg:text-[0.7rem]!"
           @click="emit('compare')"
         >
           Comparer
         </UButton>
-        <div class="motorcycle-right rotate-[10deg] flex flex-1 flex-col items-center justify-center w-full h-[150px] border border-dashed border-[var(--text-color)] p-4 rounded-lg bg-[var(--background)] z-[1] max-lg:h-[100px]! max-lg:p-[5px]!">
+        <div class="z-1 flex h-[150px] w-full flex-1 rotate-10 flex-col items-center justify-center rounded-lg border border-dashed border-(--text-color) bg-(--background) p-4 max-lg:h-[100px]! max-lg:p-[5px]!">
           <UIcon
             name="i-lucide-circle-x"
-            class="absolute top-2 right-2 size-5 self-end cursor-pointer"
+            class="absolute top-2 right-2 size-5 cursor-pointer self-end"
             @click="emit('delete', 'right')"
           />
           <img
             v-if="props.rightMotorcycleUrl"
             :src="props.rightMotorcycleUrl"
             alt="Right Motorcycle"
-            class="min-h-0 max-h-full max-w-full flex-1 -scale-x-100 object-contain"
+            class="max-h-full min-h-0 max-w-full flex-1 -scale-x-100 object-contain"
           />
           <span
             v-if="!props.rightMotorcycleUrl"
-            class="skeleton-icon inline-block size-20 bg-[var(--text-color)] -scale-x-100"
+            class="skeleton-icon inline-block size-20 -scale-x-100 bg-(--text-color)"
             aria-hidden="true"
           />
           <p class="text-sm">{{ props.rightName }}</p>
         </div>
       </div>
-      <div class="footer-open flex items-center justify-center w-[94%] gap-2 py-6 px-2 rounded-b-lg text-[var(--background)] bg-[var(--text-color)] z-[5]">
+      <div class="z-5 flex w-[94%] items-center justify-center gap-2 rounded-b-lg bg-(--text-color) px-2 py-6 text-(--background)">
         <h6>Comparer les motos</h6>
         <UIcon
           name="i-lucide-circle-x"
@@ -72,7 +72,7 @@ const isOpen = ref(true)
         />
       </div>
     </div>
-    <div v-else class="footer-closed flex items-center justify-center w-[94%] gap-2 py-6 px-2 rounded-t-lg text-[var(--background)] bg-[var(--text-color)]">
+    <div v-else class="flex w-[94%] items-center justify-center gap-2 rounded-t-lg bg-(--text-color) px-2 py-6 text-(--background)">
       <h6>Comparer les motos</h6>
       <UIcon name="i-lucide-chevron-up" class="size-5" @click="isOpen = true" />
     </div>

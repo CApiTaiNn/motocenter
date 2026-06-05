@@ -197,16 +197,16 @@ onMounted(async () => {
 v-if="isNewPost === true" icon="i-lucide-plus" size="sm" color="primary" variant="solid"
         class="cursor-pointer" />
       <template #header>
-        <div class="w-full flex justify-between items-center">
+        <div class="flex w-full items-center justify-between">
           <h3>{{ modalTitle() }}</h3>
           <UButton
-color="primary" variant="outline" icon="i-lucide-x" class="rounded-full cursor-pointer"
+color="primary" variant="outline" icon="i-lucide-x" class="cursor-pointer rounded-full"
             @click="handleCloseModal" />
         </div>
       </template>
       <template #body>
         <div>
-          <UForm :schema :state="state" class="w-full flex flex-col gap-2" @submit="onSubmit">
+          <UForm :schema :state="state" class="flex w-full flex-col gap-2" @submit="onSubmit">
             <UFormField label="Titre du post" required name="title">
               <UInput v-model="state.title" placeholder="Titre du post" size="md" class="w-full" />
             </UFormField>
@@ -218,7 +218,7 @@ v-model="state.category" placeholder="Sélectionnez la catégorie du post" :item
                   icon: 'i-lucide-search'
                 }" size="md" class="w-full">
                 <template #empty>
-                  <span class="text-gray-500 text-sm p-2">
+                  <span class="p-2 text-sm text-gray-500">
                     Aucune catégorie trouvée
                   </span>
                 </template>
@@ -232,7 +232,7 @@ v-model="state.brand" placeholder="Sélectionnez la marque du post" :items="bran
                   icon: 'i-lucide-search'
                 }" size="md" class="w-full">
                 <template #empty>
-                  <span class="text-gray-500 text-sm p-2">
+                  <span class="p-2 text-sm text-gray-500">
                     Aucune marque trouvée
                   </span>
                 </template>
@@ -250,23 +250,23 @@ v-model="state.brand" placeholder="Sélectionnez la marque du post" :items="bran
                     </div>
                     <div
 v-if="props.isNewPost && getPreviewUrl() === ''"
-                      class="cursor-pointer text-center min-h-[100px] max-h-[100px] border-2 border-dashed border-[var(--border-gray)] rounded-xl">
-                      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
+                      class="max-h-[100px] min-h-[100px] cursor-pointer rounded-xl border-2 border-dashed border-(--border-gray) text-center">
+                      <div class="absolute top-1/2 left-1/2 -translate-1/2 text-center">
                         <UIcon name="i-lucide-cloud-upload" class="size-10" />
                         <p class="text-base">Sélectionner votre fichier</p>
                       </div>
                     </div>
                     <div
 v-if="isHover && getPreviewUrl() !== ''"
-                      class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center cursor-pointer"
+                      class="absolute top-1/2 left-1/2 -translate-1/2 cursor-pointer text-center"
                       @click="() => open()">
-                      <h4 class="text-sm p-2 text-[var(--background)] bg-[rgba(128,128,128,0.865)]">Cliquer pour modifier la photo</h4>
+                      <h4 class="bg-[rgba(128,128,128,0.865)] p-2 text-sm text-(--background)">Cliquer pour modifier la photo</h4>
                     </div>
                   </div>
                 </template>
               </UFileUpload>
             </UFormField>
-            <div class="flex gap-2 mt-8">
+            <div class="mt-8 flex gap-2">
               <UButton v-if="isNewPost" class="cursor-pointer" type="submit">
                 Ajouter
               </UButton>

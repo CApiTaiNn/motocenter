@@ -23,13 +23,13 @@ const goToForm = async () => {
   <div>
     <HeaderInfo :scroll-to-element-id="'map'">
       <template #title>
-        <h1 class="h1-mobile">
+        <h1>
           Trouver de nouveaux chemins à <br />
           <span style="color: red">Explorer</span>
         </h1>
       </template>
       <template #subtitle>
-        <p class="p-mobile">
+        <p>
           Trouver facilement des nouveaux lieux, des nouvelles balades et des
           nouvelles personnes pour les réaliser avec vous.
         </p>
@@ -38,12 +38,12 @@ const goToForm = async () => {
 
     <RideBrowseMap />
 
-    <UCard class="max-w-[60rem] mx-auto mt-8 mb-16">
+    <UCard class="mx-auto mt-8 mb-16 max-w-240">
       <div class="flex flex-row flex-wrap items-center gap-4 max-[410px]:justify-center">
         <UIcon name="i-lucide-map-pinned" class="size-10 text-(--ui-primary)" />
-        <div class="flex-1 min-w-[12rem]">
+        <div class="min-w-48 flex-1">
           <h4>Pas trouvé votre balade ?</h4>
-          <p class="p-mobile">Ajoutez-la pour la partager avec la communauté.</p>
+          <p>Ajoutez-la pour la partager avec la communauté.</p>
         </div>
         <UButton
           color="primary"

@@ -138,7 +138,7 @@ onMounted(async () => {
   <div>
     <HeaderInfo :scroll-to-element-id="'post'">
       <template #title>
-        <h1 class="h1-mobile">
+        <h1>
           Bienvenue sur le <br />
           <span style="color: red">Forum</span>
         </h1>
@@ -147,13 +147,13 @@ onMounted(async () => {
         <p>Échanger librement sur votre sujet favori en lien avec la moto.</p>
       </template>
     </HeaderInfo>
-    <div id="post" class="flex flex-row items-start gap-12 my-8 mx-20 max-lg:m-[0.5em]! max-lg:gap-0!">
+    <div id="post" class="mx-20 my-8 flex flex-row items-start gap-12 max-lg:m-[0.5em]! max-lg:gap-0!">
       <div class="shrink-0">
         <ForumPanel />
       </div>
-      <USkeleton v-if="!isLoaded" class="size-20 rounded-full flex-1 min-w-0" />
-      <div v-else class="flex-1 min-w-0">
-        <div class="title-mobile-version flex flex-row items-center gap-3 my-4">
+      <USkeleton v-if="!isLoaded" class="size-20 min-w-0 flex-1 rounded-full" />
+      <div v-else class="min-w-0 flex-1">
+        <div class="my-4 flex flex-row items-center gap-3">
           <UAvatar
             :src="post?.user.image"
             size="3xl"
@@ -172,28 +172,28 @@ onMounted(async () => {
           />
         </div>
         <div>
-          <div class="flex flex-wrap items-center gap-[0.75rem_1rem] mt-6 mb-4">
+          <div class="mt-6 mb-4 flex flex-wrap items-center gap-[0.75rem_1rem]">
             <UBadge size="lg">{{ post?.brand.name }}</UBadge>
             <UBadge size="lg" variant="subtle">{{
               post?.category ? POST_CATEGORY_META[post.category]?.label : ''
             }}</UBadge>
-            <span class="text-gray-300 text-xl leading-none" aria-hidden="true">·</span>
-            <div class="flex items-center gap-1 text-gray-500 text-sm">
+            <span class="text-xl leading-none text-gray-300" aria-hidden="true">·</span>
+            <div class="flex items-center gap-1 text-sm text-gray-500">
               <UIcon name="i-lucide-messages-square" class="size-5" />
               <span>{{ responses.length || 0 }} {{ responses.length > 1 ? 'réponses' : 'réponse' }}</span>
             </div>
-            <div class="flex items-center gap-1 text-gray-500 text-sm">
+            <div class="flex items-center gap-1 text-sm text-gray-500">
               <UIcon name="i-lucide-eye" class="size-5" />
               <span>{{ post?.views }} vues</span>
             </div>
-            <span class="text-gray-300 text-xl leading-none" aria-hidden="true">·</span>
-            <span class="text-gray-500 text-sm">Par {{ post?.user.pseudo }}, {{ formatTimeAgo(post?.createdAt) }}</span>
+            <span class="text-xl leading-none text-gray-300" aria-hidden="true">·</span>
+            <span class="text-sm text-gray-500">Par {{ post?.user.pseudo }}, {{ formatTimeAgo(post?.createdAt) }}</span>
           </div>
           <img
             :src="`${post?.image}`"
             :alt="`Image du post ${post?.title} par ${post?.user.pseudo}`"
             :title="`Image du post ${post?.title} par ${post?.user.pseudo}`"
-            class="img mb-4 w-full md:w-5/6 lg:w-3/4"
+            class="mb-4 w-full md:w-5/6 lg:w-3/4"
           />
         </div>
         <h4 class="mb-4">{{ post?.content }}</h4>
@@ -204,7 +204,7 @@ onMounted(async () => {
           <UButton
             :disabled="newReponseOfPost === ''"
             size="sm"
-            class="button-comment w-3/4 md:w-1/2 lg:w-1/4"
+            class="w-3/4 md:w-1/2 lg:w-1/4"
             @click="handleAddComment"
           >
             Ajouter mon commentaire</UButton
@@ -213,7 +213,7 @@ onMounted(async () => {
         <p v-if="responses.length === 0">
           Aucun commentaire à ce post, ajouter le premier
         </p>
-        <div v-else class="mb-4 w-5/6 mt-6 flex flex-col gap-2">
+        <div v-else class="mt-6 mb-4 flex w-5/6 flex-col gap-2">
           <div v-for="response in responses" :key="response._id">
             <Comment :response="response" />
           </div>

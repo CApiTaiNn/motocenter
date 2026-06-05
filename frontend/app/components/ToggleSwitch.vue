@@ -1,6 +1,6 @@
 <script setup>
-const mode = defineModel()
-const props = defineProps({
+const mode = defineModel({ type: Boolean })
+defineProps({
   isPc: Boolean
 })
 </script>
