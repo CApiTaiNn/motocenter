@@ -4,6 +4,37 @@ import { prepareQuery, type ReqQuery } from '../utils/find'
 import { authenticateToken, requireAdmin } from '../utils/auth'
 const router = Router()
 
+// Fields an admin may set through the API — everything except _id/createdAt,
+// so the raw body is never mass-assigned into the document.
+const EDITABLE_FIELDS = [
+  'brand',
+  'name',
+  'year',
+  'category',
+  'engine_size',
+  'horsePower',
+  'torque',
+  'weight',
+  'consumption',
+  'soundLink',
+  'imageUrl',
+  'isAvailableA2',
+  'is_public',
+  'acceleration',
+  'speedMax',
+  'numberOfComparison',
+  'withAllField',
+  'price',
+  'post'
+] as const
+
+const pickEditableFields = (body: Record<string, unknown>) =>
+  Object.fromEntries(
+    EDITABLE_FIELDS.filter((field) => body[field] !== undefined).map(
+      (field) => [field, body[field]]
+    )
+  )
+
 /**
  * @openapi
  * /motorcycles:
@@ -91,7 +122,7 @@ router.get(
  */
 router.post('/', authenticateToken, requireAdmin, async (req: Request, res: Response) => {
   try {
-    const newMotorcycle = new Motorcycle(req.body)
+    const newMotorcycle = new Motorcycle(pickEditableFields(req.body))
     const savedMotorcycle = await newMotorcycle.save()
     res.status(201).json(savedMotorcycle)
   } catch (error) {
@@ -202,7 +233,7 @@ router.put('/:id', authenticateToken, requireAdmin, async (req: Request, res: Re
   try {
     const updatedMotorcycle = await Motorcycle.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      pickEditableFields(req.body),
       { returnDocument: 'after', runValidators: true }
     ).populate('brand')
     if (!updatedMotorcycle) {

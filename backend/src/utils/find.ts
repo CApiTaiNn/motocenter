@@ -42,6 +42,10 @@ function parseJsonParam(raw: string, label: string): any {
 }
 
 const defaultLimit = 10
+// Hard ceiling so a client can't dump entire collections. High because the
+// admin motorcycle table fetches everything client-side (limit=10000);
+// lower it once real pagination (skip/cursor) exists.
+const maxLimit = 10000
 const defaultSort = {
   createdAt: -1
 }
@@ -67,7 +71,12 @@ export function prepareQuery(query: ReqQuery) {
     project = { [defaultProject]: 1 }
   }
 
-  const limit = query.limit ? Number(query.limit) : defaultLimit
+  const rawLimit = query.limit ? Number(query.limit) : defaultLimit
+  // limit(0) would mean "no limit" in Mongo, so 0 is rejected too.
+  if (!Number.isFinite(rawLimit) || rawLimit < 1) {
+    throw new HttpError(400, 'Invalid limit parameter')
+  }
+  const limit = Math.min(rawLimit, maxLimit)
   const filter = query.filter
     ? parseJsonParam(query.filter, 'filter')
     : defaultFilter

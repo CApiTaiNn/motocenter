@@ -128,7 +128,8 @@ router.post('/account', async (req: Request, res: Response) => {
     image
   } = req.body
 
-  if (!email || !password) {
+  // Strings only: objects here would reach Mongo queries as operators.
+  if (typeof email !== 'string' || typeof password !== 'string') {
     return res.status(400).json({ error: 'Email and password are required' })
   }
 
@@ -246,6 +247,9 @@ router.put(
     })
 
     try {
+      if (updateData.pseudo !== undefined && typeof updateData.pseudo !== 'string') {
+        return res.status(400).json({ error: 'Pseudo must be a string' })
+      }
       if (updateData.pseudo) {
         const existingUser = await User.findOne({
           pseudo: updateData.pseudo,
@@ -383,15 +387,23 @@ router.delete(
 router.get(
   '/',
   async (req: Request<unknown, unknown, unknown, ReqQuery>, res: Response) => {
-    const allowedFields = [
-      'email',
-      'pseudo',
-      'userType',
-      'ridingStartYear',
-      'image'
-    ]
+    // Public profile data only — never email or other private fields.
+    const allowedFields = ['pseudo', 'userType', 'ridingStartYear', 'image']
+    // This route is unauthenticated: only allow the filters the app needs
+    // (ride authors by _id, admin signup stats by createdAt), so the user
+    // collection can't be probed on private fields like email or isAdmin.
+    const allowedFilterKeys = ['_id', 'createdAt']
 
     const { project, sort, limit, filter } = prepareQuery(req.query)
+
+    const forbiddenKey = Object.keys(filter).find(
+      (key) => !allowedFilterKeys.includes(key)
+    )
+    if (forbiddenKey) {
+      return res
+        .status(400)
+        .json({ error: `Filtering users on ${forbiddenKey} is not allowed` })
+    }
 
     const safeProject = Object.fromEntries(
       Object.entries(project).filter(([key]) => allowedFields.includes(key))

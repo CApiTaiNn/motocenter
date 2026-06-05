@@ -69,6 +69,10 @@ const uploadLimiter = makeRateLimiter(30)
 
 const router = Router()
 
+// Deliberately unauthenticated: account creation uploads the avatar BEFORE
+// the user exists (CreateForm). Abuse is bounded by the rate limit, the 5MB
+// single-file cap and magic-byte content validation. Require auth here once
+// registration uploads after login instead.
 router.post('/', uploadLimiter, handleUpload, async (req, res) => {
   try {
     const file = req.file

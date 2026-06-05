@@ -47,6 +47,15 @@ describe('Auth Routes - /api/v1/auth', () => {
 
       expect(res.status).toBe(401)
     })
+
+    it('should reject NoSQL operator payloads instead of querying them', async () => {
+      const res = await request(app)
+        .post('/api/v1/auth')
+        .send({ email: { $gt: '' }, password: userData.password })
+
+      expect(res.status).toBe(401)
+      expect(res.body.message).toBe('Email ou mot de passe incorrect')
+    })
   })
 
   describe('POST /api/v1/auth/logout', () => {

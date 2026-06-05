@@ -8,6 +8,7 @@ import Motorcycle from '../models/Motorcycle'
 import { PostCategory } from '../constants/PostCategory'
 import { attachUser } from '../utils/attach'
 import { authenticateToken } from '../utils/auth'
+import { makeRateLimiter } from '../utils/rateLimit'
 
 const router = Router()
 
@@ -234,7 +235,9 @@ router.get(
  *       500:
  *         description: Erreur serveur
  */
-router.post('/add-view', async (req, res) => {
+// Anonymous visitors legitimately generate views, so no auth — but throttle
+// so the counter can't be inflated in bulk.
+router.post('/add-view', makeRateLimiter(60), async (req, res) => {
   const { filter } = prepareQuery(req.query)
   try {
     await Post.updateOne({ _id: filter.id }, { $inc: { views: 1 } })

@@ -57,6 +57,14 @@ router.post('/', async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body
 
+    // Strings only: an object like {"$gt":""} would otherwise reach the
+    // Mongo query as an operator (NoSQL injection / user enumeration).
+    if (typeof email !== 'string' || typeof password !== 'string') {
+      return res
+        .status(401)
+        .json({ message: 'Email ou mot de passe incorrect' })
+    }
+
     const user = await User.findOne({ email }).select('+password')
 
     if (!user || !(await verify(password, user.password))) {

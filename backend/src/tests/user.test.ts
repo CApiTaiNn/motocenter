@@ -65,13 +65,16 @@ describe('User Routes - /api/v1/users', () => {
       expect(res.body.users.length).toBe(1)
     })
 
-    it('should filter only allowed fields (no password)', async () => {
-      const res = await request(app).get('/api/v1/users?project=password,email')
+    it('should filter only allowed fields (no password, no email)', async () => {
+      const res = await request(app).get(
+        '/api/v1/users?project=password,email,pseudo'
+      )
 
       expect(res.status).toBe(200)
       const user = res.body.users[0]
       expect(user.password).toBeUndefined()
-      expect(user.email).toBe(userData.email)
+      expect(user.email).toBeUndefined()
+      expect(user.pseudo).toBe(userData.pseudo)
     })
 
     it('should respect limit parameter', async () => {
@@ -80,10 +83,36 @@ describe('User Routes - /api/v1/users', () => {
         email: 'john2@test.com',
         pseudo: 'johnd2'
       })
-      const res = await request(app).get('/api/v1/users?project=email&limit=1')
+      const res = await request(app).get('/api/v1/users?project=pseudo&limit=1')
 
       expect(res.status).toBe(200)
       expect(res.body.users.length).toBe(1)
+    })
+
+    it('should reject filters on private fields', async () => {
+      const res = await request(app).get(
+        `/api/v1/users?filter=${JSON.stringify({ isAdmin: true })}`
+      )
+
+      expect(res.status).toBe(400)
+    })
+
+    it('should allow filtering by _id', async () => {
+      const res = await request(app).get(
+        `/api/v1/users?filter=${JSON.stringify({ _id: userId })}&project=pseudo`
+      )
+
+      expect(res.status).toBe(200)
+      expect(res.body.users.length).toBe(1)
+      expect(res.body.users[0].pseudo).toBe(userData.pseudo)
+    })
+
+    it('should reject an invalid limit', async () => {
+      const zero = await request(app).get('/api/v1/users?limit=0')
+      expect(zero.status).toBe(400)
+
+      const nan = await request(app).get('/api/v1/users?limit=abc')
+      expect(nan.status).toBe(400)
     })
   })
 
