@@ -137,6 +137,20 @@ async function fetchMotocycles() {
     (m) => m._id === motorcycle2Id.value
   )
 
+  // If either id didn't resolve (e.g. an unavailable/private bike), don't show
+  // a half-empty comparison.
+  if (!motorcycle1.value || !motorcycle2.value) {
+    showResultat.value = false
+    return
+  }
+
+  // Single source of truth for the DualMotorcycle preview: derive it from the
+  // resolved bikes so it stays correct whichever input path was used (carousel
+  // or the form). The form never set these previews, which left stale/blank
+  // images in the dock.
+  motorcycle1PreviewUrl.value = motorcycle1.value.imageUrl ?? ''
+  motorcycle2PreviewUrl.value = motorcycle2.value.imageUrl ?? ''
+
   createResultat()
   showResultat.value = true
   await nextTick()
@@ -278,9 +292,15 @@ onMounted(() => {
   fetchCarrouselMotorcycles()
 })
 
-// Auto-trigger comparison the moment both motorcycles are picked
+// True when both sides point at the same bike — a degenerate comparison
+// ($in dedups to one document, so both columns would be identical).
+const sameMotorcycle = computed(
+  () => !!motorcycle1Id.value && motorcycle1Id.value === motorcycle2Id.value
+)
+
+// Auto-trigger comparison the moment two *different* motorcycles are picked.
 watch([motorcycle1Id, motorcycle2Id], ([id1, id2]) => {
-  if (id1 && id2) {
+  if (id1 && id2 && id1 !== id2) {
     fetchMotocycles()
   } else {
     showResultat.value = false
@@ -305,7 +325,7 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
       <template #title>
         <h1>
           Comparez. Choisissez. <br />
-          <span class="text-[red]">Pilotez</span>
+          <span class="text-(--ui-primary)">Pilotez</span>
         </h1>
       </template>
       <template #subtitle>
@@ -328,6 +348,9 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
         </div>
         <p v-if="!motorcycle1Id || !motorcycle2Id" class="text-center text-sm text-gray-500 italic">
           Sélectionnez deux motos pour lancer la comparaison.
+        </p>
+        <p v-else-if="sameMotorcycle" class="text-center text-sm text-(--ui-error) italic">
+          Choisissez deux motos différentes pour les comparer.
         </p>
       </div>
       <Transition>

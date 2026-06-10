@@ -9,20 +9,15 @@ const toast = useToast()
 
 const getFavoritesPostsOfUser = async () => {
   try {
-    const response = await $fetch<{ posts: IPost[] }>(`${apiBase}posts`, {
-      params: {
-        project:
-          'image,content,title,createdAt,views,userFavoritePost,brand,user,brand,category',
-        deep: true
-      }
-    })
+    // Dedicated server-side endpoint: returns only the caller's favorites
+    // instead of downloading every post and filtering client-side (and never
+    // discloses other users' favorites).
+    const response = await $fetch<{ posts: IPost[] }>(
+      `${apiBase}posts/favorites`,
+      { credentials: 'include' }
+    )
 
-    const userId = user.value?._id
-    if (userId) {
-      myFavoritesPosts.value = response.posts.filter((post) =>
-        post.userFavoritePost?.includes(userId)
-      )
-    }
+    myFavoritesPosts.value = response.posts
   } catch {
     toast.add({
       title: 'Erreur',

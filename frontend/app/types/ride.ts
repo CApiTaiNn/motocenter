@@ -14,7 +14,8 @@ export interface IRide {
   ride_type: string
   image_link: string
   like: number
-  liked_id: string[]
+  // Per-viewer like state (the raw liker id-array is no longer exposed).
+  likedByMe?: boolean
   user_id: string
   is_event: boolean
   date_event: string

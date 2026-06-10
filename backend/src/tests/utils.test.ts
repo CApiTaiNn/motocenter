@@ -40,9 +40,30 @@ describe('utils/supabase getSupabase', () => {
 })
 
 describe('utils/find prepareQuery', () => {
-  it('returns empty projection for project=all', () => {
+  it('excludes the technical __v field for project=all', () => {
     const { project } = prepareQuery({ project: 'all' })
-    expect(project).toEqual({})
+    expect(project).toEqual({ __v: 0 })
+  })
+
+  it('strips __v from an explicit projection', () => {
+    const { project } = prepareQuery({ project: 'name,__v' })
+    expect(project).toEqual({ name: 1 })
+  })
+
+  it('keeps only projectable fields when a policy is given', () => {
+    const { project } = prepareQuery(
+      { project: 'pseudo,email,password' },
+      { projectable: ['pseudo', 'image'] }
+    )
+    expect(project).toEqual({ pseudo: 1 })
+  })
+
+  it('expands project=all to the projectable allowlist', () => {
+    const { project } = prepareQuery(
+      { project: 'all' },
+      { projectable: ['pseudo', 'image'] }
+    )
+    expect(project).toEqual({ pseudo: 1, image: 1 })
   })
 
   it('trims a comma-separated project list', () => {
@@ -79,6 +100,104 @@ describe('utils/find prepareQuery', () => {
     }
   })
 
+  it('rejects an operator outside the allowlist (400)', () => {
+    // $text is not in the allowlist even though it isn't a code operator.
+    try {
+      prepareQuery({ filter: '{"title":{"$text":"x"}}' })
+      throw new Error('should have thrown')
+    } catch (e) {
+      expect(e).toBeInstanceOf(HttpError)
+      expect((e as HttpError).status).toBe(400)
+    }
+  })
+
+  it('allows safe comparison operators', () => {
+    const { filter } = prepareQuery({
+      filter: '{"createdAt":{"$gte":"2024-01-01"},"_id":{"$in":["a","b"]}}'
+    })
+    expect(filter).toEqual({
+      createdAt: { $gte: '2024-01-01' },
+      _id: { $in: ['a', 'b'] }
+    })
+  })
+
+  it('rejects $regex when no field is whitelisted for it (400)', () => {
+    try {
+      prepareQuery({ filter: '{"email":{"$regex":"^a"}}' })
+      throw new Error('should have thrown')
+    } catch (e) {
+      expect((e as HttpError).status).toBe(400)
+    }
+  })
+
+  it('rejects $regex on a field outside regexFields (400)', () => {
+    try {
+      prepareQuery(
+        { filter: '{"email":{"$regex":"^a"}}' },
+        { regexFields: ['title'] }
+      )
+      throw new Error('should have thrown')
+    } catch (e) {
+      expect((e as HttpError).status).toBe(400)
+    }
+  })
+
+  it('escapes regex metacharacters and forces case-insensitive options', () => {
+    const { filter } = prepareQuery(
+      { filter: '{"title":{"$regex":"a.*(b|c)","$options":"gms"}}' },
+      { regexFields: ['title'] }
+    )
+    expect(filter).toEqual({
+      title: { $regex: 'a\\.\\*\\(b\\|c\\)', $options: 'i' }
+    })
+  })
+
+  it('rejects a regex source longer than the cap (400)', () => {
+    const long = 'a'.repeat(65)
+    try {
+      prepareQuery(
+        { filter: JSON.stringify({ title: { $regex: long } }) },
+        { regexFields: ['title'] }
+      )
+      throw new Error('should have thrown')
+    } catch (e) {
+      expect((e as HttpError).status).toBe(400)
+    }
+  })
+
+  it('rejects filtering on a field outside the allowlist (400)', () => {
+    try {
+      prepareQuery(
+        { filter: '{"isAdmin":true}' },
+        { filterable: ['_id', 'createdAt'] }
+      )
+      throw new Error('should have thrown')
+    } catch (e) {
+      expect((e as HttpError).status).toBe(400)
+    }
+  })
+
+  it('validates fields nested under logical operators', () => {
+    try {
+      prepareQuery(
+        { filter: '{"$or":[{"_id":"a"},{"isAdmin":true}]}' },
+        { filterable: ['_id'] }
+      )
+      throw new Error('should have thrown')
+    } catch (e) {
+      expect((e as HttpError).status).toBe(400)
+    }
+  })
+
+  it('rejects an operator used inside sort (400)', () => {
+    try {
+      prepareQuery({ sort: '{"$where":"1"}' })
+      throw new Error('should have thrown')
+    } catch (e) {
+      expect((e as HttpError).status).toBe(400)
+    }
+  })
+
   it('rejects an invalid JSON filter (400)', () => {
     try {
       prepareQuery({ filter: 'not json' })
@@ -101,8 +220,13 @@ describe('utils/find prepareQuery', () => {
     }
   })
 
-  it('caps the limit at the hard maximum', () => {
+  it('caps the limit at the public maximum by default', () => {
     const { limit } = prepareQuery({ limit: '999999' })
+    expect(limit).toBe(100)
+  })
+
+  it('honours a higher maxLimit from the policy (admin routes)', () => {
+    const { limit } = prepareQuery({ limit: '999999' }, { maxLimit: 10000 })
     expect(limit).toBe(10000)
   })
 

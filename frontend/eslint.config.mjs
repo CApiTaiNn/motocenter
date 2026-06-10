@@ -62,6 +62,15 @@ export default withNuxt(
             '^skeleton-icon$',
             '^theme-toggle-button$',
             // gradient / color-mix() backgrounds with no utility equivalent
+            '^hero-glow$',
+            '^ambient-glow(--(left|right))?$',
+            '^band$',
+            // home RideSection + StatsHome scoped decoration (gradients,
+            // ::before redline, keyframe-driven number reveal)
+            '^route-card$',
+            '^marker$',
+            '^label$',
+            '^stat-(card|stripes|redline|number|suffix|content)$',
             '^header$',
             '^brand-tag$',
             '^footer-(top-border|tagline|link|social-label|bottom-text|bottom-link)$'

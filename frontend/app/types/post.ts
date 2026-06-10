@@ -11,8 +11,9 @@ export interface IPost {
   user: IUserPublic
   brand: IBrand
   createdAt: string
-  views: string
+  views: number
   responses: IMessage[]
   image?: string
-  userFavoritePost?: Array<string>
+  // Per-viewer favorite state (the raw favoriting-users array is not exposed).
+  favoritedByMe?: boolean
 }

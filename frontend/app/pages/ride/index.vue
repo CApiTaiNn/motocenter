@@ -25,7 +25,7 @@ const goToForm = async () => {
       <template #title>
         <h1>
           Trouver de nouveaux chemins à <br />
-          <span style="color: red">Explorer</span>
+          <span class="text-(--ui-primary)">Explorer</span>
         </h1>
       </template>
       <template #subtitle>

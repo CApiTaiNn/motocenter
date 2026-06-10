@@ -44,7 +44,7 @@ describe('Image Routes - /api/v1/images', () => {
     const res = await request(app).post('/api/v1/images')
 
     expect(res.status).toBe(400)
-    expect(res.body.message).toBe('Please upload a file')
+    expect(res.body.error).toBe('Please upload a file')
   })
 
   it('rejects a non-image file by its magic bytes (400)', async () => {
@@ -57,7 +57,7 @@ describe('Image Routes - /api/v1/images', () => {
       })
 
     expect(res.status).toBe(400)
-    expect(res.body.message).toBe('Unsupported file type')
+    expect(res.body.error).toBe('Unsupported file type')
   })
 
   it('rejects an oversize file (>5MB) with 413', async () => {
@@ -133,6 +133,6 @@ describe('Image Routes - /api/v1/images', () => {
       })
 
     expect(res.status).toBe(500)
-    expect(res.body.message).toBe('Image upload failed')
+    expect(res.body.error).toBe('Image upload failed')
   })
 })

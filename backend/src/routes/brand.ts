@@ -47,22 +47,17 @@ const router = Router()
  *       500:
  *         description: Internal server error
  */
-router.get(
-  '/',
-  async (req: Request, res: Response) => {
-    const { project, sort, limit, skip, filter } = prepareQuery(req.query)
-    try {
-      const brands = await Brand.find(filter)
-        .select(project)
-        .sort(sort)
-        .skip(skip).limit(limit)
-      res.status(200).json({ brands })
-    } catch (error) {
-      console.error('Error accessing brand route:', error)
-      res.status(500).json({ error: 'Internal server error' })
-    }
-  }
-)
+router.get('/', async (req: Request, res: Response) => {
+  const { project, sort, limit, skip, filter } = prepareQuery(req.query, {
+    filterable: ['_id', 'name']
+  })
+  const brands = await Brand.find(filter)
+    .select(project)
+    .sort(sort)
+    .skip(skip)
+    .limit(limit)
+  res.status(200).json({ brands })
+})
 
 /**
  * @openapi
@@ -87,13 +82,8 @@ router.get(
  *         description: Internal server error
  */
 router.get('/count', async (req: Request, res: Response) => {
-  try {
-    const totalBrands: number = await Brand.countDocuments()
-    res.status(200).json(totalBrands)
-  } catch (error) {
-    console.error('Error accessing count brand route:', error)
-    res.status(500).json({ error: 'Internal server error' })
-  }
+  const totalBrands: number = await Brand.countDocuments()
+  res.status(200).json(totalBrands)
 })
 
 export default router

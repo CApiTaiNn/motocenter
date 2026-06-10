@@ -90,6 +90,7 @@ async function fetchBestMotorcycle() {
   const data = await $fetch<{ motorcycles: IMotorcycle[] }>(
     `${apiBase}motorcycles`,
     {
+      credentials: 'include',
       params: {
         sort: JSON.stringify({ numberOfComparison: -1 }),
         limit: 1,

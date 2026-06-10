@@ -109,14 +109,23 @@ function toggleOpen() {
           <LogoApp />
           <ToggleSwitch v-if="isDev" v-model="mode" />
         </div>
-        <UIcon
-          :name="isOpen ? 'i-lucide-chevron-down' : 'i-lucide-menu'"
-          class="size-10 cursor-pointer"
+        <button
+          type="button"
+          class="cursor-pointer"
+          :aria-label="isOpen ? 'Fermer le menu' : 'Ouvrir le menu'"
+          :aria-expanded="isOpen"
+          aria-controls="mobile-menu"
           @click="toggleOpen"
-        />
+        >
+          <UIcon
+            :name="isOpen ? 'i-lucide-chevron-down' : 'i-lucide-menu'"
+            class="size-10"
+          />
+        </button>
       </div>
       <div
         v-if="isOpen"
+        id="mobile-menu"
         class="flex flex-col gap-[10px] pb-2 text-center"
       >
         <UButton

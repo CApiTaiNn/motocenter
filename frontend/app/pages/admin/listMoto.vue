@@ -144,6 +144,7 @@ async function fetchData() {
     const data = await $fetch<{ motorcycles: IMotorcycle[] }>(
       `${apiBase}motorcycles`,
       {
+        credentials: 'include',
         params: {
           project: 'name,year,is_public,withAllField,brand',
           limit: 10000
@@ -256,7 +257,7 @@ watch(
               <div
                 class="flex flex-col items-center justify-center gap-2 py-10 text-gray-400"
               >
-                <img :src="motorcycleIcon" width="46" height="25" />
+                <img :src="motorcycleIcon" width="46" height="25" alt="" />
 
                 <p>Aucune moto trouvée</p>
               </div>

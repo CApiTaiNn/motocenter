@@ -127,7 +127,7 @@ describe('Ride Routes - /api/v1/rides', () => {
       expect(out.participating_user[0].password).toBeUndefined()
     })
 
-    it('should flip a past event to is_event=false on read', async () => {
+    it('should report a past event as is_event=false without persisting it', async () => {
       const ride = await Ride.create({
         ...rideData,
         is_event: true,
@@ -141,10 +141,12 @@ describe('Ride Routes - /api/v1/rides', () => {
       const out = res.body.rides.find(
         (r: any) => r._id === ride._id.toString()
       )
+      // Expiry is computed on read, so the response shows false…
       expect(out.is_event).toBe(false)
 
+      // …but the document is never mutated during a GET (no write-on-read).
       const reloaded = await Ride.findById(ride._id)
-      expect(reloaded!.is_event).toBe(false)
+      expect(reloaded!.is_event).toBe(true)
     })
   })
 
@@ -205,17 +207,20 @@ describe('Ride Routes - /api/v1/rides', () => {
       geom: rideData.geom
     }
 
-    it('should create a new ride', async () => {
+    it('should create a new ride and echo only the id', async () => {
       const res = await request(app)
         .post('/api/v1/rides')
         .set('Cookie', authCookie)
         .send(validBody)
 
       expect(res.status).toBe(201)
-      expect(res.body.message).toBe('Ride created successfully')
-      expect(res.body.ride.title).toBe('New ride')
-      expect(res.body.ride.start_town).toBe('Rennes')
-      expect(res.body.ride.end_town).toBe('Nantes')
+      expect(res.body._id).toBeTruthy()
+      expect(res.body.ride).toBeUndefined()
+
+      const ride = await Ride.findById(res.body._id)
+      expect(ride!.title).toBe('New ride')
+      expect(ride!.start_town).toBe('Rennes')
+      expect(ride!.end_town).toBe('Nantes')
     })
 
     it('should derive user_id from the token, not the request body', async () => {
@@ -226,7 +231,8 @@ describe('Ride Routes - /api/v1/rides', () => {
 
       expect(res.status).toBe(201)
       // user_id comes from the JWT, never from body.userId
-      expect(res.body.ride.user_id).toBe(userId)
+      const ride = await Ride.findById(res.body._id)
+      expect(ride!.user_id).toBe(userId)
     })
 
     it('should auto-assign a color from the RideColor palette', async () => {
@@ -236,7 +242,8 @@ describe('Ride Routes - /api/v1/rides', () => {
         .send(validBody)
 
       expect(res.status).toBe(201)
-      expect(Object.values(RideColor)).toContain(res.body.ride.color)
+      const ride = await Ride.findById(res.body._id)
+      expect(Object.values(RideColor)).toContain(ride!.color)
     })
 
     it('should default like/liked_id/participating_user/is_event', async () => {
@@ -246,10 +253,11 @@ describe('Ride Routes - /api/v1/rides', () => {
         .send(validBody)
 
       expect(res.status).toBe(201)
-      expect(res.body.ride.like).toBe(0)
-      expect(res.body.ride.liked_id).toEqual([])
-      expect(res.body.ride.participating_user).toEqual([])
-      expect(res.body.ride.is_event).toBe(false)
+      const ride = await Ride.findById(res.body._id)
+      expect(ride!.like).toBe(0)
+      expect(ride!.liked_id).toEqual([])
+      expect(ride!.participating_user).toEqual([])
+      expect(ride!.is_event).toBe(false)
     })
 
     it('should return 401 without a token', async () => {
@@ -267,7 +275,7 @@ describe('Ride Routes - /api/v1/rides', () => {
         .send({ title: 'Incomplete' })
 
       expect(res.status).toBe(400)
-      expect(res.body.error).toBe('Failed to create ride')
+      expect(res.body.error).toBe('Validation failed')
     })
 
     it('should fail when an event has an empty date/hour string', async () => {
@@ -282,7 +290,7 @@ describe('Ride Routes - /api/v1/rides', () => {
         })
 
       expect(res.status).toBe(400)
-      expect(res.body.error).toBe('Failed to create ride')
+      expect(res.body.error).toBe('Validation failed')
     })
 
     it('should fail when an event omits date/hour entirely', async () => {
@@ -295,7 +303,7 @@ describe('Ride Routes - /api/v1/rides', () => {
         })
 
       expect(res.status).toBe(400)
-      expect(res.body.error).toBe('Failed to create ride')
+      expect(res.body.error).toBe('Validation failed')
     })
 
     it('should create an event with a date/hour', async () => {
@@ -310,9 +318,10 @@ describe('Ride Routes - /api/v1/rides', () => {
         })
 
       expect(res.status).toBe(201)
-      expect(res.body.ride.is_event).toBe(true)
-      expect(res.body.ride.date_event).toBe('2999-01-01')
-      expect(res.body.ride.hour_event).toBe('10:00')
+      const ride = await Ride.findById(res.body._id)
+      expect(ride!.is_event).toBe(true)
+      expect(ride!.date_event).toBe('2999-01-01')
+      expect(ride!.hour_event).toBe('10:00')
     })
   })
 
@@ -448,12 +457,13 @@ describe('Ride Routes - /api/v1/rides', () => {
       expect(res.body.error).toBe('Invalid User ID format')
     })
 
-    it('should return 500 for an invalid ride ObjectId', async () => {
+    it('should return 404 for an invalid ride ObjectId', async () => {
       const res = await request(app)
         .patch('/api/v1/rides/not-a-valid-id/participate')
         .set('Cookie', authCookie)
 
-      expect(res.status).toBe(500)
+      // A malformed id is guarded up front as "not found", not a 500.
+      expect(res.status).toBe(404)
     })
   })
 

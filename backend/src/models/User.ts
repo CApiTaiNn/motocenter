@@ -1,5 +1,6 @@
 import type { IUser } from '../types/user'
 import { Schema, model } from 'mongoose'
+import { stripInternalFields } from '../utils/serialize'
 
 const userSchema = new Schema(
   {
@@ -48,13 +49,14 @@ const userSchema = new Schema(
       type: String
     }
   },
-  { timestamps: true }
+  { timestamps: true, toJSON: stripInternalFields }
 )
 
 // createdAt: signup counts + monthly stats range queries.
 userSchema.index({ createdAt: -1 })
-// pseudo: the uniqueness lookup on every profile update. Not `unique` at the
-// DB level — existing data may hold duplicates; routes enforce it manually.
-userSchema.index({ pseudo: 1 })
+// pseudo is the public display identity: unique at the DB level so a race
+// between two check-then-write requests can't create duplicates. Routes still
+// pre-check to return a friendly 409 before hitting the index.
+userSchema.index({ pseudo: 1 }, { unique: true })
 
 export default model<IUser>('User', userSchema)

@@ -28,10 +28,10 @@ const isResponseOfAcommentValue = ref('')
 
 const message = ref<IMessage>({ ...props.response })
 const isSolidThumbUp = computed(
-  () => user.value && message.value.usersLikeId.includes(user.value._id)
+  () => user.value && message.value.likedByMe === true
 )
 const isSolidThumbDown = computed(
-  () => user.value && message.value.usersDislikeId.includes(user.value._id)
+  () => user.value && message.value.dislikedByMe === true
 )
 const isOpen = ref(false)
 

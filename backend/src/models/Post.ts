@@ -2,6 +2,7 @@ import { model, Schema, Types } from 'mongoose'
 import type { IPost } from '../types/post'
 import { PostCategory } from '../constants/PostCategory'
 import { brandSnapshotSchema } from './Brand'
+import { stripInternalFields } from '../utils/serialize'
 
 const postSchema = new Schema({
   title: {
@@ -47,7 +48,7 @@ const postSchema = new Schema({
     type: [String],
     default: []
   }
-})
+}, { toJSON: stripInternalFields })
 
 // createdAt: default list sort + the /count month-range queries.
 postSchema.index({ createdAt: -1 })

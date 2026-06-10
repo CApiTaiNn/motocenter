@@ -59,15 +59,19 @@ describe('Motorcycle Routes - /api/v1/motorcycles', () => {
   })
 
   describe('POST /api/v1/motorcycles', () => {
-    it('should create a new motorcycle', async () => {
+    it('should create a new motorcycle and echo only the id', async () => {
       const res = await request(app)
         .post('/api/v1/motorcycles')
         .set('Cookie', adminCookie)
         .send({ ...motoData, brand: brandId })
 
       expect(res.status).toBe(201)
-      expect(res.body.name).toBe('MT-07')
-      expect(res.body.horsePower).toBe(73)
+      expect(res.body._id).toBeTruthy()
+      expect(res.body.name).toBeUndefined()
+
+      const stored = await Motorcycle.findById(res.body._id)
+      expect(stored!.name).toBe('MT-07')
+      expect(stored!.horsePower).toBe(73)
     })
 
     it('should fail without required fields', async () => {
@@ -84,10 +88,14 @@ describe('Motorcycle Routes - /api/v1/motorcycles', () => {
 
   describe('GET /api/v1/motorcycles', () => {
     beforeEach(async () => {
-      await Motorcycle.create({ ...motoData, brand: brandSnapshot })
+      await Motorcycle.create({
+        ...motoData,
+        brand: brandSnapshot,
+        is_public: true
+      })
     })
 
-    it('should return motorcycles with populated brand', async () => {
+    it('should return public motorcycles to anonymous callers', async () => {
       const res = await request(app).get('/api/v1/motorcycles?project=all')
 
       expect(res.status).toBe(200)
@@ -97,13 +105,71 @@ describe('Motorcycle Routes - /api/v1/motorcycles', () => {
     })
 
     it('should respect limit', async () => {
-      await Motorcycle.create({ ...motoData, name: 'MT-09', brand: brandSnapshot })
+      await Motorcycle.create({
+        ...motoData,
+        name: 'MT-09',
+        brand: brandSnapshot,
+        is_public: true
+      })
       const res = await request(app).get(
         '/api/v1/motorcycles?project=all&limit=1'
       )
 
       expect(res.status).toBe(200)
       expect(res.body.motorcycles.length).toBe(1)
+    })
+
+    it('should hide non-public motorcycles from anonymous and non-admin callers', async () => {
+      await Motorcycle.create({
+        ...motoData,
+        name: 'Secret',
+        brand: brandSnapshot,
+        is_public: false
+      })
+
+      const anon = await request(app).get('/api/v1/motorcycles?project=all')
+      expect(anon.body.motorcycles.length).toBe(1)
+      expect(anon.body.motorcycles[0].name).toBe('MT-07')
+
+      const user = await request(app)
+        .get('/api/v1/motorcycles?project=all')
+        .set('Cookie', userCookie)
+      expect(user.body.motorcycles.length).toBe(1)
+      expect(user.body.motorcycles[0].name).toBe('MT-07')
+    })
+
+    it('should return all motorcycles (public and non-public) to an admin', async () => {
+      await Motorcycle.create({
+        ...motoData,
+        name: 'Secret',
+        brand: brandSnapshot,
+        is_public: false
+      })
+
+      const res = await request(app)
+        .get('/api/v1/motorcycles?project=all')
+        .set('Cookie', adminCookie)
+      expect(res.body.motorcycles.length).toBe(2)
+    })
+
+    it('should not let a non-admin reveal drafts via an is_public filter', async () => {
+      await Motorcycle.create({
+        ...motoData,
+        name: 'Secret',
+        brand: brandSnapshot,
+        is_public: false
+      })
+
+      const res = await request(app)
+        .get(
+          `/api/v1/motorcycles?project=all&filter=${JSON.stringify({ is_public: false })}`
+        )
+        .set('Cookie', userCookie)
+
+      // The forced is_public:true wins, so the draft stays hidden.
+      expect(res.body.motorcycles.every((m: any) => m.name !== 'Secret')).toBe(
+        true
+      )
     })
   })
 
@@ -161,7 +227,7 @@ describe('Motorcycle Routes - /api/v1/motorcycles', () => {
   })
 
   describe('PUT /api/v1/motorcycles/:id', () => {
-    it('should update a motorcycle', async () => {
+    it('should update a motorcycle and return no content', async () => {
       const moto = await Motorcycle.create({ ...motoData, brand: brandSnapshot })
 
       const res = await request(app)
@@ -169,8 +235,11 @@ describe('Motorcycle Routes - /api/v1/motorcycles', () => {
         .set('Cookie', adminCookie)
         .send({ name: 'MT-07 Updated' })
 
-      expect(res.status).toBe(200)
-      expect(res.body.motorcycle).toBeDefined()
+      expect(res.status).toBe(204)
+      expect(res.body).toEqual({})
+
+      const updated = await Motorcycle.findById(moto._id)
+      expect(updated!.name).toBe('MT-07 Updated')
     })
 
     it('should return 404 for non-existent id', async () => {
@@ -199,10 +268,10 @@ describe('Motorcycle Routes - /api/v1/motorcycles', () => {
           hackerField: 'pwned'
         })
 
-      expect(res.status).toBe(200)
-      expect(res.body.motorcycle.name).toBe('MT-07 Renamed')
+      expect(res.status).toBe(204)
 
       const updated = await Motorcycle.findById(originalId)
+      expect(updated!.name).toBe('MT-07 Renamed')
       expect(updated).not.toBeNull()
       expect(updated!._id.toString()).toBe(originalId)
       expect(updated!.createdAt!.toISOString()).toBe(originalCreatedAt)

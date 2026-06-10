@@ -28,7 +28,8 @@ async function fetchStats() {
         $fetch<number>(`${apiBase}users/count`),
         $fetch<number>(`${apiBase}motorcycles/count`),
         $fetch<{ users: IUser[] }>(
-          `${apiBase}users?filter=${JSON.stringify({ createdAt: { $gte: today } })}`
+          `${apiBase}users?filter=${JSON.stringify({ createdAt: { $gte: today } })}`,
+          { credentials: 'include' }
         ),
         $fetch<{ posts: any[] }>(
           `${apiBase}posts?filter=${JSON.stringify({ createdAt: { $gte: today } })}`

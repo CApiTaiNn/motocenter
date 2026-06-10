@@ -1,8 +1,6 @@
 <script setup>
-import { useAuth } from '~/composables/useAuth'
-
-const { fetchUser } = useAuth()
-onMounted(fetchUser)
+// Auth state is resolved once globally in app.vue; no per-layout fetch (it
+// fired a second redundant users/account request on every page load).
 </script>
 
 <template>
@@ -11,5 +9,6 @@ onMounted(fetchUser)
     <NuxtPage />
     <FooterApp />
     <ModalsApp />
+    <ScrollBike />
   </UApp>
 </template>

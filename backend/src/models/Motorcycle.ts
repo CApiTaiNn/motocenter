@@ -2,6 +2,7 @@ import type { IMotorcycle } from '../types/motorcycle'
 import { Schema, Types, model } from 'mongoose'
 import { MotorcycleCategory } from '../constants/MotorcycleCategory'
 import { brandSnapshotSchema } from './Brand'
+import { stripInternalFields } from '../utils/serialize'
 
 // Re-exported for back-compat: existing imports of MotorcycleCategory from
 // this model keep working. The enum now lives in constants/MotorcycleCategory.ts.
@@ -57,7 +58,8 @@ const motorcycleSchema = new Schema({
     type: Boolean
   },
   is_public: {
-    type: Boolean
+    type: Boolean,
+    default: false
   },
   acceleration: {
     time_0_100: { type: Number },
@@ -87,7 +89,7 @@ const motorcycleSchema = new Schema({
     type: Types.ObjectId,
     ref: 'Post'
   }
-})
+}, { toJSON: stripInternalFields })
 
 // brand._id: the "motorcycles of this brand" lookup in the admin form.
 motorcycleSchema.index({ 'brand._id': 1 })

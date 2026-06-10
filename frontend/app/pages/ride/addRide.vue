@@ -8,7 +8,7 @@ import HeaderInfo from '../../components/global/HeaderInfo.vue'
       <template #title>
         <h1>
           Créer de nouveaux <br />
-          <span style="color: red">Horizons</span>
+          <span class="text-(--ui-primary)">Horizons</span>
         </h1>
       </template>
       <template #subtitle>

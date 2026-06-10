@@ -1,16 +1,22 @@
 import type { IUser } from '~/types/users.ts'
 
-const user = ref<IUser | null>(null)
-const isAuthenticated = computed(() => !!user.value)
-const isLoading = ref(true)
-
 export function useAuth() {
   const apiBase = useRuntimeConfig().public.apiBase
 
+  // SSR-safe shared state: useState is per-request on the server (no leakage
+  // between concurrent requests) and serialises to the client on hydration.
+  const user = useState<IUser | null>('auth-user', () => null)
+  const isLoading = useState<boolean>('auth-loading', () => true)
+  const isAuthenticated = computed(() => !!user.value)
+
   async function fetchUser(projects: string = 'all') {
     isLoading.value = true
+    // useRequestFetch forwards the incoming request's cookies during SSR, so a
+    // hard refresh can resolve the session on the server pass (plain $fetch
+    // drops them server-side, which bounced authenticated admins).
+    const request = useRequestFetch()
     try {
-      const data = await $fetch<{ users: IUser }>(`${apiBase}users/account`, {
+      const data = await request<{ users: IUser }>(`${apiBase}users/account`, {
         credentials: 'include',
         params: { project: projects }
       })

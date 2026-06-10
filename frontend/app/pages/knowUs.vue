@@ -14,7 +14,7 @@ const team = [
       <template #title>
         <h1>
           À propos de <br />
-          <span style="color: red">nous</span>
+          <span class="text-(--ui-primary)">nous</span>
         </h1>
       </template>
       <template #subtitle>

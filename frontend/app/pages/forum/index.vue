@@ -2,6 +2,7 @@
 import ForumMyFavoritesPost from '~/components/forum/ForumMyFavoritesPost.vue'
 import HeaderInfo from '~/components/global/HeaderInfo.vue'
 import type { IPost } from '~/types/post'
+import type { IMessage } from '~/types/messages'
 
 const posts = ref<IPost[]>([])
 const loading = ref(true)
@@ -36,35 +37,45 @@ const filter = computed(() => {
 
   if (!conditions.length) return undefined
 
+  // Combine brand/category/search with AND so each filter narrows the results
+  // (an $or here returned the union — selecting a brand AND typing a search
+  // widened instead of restricting).
   return JSON.stringify({
-    $or: conditions
+    $and: conditions
   })
 })
 
+const apiBase = useRuntimeConfig().public.apiBase
+
 const getPosts = async () => {
-  const res = await $fetch<{ posts: IPost[] }>(
-    `${useRuntimeConfig().public.apiBase}posts`,
-    {
+  try {
+    const res = await $fetch<{ posts: IPost[] }>(`${apiBase}posts`, {
       params: {
         deep: true,
         project: 'content,title,id,createdAt,views,image',
         filter: filter.value
       }
-    }
-  )
-  posts.value = await Promise.all(
-    res.posts.map(async (post: IPost) => {
-      post.responses = await getResponseOfPost(post._id)
-      return post
     })
-  )
+    posts.value = await Promise.all(
+      res.posts.map(async (post: IPost) => {
+        post.responses = await getResponseOfPost(post._id)
+        return post
+      })
+    )
+  } catch (error) {
+    // Surface nothing to the user here, but never leave the page stuck in the
+    // loading state on a failed fetch.
+    console.error('Failed to load posts', error)
+    posts.value = []
+  } finally {
+    loading.value = false
+  }
 }
 
 const getResponseOfPost = async (postId: string) => {
-  const res = await fetch(
-    `${useRuntimeConfig().public.apiBase}posts/${postId}/responses`
+  const data = await $fetch<{ messages: IMessage[] }>(
+    `${apiBase}posts/${postId}/responses`
   )
-  const data = await res.json()
   return data.messages
 }
 
@@ -88,7 +99,7 @@ onMounted(async () => {
       <template #title>
         <h1>
           Bienvenue sur le <br />
-          <span style="color: red">Forum</span>
+          <span class="text-(--ui-primary)">Forum</span>
         </h1>
       </template>
       <template #subtitle>

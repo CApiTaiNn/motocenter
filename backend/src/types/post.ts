@@ -10,5 +10,7 @@ export interface IPost {
   brand: IBrandSnapshot
   views: number
   image?: string
+  // Marks system-owned motorcycle discussion threads (see POST /posts).
+  isNewMotoComment?: boolean
   userFavoritePost?: Array<string>
 }

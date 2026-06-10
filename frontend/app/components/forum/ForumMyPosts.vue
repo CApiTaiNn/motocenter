@@ -12,16 +12,17 @@ const postOfUser = ref<IPost[]>([])
 
 const getMyPost = async () => {
   if (user.value) {
+    // Filter server-side by author instead of downloading every post and
+    // filtering on the client.
     const response = await $fetch<{ posts: IPost[] }>(`${apiBase}posts`, {
       params: {
         project: 'title,user',
-        deep: true
+        deep: true,
+        filter: JSON.stringify({ user: user.value._id })
       }
     })
 
-    postOfUser.value = response.posts.filter(
-      (post) => post.user._id === user.value?._id
-    )
+    postOfUser.value = response.posts
   }
 }
 

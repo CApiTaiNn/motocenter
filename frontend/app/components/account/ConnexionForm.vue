@@ -103,7 +103,7 @@ watch(isOpen, (newVal) => {
             >S'inscrire</span
           >
         </p>
-        <p class="m-4 text-xs text-[red]">{{ error }}</p>
+        <p class="m-4 text-xs text-(--ui-error)">{{ error }}</p>
       </div>
     </template>
   </UModal>

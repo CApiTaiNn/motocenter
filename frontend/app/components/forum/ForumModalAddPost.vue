@@ -246,7 +246,11 @@ v-model="state.brand" placeholder="Sélectionnez la marque du post" :items="bran
                 <template #default="{ open }">
                   <div @click="() => open()" @mouseover="isHover = true" @mouseleave="isHover = false">
                     <div class="cursor-pointer" :class="isHover ? 'blur-[2px]' : ''">
-                      <img :src="getPreviewUrl()" class="max-w-[80%]" />
+                      <img
+                        :src="getPreviewUrl()"
+                        alt="Aperçu de l'image du post"
+                        class="max-w-[80%]"
+                      />
                     </div>
                     <div
 v-if="props.isNewPost && getPreviewUrl() === ''"

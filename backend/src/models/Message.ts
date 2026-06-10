@@ -1,5 +1,6 @@
 import type { IMessage } from '../types/messages'
 import { Schema, Types, model } from 'mongoose'
+import { stripInternalFields } from '../utils/serialize'
 
 const messageSchema = new Schema(
   {
@@ -47,7 +48,8 @@ const messageSchema = new Schema(
     }
   },
   {
-    validateBeforeSave: true
+    validateBeforeSave: true,
+    toJSON: stripInternalFields
   }
 )
 

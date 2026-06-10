@@ -8,6 +8,7 @@ import multer, { MulterError } from 'multer'
 import { v4 as uuidv4 } from 'uuid'
 import { getSupabase } from '../utils/supabase'
 import { makeRateLimiter } from '../utils/rateLimit'
+import { HttpError } from '../utils/errors'
 
 const BUCKET = 'userProfilImages'
 const MAX_FILE_SIZE = 5 * 1024 * 1024
@@ -58,9 +59,9 @@ const handleUpload = (req: Request, res: Response, next: NextFunction) => {
   upload.single('file')(req, res, (err) => {
     if (err instanceof MulterError) {
       const status = err.code === 'LIMIT_FILE_SIZE' ? 413 : 400
-      return res.status(status).json({ message: err.message })
+      return next(new HttpError(status, err.message))
     }
-    if (err) return res.status(400).json({ message: err.message })
+    if (err) return next(new HttpError(400, err.message))
     next()
   })
 }
@@ -74,38 +75,35 @@ const router = Router()
 // single-file cap and magic-byte content validation. Require auth here once
 // registration uploads after login instead.
 router.post('/', uploadLimiter, handleUpload, async (req, res) => {
-  try {
-    const file = req.file
-    if (!file) {
-      res.status(400).json({ message: 'Please upload a file' })
-      return
-    }
-
-    const ext = detectImageType(file.buffer)
-    if (!ext) {
-      res.status(400).json({ message: 'Unsupported file type' })
-      return
-    }
-
-    const fileName = `${uuidv4()}.${ext}`
-
-    const supabase = getSupabase()
-    const { data, error } = await supabase.storage
-      .from(BUCKET)
-      .upload(fileName, file.buffer, {
-        contentType: IMAGE_TYPES[ext],
-        upsert: false
-      })
-
-    if (error) throw error
-
-    const { data: image } = supabase.storage.from(BUCKET).getPublicUrl(data.path)
-
-    res.status(200).json({ url: image.publicUrl })
-  } catch (error) {
-    console.error('Error uploading image:', error)
-    res.status(500).json({ message: 'Image upload failed' })
+  const file = req.file
+  if (!file) {
+    throw new HttpError(400, 'Please upload a file')
   }
+
+  const ext = detectImageType(file.buffer)
+  if (!ext) {
+    throw new HttpError(400, 'Unsupported file type')
+  }
+
+  const fileName = `${uuidv4()}.${ext}`
+
+  const supabase = getSupabase()
+  const { data, error } = await supabase.storage
+    .from(BUCKET)
+    .upload(fileName, file.buffer, {
+      contentType: IMAGE_TYPES[ext],
+      upsert: false
+    })
+
+  if (error) {
+    // Preserve the underlying cause in the logs, surface a safe message.
+    console.error('Supabase upload failed:', error)
+    throw new HttpError(500, 'Image upload failed')
+  }
+
+  const { data: image } = supabase.storage.from(BUCKET).getPublicUrl(data.path)
+
+  res.status(200).json({ url: image.publicUrl })
 })
 
 export default router

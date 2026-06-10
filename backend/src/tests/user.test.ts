@@ -56,63 +56,118 @@ describe('User Routes - /api/v1/users', () => {
     })
   })
 
-  describe('GET /api/v1/users', () => {
-    it('should return users list', async () => {
-      const res = await request(app).get('/api/v1/users?project=email,pseudo')
+  describe('GET /api/v1/users (admin only)', () => {
+    let adminCookie: string
+
+    beforeEach(async () => {
+      const admin = await User.create({
+        firstname: 'Admin',
+        lastname: 'Root',
+        pseudo: 'root',
+        email: 'admin@test.com',
+        password: 'password123',
+        isAdmin: true
+      })
+      const token = jwt.sign(
+        { id: admin._id.toString(), email: 'admin@test.com' },
+        process.env.JWT_SECRET!
+      )
+      adminCookie = `accessToken=${token}`
+    })
+
+    it('should return 401 without a token', async () => {
+      const res = await request(app).get('/api/v1/users')
+      expect(res.status).toBe(401)
+    })
+
+    it('should return 403 for a non-admin user', async () => {
+      const res = await request(app)
+        .get('/api/v1/users')
+        .set('Cookie', authCookie)
+      expect(res.status).toBe(403)
+    })
+
+    it('should return the users list for an admin', async () => {
+      const res = await request(app)
+        .get('/api/v1/users?project=email,pseudo')
+        .set('Cookie', adminCookie)
 
       expect(res.status).toBe(200)
       expect(res.body.users).toBeInstanceOf(Array)
-      expect(res.body.users.length).toBe(1)
+      // the test user plus the admin created above
+      expect(res.body.users.length).toBe(2)
     })
 
-    it('should filter only allowed fields (no password, no email)', async () => {
-      const res = await request(app).get(
-        '/api/v1/users?project=password,email,pseudo'
-      )
+    it('should never return the password, even with project=all', async () => {
+      const res = await request(app)
+        .get('/api/v1/users?project=all')
+        .set('Cookie', adminCookie)
 
       expect(res.status).toBe(200)
-      const user = res.body.users[0]
-      expect(user.password).toBeUndefined()
-      expect(user.email).toBeUndefined()
-      expect(user.pseudo).toBe(userData.pseudo)
-    })
-
-    it('should respect limit parameter', async () => {
-      await User.create({
-        ...userData,
-        email: 'john2@test.com',
-        pseudo: 'johnd2'
-      })
-      const res = await request(app).get('/api/v1/users?project=pseudo&limit=1')
-
-      expect(res.status).toBe(200)
-      expect(res.body.users.length).toBe(1)
-    })
-
-    it('should reject filters on private fields', async () => {
-      const res = await request(app).get(
-        `/api/v1/users?filter=${JSON.stringify({ isAdmin: true })}`
+      expect(res.body.users.every((u: any) => u.password === undefined)).toBe(
+        true
       )
-
-      expect(res.status).toBe(400)
+      // admins are allowed to read private fields such as email
+      expect(res.body.users.some((u: any) => u.email === userData.email)).toBe(
+        true
+      )
     })
 
-    it('should allow filtering by _id', async () => {
-      const res = await request(app).get(
-        `/api/v1/users?filter=${JSON.stringify({ _id: userId })}&project=pseudo`
-      )
+    it('should respect the limit parameter', async () => {
+      const res = await request(app)
+        .get('/api/v1/users?project=pseudo&limit=1')
+        .set('Cookie', adminCookie)
 
       expect(res.status).toBe(200)
       expect(res.body.users.length).toBe(1)
-      expect(res.body.users[0].pseudo).toBe(userData.pseudo)
+    })
+
+    it('should allow an admin to filter on private fields', async () => {
+      const res = await request(app)
+        .get(
+          `/api/v1/users?filter=${JSON.stringify({ isAdmin: true })}&project=pseudo`
+        )
+        .set('Cookie', adminCookie)
+
+      expect(res.status).toBe(200)
+      expect(res.body.users.length).toBe(1)
+      expect(res.body.users[0].pseudo).toBe('root')
     })
 
     it('should reject an invalid limit', async () => {
-      const zero = await request(app).get('/api/v1/users?limit=0')
+      const zero = await request(app)
+        .get('/api/v1/users?limit=0')
+        .set('Cookie', adminCookie)
       expect(zero.status).toBe(400)
 
-      const nan = await request(app).get('/api/v1/users?limit=abc')
+      const nan = await request(app)
+        .get('/api/v1/users?limit=abc')
+        .set('Cookie', adminCookie)
       expect(nan.status).toBe(400)
+    })
+  })
+
+  describe('GET /api/v1/users/:id (public profile)', () => {
+    it('should return public fields only, without authentication', async () => {
+      const res = await request(app).get(`/api/v1/users/${userId}`)
+
+      expect(res.status).toBe(200)
+      expect(res.body.users.pseudo).toBe(userData.pseudo)
+      expect(res.body.users.email).toBeUndefined()
+      expect(res.body.users.password).toBeUndefined()
+      expect(res.body.users.isAdmin).toBeUndefined()
+    })
+
+    it('should return 404 for a non-existent id', async () => {
+      const res = await request(app).get(
+        '/api/v1/users/507f1f77bcf86cd799439011'
+      )
+      expect(res.status).toBe(404)
+    })
+
+    it('should return 400 for a malformed id', async () => {
+      const res = await request(app).get('/api/v1/users/not-an-id')
+      expect(res.status).toBe(400)
     })
   })
 
@@ -127,19 +182,26 @@ describe('User Routes - /api/v1/users', () => {
       ridingStartYear: 2010
     }
 
-    it('should create a new account (201, no password, not admin)', async () => {
+    it('should create a new account and echo only the id', async () => {
       const res = await request(app)
         .post('/api/v1/users/account')
         .send(newUser)
 
       expect(res.status).toBe(201)
-      expect(res.body.users).toBeDefined()
-      expect(res.body.users.email).toBe(newUser.email)
-      expect(res.body.users.password).toBeUndefined()
-      expect(res.body.users.isAdmin).toBe(false)
+      // Minimal response: just the id, never the user object.
+      expect(res.body._id).toBeTruthy()
+      expect(res.body.users).toBeUndefined()
+      expect(res.body.email).toBeUndefined()
+      expect(res.body.isAdmin).toBeUndefined()
 
-      const stored = await User.findOne({ email: newUser.email })
+      // The account is persisted, not an admin, with a hashed (never returned)
+      // password.
+      const stored = await User.findOne({ email: newUser.email }).select(
+        '+password'
+      )
       expect(stored).not.toBeNull()
+      expect(stored!.isAdmin).toBe(false)
+      expect(stored!.password).not.toBe(newUser.password)
     })
 
     it('should reject a duplicate email with 409', async () => {
@@ -386,16 +448,38 @@ describe('User Routes - /api/v1/users', () => {
   })
 
   describe('Query hardening', () => {
-    it('rejects a $where filter with 400', async () => {
-      const res = await request(app).get(
-        `/api/v1/users?filter=${encodeURIComponent('{"$where":"1==1"}')}`
+    // The list route is admin-gated, so authenticate before exercising the
+    // filter parser that runs inside the handler.
+    let adminCookie: string
+
+    beforeEach(async () => {
+      const admin = await User.create({
+        firstname: 'Admin',
+        lastname: 'Root',
+        pseudo: 'root',
+        email: 'admin@test.com',
+        password: 'password123',
+        isAdmin: true
+      })
+      const token = jwt.sign(
+        { id: admin._id.toString(), email: 'admin@test.com' },
+        process.env.JWT_SECRET!
       )
+      adminCookie = `accessToken=${token}`
+    })
+
+    it('rejects a $where filter with 400', async () => {
+      const res = await request(app)
+        .get(`/api/v1/users?filter=${encodeURIComponent('{"$where":"1==1"}')}`)
+        .set('Cookie', adminCookie)
 
       expect(res.status).toBe(400)
     })
 
     it('rejects a malformed filter with 400', async () => {
-      const res = await request(app).get('/api/v1/users?filter=not-json')
+      const res = await request(app)
+        .get('/api/v1/users?filter=not-json')
+        .set('Cookie', adminCookie)
 
       expect(res.status).toBe(400)
     })

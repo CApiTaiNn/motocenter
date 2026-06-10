@@ -219,7 +219,7 @@ describe('Post Routes - /api/v1/posts', () => {
           content: 'New content',
           brand: 'Yamaha',
           category: PostCategory.RACING,
-          isNewMotoComment: true
+          isNewMotoComment: false
         })
 
       expect(res.status).toBe(201)
@@ -551,7 +551,7 @@ describe('Post Routes - /api/v1/posts', () => {
           content: 'Content',
           brand: 'Yamaha',
           category: PostCategory.RACING,
-          isNewMotoComment: true
+          isNewMotoComment: false
         })
 
       expect(res.status).toBe(201)

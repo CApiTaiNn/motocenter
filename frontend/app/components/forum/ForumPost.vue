@@ -84,7 +84,7 @@ const handlePostChange = () => {
               <div class="flex flex-row">
                 <p>{{ props.post.views }}&nbsp;</p>
                 <p class="max-lg:hidden">
-                  {{ props.post.views.length > 1 ? 'vues' : ' vue' }}
+                  {{ props.post.views > 1 ? 'vues' : ' vue' }}
                 </p>
               </div>
             </div>

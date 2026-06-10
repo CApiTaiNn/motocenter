@@ -2,7 +2,7 @@
 import type { IRide } from '~/types/ride'
 import { computed } from 'vue'
 import { useAuth } from '~/composables/useAuth'
-import type { IUser } from '~/types/users.js'
+import type { IUserPublic } from '~/types/users.js'
 import { useConnexionModal } from '~/composables/useConnexionModal.js'
 
 interface IProps {
@@ -11,9 +11,8 @@ interface IProps {
 
 const { user } = useAuth()
 const props = defineProps<IProps>()
-const isLikedCurrent = ref<boolean>(
-  props.ride.liked_id?.includes(user.value?._id ?? '') ?? false
-)
+// Server-derived per-viewer flag — no need to scan a raw liker array.
+const isLikedCurrent = ref<boolean>(props.ride.likedByMe ?? false)
 const { open } = useConnexionModal()
 const creator = ref<any>(null)
 
@@ -136,33 +135,20 @@ const fetchCreatorInfos = async () => {
   if (!props.ride.user_id) return
 
   try {
-    const data: any = await $fetch<{ user: IUser }>(
-      `${runtimeConfig.public.apiBase}users`,
-      {
-        params: {
-          filter: JSON.stringify({ _id: props.ride.user_id }),
-          project: 'pseudo,image'
-        }
-      }
+    const data = await $fetch<{ users: IUserPublic }>(
+      `${runtimeConfig.public.apiBase}users/${props.ride.user_id}`
     )
 
-    creator.value = data.users[0] || data
+    creator.value = data.users
   } catch (e) {
     console.error("Erreur lors de la récupération de l'auteur", e)
   }
 }
 
 onMounted(async () => {
+  // The connected user is already in shared auth state; no per-card refetch.
   await fetchCreatorInfos()
-
-  const runtimeConfig = useRuntimeConfig()
-  const currentUser: any = await $fetch(
-    `${runtimeConfig.public.apiBase}users/account`,
-    { credentials: 'include' }
-  )
-  if (currentUser.users && props.ride.liked_id) {
-    isLikedCurrent.value = props.ride.liked_id.includes(currentUser.users._id)
-  }
+  isLikedCurrent.value = props.ride.likedByMe ?? false
 })
 </script>
 

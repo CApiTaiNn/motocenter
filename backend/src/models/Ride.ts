@@ -1,5 +1,6 @@
 import type { IRide } from '../types/ride'
 import { model, Schema } from 'mongoose'
+import { stripInternalFields } from '../utils/serialize'
 
 const rideSchema = new Schema({
   title: {
@@ -114,7 +115,7 @@ const rideSchema = new Schema({
     type: Date,
     default: Date.now
   }
-})
+}, { toJSON: stripInternalFields })
 
 // createdAt: default list sort + the /count month-range queries.
 rideSchema.index({ createdAt: -1 })

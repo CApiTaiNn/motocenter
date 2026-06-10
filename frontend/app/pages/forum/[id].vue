@@ -18,13 +18,14 @@ const newReponseOfPost = ref('')
 const toast = useToast()
 const isLoaded = ref(false)
 const isSolidStar = computed(
-  () => user.value && post.value?.userFavoritePost?.includes(user.value._id)
+  () => user.value && post.value?.favoritedByMe === true
 )
 
 const getPost = async () => {
   const data = await $fetch<{ posts: IPost[] }>(`${apiBase}posts`, {
     params: {
       filter: JSON.stringify({ _id: route.params.id }),
+      // userFavoritePost is selected so the API can derive favoritedByMe.
       project: 'image,content,title,createdAt,views,userFavoritePost',
       deep: true
     }
@@ -140,7 +141,7 @@ onMounted(async () => {
       <template #title>
         <h1>
           Bienvenue sur le <br />
-          <span style="color: red">Forum</span>
+          <span class="text-(--ui-primary)">Forum</span>
         </h1>
       </template>
       <template #subtitle>

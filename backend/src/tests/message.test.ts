@@ -105,8 +105,14 @@ describe('Message Routes - /api/v1/messages', () => {
         })
 
       expect(res.status).toBe(201)
-      expect(res.body.content).toBe('New message')
-      expect(res.body.user).toBe(userId)
+      // Minimal response: just the id.
+      expect(res.body._id).toBeTruthy()
+      expect(res.body.content).toBeUndefined()
+
+      // The message is persisted with the author derived from the token.
+      const stored = await Message.findById(res.body._id)
+      expect(stored!.content).toBe('New message')
+      expect(stored!.user!.toString()).toBe(userId)
     })
 
     it('should return 401 without a token', async () => {
@@ -123,7 +129,8 @@ describe('Message Routes - /api/v1/messages', () => {
         .set('Cookie', authCookie)
         .send({})
 
-      expect(res.status).toBe(500)
+      // Missing content is a client error: validated up front as a 400.
+      expect(res.status).toBe(400)
     })
   })
 
@@ -138,7 +145,9 @@ describe('Message Routes - /api/v1/messages', () => {
 
       expect(res.status).toBe(200)
       expect(res.body.populatedMessage.like).toBe(1)
-      expect(res.body.populatedMessage.usersLikeId).toContain(userId)
+      // Raw reactor arrays are never exposed; a per-viewer boolean is.
+      expect(res.body.populatedMessage.likedByMe).toBe(true)
+      expect(res.body.populatedMessage.usersLikeId).toBeUndefined()
     })
 
     it('should toggle like off', async () => {
@@ -156,7 +165,7 @@ describe('Message Routes - /api/v1/messages', () => {
 
       expect(res.status).toBe(200)
       expect(res.body.populatedMessage.like).toBe(0)
-      expect(res.body.populatedMessage.usersLikeId).not.toContain(userId)
+      expect(res.body.populatedMessage.likedByMe).toBe(false)
     })
 
     it('should dislike a message', async () => {
@@ -233,7 +242,7 @@ describe('Message Routes - /api/v1/messages', () => {
 
       expect(res.status).toBe(200)
       expect(res.body.populatedMessage.dislike).toBe(0)
-      expect(res.body.populatedMessage.usersDislikeId).not.toContain(userId)
+      expect(res.body.populatedMessage.dislikedByMe).toBe(false)
     })
   })
 

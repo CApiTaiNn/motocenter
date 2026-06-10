@@ -49,6 +49,7 @@ async function fetchMotoDetails(_id: string) {
   const data = await $fetch<{ motorcycles: IMotorcycle[] }>(
     `${apiBase}motorcycles`,
     {
+      credentials: 'include',
       params: {
         filter: JSON.stringify({ _id: _id }),
         project: 'all'
@@ -343,6 +344,7 @@ async function removeMotorcycle() {
       <img
         v-if="state.imageUrl"
         :src="state.imageUrl"
+        alt="Aperçu de l'image de la moto"
         class="mt-2 h-24 rounded-sm object-cover"
       />
     </UFormField>

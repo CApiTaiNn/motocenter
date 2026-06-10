@@ -1,20 +1,24 @@
 import type { IBrand, IBrandSnapshot } from '../types/brand'
 import { Schema, model, type Types } from 'mongoose'
+import { stripInternalFields } from '../utils/serialize'
 
-const brandSchema = new Schema({
-  name: {
-    type: String,
-    required: true
+const brandSchema = new Schema(
+  {
+    name: {
+      type: String,
+      required: true
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now
+    },
+    icon: {
+      type: String,
+      required: true
+    }
   },
-  createdAt: {
-    type: Date,
-    default: Date.now
-  },
-  icon: {
-    type: String,
-    required: true
-  }
-})
+  { toJSON: stripInternalFields }
+)
 
 // Denormalized brand snapshot embedded on documents that display brand data
 // (Post, Motorcycle) — see the data-modeling convention. `_id` is set to the

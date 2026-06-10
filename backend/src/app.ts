@@ -1,14 +1,10 @@
-import express, {
-  type NextFunction,
-  type Request,
-  type Response
-} from 'express'
+import express from 'express'
 import routes from './routes'
 import cors from 'cors'
 import helmet from 'helmet'
 import swaggerUi from 'swagger-ui-express'
 import { swaggerSpec } from './swagger'
-import { HttpError } from './utils/errors'
+import { errorHandler } from './utils/errorHandler'
 import { makeRateLimiter } from './utils/rateLimit'
 
 import cookieParser from 'cookie-parser'
@@ -34,16 +30,7 @@ if (process.env.NODE_ENV !== 'production') {
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 }
 
-// Centralised error handler: surfaces client errors (4xx) but never leaks
-// internal details on a 500.
-app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
-  const status = err instanceof HttpError ? err.status : 500
-  if (status >= 500) {
-    console.error(err)
-    res.status(500).json({ error: 'Internal server error' })
-  } else {
-    res.status(status).json({ error: (err as HttpError).message })
-  }
-})
+// Central error handler — must be registered last, after all routes.
+app.use(errorHandler)
 
 export default app

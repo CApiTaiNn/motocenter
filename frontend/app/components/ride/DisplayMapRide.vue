@@ -336,11 +336,20 @@ const renderRides = (isZooming = false) => {
     const hour = Math.floor(ride.duration)
     const minutes = Math.round((ride.duration - hour) * 60)
 
+    // Build the popup via DOM nodes (textContent), never an HTML string, so a
+    // crafted ride title can't inject markup/script — Leaflet renders popup
+    // strings as raw HTML.
+    const popupEl = document.createElement('div')
+    popupEl.className = 'ride-detail-container'
+    const titleEl = document.createElement('b')
+    titleEl.textContent = ride.title
+    popupEl.appendChild(titleEl)
+    popupEl.appendChild(document.createElement('br'))
+    popupEl.append(`${ride.distance}km - ${hour}h ${minutes}min`)
+
     // Création du marker du point de départ
     const marker = L.marker([start[1], start[0]], { icon: dynamicIcon })
-      .bindPopup(
-        `<div class="ride-detail-container"><b>${ride.title}</b><br>${ride.distance}km - ${hour}h ${minutes}min</div>`
-      )
+      .bindPopup(popupEl)
       .on('popupopen', () => {
         if (activeTraceLayer) {
           map.value.removeLayer(activeTraceLayer)
