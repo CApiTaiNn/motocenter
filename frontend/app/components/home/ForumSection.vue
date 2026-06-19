@@ -3,7 +3,7 @@
 </script>
 
 <template>
-  <div class="flex flex-row-reverse items-center gap-12 max-lg:flex-col!">
+  <div class="flex flex-row items-center gap-12 max-lg:flex-col!">
     <div class="flex flex-1 flex-col gap-6">
       <div class="flex flex-col gap-3">
         <h2>Une question ? <span class="text-(--ui-primary)">La communauté répond</span></h2>
