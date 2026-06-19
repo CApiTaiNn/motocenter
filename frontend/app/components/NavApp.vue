@@ -60,7 +60,7 @@ function toggleOpen() {
         <LogoApp />
         <ToggleSwitch v-if="isDev" v-model="mode" />
       </div>
-      <div class="mx-[2%] flex flex-row items-center gap-10">
+      <div class="mx-[2%] flex flex-row items-center gap-4">
         <div
           v-for="item in navItems"
           :key="item.to"
