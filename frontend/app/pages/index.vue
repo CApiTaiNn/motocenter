@@ -151,13 +151,13 @@ onMounted(async () => {
       />
     </section>
     <section class="band flex flex-col">
-      <HomeComparoSection :bikes="itemsCaroussel" />
+      <ComparoSection :bikes="itemsCaroussel" />
     </section>
     <section class="flex flex-col">
-      <HomeRideSection />
+      <RideSection />
     </section>
     <section class="band flex flex-col">
-      <HomeForumSection />
+      <ForumSection />
     </section>
     <section class="flex flex-col gap-8">
       <h2 style="text-align: center">
