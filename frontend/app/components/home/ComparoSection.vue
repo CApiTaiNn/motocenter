@@ -3,7 +3,12 @@ import type { IMotorcycle } from '~/types/motorcycles'
 
 // The two bikes are passed in from the homepage's existing motorcycle fetch,
 // so this stays a live preview rather than a hard-coded mock.
-const props = defineProps<{ bikes: IMotorcycle[] }>()
+// `reverse` is owned by the parent so the home page decides the zig-zag from
+// each section's position, instead of each section hardcoding its side.
+const props = withDefaults(
+  defineProps<{ bikes: IMotorcycle[]; reverse?: boolean }>(),
+  { reverse: false }
+)
 
 const pair = computed(() => props.bikes.slice(0, 2))
 const ready = computed(() => pair.value.length === 2)
@@ -14,7 +19,7 @@ const SPECS = ['horsePower', 'torque', 'price'] as const
 </script>
 
 <template>
-  <div class="flex flex-row items-center gap-12 max-lg:flex-col!">
+  <div class="flex items-center gap-12 max-lg:flex-col!" :class="reverse ? 'flex-row-reverse' : 'flex-row'">
     <!-- left: pitch + CTA -->
     <div class="flex flex-1 flex-col gap-6">
       <div class="flex flex-col gap-3">

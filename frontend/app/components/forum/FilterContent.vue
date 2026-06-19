@@ -101,22 +101,16 @@ onMounted(async () => {
   <div class="flex flex-col gap-5">
     <!-- Quick links -->
     <nav class="flex flex-col gap-1">
-      <button
-        type="button"
-        class="flex w-full cursor-pointer items-center gap-3 rounded-lg border-l-2 border-transparent px-3 py-2 text-left text-sm transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
-        @click="handleHaveAllPosts"
-      >
-        <UIcon class="size-5 shrink-0" name="i-lucide-messages-square" />
-        <span class="flex-1">Tous les posts</span>
-      </button>
-      <button
-        type="button"
-        class="flex w-full cursor-pointer items-center gap-3 rounded-lg border-l-2 border-transparent px-3 py-2 text-left text-sm transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
-        @click="handleHaveMyFavorites"
-      >
-        <UIcon class="size-5 shrink-0" name="i-lucide-star" />
-        <span class="flex-1">Mes favoris</span>
-      </button>
+      <FilterRow label="Tous les posts" @select="handleHaveAllPosts">
+        <template #leading>
+          <UIcon class="size-5 shrink-0" name="i-lucide-messages-square" />
+        </template>
+      </FilterRow>
+      <FilterRow label="Mes favoris" @select="handleHaveMyFavorites">
+        <template #leading>
+          <UIcon class="size-5 shrink-0" name="i-lucide-star" />
+        </template>
+      </FilterRow>
     </nav>
 
     <!-- Catégories -->
@@ -133,25 +127,17 @@ onMounted(async () => {
       </div>
       <USkeleton v-if="props.loading" class="h-8 w-full rounded-lg" />
       <div v-else class="flex flex-col gap-1">
-        <button
+        <FilterRow
           v-for="category in categories"
           :key="category.value"
-          type="button"
-          class="flex w-full cursor-pointer items-center gap-3 rounded-lg border-l-2 border-transparent px-3 py-2 text-left text-sm transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
-          :class="{
-            'border-(--ui-primary) bg-(--ui-primary)/10 font-medium text-(--ui-primary)':
-              filters.categoryIds.includes(category.value)
-          }"
-          @click="handlClickOnCategory(category.value)"
+          :label="category.label"
+          :selected="filters.categoryIds.includes(category.value)"
+          @select="handlClickOnCategory(category.value)"
         >
-          <UIcon class="size-5 shrink-0" :name="category.icon" />
-          <span class="flex-1 truncate">{{ category.label }}</span>
-          <UIcon
-            v-if="filters.categoryIds.includes(category.value)"
-            class="size-4 shrink-0"
-            name="i-lucide-check"
-          />
-        </button>
+          <template #leading>
+            <UIcon class="size-5 shrink-0" :name="category.icon" />
+          </template>
+        </FilterRow>
       </div>
     </section>
 
@@ -169,32 +155,24 @@ onMounted(async () => {
       </div>
       <USkeleton v-if="props.loading" class="h-8 w-full rounded-lg" />
       <div v-else class="flex flex-col gap-1">
-        <button
+        <FilterRow
           v-for="brand in brands"
           :key="brand._id"
-          type="button"
-          class="flex w-full cursor-pointer items-center gap-3 rounded-lg border-l-2 border-transparent px-3 py-2 text-left text-sm transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
-          :class="{
-            'border-(--ui-primary) bg-(--ui-primary)/10 font-medium text-(--ui-primary)':
-              filters.brandIds.includes(brand._id)
-          }"
-          @click="handleClickOnBrand(brand._id)"
+          :label="brand.name"
+          :selected="filters.brandIds.includes(brand._id)"
+          @select="handleClickOnBrand(brand._id)"
         >
-          <img
-            :src="brand.icon"
-            :alt="brand.name"
-            :title="brand.name"
-            width="24"
-            height="24"
-            class="size-6 shrink-0 object-contain"
-          />
-          <span class="flex-1 truncate">{{ brand.name }}</span>
-          <UIcon
-            v-if="filters.brandIds.includes(brand._id)"
-            class="size-4 shrink-0"
-            name="i-lucide-check"
-          />
-        </button>
+          <template #leading>
+            <img
+              :src="brand.icon"
+              :alt="brand.name"
+              :title="brand.name"
+              width="24"
+              height="24"
+              class="size-6 shrink-0 object-contain"
+            />
+          </template>
+        </FilterRow>
       </div>
     </section>
 

@@ -150,11 +150,12 @@ onMounted(async () => {
         aria-hidden="true"
       />
     </section>
+    <!-- Alternating zig-zag: comparo left, balade right, forum left -->
     <section class="band flex flex-col">
       <ComparoSection :bikes="itemsCaroussel" />
     </section>
     <section class="flex flex-col">
-      <RideSection />
+      <RideSection :reverse="true" />
     </section>
     <section class="band flex flex-col">
       <ForumSection />

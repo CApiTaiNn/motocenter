@@ -2,7 +2,7 @@
 import { useAuth } from '~/composables/useAuth'
 import { useConnexionModal } from '~/composables/useConnexionModal'
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     label?: string
     block?: boolean
@@ -16,6 +16,18 @@ const emit = defineEmits(['new-post'])
 const { isAuthenticated } = useAuth()
 const { open } = useConnexionModal()
 const openAddPost = ref(false)
+
+// Shared button presentation — bound to both the modal trigger (authenticated)
+// and the connexion-gated button (guest) so the two stay in sync.
+const buttonProps = computed(() => ({
+  icon: 'i-lucide-plus',
+  color: 'primary' as const,
+  variant: 'solid' as const,
+  size: props.size,
+  block: props.block,
+  label: props.label,
+  class: 'cursor-pointer rounded-full'
+}))
 
 const handleNewPost = () => {
   emit('new-post')
@@ -32,27 +44,9 @@ const handleNewPost = () => {
     @added-post="handleNewPost"
   >
     <template #trigger>
-      <UButton
-        icon="i-lucide-plus"
-        color="primary"
-        variant="solid"
-        :size="size"
-        :block="block"
-        :label="label"
-        class="cursor-pointer rounded-full"
-      />
+      <UButton v-bind="buttonProps" />
     </template>
   </ForumModalAddPost>
   <!-- Guests are routed through the connexion modal first. -->
-  <UButton
-    v-else
-    icon="i-lucide-plus"
-    color="primary"
-    variant="solid"
-    :size="size"
-    :block="block"
-    :label="label"
-    class="cursor-pointer rounded-full"
-    @click="open()"
-  />
+  <UButton v-else v-bind="buttonProps" @click="open()" />
 </template>

@@ -1,9 +1,11 @@
 <script setup lang="ts">
 // Static thread mockup — a sober preview of a real bike question and answer.
+// Direction owned by the parent (see ComparoSection) — defaults to non-reversed.
+withDefaults(defineProps<{ reverse?: boolean }>(), { reverse: false })
 </script>
 
 <template>
-  <div class="flex flex-row items-center gap-12 max-lg:flex-col!">
+  <div class="flex items-center gap-12 max-lg:flex-col!" :class="reverse ? 'flex-row-reverse' : 'flex-row'">
     <div class="flex flex-1 flex-col gap-6">
       <div class="flex flex-col gap-3">
         <h2>Une question ? <span class="text-(--ui-primary)">La communauté répond</span></h2>

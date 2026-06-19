@@ -1,4 +1,7 @@
 <script setup lang="ts">
+// Direction owned by the parent (see ComparoSection) — defaults to non-reversed.
+withDefaults(defineProps<{ reverse?: boolean }>(), { reverse: false })
+
 // Illustrative example rides for the homepage teaser — the live, interactive
 // map lives on /ride.
 const rides = [
@@ -9,7 +12,7 @@ const rides = [
 </script>
 
 <template>
-  <div class="flex flex-row-reverse items-center gap-12 max-lg:flex-col!">
+  <div class="flex items-center gap-12 max-lg:flex-col!" :class="reverse ? 'flex-row-reverse' : 'flex-row'">
     <div class="flex flex-1 flex-col gap-6">
       <div class="flex flex-col gap-3">
         <h2>Roulez sur de <span class="text-(--ui-primary)">nouveaux itinéraires</span></h2>
