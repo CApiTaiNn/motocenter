@@ -8,27 +8,9 @@ const props = defineProps<{ bikes: IMotorcycle[] }>()
 const pair = computed(() => props.bikes.slice(0, 2))
 const ready = computed(() => pair.value.length === 2)
 
-interface Row {
-  label: string
-  unit: string
-  values: [number, number]
-  winner: 0 | 1
-}
-
-// For price the lower value wins; for the rest the higher value wins.
-const rows = computed<Row[]>(() => {
-  if (!ready.value) return []
-  const [a, b] = pair.value as [IMotorcycle, IMotorcycle]
-  return [
-    { label: 'Puissance', unit: 'ch', values: [a.horsePower, b.horsePower], winner: a.horsePower >= b.horsePower ? 0 : 1 },
-    { label: 'Couple', unit: 'Nm', values: [a.torque, b.torque], winner: a.torque >= b.torque ? 0 : 1 },
-    { label: 'Prix', unit: '€', values: [a.price, b.price], winner: a.price <= b.price ? 0 : 1 }
-  ]
-})
-
-function format(value: number, unit: string) {
-  return unit === '€' ? `${value.toLocaleString('fr-FR')} €` : `${value} ${unit}`
-}
+// Specs shown as comparison slide-bars — same component & visual as the
+// /comparo results page (two mirrored bars scaled to the higher value).
+const SPECS = ['horsePower', 'torque', 'price'] as const
 </script>
 
 <template>
@@ -51,7 +33,7 @@ function format(value: number, unit: string) {
 
     <!-- right: live comparison preview -->
     <div
-      class="w-full max-w-md flex-1 overflow-hidden rounded-[20px] border border-(--border-gray) bg-(--background)"
+      class="w-full max-w-lg flex-1 overflow-hidden rounded-[20px] border border-(--border-gray) bg-(--background)"
     >
       <template v-if="ready">
         <div class="grid grid-cols-2">
@@ -70,30 +52,14 @@ function format(value: number, unit: string) {
           </div>
         </div>
 
-        <div
-          v-for="row in rows"
-          :key="row.label"
-          class="grid grid-cols-2 border-t border-(--border-gray)"
-        >
-          <div
-            v-for="i in [0, 1]"
-            :key="i"
-            class="flex items-center justify-center gap-2 p-4 max-lg:p-3!"
-            :class="[i === 0 ? 'border-r border-(--border-gray)' : '', row.winner === i ? 'bg-(--ui-primary)/5' : '']"
-          >
-            <UIcon
-              v-if="row.winner === i"
-              name="i-lucide-check"
-              class="size-5 shrink-0 text-(--ui-primary)"
-              aria-hidden="true"
-            />
-            <span class="flex flex-col items-center leading-tight">
-              <span class="font-semibold" :class="row.winner === i ? 'text-(--ui-primary)' : ''">
-                {{ format(row.values[i], row.unit) }}
-              </span>
-              <span class="text-xs text-gray-500">{{ row.label }}</span>
-            </span>
-          </div>
+        <div class="flex flex-col gap-5 border-t border-(--border-gray) p-6 max-lg:p-4!">
+          <ResultatFieldNumber
+            v-for="spec in SPECS"
+            :key="spec"
+            :field-name="spec"
+            :first-value="Number(pair[0]?.[spec] ?? 0)"
+            :second-value="Number(pair[1]?.[spec] ?? 0)"
+          />
         </div>
       </template>
 
