@@ -87,6 +87,38 @@ const handleFilter = async (updateFilter: any) => {
   await getPosts()
 }
 
+// Toolbar search owns filters.searchBar; debounce so we don't refetch on every
+// keystroke.
+let searchTimer: ReturnType<typeof setTimeout> | undefined
+const handleSearch = () => {
+  clearTimeout(searchTimer)
+  searchTimer = setTimeout(() => getPosts(), 300)
+}
+
+// Client-side sort/filter of the already-fetched posts.
+const SORT_TABS = [
+  { key: 'recent', label: 'Récents' },
+  { key: 'popular', label: 'Populaires' },
+  { key: 'unanswered', label: 'Sans réponse' }
+] as const
+const sortBy = ref<(typeof SORT_TABS)[number]['key']>('recent')
+
+const displayedPosts = computed(() => {
+  let list = [...posts.value]
+  if (sortBy.value === 'unanswered') {
+    list = list.filter((p) => (p.responses?.length || 0) === 0)
+  }
+  if (sortBy.value === 'popular') {
+    list.sort((a, b) => (b.views || 0) - (a.views || 0))
+  } else {
+    list.sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    )
+  }
+  return list
+})
+
 onMounted(async () => {
   await Promise.all([getPosts()])
   loading.value = false
@@ -112,32 +144,101 @@ onMounted(async () => {
       <div class="sticky top-[70px]">
         <ForumPanel :loading :active-filter="filters" @filters="handleFilter" />
       </div>
-      <div class="flex min-w-0 flex-1 flex-col gap-6">
-        <USkeleton v-if="loading" class="size-12 rounded-full" />
-        <UCard v-if="loading === false && posts.length === 0">
+      <div class="flex min-w-0 flex-1 flex-col gap-4">
+        <!-- Toolbar: search + new discussion -->
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <UInput
+            v-model="filters.searchBar"
+            icon="i-lucide-search"
+            size="lg"
+            placeholder="Rechercher une discussion, un modèle, un sujet…"
+            class="flex-1 [&_input]:rounded-full"
+            @update:model-value="handleSearch"
+          >
+            <template v-if="filters.searchBar?.length" #trailing>
+              <UButton
+                color="neutral"
+                variant="link"
+                size="sm"
+                icon="i-lucide-circle-x"
+                aria-label="Effacer la recherche"
+                class="cursor-pointer"
+                @click="
+                  filters.searchBar = '';
+                  getPosts();
+                "
+              />
+            </template>
+          </UInput>
+          <ForumNewDiscussionButton size="lg" @new-post="getPosts()" />
+        </div>
+
+        <!-- Sort tabs + result count -->
+        <div class="flex items-center justify-between gap-3 border-b border-solid border-(--border-gray)">
+          <div class="flex gap-1">
+            <button
+              v-for="tab in SORT_TABS"
+              :key="tab.key"
+              type="button"
+              class="-mb-px cursor-pointer border-b-2 border-transparent px-3 py-2 text-sm font-semibold transition-colors"
+              :class="
+                sortBy === tab.key
+                  ? 'border-(--ui-primary) text-(--text-color)'
+                  : 'text-(--label-text) hover:text-(--text-color)'
+              "
+              @click="sortBy = tab.key"
+            >
+              {{ tab.label }}
+            </button>
+          </div>
+          <span v-if="!loading" class="text-sm text-(--label-text)">
+            {{ displayedPosts.length }}
+            discussion{{ displayedPosts.length > 1 ? 's' : '' }}
+          </span>
+        </div>
+
+        <!-- Thread list -->
+        <div v-if="loading" class="flex flex-col gap-4">
+          <USkeleton v-for="n in 3" :key="n" class="h-28 w-full rounded-xl" />
+        </div>
+        <UCard v-else-if="displayedPosts.length === 0">
           <div class="flex flex-col items-center gap-4 py-8 text-center">
             <UIcon
               name="i-lucide-message-square-plus"
-              class="size-16 text-(--color-gray-mid)"
+              class="size-16 text-gray-400"
             />
             <div class="flex flex-col gap-1">
               <h4>Aucun post pour le moment</h4>
-              <p class="text-sm text-(--color-gray-mid)">
+              <p class="text-sm text-gray-400">
                 Soyez le premier à lancer la discussion.
               </p>
             </div>
           </div>
         </UCard>
-        <div v-for="post in posts" :key="post._id">
+        <template v-else>
           <ForumPost
+            v-for="post in displayedPosts"
+            :key="post._id"
             :post="post"
-            class="cursor-pointer"
             :loading
             @post-change="getPosts()"
           />
-        </div>
+        </template>
       </div>
       <div class="hidden lg:sticky lg:top-[70px] lg:right-0 lg:flex lg:w-[300px] lg:flex-col lg:gap-6">
+        <UCard class="border-[0.5px] border-(--border-gray) text-center">
+          <div class="flex flex-col items-center gap-3 py-2">
+            <h3>Une question ?</h3>
+            <p class="text-sm text-(--label-text)">
+              Lancez une discussion, la communauté vous répond.
+            </p>
+            <ForumNewDiscussionButton
+              label="Lancer une discussion"
+              block
+              @new-post="getPosts()"
+            />
+          </div>
+        </UCard>
         <ForumMyPosts @new-post="getPosts()" />
         <ForumMyFavoritesPost />
       </div>

@@ -40,7 +40,10 @@ watch(user, async (newUser) => {
   <div>
     <UCard variant="outline" class="w-full border-[0.5px] border-(--border-gray)">
       <template #header>
-        <h3>Mes favoris</h3>
+        <h3 class="flex items-center gap-2">
+          <UIcon name="i-lucide-star" class="size-5 text-(--ui-primary)" />
+          Mes favoris
+        </h3>
       </template>
       <template #default>
         <div v-if="myFavoritesPosts.length">

@@ -31,63 +31,67 @@ const handlePostChange = () => {
 </script>
 <template>
   <UCard
-    class="w-full max-w-275 border-[0.5px] border-l-4 border-(--border-gray) border-l-(--category-accent)"
+    class="group w-full cursor-pointer border-[0.5px] border-l-4 border-(--border-gray) border-l-(--category-accent) transition-colors hover:border-(--ui-primary)/50"
     :style="{ '--category-accent': categoryAccent(props.post.category) }"
+    :ui="{ body: 'p-4 sm:p-5' }"
     @click="handleOpenAPost(post._id)"
   >
-    <div class="flex w-full items-start gap-6 px-6 py-3">
-      <USkeleton v-if="props.loading" class="size-12 rounded-full" />
+    <div class="flex w-full items-start gap-4">
+      <USkeleton v-if="props.loading" class="size-12 shrink-0 rounded-full" />
       <UAvatar
         v-else
         :src="props.post.user.image"
-        size="3xl"
+        :alt="props.post.user.pseudo"
+        size="xl"
         loading="lazy"
+        class="shrink-0"
       />
-      <div class="flex flex-1 flex-col justify-center">
-        <div class="flex w-full flex-row items-start justify-between">
-          <h4>{{ props.post.title }}</h4>
+      <div class="flex min-w-0 flex-1 flex-col gap-2">
+        <div class="flex items-start justify-between gap-2">
+          <div class="min-w-0">
+            <!-- tags: colored category badge + brand -->
+            <div class="flex flex-wrap items-center gap-2">
+              <span
+                class="rounded-full border px-2.5 py-0.5 text-xs font-medium tracking-wide uppercase"
+                :style="{
+                  color: categoryAccent(props.post.category),
+                  borderColor: `${categoryAccent(props.post.category)}55`,
+                  backgroundColor: `${categoryAccent(props.post.category)}14`
+                }"
+              >
+                {{ POST_CATEGORY_META[props.post.category]?.label }}
+              </span>
+              <UBadge color="neutral" variant="subtle" size="sm">
+                {{ props.post.brand.name }}
+              </UBadge>
+            </div>
+            <p class="mt-1.5 line-clamp-2 text-lg/snug font-semibold transition-colors group-hover:text-(--ui-primary)">
+              {{ props.post.title }}
+            </p>
+          </div>
           <ForumEditAPost
             :post="post"
             :is-new-post="false"
             @edited-post="handlePostChange"
           />
         </div>
-        <div class="mt-2 flex w-full items-center justify-between max-lg:flex-wrap">
-          <div>
-            <div class="my-4 flex flex-row items-center gap-6">
-              <UBadge size="lg">{{
-                props.post.brand.name
-              }}</UBadge>
-              <UBadge size="lg">{{
-                POST_CATEGORY_META[props.post.category]?.label
-              }}</UBadge>
-            </div>
-            <p>
-              Par {{ props.post.user.pseudo }},
-              {{ formatTimeAgo(props.post.createdAt) }}
-            </p>
-          </div>
-          <div class="flex max-lg:flex-row max-lg:gap-2 lg:flex-col lg:items-start lg:justify-end">
-            <div class="mt-4 flex items-center justify-start gap-1">
-              <UIcon class="size-7" name="i-lucide-messages-square" />
-              <div class="flex flex-row">
-                <p>{{ props.post.responses.length || 0 }}&nbsp;</p>
-                <p class="max-lg:hidden">
-                  {{
-                    props.post.responses.length > 1 ? ' réponses' : ' réponse'
-                  }}
-                </p>
-              </div>
-            </div>
-            <div class="mt-4 flex items-center justify-start gap-1">
-              <UIcon class="size-7" name="i-lucide-eye" />
-              <div class="flex flex-row">
-                <p>{{ props.post.views }}&nbsp;</p>
-                <p class="max-lg:hidden">
-                  {{ props.post.views > 1 ? 'vues' : ' vue' }}
-                </p>
-              </div>
-            </div>
+        <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-sm text-(--label-text)">
+          <span>
+            Par
+            <b class="font-medium text-(--text-color)">{{ props.post.user.pseudo }}</b>
+            · {{ formatTimeAgo(props.post.createdAt) }}
+          </span>
+          <div class="flex items-center gap-4">
+            <span class="flex items-center gap-1.5">
+              <UIcon class="size-4" name="i-lucide-messages-square" />
+              {{ props.post.responses.length || 0 }}
+              <span class="max-sm:hidden">{{ props.post.responses.length > 1 ? 'réponses' : 'réponse' }}</span>
+            </span>
+            <span class="flex items-center gap-1.5">
+              <UIcon class="size-4" name="i-lucide-eye" />
+              {{ props.post.views }}
+              <span class="max-sm:hidden">{{ props.post.views > 1 ? 'vues' : 'vue' }}</span>
+            </span>
           </div>
         </div>
       </div>

@@ -59,7 +59,10 @@ watch(
     >
       <template #header>
         <div class="flex flex-row items-center justify-between gap-2">
-          <h3>Mes posts</h3>
+          <h3 class="flex items-center gap-2">
+            <UIcon name="i-lucide-file-text" class="size-5 text-(--ui-primary)" />
+            Mes posts
+          </h3>
           <UButton
             v-if="!isAuthenticated"
             icon="i-lucide-plus"

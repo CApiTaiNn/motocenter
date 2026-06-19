@@ -192,10 +192,13 @@ onMounted(async () => {
 <template>
   <div>
     <UModal v-model:open="displayModal" :close="true">
-      <UIcon v-if="isSameUser && isNewPost === false" class="size-6" name="i-lucide-square-pen" @click.stop />
-      <UButton
+      <!-- Default trigger; override with the #trigger slot for a custom button. -->
+      <slot name="trigger">
+        <UIcon v-if="isSameUser && isNewPost === false" class="size-6" name="i-lucide-square-pen" @click.stop />
+        <UButton
 v-if="isNewPost === true" icon="i-lucide-plus" size="sm" color="primary" variant="solid"
-        class="cursor-pointer" />
+          class="cursor-pointer" />
+      </slot>
       <template #header>
         <div class="flex w-full items-center justify-between">
           <h3>{{ modalTitle() }}</h3>
