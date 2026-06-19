@@ -117,10 +117,12 @@ function tradFieldName(fieldName: string) {
     <p>{{ tradFieldName(props.fieldName) }}</p>
     <div class="flex w-[80%] items-center justify-between gap-6 max-lg:w-[88%]! max-lg:flex-col! max-lg:gap-2! max-md:w-[95%]!">
       <div class="flex w-[90%] flex-row items-center justify-between max-lg:flex-row-reverse! max-lg:gap-[10px]">
-        <count-up
-          :end-val="parseField(props.firstValue).value"
-          :options="countUpOptions(props.firstValue)"
-        />
+        <span class="whitespace-nowrap">
+          <count-up
+            :end-val="parseField(props.firstValue).value"
+            :options="countUpOptions(props.firstValue)"
+          />
+        </span>
         <div class="relative h-[15px] w-[80%] max-lg:h-[10px]! max-lg:w-[70%]!">
           <span class="bar-value absolute top-0 right-0 z-1 h-full rounded-lg bg-(image:--gradient-primary) max-lg:right-auto! max-lg:left-0 max-lg:transform-[rotateY(180deg)]" :style="{ width: firstPercent + '%' }"></span>
           <span class="absolute top-0 left-0 size-full rounded-lg bg-(--color-track-bg)"></span>
@@ -134,10 +136,12 @@ function tradFieldName(fieldName: string) {
           ></span>
           <span class="absolute top-0 left-0 size-full rounded-lg bg-(--color-track-bg)"></span>
         </div>
-        <count-up
-          :end-val="parseField(props.secondValue).value"
-          :options="countUpOptions(props.secondValue)"
-        />
+        <span class="whitespace-nowrap">
+          <count-up
+            :end-val="parseField(props.secondValue).value"
+            :options="countUpOptions(props.secondValue)"
+          />
+        </span>
       </div>
     </div>
   </div>

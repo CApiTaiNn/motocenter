@@ -150,14 +150,15 @@ onMounted(async () => {
         aria-hidden="true"
       />
     </section>
-    <!-- Alternating zig-zag: comparo left, balade right, forum left -->
-    <section class="band flex flex-col">
+    <!-- Alternating zig-zag: comparo left, balade right, forum left.
+         Each feature section fills the viewport height on desktop. -->
+    <section class="band flex flex-col lg:min-h-screen lg:justify-center">
       <ComparoSection :bikes="itemsCaroussel" />
     </section>
-    <section class="flex flex-col">
+    <section class="flex flex-col lg:min-h-screen lg:justify-center">
       <RideSection :reverse="true" />
     </section>
-    <section class="band flex flex-col">
+    <section class="band flex flex-col lg:min-h-screen lg:justify-center">
       <ForumSection />
     </section>
     <section class="flex flex-col gap-8">
