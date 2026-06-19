@@ -225,7 +225,7 @@ onMounted(async () => {
           />
         </template>
       </div>
-      <div class="hidden lg:sticky lg:top-[70px] lg:right-0 lg:flex lg:w-[300px] lg:flex-col lg:gap-6">
+      <div class="hidden lg:sticky lg:top-[70px] lg:right-0 lg:flex lg:w-[260px] lg:flex-col lg:gap-6">
         <UCard class="border-[0.5px] border-(--border-gray) text-center">
           <div class="flex flex-col items-center gap-3 py-2">
             <h3>Une question ?</h3>
@@ -239,7 +239,6 @@ onMounted(async () => {
             />
           </div>
         </UCard>
-        <ForumMyPosts @new-post="getPosts()" />
         <ForumMyFavoritesPost />
       </div>
     </div>

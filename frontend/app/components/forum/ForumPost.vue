@@ -31,8 +31,7 @@ const handlePostChange = () => {
 </script>
 <template>
   <UCard
-    class="group w-full cursor-pointer border-[0.5px] border-l-4 border-(--border-gray) border-l-(--category-accent) transition-colors hover:border-(--ui-primary)/50"
-    :style="{ '--category-accent': categoryAccent(props.post.category) }"
+    class="group w-full cursor-pointer border-[0.5px] border-l-4 border-(--border-gray) border-l-(--ui-primary) transition-colors hover:border-(--ui-primary)/50"
     :ui="{ body: 'p-4 sm:p-5' }"
     @click="handleOpenAPost(post._id)"
   >
@@ -52,12 +51,7 @@ const handlePostChange = () => {
             <!-- tags: colored category badge + brand -->
             <div class="flex flex-wrap items-center gap-2">
               <span
-                class="rounded-full border px-2.5 py-0.5 text-xs font-medium tracking-wide uppercase"
-                :style="{
-                  color: categoryAccent(props.post.category),
-                  borderColor: `${categoryAccent(props.post.category)}55`,
-                  backgroundColor: `${categoryAccent(props.post.category)}14`
-                }"
+                class="rounded-full border border-(--ui-primary)/35 bg-(--ui-primary)/10 px-2.5 py-0.5 text-xs font-medium tracking-wide text-(--ui-primary) uppercase"
               >
                 {{ POST_CATEGORY_META[props.post.category]?.label }}
               </span>
