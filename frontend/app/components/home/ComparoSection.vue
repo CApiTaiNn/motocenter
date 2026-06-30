@@ -38,15 +38,14 @@ const SPECS = ['horsePower', 'torque', 'price'] as const
 
     <!-- right: live comparison preview -->
     <div
-      class="w-full max-w-lg flex-1 overflow-hidden rounded-[20px] border border-(--border-gray) bg-(--background)"
+      class="w-full flex-1 overflow-hidden rounded-[20px] border border-(--border-gray) bg-(--background)"
     >
       <template v-if="ready">
         <div class="grid grid-cols-2">
           <div
-            v-for="(bike, i) in pair"
+            v-for="bike in pair"
             :key="bike._id"
             class="flex flex-col items-center gap-2 p-6 max-lg:p-4!"
-            :class="i === 0 ? 'border-r border-(--border-gray)' : ''"
           >
             <img
               :src="bike.imageUrl || '/images/accueil/Hornet.png'"
