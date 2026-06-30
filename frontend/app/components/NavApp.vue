@@ -33,6 +33,7 @@ watch(() => route.path, () => {
 })
 
 const navItems = [
+  { label: 'Accueil', to: '/' },
   { label: 'Comparateur', to: '/comparo' },
   { label: 'Forum', to: '/forum' },
   { label: 'Balades', to: '/ride' },
@@ -40,6 +41,8 @@ const navItems = [
 ] as const
 
 function isActive(to: string): boolean {
+  // Root only matches exactly, otherwise '/' would highlight on every page.
+  if (to === '/') return route.path === '/'
   return route.path === to || route.path.startsWith(`${to}/`)
 }
 

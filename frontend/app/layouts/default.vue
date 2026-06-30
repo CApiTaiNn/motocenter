@@ -9,6 +9,5 @@
     <NuxtPage />
     <FooterApp />
     <ModalsApp />
-    <ScrollBike />
   </UApp>
 </template>
