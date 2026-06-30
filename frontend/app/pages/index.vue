@@ -161,7 +161,7 @@ onMounted(async () => {
     <section class="band flex flex-col lg:min-h-screen lg:justify-center">
       <ForumSection />
     </section>
-    <section class="flex flex-col gap-8">
+    <section class="flex flex-col gap-8 lg:min-h-screen lg:justify-center">
       <h2 style="text-align: center">
         <span style="color: var(--ui-primary)">Motocenter</span>
         en quelques chiffres
@@ -191,13 +191,13 @@ onMounted(async () => {
         </div>
       </article>
     </section>
-    <section class="band flex flex-col gap-8">
+    <section class="band flex flex-col gap-8 lg:min-h-screen lg:justify-center">
       <h2 style="text-align: center">Les best-sellers</h2>
       <ClientOnly>
         <CarrouselMotorcycles :items="itemsCaroussel" />
       </ClientOnly>
     </section>
-    <section class="band flex flex-col gap-8">
+    <section class="band flex flex-col gap-8 lg:min-h-screen lg:justify-center">
       <h2 style="text-align: center">
         Ils nous font confiance
       </h2>
