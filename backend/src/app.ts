@@ -11,6 +11,10 @@ import cookieParser from 'cookie-parser'
 
 const app = express()
 
+// Behind Render's proxy: trust the first hop so req.ip is the real client IP
+// (otherwise express-rate-limit keys every request on the proxy address).
+app.set('trust proxy', 1)
+
 app.use(helmet())
 app.use(
   cors({

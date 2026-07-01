@@ -25,6 +25,7 @@ services:
       - backend
     environment:
       - NUXT_HOST=0.0.0.0
+      - NUXT_PUBLIC_API_URL=${NUXT_PUBLIC_API_URL}
     env_file:
       - ./.env
   mongo:

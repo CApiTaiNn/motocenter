@@ -145,7 +145,9 @@ router.get('/count', async (req, res) => {
   const now = new Date()
   const start = new Date(now.getFullYear(), now.getMonth() - 1, 1)
   const intermediate = new Date(now.getFullYear(), now.getMonth(), 1)
-  const end = now
+  // Count the whole current month, not just up to `now`, so the comparison
+  // against the previous month covers equivalent full-month windows.
+  const end = new Date(now.getFullYear(), now.getMonth() + 1, 1)
   const countFirstPeriod = await Ride.countDocuments({
     createdAt: { $gte: start, $lt: intermediate }
   })
