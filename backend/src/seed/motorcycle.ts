@@ -222,7 +222,7 @@ const seedMotorcycles = async () => {
       price: 12000,
       numberOfComparison: 3,
       withAllField: false,
-      is_new: false,
+      is_public: false,
       speedMax: 257,
       imageUrl: '/images/motorcycles/CBR600RR_2021.png'
     },
@@ -241,7 +241,7 @@ const seedMotorcycles = async () => {
       price: 6799,
       numberOfComparison: 0,
       withAllField: false,
-      is_new: true,
+      is_public: true,
       speedMax: 191,
       imageUrl: '/images/motorcycles/CB500F_2024.png'
     },
@@ -259,7 +259,7 @@ const seedMotorcycles = async () => {
       price: 7599,
       numberOfComparison: 0,
       withAllField: false,
-      is_new: true,
+      is_public: true,
       speedMax: 200,
       imageUrl: '/images/motorcycles/mt-07_2024.png'
     },
@@ -277,7 +277,7 @@ const seedMotorcycles = async () => {
       price: 7399,
       numberOfComparison: 0,
       withAllField: false,
-      is_new: true,
+      is_public: true,
       speedMax: 195,
       imageUrl: '/images/motorcycles/Z650_2024.png'
     },
@@ -295,7 +295,7 @@ const seedMotorcycles = async () => {
       price: 7199,
       numberOfComparison: 0,
       withAllField: false,
-      is_new: false,
+      is_public: true,
       speedMax: 198,
       imageUrl: '/images/motorcycles/SV650_2023.png'
     },
@@ -314,7 +314,7 @@ const seedMotorcycles = async () => {
       price: 15999,
       numberOfComparison: 0,
       withAllField: false,
-      is_new: true,
+      is_public: true,
       speedMax: 210,
       imageUrl: '/images/motorcycles/africa_twin_2024.png'
     },
@@ -332,7 +332,7 @@ const seedMotorcycles = async () => {
       price: 19650,
       numberOfComparison: 0,
       withAllField: false,
-      is_new: true,
+      is_public: true,
       speedMax: 220,
       imageUrl: '/images/motorcycles/r_1250_gs_2024.png'
     },
@@ -350,7 +350,7 @@ const seedMotorcycles = async () => {
       price: 17499,
       numberOfComparison: 0,
       withAllField: false,
-      is_new: false,
+      is_public: true,
       speedMax: 215,
       imageUrl: '/images/motorcycles/super_tenere_1200_2023.png'
     },
@@ -368,7 +368,7 @@ const seedMotorcycles = async () => {
       price: 22990,
       numberOfComparison: 0,
       withAllField: false,
-      is_new: true,
+      is_public: true,
       speedMax: 240,
       imageUrl: '/images/motorcycles/multistrada_v4_2024.png'
     },
@@ -387,7 +387,7 @@ const seedMotorcycles = async () => {
       price: 7999,
       numberOfComparison: 0,
       withAllField: false,
-      is_new: true,
+      is_public: true,
       speedMax: 206,
       imageUrl: '/images/motorcycles/ninja_650_2024.png'
     },
@@ -405,7 +405,7 @@ const seedMotorcycles = async () => {
       price: 9999,
       numberOfComparison: 0,
       withAllField: false,
-      is_new: true,
+      is_public: true,
       speedMax: 187,
       imageUrl: '/images/motorcycles/tenere_700_2024.png'
     },
@@ -423,7 +423,7 @@ const seedMotorcycles = async () => {
       price: 7199,
       numberOfComparison: 0,
       withAllField: false,
-      is_new: true,
+      is_public: true,
       speedMax: 183,
       imageUrl: '/images/motorcycles/CBR500R_2024.png'
     },
@@ -441,7 +441,7 @@ const seedMotorcycles = async () => {
       price: 4799,
       numberOfComparison: 0,
       withAllField: false,
-      is_new: true,
+      is_public: true,
       speedMax: 140,
       imageUrl: '/images/motorcycles/v-strom_250_sx_2024.png'
     },
@@ -460,7 +460,7 @@ const seedMotorcycles = async () => {
       price: 16999,
       numberOfComparison: 0,
       withAllField: false,
-      is_new: true,
+      is_public: true,
       speedMax: 230,
       imageUrl: '/images/motorcycles/versys_1000_se_2024.png'
     },
@@ -478,7 +478,7 @@ const seedMotorcycles = async () => {
       price: 22350,
       numberOfComparison: 0,
       withAllField: false,
-      is_new: true,
+      is_public: true,
       speedMax: 215,
       imageUrl: '/images/motorcycles/r_1250_gs_adventure_2024.png'
     }
