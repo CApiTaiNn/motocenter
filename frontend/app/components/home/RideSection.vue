@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, onBeforeUnmount, ref } from 'vue'
 import type { IRide, RideResponse } from '~/types/ride'
 
 // Direction owned by the parent (see ComparoSection) — defaults to non-reversed.
@@ -7,20 +7,64 @@ withDefaults(defineProps<{ reverse?: boolean }>(), { reverse: false })
 
 // The 3 most recent rides for the homepage teaser — the live, interactive map
 // lives on /ride. The API sorts by createdAt desc by default, so limit=3 gives
-// the latest three.
+// the latest three. geom/color are needed to draw the preview traces.
 const rides = ref<IRide[]>([])
 const runtimeConfig = useRuntimeConfig()
+
+const mapEl = ref<HTMLElement | null>(null)
+let previewMap: any = null
+
+// Builds a small, non-interactive map that plots the fetched ride traces. Kept
+// deliberately static (no drag/zoom) — it's a teaser; the real map is on /ride.
+const initPreviewMap = async () => {
+  if (!mapEl.value || !rides.value.length) return
+
+  const L = await import('leaflet')
+  previewMap = L.map(mapEl.value, {
+    zoomControl: false,
+    attributionControl: false,
+    dragging: false,
+    scrollWheelZoom: false,
+    doubleClickZoom: false,
+    boxZoom: false,
+    keyboard: false,
+    touchZoom: false
+  }).setView([48.26, -3], 8)
+
+  L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&hl=fr', {
+    maxZoom: 20
+  }).addTo(previewMap)
+
+  const bounds = L.latLngBounds([])
+  for (const ride of rides.value) {
+    if (!ride.geom) continue
+    const layer = L.geoJSON(ride.geom as any, {
+      style: { color: ride.color || '#3B82F6', weight: 3, opacity: 1 }
+    }).addTo(previewMap)
+    bounds.extend(layer.getBounds())
+  }
+  if (bounds.isValid()) previewMap.fitBounds(bounds, { padding: [24, 24] })
+
+  // The map is created before flex layout fully settles, so recompute its size.
+  setTimeout(() => previewMap?.invalidateSize(), 200)
+}
 
 onMounted(async () => {
   try {
     const res = await fetch(
-      `${runtimeConfig.public.apiBase}rides?project=title,distance,start_town&limit=3`
+      `${runtimeConfig.public.apiBase}rides?project=title,distance,start_town,geom,color&limit=3`
     )
     const data: RideResponse = await res.json()
     rides.value = data.rides ?? []
+    await initPreviewMap()
   } catch (e) {
     console.error('Erreur fetch rides:', e)
   }
+})
+
+onBeforeUnmount(() => {
+  previewMap?.remove()
+  previewMap = null
 })
 
 // Open the ride on the interactive map: /ride focuses the marker via the `ride`
@@ -31,7 +75,7 @@ const goToRide = (ride: IRide) =>
 
 <template>
   <div class="flex items-center gap-12 max-lg:flex-col!" :class="reverse ? 'flex-row-reverse' : 'flex-row'">
-    <div class="flex flex-2 flex-col gap-6 max-lg:w-full!">
+    <div class="flex flex-1 flex-col gap-6 max-lg:w-full!">
       <div class="flex flex-col gap-3">
         <h2>Roulez sur de <span class="text-(--ui-primary)">nouveaux itinéraires</span></h2>
         <p class="max-lg:text-sm!">
@@ -60,47 +104,15 @@ const goToRide = (ride: IRide) =>
       </UButton>
     </div>
 
-    <!-- Sober route visual: two checkpoints joined by a dashed line -->
-    <div class="route-card relative flex aspect-square w-full max-w-md flex-3 items-center justify-center rounded-[20px] border border-(--border-gray) bg-(--background) p-8">
-      <svg class="size-full" viewBox="0 0 200 200" fill="none" aria-hidden="true">
-        <path
-          d="M40 40 C 120 60, 80 140, 160 160"
-          stroke="var(--ui-primary)"
-          stroke-width="3"
-          stroke-dasharray="6 8"
-          stroke-linecap="round"
-        />
-      </svg>
-      <span class="marker absolute top-[20%] left-[20%] -translate-1/2">
-        <UIcon name="i-lucide-map-pin" class="size-7 text-(--ui-primary)" />
-        <span class="label">Départ</span>
-      </span>
-      <span class="marker absolute top-[80%] left-[80%] -translate-1/2">
-        <UIcon name="i-lucide-flag" class="size-7 text-(--ui-primary)" />
-        <span class="label">Arrivée</span>
-      </span>
-    </div>
+    <!-- Live preview of the latest ride traces; links through to the full map. -->
+    <NuxtLink
+      to="/ride"
+      class="relative block aspect-square w-full max-w-lg flex-2 overflow-hidden rounded-[20px] border border-(--border-gray) max-lg:w-full!"
+    >
+      <div ref="mapEl" class="size-full"></div>
+      <!-- Transparent overlay so the whole card is clickable (the map itself is
+           non-interactive). -->
+      <span class="absolute inset-0 z-500" aria-hidden="true"></span>
+    </NuxtLink>
   </div>
 </template>
-
-<style scoped>
-/* Faint radial wash so the route reads as sitting on a map, without the weight
-   of an actual Leaflet tile layer. */
-.route-card {
-  background-image: radial-gradient(
-    circle at center,
-    color-mix(in srgb, var(--ui-primary) 6%, transparent),
-    transparent 70%
-  );
-}
-.marker {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-}
-.label {
-  font-size: 11px;
-  color: var(--label-text);
-}
-</style>
