@@ -154,12 +154,12 @@ onMounted(async () => {
 
 <template>
   <div
-    class="relative flex h-auto min-h-[220px] w-full flex-col overflow-visible rounded-xl bg-cover bg-center shadow-[0_4px_12px_rgba(0,0,0,0.15)]"
+    class="relative flex h-auto min-h-[165px] w-full flex-col overflow-visible rounded-xl bg-cover bg-center shadow-[0_4px_12px_rgba(0,0,0,0.15)]"
     :style="{ backgroundImage: `url(${imageUrl})` }"
   >
     <div class="absolute inset-0 z-1 rounded-xl bg-linear-to-t from-black/95 via-black/70 to-black/40"></div>
 
-    <div class="relative z-2 flex flex-col gap-2 p-4 text-white md:p-6!">
+    <div class="relative z-2 flex flex-col gap-1.5 p-3 text-white md:p-4!">
       <header class="flex w-full flex-wrap items-center justify-between gap-3">
         <div class="flex min-w-0 flex-1 flex-row flex-wrap items-center gap-2">
           <span
@@ -168,7 +168,7 @@ onMounted(async () => {
             aria-hidden="true"
           ></span>
 
-          <h2 class="m-0 shrink overflow-hidden text-xl font-bold text-ellipsis whitespace-normal [text-shadow:0_2px_4px_rgba(0,0,0,0.5)] md:text-2xl!">{{ props.ride.title }}</h2>
+          <h2 class="m-0 shrink overflow-hidden text-lg font-bold text-ellipsis whitespace-normal [text-shadow:0_2px_4px_rgba(0,0,0,0.5)] md:text-xl!">{{ props.ride.title }}</h2>
 
           <UBadge
             v-if="props.ride.is_event"
@@ -197,19 +197,19 @@ onMounted(async () => {
           :label="props.ride.like?.toString() || '0'"
           variant="subtle"
           color="neutral"
-          size="md"
+          size="sm"
           class="cursor-pointer font-bold text-white! transition-transform active:scale-120"
           @click="likeGestion"
         />
       </header>
 
-      <p class="mt-1 mb-3 line-clamp-2 text-sm opacity-85">{{ props.ride.description }}</p>
+      <p class="mt-0.5 mb-2 line-clamp-2 text-sm opacity-85">{{ props.ride.description }}</p>
 
       <footer>
-        <div class="mb-3 flex flex-wrap gap-x-3 gap-y-1">
+        <div class="mb-2 flex flex-wrap gap-x-3 gap-y-1">
           <UBadge
             variant="subtle"
-            size="lg"
+            size="md"
             icon="i-lucide-map-pinned"
             class="invisible-background"
           >
@@ -217,7 +217,7 @@ onMounted(async () => {
           </UBadge>
           <UBadge
             variant="subtle"
-            size="lg"
+            size="md"
             icon="i-lucide-clock"
             class="invisible-background"
           >
@@ -225,7 +225,7 @@ onMounted(async () => {
           </UBadge>
           <UBadge
             variant="subtle"
-            size="lg"
+            size="md"
             icon="i-lucide-map-pin"
             class="invisible-background"
           >
@@ -233,7 +233,7 @@ onMounted(async () => {
           </UBadge>
           <UBadge
             variant="subtle"
-            size="lg"
+            size="md"
             icon="i-lucide-route"
             class="invisible-background"
           >
@@ -241,10 +241,11 @@ onMounted(async () => {
           </UBadge>
         </div>
 
-        <div class="flex flex-wrap items-center justify-between gap-3 pt-3 text-sm max-[480px]:flex-col! max-[480px]:items-stretch! max-[480px]:gap-3!">
+        <div class="flex flex-wrap items-center justify-between gap-3 pt-2 text-sm max-[480px]:flex-col! max-[480px]:items-stretch! max-[480px]:gap-3!">
           <div class="flex items-center gap-3 max-[480px]:w-full max-[480px]:flex-wrap max-[480px]:justify-start">
             <template v-if="creator">
               <UAvatar
+                size="sm"
                 :alt="`Avatar de ${creator.pseudo || 'MotoCenter'}`"
                 :src="srcAvatarCreator"
               />
@@ -264,7 +265,7 @@ onMounted(async () => {
               :label="isParticipating ? 'Ne plus participer' : 'Participer'"
               :color="isParticipating ? 'neutral' : 'error'"
               :variant="isParticipating ? 'subtle' : 'solid'"
-              size="lg"
+              size="md"
               class="cursor-pointer px-5 font-bold max-[480px]:flex-1 max-[480px]:justify-center"
               :class="!isParticipating ? 'text-white!' : ''"
               @click="participateGestion"
