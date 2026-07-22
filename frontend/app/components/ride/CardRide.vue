@@ -241,7 +241,7 @@ onMounted(async () => {
           </UBadge>
         </div>
 
-        <div class="flex flex-wrap items-center justify-between gap-3 border border-t border-white/10 pt-3 text-sm max-[480px]:flex-col! max-[480px]:items-stretch! max-[480px]:gap-3!">
+        <div class="flex flex-wrap items-center justify-between gap-3 pt-3 text-sm max-[480px]:flex-col! max-[480px]:items-stretch! max-[480px]:gap-3!">
           <div class="flex items-center gap-3 max-[480px]:w-full max-[480px]:flex-wrap max-[480px]:justify-start">
             <template v-if="creator">
               <UAvatar
