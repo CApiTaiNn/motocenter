@@ -871,6 +871,7 @@ watch(
           :color="filterTime ? 'primary' : 'neutral'"
           :variant="filterTime ? 'solid' : 'subtle'"
           class="cursor-pointer"
+          :class="filterTime ? 'text-white!' : ''"
           @click="filterTime = !filterTime"
         >
           -1h30
@@ -882,6 +883,7 @@ watch(
           :color="filterDistance ? 'primary' : 'neutral'"
           :variant="filterDistance ? 'solid' : 'subtle'"
           class="cursor-pointer"
+          :class="filterDistance ? 'text-white!' : ''"
           @click="filterDistance = !filterDistance"
         >
           -50km
@@ -893,6 +895,7 @@ watch(
           :color="filterLike ? 'primary' : 'neutral'"
           :variant="filterLike ? 'solid' : 'subtle'"
           class="cursor-pointer"
+          :class="filterLike ? 'text-white!' : ''"
           @click="filterLike = !filterLike"
         >
           Coups de coeur
@@ -904,6 +907,7 @@ watch(
           :color="filterRecent ? 'primary' : 'neutral'"
           :variant="filterRecent ? 'solid' : 'subtle'"
           class="cursor-pointer"
+          :class="filterRecent ? 'text-white!' : ''"
           @click="filterRecent = !filterRecent"
         >
           Les plus récentes
@@ -915,6 +919,7 @@ watch(
           :color="filterEvent ? 'primary' : 'neutral'"
           :variant="filterEvent ? 'solid' : 'subtle'"
           class="cursor-pointer"
+          :class="filterEvent ? 'text-white!' : ''"
           @click="filterEvent = !filterEvent"
         >
           Événement
