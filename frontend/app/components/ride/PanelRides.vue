@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 import type { IRide } from '~/types/ride.js'
 import CardRide from './CardRide.vue'
 
@@ -8,7 +7,9 @@ interface IProps {
 }
 
 const props = defineProps<IProps>()
-const isSidebarOpen = ref(false) // État du volet latéral (ouvert/fermé)
+// État du volet latéral (ouvert/fermé), partagé avec la carte parente pour
+// qu'elle puisse décaler le tracé actif hors de la zone masquée par le panel.
+const isSidebarOpen = defineModel<boolean>('open', { default: false })
 </script>
 
 <template>

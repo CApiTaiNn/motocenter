@@ -31,7 +31,7 @@ const goToRide = (ride: IRide) =>
 
 <template>
   <div class="flex items-center gap-12 max-lg:flex-col!" :class="reverse ? 'flex-row-reverse' : 'flex-row'">
-    <div class="flex flex-[2] flex-col gap-6 max-lg:w-full!">
+    <div class="flex flex-2 flex-col gap-6 max-lg:w-full!">
       <div class="flex flex-col gap-3">
         <h2>Roulez sur de <span class="text-(--ui-primary)">nouveaux itinéraires</span></h2>
         <p class="max-lg:text-sm!">
@@ -61,7 +61,7 @@ const goToRide = (ride: IRide) =>
     </div>
 
     <!-- Sober route visual: two checkpoints joined by a dashed line -->
-    <div class="route-card relative flex aspect-square w-full max-w-md flex-[3] items-center justify-center rounded-[20px] border border-(--border-gray) bg-(--background) p-8">
+    <div class="route-card relative flex aspect-square w-full max-w-md flex-3 items-center justify-center rounded-[20px] border border-(--border-gray) bg-(--background) p-8">
       <svg class="size-full" viewBox="0 0 200 200" fill="none" aria-hidden="true">
         <path
           d="M40 40 C 120 60, 80 140, 160 160"
