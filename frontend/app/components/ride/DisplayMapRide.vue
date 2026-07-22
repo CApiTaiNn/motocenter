@@ -831,84 +831,95 @@ watch(
     </div>
     <div
       v-if="props.displayFilters"
-      class="filters pointer-events-none absolute top-[15px] left-[15px] z-1001 flex flex-row flex-wrap items-center gap-3"
+      class="filters pointer-events-auto absolute top-[15px] left-[15px] z-1001 flex max-w-[calc(100%-30px)] flex-col gap-2 rounded-xl border border-(--border-gray) bg-(--background)/90 p-2 shadow-(--shadow-lg) backdrop-blur-md"
     >
-      <USelect
-        v-model="selectedId"
-        :items="mapItems"
-        value-key="id"
-        class="w-44"
-        icon="i-lucide-layers"
-        color="neutral"
-        variant="subtle"
-      />
+      <!-- Ligne principale : fond de carte, recherche, ouverture des filtres -->
+      <div class="flex flex-wrap items-center gap-2">
+        <USelect
+          v-model="selectedId"
+          :items="mapItems"
+          value-key="id"
+          class="w-40"
+          icon="i-lucide-layers"
+          color="neutral"
+          variant="subtle"
+        />
 
-      <UButton
-        icon="i-lucide-filter"
-        color="primary"
-        variant="solid"
-        class="cursor-pointer text-white!"
-        @click="handleFilters"
-      >
-        Filtres
-      </UButton>
+        <UInput
+          v-model="searchValue"
+          color="neutral"
+          placeholder="Rechercher une balade..."
+          icon="i-lucide-search"
+        />
 
-      <UInput
-        v-model="searchValue"
-        color="neutral"
-        placeholder="Rechercher une balade..."
-        icon="i-lucide-search"
-      />
+        <UButton
+          icon="i-lucide-sliders-horizontal"
+          color="primary"
+          variant="solid"
+          class="cursor-pointer text-white!"
+          @click="handleFilters"
+        >
+          Filtres
+        </UButton>
+      </div>
 
-      <UButton
-        icon="i-lucide-clock"
-        :color="filterTime ? 'primary' : 'neutral'"
-        :variant="filterTime ? 'solid' : 'subtle'"
-        class="cursor-pointer"
-        @click="filterTime = !filterTime"
-      >
-        -1h30
-      </UButton>
+      <!-- Filtres rapides -->
+      <div class="flex flex-wrap items-center gap-2">
+        <UButton
+          icon="i-lucide-clock"
+          size="sm"
+          :color="filterTime ? 'primary' : 'neutral'"
+          :variant="filterTime ? 'solid' : 'subtle'"
+          class="cursor-pointer"
+          @click="filterTime = !filterTime"
+        >
+          -1h30
+        </UButton>
 
-      <UButton
-        icon="i-lucide-route"
-        :color="filterDistance ? 'primary' : 'neutral'"
-        :variant="filterDistance ? 'solid' : 'subtle'"
-        class="cursor-pointer"
-        @click="filterDistance = !filterDistance"
-      >
-        -50km
-      </UButton>
+        <UButton
+          icon="i-lucide-route"
+          size="sm"
+          :color="filterDistance ? 'primary' : 'neutral'"
+          :variant="filterDistance ? 'solid' : 'subtle'"
+          class="cursor-pointer"
+          @click="filterDistance = !filterDistance"
+        >
+          -50km
+        </UButton>
 
-      <UButton
-        icon="i-lucide-heart"
-        :color="filterLike ? 'primary' : 'neutral'"
-        :variant="filterLike ? 'solid' : 'subtle'"
-        class="cursor-pointer"
-        @click="filterLike = !filterLike"
-      >
-        Coups de coeur
-      </UButton>
+        <UButton
+          icon="i-lucide-heart"
+          size="sm"
+          :color="filterLike ? 'primary' : 'neutral'"
+          :variant="filterLike ? 'solid' : 'subtle'"
+          class="cursor-pointer"
+          @click="filterLike = !filterLike"
+        >
+          Coups de coeur
+        </UButton>
 
-      <UButton
-        icon="i-lucide-history"
-        :color="filterRecent ? 'primary' : 'neutral'"
-        :variant="filterRecent ? 'solid' : 'subtle'"
-        class="cursor-pointer"
-        @click="filterRecent = !filterRecent"
-      >
-        Les plus récentes
-      </UButton>
+        <UButton
+          icon="i-lucide-history"
+          size="sm"
+          :color="filterRecent ? 'primary' : 'neutral'"
+          :variant="filterRecent ? 'solid' : 'subtle'"
+          class="cursor-pointer"
+          @click="filterRecent = !filterRecent"
+        >
+          Les plus récentes
+        </UButton>
 
-      <UButton
-        icon="i-lucide-calendar-days"
-        :color="filterEvent ? 'primary' : 'neutral'"
-        :variant="filterEvent ? 'solid' : 'subtle'"
-        class="cursor-pointer"
-        @click="filterEvent = !filterEvent"
-      >
-        Événement
-      </UButton>
+        <UButton
+          icon="i-lucide-calendar-days"
+          size="sm"
+          :color="filterEvent ? 'primary' : 'neutral'"
+          :variant="filterEvent ? 'solid' : 'subtle'"
+          class="cursor-pointer"
+          @click="filterEvent = !filterEvent"
+        >
+          Événement
+        </UButton>
+      </div>
     </div>
     <UButton
       v-if="props.displayEnlargeButton"
@@ -984,11 +995,7 @@ watch(
 }
 
 /* --- FILTRES --- */
-/* Combinateur enfant : cible chaque enfant direct, pas un élément unique du template */
-.filters > * {
-  pointer-events: auto;
-  box-shadow: var(--shadow-md);
-}
+/* La barre est un panneau unique : les contrôles n'ont plus d'ombre propre. */
 
 /* --- LEAFLET UI CUSTOM --- */
 :deep(.custom-dynamic-pin) {
@@ -1009,6 +1016,22 @@ watch(
 :deep(.leaflet-draw-tooltip),
 :deep(.leaflet-popup-content) {
   font-family: 'Poppins', sans-serif !important;
+}
+
+/* Popup thématisée (clair/sombre) au lieu du chrome Leaflet par défaut */
+:deep(.leaflet-popup-content-wrapper) {
+  background: var(--background) !important;
+  color: var(--text-color) !important;
+  border: 1px solid var(--border-gray) !important;
+  border-radius: 12px !important;
+  box-shadow: var(--shadow-lg) !important;
+}
+:deep(.leaflet-popup-tip) {
+  background: var(--background) !important;
+  border: 1px solid var(--border-gray) !important;
+}
+:deep(.leaflet-popup-close-button) {
+  color: var(--text-color) !important;
 }
 
 :deep(.leaflet-control) {

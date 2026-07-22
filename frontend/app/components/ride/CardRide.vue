@@ -153,157 +153,130 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div
-    class="relative flex h-auto min-h-[220px] w-full flex-col overflow-visible rounded-xl bg-cover bg-center shadow-[0_4px_12px_rgba(0,0,0,0.15)]"
-    :style="{ backgroundImage: `url(${imageUrl})` }"
+  <article
+    class="flex w-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-(--background) text-(--text-color) shadow-(--shadow-md) dark:border-gray-800"
   >
-    <div class="absolute inset-0 z-1 rounded-xl bg-linear-to-t from-black/95 via-black/70 to-black/40"></div>
+    <!-- Bandeau image : porte les seules actions flottantes -->
+    <div
+      class="relative h-32 w-full bg-cover bg-center"
+      :style="{ backgroundImage: `url(${imageUrl})` }"
+    >
+      <div class="absolute inset-0 bg-linear-to-t from-black/50 to-transparent"></div>
 
-    <div class="relative z-2 flex flex-col gap-2 p-4 text-white md:p-6!">
-      <header class="flex w-full flex-wrap items-center justify-between gap-3">
-        <div class="flex min-w-0 flex-1 flex-row flex-wrap items-center gap-2">
-          <span
-            class="size-[14px] rounded-full shadow-[0_0_10px_rgba(255,255,255,0.3)]"
-            :style="{ backgroundColor: props.ride.color || '#3b82f6' }"
-            aria-hidden="true"
-          ></span>
+      <UButton
+        :icon="
+          isLikedCurrent
+            ? 'i-heroicons-hand-thumb-up-solid'
+            : 'i-heroicons-hand-thumb-up'
+        "
+        :label="props.ride.like?.toString() || '0'"
+        color="neutral"
+        size="sm"
+        class="absolute top-2 right-2 cursor-pointer bg-black/40 font-semibold text-white! backdrop-blur-sm transition-transform active:scale-110"
+        @click="likeGestion"
+      />
 
-          <h2 class="m-0 shrink overflow-hidden text-xl font-bold text-ellipsis whitespace-normal [text-shadow:0_2px_4px_rgba(0,0,0,0.5)] md:text-2xl!">{{ props.ride.title }}</h2>
-
-          <UBadge
-            v-if="props.ride.is_event"
-            variant="subtle"
-            size="md"
-            icon="i-lucide-calendar-days"
-            class="shrink-0 border border-white/20 bg-white/15 px-2 py-0.5 text-xs whitespace-nowrap text-white backdrop-blur-xs"
-          >
-            {{ dateEvent.toLocaleDateString('fr-FR') }}
-            •
-            {{
-              dateEvent.toLocaleTimeString('fr-FR', {
-                hour: '2-digit',
-                minute: '2-digit'
-              })
-            }}
-          </UBadge>
-        </div>
-
-        <UButton
-          :icon="
-            isLikedCurrent
-              ? 'i-heroicons-hand-thumb-up-solid'
-              : 'i-heroicons-hand-thumb-up'
-          "
-          :label="props.ride.like?.toString() || '0'"
-          variant="subtle"
-          color="neutral"
-          size="md"
-          class="cursor-pointer font-bold text-white! transition-transform active:scale-120"
-          @click="likeGestion"
-        />
-      </header>
-
-      <p class="mt-1 mb-3 line-clamp-2 text-sm opacity-85">{{ props.ride.description }}</p>
-
-      <footer>
-        <div class="mb-3 flex flex-wrap gap-x-3 gap-y-1">
-          <UBadge
-            variant="subtle"
-            size="lg"
-            icon="i-lucide-map-pinned"
-            class="invisible-background"
-          >
-            {{ props.ride.distance }} km
-          </UBadge>
-          <UBadge
-            variant="subtle"
-            size="lg"
-            icon="i-lucide-clock"
-            class="invisible-background"
-          >
-            {{ hour }} h {{ minutes }} min
-          </UBadge>
-          <UBadge
-            variant="subtle"
-            size="lg"
-            icon="i-lucide-map-pin"
-            class="invisible-background"
-          >
-            {{ props.ride.start_town }} → {{ props.ride.end_town }}
-          </UBadge>
-          <UBadge
-            variant="subtle"
-            size="lg"
-            icon="i-lucide-route"
-            class="invisible-background"
-          >
-            {{ props.ride.ride_type }}
-          </UBadge>
-        </div>
-
-        <div class="flex flex-wrap items-center justify-between gap-3 pt-3 text-sm max-[480px]:flex-col! max-[480px]:items-stretch! max-[480px]:gap-3!">
-          <div class="flex items-center gap-3 max-[480px]:w-full max-[480px]:flex-wrap max-[480px]:justify-start">
-            <template v-if="creator">
-              <UAvatar
-                :alt="`Avatar de ${creator.pseudo || 'MotoCenter'}`"
-                :src="srcAvatarCreator"
-              />
-              <p>
-                Créée par <strong>{{ creator.pseudo }}</strong>
-              </p>
-            </template>
-
-            <template v-else>
-              <UIcon name="i-lucide-loader-2" class="animate-spin" />
-              <p>Chargement...</p>
-            </template>
-          </div>
-
-          <div v-if="ride.is_event" class="flex items-center gap-3 max-[480px]:w-full max-[480px]:flex-wrap max-[480px]:justify-start">
-            <UButton
-              :label="isParticipating ? 'Ne plus participer' : 'Participer'"
-              :color="isParticipating ? 'neutral' : 'error'"
-              :variant="isParticipating ? 'subtle' : 'solid'"
-              size="lg"
-              class="cursor-pointer px-5 font-bold max-[480px]:flex-1 max-[480px]:justify-center"
-              :class="!isParticipating ? 'text-white!' : ''"
-              @click="participateGestion"
-            />
-
-            <div v-if="participatingCount > 0" class="flex items-center gap-2 rounded-[20px] bg-white/90 py-1 pr-3 pl-2 text-gray-700">
-              <UAvatarGroup size="xs" :max="3">
-                <UAvatar
-                  v-for="(avatar, index) in participantsAvatars"
-                  :key="index"
-                  v-bind="avatar"
-                />
-              </UAvatarGroup>
-              <span class="text-xs font-extrabold">
-                {{ participatingCount }}
-              </span>
-            </div>
-
-            <span v-else class="text-xs italic opacity-70">Aucun participant </span>
-          </div>
-        </div>
-      </footer>
+      <UBadge
+        v-if="props.ride.is_event"
+        size="md"
+        icon="i-lucide-calendar-days"
+        class="absolute bottom-2 left-2 bg-black/55 text-xs whitespace-nowrap text-white backdrop-blur-sm"
+      >
+        {{ dateEvent.toLocaleDateString('fr-FR') }}
+        •
+        {{
+          dateEvent.toLocaleTimeString('fr-FR', {
+            hour: '2-digit',
+            minute: '2-digit'
+          })
+        }}
+      </UBadge>
     </div>
-  </div>
+
+    <!-- Corps : surface pleine, lisible en clair comme en sombre -->
+    <div class="flex flex-col gap-3 p-4">
+      <div class="flex items-center gap-2">
+        <span
+          class="size-3 shrink-0 rounded-full"
+          :style="{ backgroundColor: props.ride.color || '#3b82f6' }"
+          aria-hidden="true"
+        ></span>
+        <h2 class="m-0 truncate text-lg font-bold">{{ props.ride.title }}</h2>
+      </div>
+
+      <p v-if="props.ride.description" class="line-clamp-2 text-sm text-gray-500">
+        {{ props.ride.description }}
+      </p>
+
+      <div class="flex flex-wrap gap-x-4 gap-y-1.5 text-sm text-gray-500">
+        <span class="inline-flex items-center gap-1.5">
+          <UIcon name="i-lucide-map-pinned" class="size-4 text-(--ui-primary)" />
+          {{ props.ride.distance }} km
+        </span>
+        <span class="inline-flex items-center gap-1.5">
+          <UIcon name="i-lucide-clock" class="size-4 text-(--ui-primary)" />
+          {{ hour }} h {{ minutes }} min
+        </span>
+        <span class="inline-flex items-center gap-1.5">
+          <UIcon name="i-lucide-map-pin" class="size-4 text-(--ui-primary)" />
+          {{ props.ride.start_town }} → {{ props.ride.end_town }}
+        </span>
+        <span class="inline-flex items-center gap-1.5">
+          <UIcon name="i-lucide-route" class="size-4 text-(--ui-primary)" />
+          {{ props.ride.ride_type }}
+        </span>
+      </div>
+
+      <div class="flex flex-wrap items-center justify-between gap-3 pt-1 text-sm max-[480px]:flex-col! max-[480px]:items-stretch! max-[480px]:gap-3!">
+        <div class="flex items-center gap-2 max-[480px]:w-full max-[480px]:flex-wrap max-[480px]:justify-start">
+          <template v-if="creator">
+            <UAvatar
+              size="sm"
+              :alt="`Avatar de ${creator.pseudo || 'MotoCenter'}`"
+              :src="srcAvatarCreator"
+            />
+            <p class="text-gray-500">
+              Créée par
+              <strong class="text-(--text-color)">{{ creator.pseudo }}</strong>
+            </p>
+          </template>
+
+          <template v-else>
+            <UIcon name="i-lucide-loader-2" class="animate-spin text-gray-500" />
+            <p class="text-gray-500">Chargement...</p>
+          </template>
+        </div>
+
+        <div v-if="ride.is_event" class="flex items-center gap-3 max-[480px]:w-full max-[480px]:flex-wrap max-[480px]:justify-start">
+          <UButton
+            :label="isParticipating ? 'Ne plus participer' : 'Participer'"
+            :color="isParticipating ? 'neutral' : 'error'"
+            :variant="isParticipating ? 'subtle' : 'solid'"
+            size="md"
+            class="cursor-pointer px-4 font-semibold max-[480px]:flex-1 max-[480px]:justify-center"
+            :class="!isParticipating ? 'text-white!' : ''"
+            @click="participateGestion"
+          />
+
+          <div
+            v-if="participatingCount > 0"
+            class="flex items-center gap-2 rounded-full bg-gray-100 py-1 pr-3 pl-2 dark:bg-gray-800"
+          >
+            <UAvatarGroup size="xs" :max="3">
+              <UAvatar
+                v-for="(avatar, index) in participantsAvatars"
+                :key="index"
+                v-bind="avatar"
+              />
+            </UAvatarGroup>
+            <span class="text-xs font-extrabold">
+              {{ participatingCount }}
+            </span>
+          </div>
+
+          <span v-else class="text-xs text-gray-500 italic">Aucun participant</span>
+        </div>
+      </div>
+    </div>
+  </article>
 </template>
-
-<style scoped>
-/* Style partagé pour tous les badges d'info : override des internes Nuxt UI */
-.invisible-background,
-:deep(.invisible-background) {
-  background-color: transparent !important;
-  color: white !important;
-  border: none !important;
-  box-shadow: none !important;
-  padding-left: 0 !important;
-  padding-right: 0.75rem !important;
-}
-
-:deep(.invisible-background .pointer-events-none) {
-  color: white !important;
-}
-</style>
