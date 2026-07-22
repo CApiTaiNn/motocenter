@@ -67,25 +67,6 @@ const selectedId = ref<string>('default') // Identifiant du fond de plan sélect
 
 let activeTraceLayer: any = null
 
-// État d'ouverture du panel latéral des balades.
-const isPanelOpen = ref(false)
-
-// Côté d'ancrage du panel. On le place du côté opposé au tracé actif pour que la
-// liste des balades ne recouvre jamais la ligne (plutôt que de recadrer/zoomer).
-const panelSide = ref<'left' | 'right'>('right')
-
-/**
- * Place le panel du côté opposé au tracé : si la ligne est plutôt dans la moitié
- * droite de la carte, le panel va à gauche, et inversement.
- */
-const updatePanelSide = (layer: any) => {
-  if (!layer || !map.value) return
-  const bounds = layer.getBounds?.()
-  if (!bounds || !bounds.isValid()) return
-  const traceCenterX = map.value.latLngToContainerPoint(bounds.getCenter()).x
-  panelSide.value = traceCenterX > map.value.getSize().x / 2 ? 'left' : 'right'
-}
-
 // Marker + cluster refs kept so an external caller (e.g. the homepage teaser
 // linking to /ride?ride=<id>) can focus a specific ride after load.
 let markersById: Record<string, any> = {}
@@ -367,7 +348,8 @@ const renderRides = (isZooming = false) => {
     // strings as raw HTML.
     const popupEl = document.createElement('div')
     popupEl.className = 'ride-detail-container'
-    const titleEl = document.createElement('b')
+    // Titre non gras : plus léger au-dessus du tracé qu'il recouvre.
+    const titleEl = document.createElement('span')
     titleEl.textContent = ride.title
     popupEl.appendChild(titleEl)
     popupEl.appendChild(document.createElement('br'))
@@ -388,9 +370,6 @@ const renderRides = (isZooming = false) => {
             opacity: 1
           }
         }).addTo(map.value)
-
-        // Déplace le panel du côté opposé à la ligne pour ne pas la masquer.
-        updatePanelSide(activeTraceLayer)
       })
 
     markersCluster.addLayer(marker)
@@ -950,12 +929,7 @@ watch(
       @apply="onApplyFilters"
     />
 
-    <PanelRides
-      v-if="props.displayRideList"
-      v-model:open="isPanelOpen"
-      :side="panelSide"
-      :filtered-rides="visibleRides"
-    />
+    <PanelRides v-if="props.displayRideList" :filtered-rides="visibleRides" />
   </div>
 </template>
 
