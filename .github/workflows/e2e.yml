@@ -1,0 +1,37 @@
+name: UI tests (Playwright)
+
+on:
+  push:
+    branches: ['main']
+  pull_request:
+    branches: ['main']
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js 22.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - run: npm ci
+      # UI tests mock every backend call (see uitest/support/mock.ts), so no
+      # backend or database is needed here.
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:ui
+
+      # The HTML report is a full browsable site: open it to see every test's
+      # steps, screenshots, video and trace.
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: frontend/playwright-report
+          retention-days: 14
