@@ -13,8 +13,8 @@ const isSidebarOpen = ref(false) // État du volet latéral (ouvert/fermé)
 
 <template>
   <div
-    class="sidebar absolute top-[80px] right-0 bottom-[20px] z-1020 flex w-[40dvw] translate-x-full rounded-l-xl rounded-r-none border-l border-solid border-gray-300 bg-(--background) backdrop-blur-sm transition-transform duration-300 ease-in-out max-lg:w-[60dvw]! max-md:w-[90dvw]!"
-    :class="{ 'is-open': isSidebarOpen }"
+    class="sidebar absolute top-[80px] right-0 bottom-[20px] z-1020 flex w-[40dvw] rounded-l-xl rounded-r-none border-l border-solid border-gray-300 bg-(--background) backdrop-blur-sm transition-transform duration-300 ease-in-out max-lg:w-[60dvw]! max-md:w-[90dvw]!"
+    :class="isSidebarOpen ? 'translate-x-0' : 'translate-x-full'"
   >
     <div class="absolute top-1/2 -left-10 z-1002 size-10 -translate-y-1/2">
       <UButton
@@ -48,9 +48,3 @@ const isSidebarOpen = ref(false) // État du volet latéral (ouvert/fermé)
     </div>
   </div>
 </template>
-
-<style scoped>
-.sidebar.is-open {
-  transform: translateX(0);
-}
-</style>

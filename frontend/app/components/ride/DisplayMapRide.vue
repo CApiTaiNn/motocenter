@@ -67,6 +67,11 @@ const selectedId = ref<string>('default') // Identifiant du fond de plan sélect
 
 let activeTraceLayer: any = null
 
+// Marker + cluster refs kept so an external caller (e.g. the homepage teaser
+// linking to /ride?ride=<id>) can focus a specific ride after load.
+let markersById: Record<string, any> = {}
+let markersClusterRef: any = null
+
 // Liste des fonds de carte disponibles avec leur URL
 const mapItems = ref<MapItem[]>([
   {
@@ -322,6 +327,8 @@ const renderRides = (isZooming = false) => {
     animateAddingMarkers: false,
     zoomToBoundsOnClick: true
   })
+  markersClusterRef = markersCluster
+  markersById = {}
 
   filteredRides.value.forEach((ride: IRide) => {
     const dynamicIcon = L.divIcon({
@@ -365,12 +372,26 @@ const renderRides = (isZooming = false) => {
       })
 
     markersCluster.addLayer(marker)
+    markersById[ride._id] = marker
     bounds.extend([start[1], start[0]])
   })
 
   // On ajoute la couche de cluster et on l'ajoute à la carte
   ridesLayerGroup.value.addLayer(markersCluster)
   ridesLayerGroup.value.addTo(map.value)
+}
+
+/**
+ * Centre la carte sur une balade et ouvre sa popup (déclenchant l'affichage du
+ * tracé). Utilisé quand on arrive sur /ride?ride=<id> depuis une autre page.
+ */
+const focusRide = (rideId: string) => {
+  const marker = markersById[rideId]
+  if (!marker || !markersClusterRef) return
+
+  // zoomToShowLayer dézoome/recentre pour sortir le marker de son cluster, puis
+  // on ouvre la popup une fois qu'il est visible.
+  markersClusterRef.zoomToShowLayer(marker, () => marker.openPopup())
 }
 
 const onApplyFilters = (payload: IFilterObject) => {
@@ -655,6 +676,13 @@ onMounted(async () => {
         listStartTown.value = getUniqueValues(data.rides, 'start_town')
         listEndTown.value = getUniqueValues(data.rides, 'end_town')
         renderRides()
+
+        // Focus a specific ride when linked from elsewhere (e.g. homepage
+        // teaser → /ride?ride=<id>).
+        const rideIdParam = route.query.ride
+        if (typeof rideIdParam === 'string') {
+          setTimeout(() => focusRide(rideIdParam), 300)
+        }
       }
     } catch (e) {
       console.error('Erreur fetch:', e)
