@@ -67,36 +67,23 @@ const selectedId = ref<string>('default') // Identifiant du fond de plan sélect
 
 let activeTraceLayer: any = null
 
-// État d'ouverture du panel latéral des balades (docké à droite, il recouvre
-// une partie de la carte). Sert à décaler le tracé actif hors de cette zone.
+// État d'ouverture du panel latéral des balades.
 const isPanelOpen = ref(false)
 
-/**
- * Largeur (en px) de la zone de carte masquée par le panel latéral quand il est
- * ouvert. Mesurée sur le DOM pour suivre automatiquement les breakpoints
- * responsive (40dvw desktop, jusqu'à 90dvw mobile). Plafonnée aux deux tiers de
- * la largeur de la carte pour qu'il reste toujours de la place au tracé.
- */
-const getPanelOffsetX = (): number => {
-  if (!isPanelOpen.value || !map.value) return 0
-  const panelEl = document.querySelector('.sidebar') as HTMLElement | null
-  if (!panelEl) return 0
-  const mapWidth = map.value.getSize().x
-  return Math.min(panelEl.offsetWidth, mapWidth * 0.66)
-}
+// Côté d'ancrage du panel. On le place du côté opposé au tracé actif pour que la
+// liste des balades ne recouvre jamais la ligne (plutôt que de recadrer/zoomer).
+const panelSide = ref<'left' | 'right'>('right')
 
 /**
- * Recadre la carte sur un tracé en réservant, à droite, la place occupée par le
- * panel latéral : le tracé reste ainsi entièrement dans la partie visible.
+ * Place le panel du côté opposé au tracé : si la ligne est plutôt dans la moitié
+ * droite de la carte, le panel va à gauche, et inversement.
  */
-const fitTraceIntoView = (layer: any) => {
+const updatePanelSide = (layer: any) => {
   if (!layer || !map.value) return
   const bounds = layer.getBounds?.()
   if (!bounds || !bounds.isValid()) return
-  map.value.fitBounds(bounds, {
-    paddingTopLeft: [30, 30],
-    paddingBottomRight: [30 + getPanelOffsetX(), 30]
-  })
+  const traceCenterX = map.value.latLngToContainerPoint(bounds.getCenter()).x
+  panelSide.value = traceCenterX > map.value.getSize().x / 2 ? 'left' : 'right'
 }
 
 // Marker + cluster refs kept so an external caller (e.g. the homepage teaser
@@ -402,9 +389,8 @@ const renderRides = (isZooming = false) => {
           }
         }).addTo(map.value)
 
-        // Recadre sur le tracé en tenant compte du panel latéral, sinon une
-        // partie de la ligne resterait cachée derrière lui.
-        fitTraceIntoView(activeTraceLayer)
+        // Déplace le panel du côté opposé à la ligne pour ne pas la masquer.
+        updatePanelSide(activeTraceLayer)
       })
 
     markersCluster.addLayer(marker)
@@ -811,12 +797,6 @@ watch(filteredRides, () => {
   }
 })
 
-// Quand on ouvre/ferme le panel latéral et qu'un tracé est affiché, on le
-// recadre pour qu'il reste (ou revienne) dans la zone visible de la carte.
-watch(isPanelOpen, () => {
-  if (activeTraceLayer) fitTraceIntoView(activeTraceLayer)
-})
-
 // Quand le v-model geom change depuis l'extérieur (ex: calcul GPS), on redessine le tracé sur la carte
 watch(
   () => geom.value,
@@ -973,6 +953,7 @@ watch(
     <PanelRides
       v-if="props.displayRideList"
       v-model:open="isPanelOpen"
+      :side="panelSide"
       :filtered-rides="visibleRides"
     />
   </div>

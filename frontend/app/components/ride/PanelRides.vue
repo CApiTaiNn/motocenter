@@ -1,30 +1,64 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import type { IRide } from '~/types/ride.js'
 import CardRide from './CardRide.vue'
 
 interface IProps {
   filteredRides: IRide[]
+  // Côté d'ancrage, piloté par la carte pour rester à l'opposé du tracé actif.
+  side?: 'left' | 'right'
 }
 
-const props = defineProps<IProps>()
-// État du volet latéral (ouvert/fermé), partagé avec la carte parente pour
-// qu'elle puisse décaler le tracé actif hors de la zone masquée par le panel.
+const props = withDefaults(defineProps<IProps>(), { side: 'right' })
+// État du volet latéral (ouvert/fermé), partagé avec la carte parente.
 const isSidebarOpen = defineModel<boolean>('open', { default: false })
+
+// Position + coins arrondis + bordure du côté d'ancrage choisi.
+const dockClass = computed(() =>
+  props.side === 'left'
+    ? 'left-0 rounded-l-none rounded-r-xl border-r'
+    : 'right-0 rounded-r-none rounded-l-xl border-l'
+)
+
+// Sens de repli quand le panel est fermé (translaté hors écran du bon côté).
+const transformClass = computed(() => {
+  if (isSidebarOpen.value) return 'translate-x-0'
+  return props.side === 'left' ? '-translate-x-full' : 'translate-x-full'
+})
+
+// Le bouton de bascule reste sur le bord intérieur (face à la carte) :
+// position du conteneur d'un côté, coins arrondis vers l'extérieur du panel.
+const togglePosClass = computed(() =>
+  props.side === 'left' ? '-right-10' : '-left-10'
+)
+const toggleRoundClass = computed(() =>
+  props.side === 'left'
+    ? 'rounded-l-none rounded-r-lg'
+    : 'rounded-r-none rounded-l-lg'
+)
+
+// La flèche pointe vers l'action : ouvrir vers la carte, fermer vers le bord.
+const toggleIcon = computed(() => {
+  const towardsMap =
+    props.side === 'left' ? 'i-lucide-chevron-right' : 'i-lucide-chevron-left'
+  const towardsEdge =
+    props.side === 'left' ? 'i-lucide-chevron-left' : 'i-lucide-chevron-right'
+  return isSidebarOpen.value ? towardsEdge : towardsMap
+})
 </script>
 
 <template>
   <div
-    class="sidebar absolute top-[80px] right-0 bottom-[20px] z-1020 flex w-[40dvw] rounded-l-xl rounded-r-none border-l border-solid border-gray-300 bg-(--background) backdrop-blur-sm transition-transform duration-300 ease-in-out max-lg:w-[60dvw]! max-md:w-[90dvw]!"
-    :class="isSidebarOpen ? 'translate-x-0' : 'translate-x-full'"
+    class="sidebar absolute top-[80px] bottom-[20px] z-1020 flex w-[40dvw] border-solid border-gray-300 bg-(--background) backdrop-blur-sm transition-transform duration-300 ease-in-out max-lg:w-[60dvw]! max-md:w-[90dvw]!"
+    :class="[dockClass, transformClass]"
   >
-    <div class="absolute top-1/2 -left-10 z-1002 size-10 -translate-y-1/2">
+    <div class="absolute top-1/2 z-1002 size-10 -translate-y-1/2" :class="togglePosClass">
       <UButton
-        :icon="
-          isSidebarOpen ? 'i-lucide-chevron-right' : 'i-lucide-chevron-left'
-        "
+        :icon="toggleIcon"
         color="neutral"
         variant="subtle"
-        class="size-10 cursor-pointer rounded-l-lg rounded-r-none bg-(--background)"
+        class="size-10 cursor-pointer bg-(--background)"
+        :class="toggleRoundClass"
         @click="isSidebarOpen = !isSidebarOpen"
       />
     </div>
