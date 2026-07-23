@@ -25,6 +25,10 @@ jobs:
       # UI tests mock every backend call (see uitest/support/mock.ts), so no
       # backend or database is needed here.
       - run: npx playwright install --with-deps chromium
+      # Serve a production build in CI (playwright.config.ts runs `nuxt preview`
+      # when CI is set) — no on-demand compilation, so the suite is stable under
+      # parallel load. The build must exist before the tests start.
+      - run: npm run build
       # PW_RECORD=1 records a video + trace for every test (even passing ones) so
       # you can watch each flow in the HTML report. Remove this env line to keep
       # artifacts lean again (media then only kept on failure).
