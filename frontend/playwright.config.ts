@@ -28,8 +28,15 @@ export default defineConfig({
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: {
-    // `npm run dev` needs no build step; client-side fetches are interceptable.
-    command: 'npm run dev',
+    // CI serves a production build (`nuxt preview`) instead of the dev server:
+    // there's no on-demand route compilation, so pages load fast and
+    // deterministically under parallel load — this is what removes the flaky
+    // "locator wait failed" timeouts. CI must run `npm run build` first (see the
+    // e2e workflow). Locally we keep `npm run dev` for fast iteration (no build
+    // step; the occasional dev flake is absorbed by retries).
+    // Interception is unaffected either way: every data fetch is client-side
+    // (onMounted/$fetch), so page.route still intercepts it in both modes.
+    command: process.env.CI ? 'npm run preview' : 'npm run dev',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
     timeout: 180_000
