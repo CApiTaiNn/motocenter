@@ -77,11 +77,11 @@ test.describe('/admin dashboard', () => {
     page
   }) => {
     await blockUnmockedApi(page)
-    // users/account returns 401 -> middleware treats the visitor as anonymous.
+    // users/account returns 401 -> middleware treats the visitor as anonymous,
+    // so the admin guard never lets the dashboard render and openAdmin rejects.
     await mockAdminApi(page, { account: null })
-    await openAdmin(page)
 
-    await expect(page).not.toHaveURL(/\/admin/)
+    await expect(openAdmin(page)).rejects.toThrow()
     await expect(
       page.getByRole('heading', { name: 'Bienvenue Admin' })
     ).toHaveCount(0)

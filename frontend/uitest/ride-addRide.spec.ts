@@ -32,6 +32,9 @@ async function fillInfos(page: Page) {
   await page.getByPlaceholder('Entrez un titre...').fill('Ma balade test')
   await page.getByText('Sélectionnez le type...').click()
   await page.getByRole('option', { name: 'Mixte', exact: true }).click()
+  // Ensure the selection registered (placeholder gone) before advancing, so the
+  // step guard sees rideType set and "Suivant" enables.
+  await expect(page.getByText('Sélectionnez le type...')).toHaveCount(0)
 }
 
 async function goToTrajet(page: Page) {
@@ -42,12 +45,17 @@ async function goToTrajet(page: Page) {
 
 // --- Step 1 : Trajet ------------------------------------------------------
 async function selectTowns(page: Page) {
-  // Départ first; after it is picked its trigger shows the chosen label, so the
-  // remaining 'Chercher une ville...' trigger is the arrival one.
+  // Both town selects share the same option labels, and a menu keeps its
+  // listbox briefly while closing — so wait for the previous menu to fully
+  // close before opening the next, or the same label matches twice.
   await page.getByText('Chercher une ville...').first().click()
   await page.getByRole('option', { name: START_TOWN_LABEL }).click()
+  await expect(page.getByRole('option')).toHaveCount(0)
+  // Départ now shows the chosen label, so the remaining placeholder trigger is
+  // the arrival one.
   await page.getByText('Chercher une ville...').first().click()
   await page.getByRole('option', { name: END_TOWN_LABEL }).click()
+  await expect(page.getByRole('option')).toHaveCount(0)
 }
 
 async function calcGpsRoute(page: Page) {
@@ -113,9 +121,11 @@ test.describe('/ride/addRide form', () => {
     await page.getByText('Sélectionnez le type...').click()
     await page.getByRole('option', { name: 'Sinueux', exact: true }).click()
 
-    // Placeholder is replaced by the chosen value in the trigger.
+    // Placeholder is replaced by the chosen value in the trigger. The label
+    // "Sinueux" also appears in the (now-closed) listbox item and the hidden
+    // native <option>, so assert on the trigger's value display specifically.
     await expect(page.getByText('Sélectionnez le type...')).toHaveCount(0)
-    await expect(page.getByText('Sinueux')).toBeVisible()
+    await expect(page.getByLabel('Type de la balade')).toHaveText('Sinueux')
   })
 
   test('"Suivant" is disabled until step 0 is valid, then advances', async ({
@@ -150,6 +160,8 @@ test.describe('/ride/addRide form', () => {
 
     await page.getByText('Chercher une ville...').first().click()
     await page.getByRole('option', { name: START_TOWN_LABEL }).click()
+    // Wait for the listbox to close so only the trigger keeps the label.
+    await expect(page.getByRole('option')).toHaveCount(0)
 
     await expect(page.getByText(START_TOWN_LABEL)).toBeVisible()
   })
@@ -161,8 +173,10 @@ test.describe('/ride/addRide form', () => {
     // Pick départ first so only the arrival trigger keeps the placeholder.
     await page.getByText('Chercher une ville...').first().click()
     await page.getByRole('option', { name: START_TOWN_LABEL }).click()
+    await expect(page.getByRole('option')).toHaveCount(0)
     await page.getByText('Chercher une ville...').first().click()
     await page.getByRole('option', { name: END_TOWN_LABEL }).click()
+    await expect(page.getByRole('option')).toHaveCount(0)
 
     await expect(page.getByText(END_TOWN_LABEL)).toBeVisible()
   })
@@ -215,8 +229,10 @@ test.describe('/ride/addRide form', () => {
   test('duration hour / minute inputs accept values', async ({ page }) => {
     await gotoAddRide(page)
 
-    const hours = page.locator('.w-22 input')
-    const minutes = page.locator('.w-28 input')
+    // Each duration field is a UInputNumber; `.w-22 input` would also match a
+    // hidden field, so target the number field's spinbutton input by role.
+    const hours = page.locator('.w-22').getByRole('spinbutton')
+    const minutes = page.locator('.w-28').getByRole('spinbutton')
 
     await hours.fill('3')
     await hours.blur()
@@ -238,8 +254,9 @@ test.describe('/ride/addRide form', () => {
       buffer: Buffer.from('fake-image-bytes')
     })
 
-    // UFileUpload surfaces the picked file name once accepted.
-    await expect(page.getByText('moto.jpg')).toBeVisible()
+    // UFileUpload records the picked file name (shown via a preview, so the
+    // filename node is in the DOM but not itself visible) — assert it attached.
+    await expect(page.getByText('moto.jpg')).toBeAttached()
   })
 
   test('"balade groupée" switch reveals and hides the date/time fields', async ({
@@ -308,7 +325,11 @@ test.describe('/ride/addRide form', () => {
     expect(req.postDataJSON().title).toBe('Ma balade test')
 
     await page.waitForURL((url) => url.pathname === '/ride')
-    await expect(page.getByText('Votre balade a été ajouté.')).toBeVisible()
+    // Toast text also appears in the aria-live alert span; match the visible
+    // description exactly.
+    await expect(
+      page.getByText('Votre balade a été ajouté.', { exact: true })
+    ).toBeVisible()
   })
 
   // --- Map draw toolbar (leaflet-draw) -----------------------------------

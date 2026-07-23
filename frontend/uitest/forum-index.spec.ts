@@ -111,10 +111,14 @@ test.describe('/forum index', () => {
     // Fill the required fields (file is optional in the valibot schema).
     await page.getByPlaceholder('Titre du post').fill('Ma nouvelle question')
     // USelectMenu triggers: click the placeholder to open, then pick the option.
+    // Each menu closes with a short animation; wait for its listbox to detach
+    // before touching the next control, or the open overlay swallows the input.
     await page.getByText('Sélectionnez la catégorie du post').click()
     await page.getByRole('option', { name: 'Réparation' }).click()
+    await expect(page.getByRole('listbox')).toHaveCount(0)
     await page.getByText('Sélectionnez la marque du post').click()
     await page.getByRole('option', { name: brands[0]!.name }).click()
+    await expect(page.getByRole('listbox')).toHaveCount(0)
     await page
       .getByPlaceholder('Ecrivez votre description')
       .fill('Voici le détail de ma question.')
@@ -131,7 +135,7 @@ test.describe('/forum index', () => {
         new URL(req.url()).pathname.endsWith('/posts')
     )
 
-    await page.getByRole('button', { name: 'Ajouter' }).click()
+    await page.getByRole('button', { name: 'Ajouter', exact: true }).click()
 
     const req = await createRequest
     const body = req.postDataJSON()
@@ -144,8 +148,9 @@ test.describe('/forum index', () => {
     })
 
     await refetch
-    // Success effect: toast shown and modal closed.
-    await expect(page.getByText('Succès')).toBeVisible()
+    // Success effect: toast shown and modal closed. "Succès" also appears in the
+    // aria-live alert span, so match the visible toast title exactly.
+    await expect(page.getByText('Succès', { exact: true })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Ajouter post' })).toBeHidden()
   })
 })

@@ -50,7 +50,7 @@ test.describe('forum discussion detail', () => {
     await page.getByRole('button', { name: 'Ajouter aux favoris' }).click()
 
     await expect(
-      page.getByText('Votre post a été ajouté aux favoris.')
+      page.getByText('Votre post a été ajouté aux favoris.', { exact: true })
     ).toBeVisible()
     // getPost() refetch now reports favoritedByMe → the star flips to "Retirer".
     await expect(
@@ -96,7 +96,7 @@ test.describe('forum discussion detail', () => {
     await page.getByRole('button', { name: 'Ajouter mon commentaire' }).click()
 
     await expect(
-      page.getByText('Votre commentaire a été ajouté.')
+      page.getByText('Votre commentaire a été ajouté.', { exact: true })
     ).toBeVisible()
     // Textarea reset + refetched thread contains the new comment.
     await expect(textarea).toHaveValue('')
@@ -176,7 +176,7 @@ test.describe('forum discussion detail', () => {
     await page.getByRole('button', { name: 'Envoyer ma réponse' }).click()
 
     await expect(
-      page.getByText('Votre commentaire a été ajouté.')
+      page.getByText('Votre commentaire a été ajouté.', { exact: true })
     ).toBeVisible()
     // Reply field collapses after a successful send.
     await expect(

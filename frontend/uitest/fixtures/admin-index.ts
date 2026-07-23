@@ -101,12 +101,28 @@ export async function openAdmin(page: Page, path = '/admin') {
   // Hydration finished + router/popstate listener installed + app.vue's
   // onMounted auth fetch resolved once the mocked calls settle.
   await page.waitForLoadState('networkidle')
-  await page.evaluate((to) => {
-    window.history.pushState({}, '', to)
-    // vue-router's history listener turns this into a guarded client-side
-    // navigation, so Nuxt route middleware runs in the browser.
-    window.dispatchEvent(
-      new PopStateEvent('popstate', { state: window.history.state })
-    )
-  }, path)
+
+  // Navigate through vue-router (not a raw pushState) so the router's internal
+  // state stays in sync — otherwise a later real link click on the dashboard
+  // doesn't navigate. Retry until the dashboard renders (or a deadline passes),
+  // since a single push is racy: the guard can run before the auth fetch
+  // resolves, or the target chunk may still be compiling. A non-admin session
+  // never renders the dashboard, so this throws after the deadline — guard
+  // tests assert on that rejection.
+  const deadline = 15000
+  const start = Date.now()
+  while (Date.now() - start < deadline) {
+    await page.evaluate((to) => {
+      const app = (document.getElementById('__nuxt') as any)?.__vue_app__
+      return app?.config.globalProperties.$router.push(to).catch(() => {})
+    }, path)
+
+    const landed = await page
+      .getByRole('heading', { name: 'Bienvenue Admin' })
+      .isVisible()
+      .catch(() => false)
+    if (landed) return
+    await page.waitForTimeout(300)
+  }
+  throw new Error('admin dashboard did not render after client navigation')
 }

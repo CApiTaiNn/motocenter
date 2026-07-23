@@ -7,13 +7,24 @@ export default defineConfig({
   testDir: './uitest',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
+  // The single `nuxt dev` server compiles routes on demand, so the first hit on
+  // a route (and heavy map/chart pages) can be slow. Cap concurrency so a burst
+  // of workers doesn't overwhelm it into cascading timeouts, keep retries to
+  // absorb the residual first-compile jitter, and give each test more headroom
+  // than the 30s default.
+  retries: 2,
+  workers: 2,
+  timeout: 60_000,
+  expect: { timeout: 10_000 },
   reporter: [['html', { open: 'never' }], ['list']],
   use: {
     baseURL: 'http://localhost:3000',
-    trace: 'on-first-retry',
-    screenshot: 'only-on-failure',
-    video: 'retain-on-failure'
+    // Set PW_RECORD=1 to capture a video (+ trace + screenshots) for EVERY
+    // test, passing or not — useful to watch how a flow runs. Without it we keep
+    // artifacts lean: media is only kept when a test fails.
+    trace: process.env.PW_RECORD ? 'on' : 'on-first-retry',
+    screenshot: process.env.PW_RECORD ? 'on' : 'only-on-failure',
+    video: process.env.PW_RECORD ? 'on' : 'retain-on-failure'
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: {

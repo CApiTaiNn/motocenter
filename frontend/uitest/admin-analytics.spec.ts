@@ -16,9 +16,10 @@ import {
 test.describe('admin analytics', () => {
   test('bounces a non-admin user back to the home page', async ({ page }) => {
     await mockAnalytics(page, { user: nonAdminUser })
-    await openAnalytics(page)
 
-    await expect(page).toHaveURL(/\/(?:$|\?)/)
+    // The guard never lets the analytics page render for a non-admin, so the
+    // navigation helper rejects instead of landing there.
+    await expect(openAnalytics(page)).rejects.toThrow()
     await expect(
       page.getByRole('heading', { name: 'Evolution des utilisateurs' })
     ).toHaveCount(0)

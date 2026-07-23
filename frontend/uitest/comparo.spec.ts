@@ -1,5 +1,5 @@
 import { test, expect } from './support/test'
-import type { Page } from '@playwright/test'
+import type { Page, Locator } from '@playwright/test'
 import { blockUnmockedApi } from './support/mock'
 import type { IUser } from '~/types/users'
 import {
@@ -45,8 +45,15 @@ function cardByHeading(page: Page, name: string | RegExp, level: number) {
 
 // Drive one MotocyclesForm (brand -> model -> year) via its Nuxt UI pickers.
 // The inputs are matched by their placeholder (unique inside each card) and the
-// listbox options by role. Opening the model/year menus triggers the on-demand
-// fetchMotorcyclesByBrand call, which the option click auto-waits for.
+// listbox options by role. Each field is a UInputMenu (a combobox) that opens
+// on ArrowDown (a plain click only focuses it), showing the full option list;
+// opening the model/year menus triggers the on-demand fetchMotorcyclesByBrand
+// call, which the option click auto-waits for.
+async function openMenu(input: Locator) {
+  await input.click()
+  await input.press('ArrowDown')
+}
+
 async function pickMotorcycle(
   page: Page,
   formTitle: string,
@@ -55,11 +62,11 @@ async function pickMotorcycle(
   year: number
 ) {
   const card = cardByHeading(page, formTitle, 3)
-  await card.getByPlaceholder('Yamaha').click()
+  await openMenu(card.getByPlaceholder('Yamaha'))
   await page.getByRole('option', { name: brand }).click()
-  await card.getByPlaceholder('MT-07').click()
+  await openMenu(card.getByPlaceholder('MT-07'))
   await page.getByRole('option', { name: model, exact: true }).click()
-  await card.getByPlaceholder('2020').click()
+  await openMenu(card.getByPlaceholder('2020'))
   await page.getByRole('option', { name: String(year), exact: true }).click()
 }
 
@@ -95,11 +102,11 @@ test('selecting a brand populates its model list in the picker', async ({
   await page.goto(URL)
 
   const card = cardByHeading(page, 'Moto 1', 3)
-  await card.getByPlaceholder('Yamaha').click()
+  await openMenu(card.getByPlaceholder('Yamaha'))
   await page.getByRole('option', { name: 'Yamaha' }).click()
 
   // Opening the model menu fetches the brand's models; they show up as options.
-  await card.getByPlaceholder('MT-07').click()
+  await openMenu(card.getByPlaceholder('MT-07'))
   await expect(page.getByRole('option', { name: 'MT-07', exact: true })).toBeVisible()
   await expect(page.getByRole('option', { name: 'R1', exact: true })).toBeVisible()
 })
@@ -109,13 +116,13 @@ test('picking a model reveals its available years', async ({ page }) => {
   await page.goto(URL)
 
   const card = cardByHeading(page, 'Moto 1', 3)
-  await card.getByPlaceholder('Yamaha').click()
+  await openMenu(card.getByPlaceholder('Yamaha'))
   await page.getByRole('option', { name: 'Yamaha' }).click()
-  await card.getByPlaceholder('MT-07').click()
+  await openMenu(card.getByPlaceholder('MT-07'))
   await page.getByRole('option', { name: 'MT-07', exact: true }).click()
 
   // MT-07 exists in 2021 and 2022 in the fixtures.
-  await card.getByPlaceholder('2020').click()
+  await openMenu(card.getByPlaceholder('2020'))
   await expect(page.getByRole('option', { name: '2021', exact: true })).toBeVisible()
   await expect(page.getByRole('option', { name: '2022', exact: true })).toBeVisible()
 })
@@ -129,11 +136,13 @@ test('choosing two different bikes via the forms triggers the comparison', async
   await compareViaForms(page)
 
   // Result tabs appear and the default (Performances) panel shows stat labels.
+  // "Prix" is matched exactly: the hero paragraph ("…performances, prix et…")
+  // also contains the substring.
   await expect(page.getByRole('tab', { name: 'Look' })).toBeVisible()
   await expect(page.getByRole('tab', { name: 'Son' })).toBeVisible()
   await expect(page.getByRole('tab', { name: 'Avis' })).toBeVisible()
-  await expect(page.getByText('Prix')).toBeVisible()
-  await expect(page.getByText('Puissance')).toBeVisible()
+  await expect(page.getByText('Prix', { exact: true })).toBeVisible()
+  await expect(page.getByText('Puissance', { exact: true })).toBeVisible()
 })
 
 // --- Selection guards -----------------------------------------------------

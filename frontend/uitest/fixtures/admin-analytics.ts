@@ -117,13 +117,30 @@ export async function mockAnalytics(page: Page, opts: MockOptions = {}) {
  */
 export async function openAnalytics(page: Page) {
   await page.goto('/')
-  await page.waitForFunction(
-    () => !!(document.getElementById('__nuxt') as any)?.__vue_app__
-  )
-  await page.evaluate(() => {
-    const app = (document.getElementById('__nuxt') as any).__vue_app__
-    return app.config.globalProperties.$router
-      .push('/admin/analytics')
-      .catch(() => {})
-  })
+  // Wait for the app.vue auth fetch to settle so the client guard sees the
+  // mocked session (networkidle covers the onMounted users/account call).
+  await page.waitForLoadState('networkidle')
+
+  // Re-dispatch the client navigation until the analytics page renders (or the
+  // deadline passes). A single push is racy: the guard can run before auth
+  // resolves, or the route chunk may still be compiling, silently leaving us on
+  // '/'. A non-admin session never renders the page, so this throws after the
+  // deadline — the guard test asserts on that rejection.
+  const target = '/admin/analytics'
+  const deadline = 15000
+  const start = Date.now()
+  while (Date.now() - start < deadline) {
+    await page.evaluate((to) => {
+      const app = (document.getElementById('__nuxt') as any)?.__vue_app__
+      return app?.config.globalProperties.$router.push(to).catch(() => {})
+    }, target)
+
+    const landed = await page
+      .getByRole('heading', { name: 'Evolution des utilisateurs' })
+      .isVisible()
+      .catch(() => false)
+    if (landed) return
+    await page.waitForTimeout(300)
+  }
+  throw new Error('admin analytics did not render after client navigation')
 }

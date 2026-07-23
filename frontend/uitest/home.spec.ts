@@ -78,9 +78,11 @@ test.describe('home page (/)', () => {
   test('RideSection map preview card links to /ride', async ({ page }) => {
     await page.goto('/')
     // The whole square map preview is a NuxtLink to="/ride" (no query params).
-    // Two links point at /ride; this one carries no text (the other is the
-    // "Explorer la carte" button), so filter that one out.
+    // The shared nav/footer also link to /ride ("Balades"), so scope to <main>;
+    // inside it two links point at /ride — the map card (no text) and the
+    // "Explorer la carte" button — so filter that latter one out.
     const mapLink = page
+      .getByRole('main')
       .locator('a[href="/ride"]')
       .filter({ hasNotText: 'Explorer la carte' })
     await mapLink.click()
@@ -125,12 +127,27 @@ test.describe('home page (/)', () => {
   test('best-seller carousel "next" arrow advances without leaving the page', async ({
     page
   }) => {
+    // The UCarousel only renders its prev/next arrows when the rail actually
+    // overflows, so this test needs more bikes than fit on screen. Re-mock the
+    // list endpoint with a longer list (registered after beforeEach's handler,
+    // so it wins).
+    const many = Array.from({ length: 10 }, (_, i) => ({
+      ...motorcycles[0]!,
+      _id: `bestseller-${i}`,
+      name: `Best-seller ${i}`
+    }))
+    await page.route(/\/api\/v1\/motorcycles\?/, (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ motorcycles: many })
+      })
+    )
+
     await page.goto('/')
-    // UCarousel renders prev/next arrow buttons. Their aria-labels come from
-    // Nuxt UI defaults; match the "next" arrow by its accessible role/name.
-    const next = page
-      .getByRole('button', { name: /next|suivant/i })
-      .first()
+    // UCarousel renders prev/next arrow buttons (aria-labels "Prev"/"Next")
+    // once the rail overflows; match the "next" arrow by its accessible name.
+    const next = page.getByRole('button', { name: /next|suivant/i }).first()
     await expect(next).toBeVisible()
     await next.click()
     // The arrow only scrolls the carousel — it must not navigate away.

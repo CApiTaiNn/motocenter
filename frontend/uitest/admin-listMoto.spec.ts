@@ -78,8 +78,9 @@ test.describe('admin/listMoto', () => {
 
     await expect(page.locator('tbody tr')).toHaveCount(10)
 
-    // The page-size USelect trigger displays the current value (10).
-    await page.getByRole('button', { name: '10', exact: true }).click()
+    // The page-size control is a USelect (role=combobox) whose trigger shows the
+    // current value (10). Open it and pick 20.
+    await page.getByRole('combobox').click()
     await page.getByRole('option', { name: '20', exact: true }).click()
 
     // 20 >= the 12 fixtures -> all rows now fit on a single page.
@@ -91,7 +92,8 @@ test.describe('admin/listMoto', () => {
 
     await expect(page.locator('tbody tr')).toHaveCount(10)
 
-    await page.getByRole('button', { name: '2', exact: true }).click()
+    // UPagination renders its page buttons with aria-label "Page N".
+    await page.getByRole('button', { name: 'Page 2' }).click()
 
     // 12 fixtures, page size 10 -> the second page holds the remaining 2.
     await expect(page.locator('tbody tr')).toHaveCount(2)
@@ -110,7 +112,7 @@ test.describe('admin/listMoto', () => {
     await page.getByRole('button', { name: 'Enregistrer' }).click()
 
     await put
-    await expect(page.getByText('Moto enregistrée')).toBeVisible()
+    await expect(page.getByText('Moto enregistrée', { exact: true })).toBeVisible()
     // Panel closes on success.
     await expect(page.getByRole('heading', { name: 'Modifier · MT-07' })).toHaveCount(0)
   })
@@ -139,7 +141,7 @@ test.describe('admin/listMoto', () => {
     await page.getByRole('button', { name: 'Enregistrer' }).click()
 
     await post
-    await expect(page.getByText('Moto enregistrée')).toBeVisible()
+    await expect(page.getByText('Moto enregistrée', { exact: true })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Nouvelle moto' })).toHaveCount(0)
   })
 
@@ -176,7 +178,7 @@ test.describe('admin/listMoto', () => {
     await page.locator('.size-6.cursor-pointer').last().click()
 
     await del
-    await expect(page.getByText('La moto a bien été supprimée')).toBeVisible()
+    await expect(page.getByText('La moto a bien été supprimée', { exact: true })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Modifier · MT-07' })).toHaveCount(0)
   })
 

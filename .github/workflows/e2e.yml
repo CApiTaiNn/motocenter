@@ -25,7 +25,12 @@ jobs:
       # UI tests mock every backend call (see uitest/support/mock.ts), so no
       # backend or database is needed here.
       - run: npx playwright install --with-deps chromium
+      # PW_RECORD=1 records a video + trace for every test (even passing ones) so
+      # you can watch each flow in the HTML report. Remove this env line to keep
+      # artifacts lean again (media then only kept on failure).
       - run: npm run test:ui
+        env:
+          PW_RECORD: '1'
 
       # The HTML report is a full browsable site: open it to see every test's
       # steps, screenshots, video and trace.
