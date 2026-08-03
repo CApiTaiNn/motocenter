@@ -52,7 +52,10 @@ const getPosts = async () => {
     const res = await $fetch<{ posts: IPost[] }>(`${apiBase}posts`, {
       params: {
         deep: true,
-        project: 'content,title,id,createdAt,views,image',
+        // The post card renders author, brand and category, so they must be
+        // projected: without user/brand/category the card's post.user.image
+        // throws during render and the whole list fails to show.
+        project: 'content,title,category,user,brand,id,createdAt,views,image',
         filter: filter.value
       }
     })

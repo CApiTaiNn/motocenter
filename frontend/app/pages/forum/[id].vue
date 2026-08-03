@@ -25,8 +25,10 @@ const getPost = async () => {
   const data = await $fetch<{ posts: IPost[] }>(`${apiBase}posts`, {
     params: {
       filter: JSON.stringify({ _id: route.params.id }),
-      // userFavoritePost is selected so the API can derive favoritedByMe.
-      project: 'image,content,title,createdAt,views,userFavoritePost',
+      // user/brand/category are rendered by the template; userFavoritePost is
+      // selected so the API can derive favoritedByMe.
+      project:
+        'image,content,title,category,user,brand,createdAt,views,userFavoritePost',
       deep: true
     }
   })
