@@ -6,6 +6,7 @@ import { IUser } from '../types/user'
 import { authenticateToken, requireAdmin, getAuthUser } from '../utils/auth'
 import { prepareQuery, ADMIN_MAX_LIMIT, type ReqQuery } from '../utils/find'
 import { argon2PasswordHasher } from '../utils/hash'
+import { sendWelcomeEmail } from '../utils/mail'
 import { makeRateLimiter } from '../utils/rateLimit'
 import { type Request, Response, Router } from 'express'
 import type { Types } from 'mongoose'
@@ -198,6 +199,13 @@ router.post('/account', makeRateLimiter(20), async (req: Request, res: Response)
   }
 
   const created = await User.insertOne(newUser)
+
+  // Fire-and-forget confirmation email: delivery is best-effort and must never
+  // block or fail signup (no-ops when Resend isn't configured).
+  void sendWelcomeEmail({ to: email, firstname }).catch((err) =>
+    console.error('Failed to send welcome email:', err)
+  )
+
   // Minimal echo: the client only needs the new id (it re-fetches via login).
   res.status(201).json({ _id: created._id })
 })
