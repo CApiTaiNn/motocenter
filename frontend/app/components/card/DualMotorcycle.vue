@@ -11,13 +11,57 @@ const emit = defineEmits<{
 }>()
 
 const isOpen = ref(true)
+
+// Both title slots are a fixed size (see the wrapper's h-*/w-full below). A long
+// name can't grow the box or deform the card; instead we shrink its font just
+// enough to fit, so the full name stays readable (no clamp / ellipsis).
+const leftTitleBox = ref<HTMLElement | null>(null)
+const rightTitleBox = ref<HTMLElement | null>(null)
+
+const MAX_FONT_PX = 14 // matches text-sm, the desired size when the name fits
+const MIN_FONT_PX = 9 // floor so very long names stay legible
+
+function fitTitle(box: HTMLElement | null) {
+  const p = box?.querySelector('p')
+  if (!box || !p) return
+  let size = MAX_FONT_PX
+  p.style.fontSize = `${size}px`
+  // Shrink until the text fits the fixed box in both axes (or we hit the floor).
+  while (
+    (p.scrollHeight > box.clientHeight || p.scrollWidth > box.clientWidth) &&
+    size > MIN_FONT_PX
+  ) {
+    size -= 0.5
+    p.style.fontSize = `${size}px`
+  }
+}
+
+function fitTitles() {
+  fitTitle(leftTitleBox.value)
+  fitTitle(rightTitleBox.value)
+}
+
+onMounted(() => {
+  fitTitles()
+  // Web fonts change metrics after load; re-fit once they're ready.
+  document.fonts?.ready.then(fitTitles)
+  window.addEventListener('resize', fitTitles)
+})
+
+onBeforeUnmount(() => window.removeEventListener('resize', fitTitles))
+
+// Re-fit whenever a name changes (and after the box has a chance to reopen).
+watch(
+  () => [props.leftName, props.rightName, isOpen.value],
+  () => nextTick(fitTitles)
+)
 </script>
 
 <template>
   <div class="flex w-[400px] flex-col items-center max-lg:w-[400px]! max-md:w-[90vw]!">
     <div v-if="isOpen" class="flex w-[400px] flex-col items-center justify-center max-lg:w-full!">
       <div class="flex w-full items-end justify-between gap-4">
-        <div class="z-1 flex h-[150px] w-full flex-1 rotate-[-10deg] flex-col items-center justify-center rounded-lg border border-dashed border-(--text-color) bg-(--background) p-4 max-lg:h-[100px]! max-lg:p-[5px]!">
+        <div class="z-1 flex h-[150px] w-full min-w-0 flex-1 rotate-[-10deg] flex-col items-center justify-center rounded-lg border border-dashed border-(--text-color) bg-(--background) p-4 max-lg:h-[100px]! max-lg:p-[5px]!">
           <UIcon
             name="i-lucide-circle-x"
             class="absolute top-2 right-2 size-5 cursor-pointer self-end"
@@ -34,10 +78,13 @@ const isOpen = ref(true)
             class="skeleton-icon inline-block size-20 bg-(--text-color)"
             aria-hidden="true"
           />
-          <div class="flex h-8 w-full items-center justify-center max-lg:h-7!">
+          <div
+            ref="leftTitleBox"
+            class="flex h-9 w-full items-center justify-center overflow-hidden max-lg:h-8!"
+          >
             <p
               :title="props.leftName"
-              class="line-clamp-2 break-words text-center text-sm leading-tight max-lg:text-xs!"
+              class="w-full break-words text-center text-sm leading-tight"
             >
               {{ props.leftName }}
             </p>
@@ -50,7 +97,7 @@ const isOpen = ref(true)
         >
           Comparer
         </UButton>
-        <div class="z-1 flex h-[150px] w-full flex-1 rotate-10 flex-col items-center justify-center rounded-lg border border-dashed border-(--text-color) bg-(--background) p-4 max-lg:h-[100px]! max-lg:p-[5px]!">
+        <div class="z-1 flex h-[150px] w-full min-w-0 flex-1 rotate-10 flex-col items-center justify-center rounded-lg border border-dashed border-(--text-color) bg-(--background) p-4 max-lg:h-[100px]! max-lg:p-[5px]!">
           <UIcon
             name="i-lucide-circle-x"
             class="absolute top-2 right-2 size-5 cursor-pointer self-end"
@@ -67,10 +114,13 @@ const isOpen = ref(true)
             class="skeleton-icon inline-block size-20 -scale-x-100 bg-(--text-color)"
             aria-hidden="true"
           />
-          <div class="flex h-8 w-full items-center justify-center max-lg:h-7!">
+          <div
+            ref="rightTitleBox"
+            class="flex h-9 w-full items-center justify-center overflow-hidden max-lg:h-8!"
+          >
             <p
               :title="props.rightName"
-              class="line-clamp-2 break-words text-center text-sm leading-tight max-lg:text-xs!"
+              class="w-full break-words text-center text-sm leading-tight"
             >
               {{ props.rightName }}
             </p>
