@@ -34,7 +34,14 @@ const isOpen = ref(true)
             class="skeleton-icon inline-block size-20 bg-(--text-color)"
             aria-hidden="true"
           />
-          <p class="text-sm">{{ props.leftName }}</p>
+          <div class="flex h-8 w-full items-center justify-center max-lg:h-7!">
+            <p
+              :title="props.leftName"
+              class="line-clamp-2 break-words text-center text-sm leading-tight max-lg:text-xs!"
+            >
+              {{ props.leftName }}
+            </p>
+          </div>
         </div>
         <UButton
           icon="i-lucide-arrow-left-right"
@@ -60,7 +67,14 @@ const isOpen = ref(true)
             class="skeleton-icon inline-block size-20 -scale-x-100 bg-(--text-color)"
             aria-hidden="true"
           />
-          <p class="text-sm">{{ props.rightName }}</p>
+          <div class="flex h-8 w-full items-center justify-center max-lg:h-7!">
+            <p
+              :title="props.rightName"
+              class="line-clamp-2 break-words text-center text-sm leading-tight max-lg:text-xs!"
+            >
+              {{ props.rightName }}
+            </p>
+          </div>
         </div>
       </div>
       <div class="z-5 flex w-[94%] items-center justify-center gap-2 rounded-b-lg bg-(--text-color) px-2 py-6 text-(--background)">
