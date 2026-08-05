@@ -18,8 +18,9 @@ const props = defineProps<{
     <p v-if="props.value !== undefined" class="max-lg:text-xs! max-lg:leading-tight">
       <CountUp
         v-if="props.started"
+        :start-val="(props.value ?? 0) * 0.2"
         :end-val="props.value"
-        :duration="3.5"
+        :duration="2.8"
       />
       <span v-else>0</span>
       {{ props.suffix }}

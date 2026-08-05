@@ -24,6 +24,7 @@ const connexionModal = useConnexionModal()
 const itemsCaroussel = ref<IMotorcycle[]>([])
 const apiBase = useRuntimeConfig().public.apiBase
 const dynamicStats = ref<IStatCount[]>([])
+const totalUsers = ref(0)
 
 // Count-up only starts once the stats row scrolls into view
 const statsRow = ref<HTMLElement | null>(null)
@@ -69,6 +70,9 @@ async function fetchStats() {
       urlImg: '/images/accueil/icon_moto.png'
     })
 }
+async function fetchUserCount() {
+  totalUsers.value = await $fetch<number>(`${apiBase}users/count`)
+}
 async function fetchMotocycles() {
   const data = await $fetch<{ motorcycles: IMotorcycle[] }>(
     `${apiBase}motorcycles`,
@@ -95,7 +99,7 @@ onMounted(async () => {
     observer.observe(statsRow.value)
   }
 
-  await Promise.all([fetchMotocycles(), fetchStats()])
+  await Promise.all([fetchMotocycles(), fetchStats(), fetchUserCount()])
 })
 </script>
 <template>
@@ -210,7 +214,7 @@ onMounted(async () => {
         class="button rounded-full max-lg:px-[30px]! max-lg:py-[10px]! max-lg:text-sm!"
         icon="i-lucide-badge-check"
         style="margin-bottom: 20vh"
-        >Approuvé par 100 utilisateurs</UButton
+        >Approuvé par {{ totalUsers }} utilisateurs</UButton
       >
     </section>
   </main>
