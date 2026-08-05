@@ -405,7 +405,7 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
           <div v-show="activeResultTab === 'comments'" class="tab-panel">
             <div class="flex items-start gap-8 max-lg:flex-col max-lg:items-center!">
               <div class="flex min-w-0 flex-1 flex-col gap-3">
-                <h4 class="mb-2 text-center">
+                <h4 class="mb-2 text-center text-(--ui-primary)">
                   {{ motorcycle1?.name ?? 'Moto 1' }}
                 </h4>
                 <template v-if="commentsMotorcycle1.length > 0">

@@ -13,6 +13,22 @@ function normalizeValue(value: number) {
   return props.fieldName === 'year' ? value - BASE_YEAR : value
 }
 
+// Fields where a smaller number is the better result. Everything not listed
+// here as lower/higher (e.g. year, engine_size) has no meaningful "winner",
+// so no side is highlighted.
+const LOWER_IS_BETTER = new Set(['price', 'weight', 'consumption', 'acceleration'])
+const HIGHER_IS_BETTER = new Set(['horsePower', 'torque', 'speedMax'])
+
+// Which side wins this stat, or null when it's a tie / a neutral field.
+const winner = computed<'first' | 'second' | null>(() => {
+  const a = props.firstValue
+  const b = props.secondValue
+  if (a === b) return null
+  if (LOWER_IS_BETTER.has(props.fieldName)) return a < b ? 'first' : 'second'
+  if (HIGHER_IS_BETTER.has(props.fieldName)) return a > b ? 'first' : 'second'
+  return null
+})
+
 const max = computed(() =>
   Math.max(normalizeValue(props.firstValue), normalizeValue(props.secondValue))
 )
@@ -117,7 +133,7 @@ function tradFieldName(fieldName: string) {
     <p>{{ tradFieldName(props.fieldName) }}</p>
     <div class="flex w-[80%] items-center justify-between gap-6 max-lg:w-[88%]! max-lg:flex-col! max-lg:gap-2! max-md:w-[95%]!">
       <div class="flex w-[90%] flex-row items-center justify-between max-lg:flex-row-reverse! max-lg:gap-[10px]">
-        <span class="whitespace-nowrap">
+        <span class="whitespace-nowrap" :class="{ 'font-bold': winner === 'first' }">
           <count-up
             :end-val="parseField(props.firstValue).value"
             :options="countUpOptions(props.firstValue)"
@@ -131,12 +147,12 @@ function tradFieldName(fieldName: string) {
       <div class="flex w-[90%] flex-row items-center justify-between max-lg:gap-[10px]">
         <div class="relative h-[15px] w-[80%] max-lg:h-[10px]! max-lg:w-[70%]!">
           <span
-            class="bar-value absolute top-0 left-0 z-1 h-full transform-[rotateY(180deg)] rounded-lg bg-(image:--gradient-primary)"
+            class="bar-value absolute top-0 left-0 z-1 h-full transform-[rotateY(180deg)] rounded-lg bg-(image:--gradient-neutral)"
             :style="{ width: secondPercent + '%' }"
           ></span>
           <span class="absolute top-0 left-0 size-full rounded-lg bg-(--color-track-bg)"></span>
         </div>
-        <span class="whitespace-nowrap">
+        <span class="whitespace-nowrap" :class="{ 'font-bold': winner === 'second' }">
           <count-up
             :end-val="parseField(props.secondValue).value"
             :options="countUpOptions(props.secondValue)"
