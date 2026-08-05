@@ -48,14 +48,6 @@
     var(--ui-primary),
     color-mix(in srgb, var(--ui-primary) 60%, black)
   );
-  /* Neutral counterpart to --gradient-primary, built from the theme
-     foreground so a second series (e.g. comparo "bike 2") reads as a
-     distinct identity in both light and dark themes. */
-  --gradient-neutral: linear-gradient(
-    90deg,
-    color-mix(in srgb, var(--text-color) 55%, transparent),
-    color-mix(in srgb, var(--text-color) 85%, transparent)
-  );
 
   /* Map leaflet */
   --circle-draw-line: #ffffff;

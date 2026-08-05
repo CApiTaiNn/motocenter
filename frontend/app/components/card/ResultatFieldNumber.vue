@@ -147,7 +147,7 @@ function tradFieldName(fieldName: string) {
       <div class="flex w-[90%] flex-row items-center justify-between max-lg:gap-[10px]">
         <div class="relative h-[15px] w-[80%] max-lg:h-[10px]! max-lg:w-[70%]!">
           <span
-            class="bar-value absolute top-0 left-0 z-1 h-full transform-[rotateY(180deg)] rounded-lg bg-(image:--gradient-neutral)"
+            class="bar-value absolute top-0 left-0 z-1 h-full transform-[rotateY(180deg)] rounded-lg bg-(image:--gradient-primary)"
             :style="{ width: secondPercent + '%' }"
           ></span>
           <span class="absolute top-0 left-0 size-full rounded-lg bg-(--color-track-bg)"></span>
