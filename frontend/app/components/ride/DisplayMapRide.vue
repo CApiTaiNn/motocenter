@@ -9,12 +9,18 @@ import type {
 } from '~/types/ride'
 import PanelRides from './PanelRides.vue'
 import FormFilters from './FormFilters.vue'
-import { getWeightByZoom, getMapPinSvg } from '~/utils/ride'
+import {
+  getWeightByZoom,
+  getMapPinSvg,
+  buildRideColorMap,
+  RIDE_FALLBACK_COLOR
+} from '~/utils/ride'
 import { CalendarDate, Time } from '@internationalized/date'
 
 interface IProps {
   displayFilters?: boolean
   displayEnlargeButton?: boolean
+  displayAddButton?: boolean
   displayRideList?: boolean
   displayMapLoader?: boolean
   displayRide?: boolean
@@ -27,6 +33,7 @@ interface IProps {
 const props = withDefaults(defineProps<IProps>(), {
   displayFilters: false,
   displayEnlargeButton: false,
+  displayAddButton: false,
   displayRideList: false,
   displayMapLoader: true,
   displayRide: false,
@@ -35,6 +42,8 @@ const props = withDefaults(defineProps<IProps>(), {
   disableCreating: false,
   disableDeleting: false
 })
+
+const emit = defineEmits<{ add: [] }>()
 
 // INSTANCES LEAFLET
 const map = ref<any>(null) // Instance principale de la carte Leaflet
@@ -247,6 +256,13 @@ const filteredRides = computed<IRide[]>(() => {
   return rides
 })
 
+// Couleur de chaque balade affichée, attribuée par rang de longueur sur
+// l'ensemble filtré (vert → rouge). Recalculée quand les balades affichées
+// changent ; partagée par les pins, les tracés et la liste.
+const rideColorMap = computed<Record<string, string>>(() =>
+  buildRideColorMap(filteredRides.value)
+)
+
 // FONCTIONS SUR LA CARTE
 /**
  * Met à jour le fond de carte (tiles) de l'instance Leaflet
@@ -331,8 +347,11 @@ const renderRides = (isZooming = false) => {
   markersById = {}
 
   filteredRides.value.forEach((ride: IRide) => {
+    // Couleur attribuée par rang de longueur (vert → rouge)
+    const rideColor = rideColorMap.value[ride._id] || RIDE_FALLBACK_COLOR
+
     const dynamicIcon = L.divIcon({
-      html: getMapPinSvg(ride.color || '#3b82f6'),
+      html: getMapPinSvg(rideColor),
       iconSize: [26, 26],
       iconAnchor: [13, 10],
       className: 'custom-dynamic-pin'
@@ -355,9 +374,27 @@ const renderRides = (isZooming = false) => {
     popupEl.appendChild(document.createElement('br'))
     popupEl.append(`${ride.distance}km - ${hour}h ${minutes}min`)
 
+    // Popup juste à côté du départ, du côté opposé au tracé (tracé à l'est →
+    // popup à gauche) : décalage minimal pour rester collée au point de départ
+    // sans recouvrir la balade.
+    const coords = ride.geom.features[0].geometry.coordinates
+    let dLng = 0
+    for (const p of coords) {
+      dLng += p[0] - start[0]
+    }
+    // Popup à côté du départ + flèche pointant vers lui : tracé à l'est → popup
+    // à gauche, flèche sur son bord droit (et inversement).
+    const traceEast = dLng >= 0
+    const popupOffset = L.point(traceEast ? -120 : 120, 34)
+    const popupClass = `ride-popup ride-popup--tail-${traceEast ? 'right' : 'left'}`
+
     // Création du marker du point de départ
     const marker = L.marker([start[1], start[0]], { icon: dynamicIcon })
-      .bindPopup(popupEl)
+      .bindPopup(popupEl, {
+        offset: popupOffset,
+        maxWidth: 180,
+        className: popupClass
+      })
       .on('popupopen', () => {
         if (activeTraceLayer) {
           map.value.removeLayer(activeTraceLayer)
@@ -365,7 +402,7 @@ const renderRides = (isZooming = false) => {
 
         activeTraceLayer = L.geoJSON(ride.geom as any, {
           style: {
-            color: ride.color || '#3B82F6',
+            color: rideColor,
             weight: getWeightByZoom(currentZoom),
             opacity: 1
           }
@@ -804,7 +841,7 @@ watch(
 
 <template>
   <div
-    class="map-container relative! mb-6 h-[80dvh] w-full overflow-hidden bg-[#f8f9fa]"
+    class="map-container relative! mx-auto mb-6 h-[80dvh] w-full max-w-[1680px] overflow-hidden rounded-xl bg-[#f8f9fa]"
     :class="{ 'is-fullscreen': isFullScreen }"
     tabindex="0"
     @keydown.esc="toggleFullScreen"
@@ -926,14 +963,29 @@ watch(
         </UButton>
       </div>
     </div>
-    <UButton
-      v-if="props.displayEnlargeButton"
-      :icon="isFullScreen ? 'i-lucide-minimize' : 'i-lucide-maximize'"
-      class="pointer-events-auto absolute right-4 bottom-6 z-1010 cursor-pointer"
-      color="neutral"
-      variant="subtle"
-      @click="toggleFullScreen"
-    />
+    <div
+      v-if="props.displayEnlargeButton || props.displayAddButton"
+      class="pointer-events-none absolute right-4 bottom-6 z-1010 flex items-center gap-2"
+    >
+      <UButton
+        v-if="props.displayEnlargeButton"
+        :icon="isFullScreen ? 'i-lucide-minimize' : 'i-lucide-maximize'"
+        class="pointer-events-auto cursor-pointer"
+        color="neutral"
+        variant="subtle"
+        @click="toggleFullScreen"
+      />
+      <UButton
+        v-if="props.displayAddButton"
+        icon="i-lucide-plus"
+        color="primary"
+        size="lg"
+        class="pointer-events-auto cursor-pointer text-white! shadow-(--shadow-lg)"
+        @click="emit('add')"
+      >
+        Ajouter une balade
+      </UButton>
+    </div>
 
     <FormFilters
       v-if="showFilters && distanceMax > 1 && props.displayFilters"
@@ -945,15 +997,16 @@ watch(
       @apply="onApplyFilters"
     />
 
-    <PanelRides v-if="props.displayRideList" :filtered-rides="visibleRides" />
+    <PanelRides
+      v-if="props.displayRideList"
+      :filtered-rides="visibleRides"
+      :color-map="rideColorMap"
+      @select="focusRide"
+    />
   </div>
 </template>
 
 <style scoped>
-/* Classe utilisée dans le HTML de la popup Leaflet (string JS, pas dans le template) */
-.ride-detail-container {
-  margin-bottom: 20em;
-}
 
 /* Animation du loader (keyframes non exprimable en utilitaire) */
 .loader-icon {
@@ -983,6 +1036,7 @@ watch(
   right: 0 !important;
   bottom: 0 !important;
   width: 100vw !important;
+  max-width: none !important;
   height: 100dvh !important;
   z-index: 99999 !important;
   margin: 0 !important;
@@ -1025,15 +1079,54 @@ watch(
 
 /* Popup thématisée (clair/sombre) au lieu du chrome Leaflet par défaut */
 :deep(.leaflet-popup-content-wrapper) {
+  position: relative;
   background: var(--background) !important;
   color: var(--text-color) !important;
   border: 1px solid var(--border-gray) !important;
   border-radius: 12px !important;
   box-shadow: var(--shadow-lg) !important;
 }
-:deep(.leaflet-popup-tip) {
-  background: var(--background) !important;
-  border: 1px solid var(--border-gray) !important;
+
+/* On masque la flèche Leaflet par défaut (en bas) au profit d'une flèche
+   latérale pointant vers le point de départ de la balade. */
+:deep(.leaflet-popup-tip-container) {
+  display: none !important;
+}
+
+:deep(.ride-popup .leaflet-popup-content-wrapper)::before,
+:deep(.ride-popup .leaflet-popup-content-wrapper)::after {
+  content: '';
+  position: absolute;
+  /* Le point de départ est toujours à 14px du bas de la bulle (mesuré) : on
+     ancre la flèche par le bas pour qu'elle vise le marker quelle que soit la
+     hauteur de la bulle. */
+  bottom: 5px;
+  width: 0;
+  height: 0;
+  border-top: 9px solid transparent;
+  border-bottom: 9px solid transparent;
+}
+
+/* Popup à gauche du départ → flèche sur son bord droit, pointant à droite. */
+:deep(.ride-popup--tail-right .leaflet-popup-content-wrapper)::before {
+  left: 100%;
+  border-left: 9px solid var(--border-gray);
+}
+:deep(.ride-popup--tail-right .leaflet-popup-content-wrapper)::after {
+  left: 100%;
+  margin-left: -1px;
+  border-left: 8px solid var(--background);
+}
+
+/* Popup à droite du départ → flèche sur son bord gauche, pointant à gauche. */
+:deep(.ride-popup--tail-left .leaflet-popup-content-wrapper)::before {
+  right: 100%;
+  border-right: 9px solid var(--border-gray);
+}
+:deep(.ride-popup--tail-left .leaflet-popup-content-wrapper)::after {
+  right: 100%;
+  margin-right: -1px;
+  border-right: 8px solid var(--background);
 }
 :deep(.leaflet-popup-close-button) {
   color: var(--text-color) !important;

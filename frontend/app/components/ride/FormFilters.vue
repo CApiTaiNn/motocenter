@@ -103,7 +103,7 @@ const resetFilter = () => {
 </script>
 
 <template>
-  <div class="absolute top-[60px] bottom-[20px] z-2000 ml-3 flex h-184 max-h-[calc(100vh-100px)] w-[20dvw] min-w-[350px] flex-col gap-4 overflow-y-auto rounded-lg border border-solid border-(--border-gray) bg-(--background) p-4 shadow-(--shadow-md) transition-[left,transform,width] duration-300 max-[480px]:left-1/2 max-[480px]:m-0! max-[480px]:h-auto! max-[480px]:max-h-[80vh]! max-[480px]:w-[95%]! max-[480px]:min-w-0! max-[480px]:-translate-x-1/2">
+  <div class="absolute top-[60px] bottom-[20px] z-2000 ml-3 flex h-184 max-h-[calc(100vh-100px)] w-[20dvw] min-w-[350px] zoom-[0.8] flex-col gap-4 overflow-y-auto rounded-lg border border-solid border-(--border-gray) bg-(--background) p-4 shadow-(--shadow-md) transition-[left,transform,width] duration-300 max-[480px]:left-1/2 max-[480px]:m-0! max-[480px]:h-auto! max-[480px]:max-h-[80vh]! max-[480px]:w-[95%]! max-[480px]:min-w-0! max-[480px]:-translate-x-1/2">
     <h3 class="text-center text-xl font-semibold">Filtres</h3>
     <div class="flex flex-col items-center justify-center gap-4 px-4">
       <UFormField label="Titre de la balade">

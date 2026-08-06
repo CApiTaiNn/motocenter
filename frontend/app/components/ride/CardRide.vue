@@ -1,12 +1,16 @@
 <script setup lang="ts">
 import type { IRide } from '~/types/ride'
 import { computed } from 'vue'
+import { RIDE_FALLBACK_COLOR } from '~/utils/ride'
 import { useAuth } from '~/composables/useAuth'
 import type { IUserPublic } from '~/types/users.js'
 import { useConnexionModal } from '~/composables/useConnexionModal.js'
 
 interface IProps {
   ride: IRide
+  // Couleur attribuée par rang de longueur (vert → rouge), fournie par la carte
+  // pour rester identique au pin et au tracé.
+  color?: string
 }
 
 const { user } = useAuth()
@@ -55,7 +59,9 @@ const participantsAvatars = computed(() => {
   })
 })
 
-const emit = defineEmits(['update:like', 'update:participants'])
+const emit = defineEmits(['update:like', 'update:participants', 'select'])
+
+const dotColor = computed(() => props.color ?? RIDE_FALLBACK_COLOR)
 
 const srcAvatarCreator = computed<string>(() => {
   return creator.value?.image || '/images/users/default.svg'
@@ -154,8 +160,12 @@ onMounted(async () => {
 
 <template>
   <div
-    class="relative flex h-auto min-h-[165px] w-full flex-col overflow-visible rounded-xl bg-cover bg-center shadow-[0_4px_12px_rgba(0,0,0,0.15)]"
+    class="relative flex h-auto min-h-[165px] w-full cursor-pointer flex-col overflow-visible rounded-xl bg-cover bg-center shadow-[0_4px_12px_rgba(0,0,0,0.15)] transition-shadow hover:shadow-[0_6px_18px_rgba(0,0,0,0.28)]"
     :style="{ backgroundImage: `url(${imageUrl})` }"
+    role="button"
+    tabindex="0"
+    @click="emit('select', props.ride._id)"
+    @keydown.enter="emit('select', props.ride._id)"
   >
     <div class="absolute inset-0 z-1 rounded-xl bg-linear-to-t from-black/95 via-black/70 to-black/40"></div>
 
@@ -164,7 +174,7 @@ onMounted(async () => {
         <div class="flex min-w-0 flex-1 flex-row flex-wrap items-center gap-2">
           <span
             class="size-[14px] rounded-full shadow-[0_0_10px_rgba(255,255,255,0.3)]"
-            :style="{ backgroundColor: props.ride.color || '#3b82f6' }"
+            :style="{ backgroundColor: dotColor }"
             aria-hidden="true"
           ></span>
 
@@ -195,11 +205,11 @@ onMounted(async () => {
               : 'i-heroicons-hand-thumb-up'
           "
           :label="props.ride.like?.toString() || '0'"
-          variant="subtle"
+          variant="ghost"
           color="neutral"
-          size="sm"
-          class="cursor-pointer font-bold text-white! transition-transform active:scale-120"
-          @click="likeGestion"
+          size="lg"
+          class="cursor-pointer font-bold text-white! transition-transform hover:bg-white/15 active:scale-120"
+          @click.stop="likeGestion"
         />
       </header>
 
@@ -268,7 +278,7 @@ onMounted(async () => {
               size="md"
               class="cursor-pointer px-5 font-bold max-[480px]:flex-1 max-[480px]:justify-center"
               :class="!isParticipating ? 'text-white!' : ''"
-              @click="participateGestion"
+              @click.stop="participateGestion"
             />
 
             <div v-if="participatingCount > 0" class="flex items-center gap-2 rounded-[20px] bg-white/90 py-1 pr-3 pl-2 text-gray-700">

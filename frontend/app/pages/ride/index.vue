@@ -36,24 +36,6 @@ const goToForm = async () => {
       </template>
     </HeaderInfo>
 
-    <RideBrowseMap />
-
-    <UCard class="mx-auto mt-8 mb-16 max-w-240">
-      <div class="flex flex-row flex-wrap items-center gap-4 max-[410px]:justify-center">
-        <UIcon name="i-lucide-map-pinned" class="size-10 text-(--ui-primary)" />
-        <div class="min-w-48 flex-1">
-          <h4>Pas trouvé votre balade ?</h4>
-          <p>Ajoutez-la pour la partager avec la communauté.</p>
-        </div>
-        <UButton
-          color="primary"
-          icon="i-lucide-plus"
-          size="lg"
-          class="cursor-pointer text-white!"
-          @click="goToForm"
-          >Ajouter une balade</UButton
-        >
-      </div>
-    </UCard>
+    <RideBrowseMap @add="goToForm" />
   </div>
 </template>

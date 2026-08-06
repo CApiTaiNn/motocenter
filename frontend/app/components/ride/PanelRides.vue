@@ -5,10 +5,19 @@ import CardRide from './CardRide.vue'
 
 interface IProps {
   filteredRides: IRide[]
+  colorMap: Record<string, string>
 }
 
 const props = defineProps<IProps>()
+const emit = defineEmits<{ select: [rideId: string] }>()
 const isSidebarOpen = ref(false) // État du volet latéral (ouvert/fermé)
+
+// Clic sur une balade de la liste : on la sélectionne sur la carte (centrage +
+// popup + tracé) et on referme le volet pour la laisser visible.
+const selectRide = (rideId: string) => {
+  emit('select', rideId)
+  isSidebarOpen.value = false
+}
 </script>
 
 <template>
@@ -46,10 +55,12 @@ const isSidebarOpen = ref(false) // État du volet latéral (ouvert/fermé)
         <div
           v-for="ride in props.filteredRides"
           :key="ride._id"
-          class="h-auto w-full rounded-xl"
+          class="h-auto w-full zoom-[0.8] rounded-xl"
         >
           <CardRide
             :ride="ride"
+            :color="props.colorMap[ride._id]"
+            @select="selectRide"
             @update:like="(newCount) => (ride.like = newCount)"
             @update:participants="
               (newList) => (ride.participating_user = newList)
