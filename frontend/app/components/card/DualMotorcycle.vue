@@ -84,7 +84,7 @@ watch(
           >
             <p
               :title="props.leftName"
-              class="w-full break-words text-center text-sm leading-tight"
+              class="w-full text-center text-sm/tight wrap-break-word"
             >
               {{ props.leftName }}
             </p>
@@ -120,7 +120,7 @@ watch(
           >
             <p
               :title="props.rightName"
-              class="w-full break-words text-center text-sm leading-tight"
+              class="w-full text-center text-sm/tight wrap-break-word"
             >
               {{ props.rightName }}
             </p>
