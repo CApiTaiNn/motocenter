@@ -1,23 +1,6 @@
 <script setup lang="ts">
-import { useAuth } from '~/composables/useAuth.js'
 import HeaderInfo from '../../components/global/HeaderInfo.vue'
 import RideBrowseMap from '../../components/ride/RideBrowseMap.vue'
-import { useConnexionModal } from '~/composables/useConnexionModal.js'
-
-const { user } = useAuth()
-const { open } = useConnexionModal()
-
-const goToForm = async () => {
-  if (!user.value?._id) {
-    open()
-    return
-  }
-
-  await navigateTo({
-    path: '/ride/addRide',
-    query: { scroll: 'true' }
-  })
-}
 </script>
 <template>
   <div>
@@ -36,6 +19,6 @@ const goToForm = async () => {
       </template>
     </HeaderInfo>
 
-    <RideBrowseMap @add="goToForm" />
+    <RideBrowseMap />
   </div>
 </template>

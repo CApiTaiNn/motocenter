@@ -160,7 +160,7 @@ onMounted(async () => {
 
 <template>
   <div
-    class="relative flex h-auto min-h-[165px] w-full cursor-pointer flex-col overflow-visible rounded-xl bg-cover bg-center shadow-[0_4px_12px_rgba(0,0,0,0.15)] transition-shadow hover:shadow-[0_6px_18px_rgba(0,0,0,0.28)]"
+    class="relative flex h-auto min-h-[124px] w-full cursor-pointer flex-col overflow-visible rounded-xl bg-cover bg-center shadow-[0_4px_12px_rgba(0,0,0,0.15)] transition-shadow hover:shadow-[0_6px_18px_rgba(0,0,0,0.28)]"
     :style="{ backgroundImage: `url(${imageUrl})` }"
     role="button"
     tabindex="0"
@@ -169,23 +169,23 @@ onMounted(async () => {
   >
     <div class="absolute inset-0 z-1 rounded-xl bg-linear-to-t from-black/95 via-black/70 to-black/40"></div>
 
-    <div class="relative z-2 flex flex-col gap-1.5 p-3 text-white md:p-4!">
+    <div class="relative z-2 flex flex-col gap-1 p-2 text-white md:p-3!">
       <header class="flex w-full flex-wrap items-center justify-between gap-3">
         <div class="flex min-w-0 flex-1 flex-row flex-wrap items-center gap-2">
           <span
-            class="size-[14px] rounded-full shadow-[0_0_10px_rgba(255,255,255,0.3)]"
+            class="size-[10px] rounded-full shadow-[0_0_10px_rgba(255,255,255,0.3)]"
             :style="{ backgroundColor: dotColor }"
             aria-hidden="true"
           ></span>
 
-          <h2 class="m-0 shrink overflow-hidden text-lg font-bold text-ellipsis whitespace-normal [text-shadow:0_2px_4px_rgba(0,0,0,0.5)] md:text-xl!">{{ props.ride.title }}</h2>
+          <h2 class="m-0 shrink overflow-hidden text-base font-bold text-ellipsis whitespace-normal [text-shadow:0_2px_4px_rgba(0,0,0,0.5)] md:text-lg!">{{ props.ride.title }}</h2>
 
           <UBadge
             v-if="props.ride.is_event"
             variant="subtle"
-            size="md"
+            size="sm"
             icon="i-lucide-calendar-days"
-            class="shrink-0 border border-white/20 bg-white/15 px-2 py-0.5 text-xs whitespace-nowrap text-white backdrop-blur-xs"
+            class="shrink-0 border border-white/20 bg-white/15 px-1.5 py-0.5 text-xs whitespace-nowrap text-white backdrop-blur-xs"
           >
             {{ dateEvent.toLocaleDateString('fr-FR') }}
             •
@@ -207,19 +207,19 @@ onMounted(async () => {
           :label="props.ride.like?.toString() || '0'"
           variant="ghost"
           color="neutral"
-          size="lg"
+          size="xs"
           class="cursor-pointer font-bold text-white! transition-transform hover:bg-white/15 active:scale-120"
           @click.stop="likeGestion"
         />
       </header>
 
-      <p class="mt-0.5 mb-2 line-clamp-2 text-sm opacity-85">{{ props.ride.description }}</p>
+      <p class="mt-0.5 mb-1.5 line-clamp-2 text-xs opacity-85">{{ props.ride.description }}</p>
 
       <footer>
-        <div class="mb-2 flex flex-wrap gap-x-3 gap-y-1">
+        <div class="mb-1.5 flex flex-wrap gap-x-3 gap-y-1">
           <UBadge
             variant="subtle"
-            size="md"
+            size="sm"
             icon="i-lucide-map-pinned"
             class="invisible-background"
           >
@@ -227,7 +227,7 @@ onMounted(async () => {
           </UBadge>
           <UBadge
             variant="subtle"
-            size="md"
+            size="sm"
             icon="i-lucide-clock"
             class="invisible-background"
           >
@@ -235,7 +235,7 @@ onMounted(async () => {
           </UBadge>
           <UBadge
             variant="subtle"
-            size="md"
+            size="sm"
             icon="i-lucide-map-pin"
             class="invisible-background"
           >
@@ -243,7 +243,7 @@ onMounted(async () => {
           </UBadge>
           <UBadge
             variant="subtle"
-            size="md"
+            size="sm"
             icon="i-lucide-route"
             class="invisible-background"
           >
@@ -251,11 +251,11 @@ onMounted(async () => {
           </UBadge>
         </div>
 
-        <div class="flex flex-wrap items-center justify-between gap-3 pt-2 text-sm max-[480px]:flex-col! max-[480px]:items-stretch! max-[480px]:gap-3!">
+        <div class="flex flex-wrap items-center justify-between gap-3 pt-1.5 text-xs max-[480px]:flex-col! max-[480px]:items-stretch! max-[480px]:gap-3!">
           <div class="flex items-center gap-3 max-[480px]:w-full max-[480px]:flex-wrap max-[480px]:justify-start">
             <template v-if="creator">
               <UAvatar
-                size="sm"
+                size="xs"
                 :alt="`Avatar de ${creator.pseudo || 'MotoCenter'}`"
                 :src="srcAvatarCreator"
               />
@@ -275,8 +275,8 @@ onMounted(async () => {
               :label="isParticipating ? 'Ne plus participer' : 'Participer'"
               :color="isParticipating ? 'neutral' : 'error'"
               :variant="isParticipating ? 'subtle' : 'solid'"
-              size="md"
-              class="cursor-pointer px-5 font-bold max-[480px]:flex-1 max-[480px]:justify-center"
+              size="sm"
+              class="cursor-pointer px-4 font-bold max-[480px]:flex-1 max-[480px]:justify-center"
               :class="!isParticipating ? 'text-white!' : ''"
               @click.stop="participateGestion"
             />

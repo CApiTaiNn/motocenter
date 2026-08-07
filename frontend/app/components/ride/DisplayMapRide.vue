@@ -16,11 +16,13 @@ import {
   RIDE_FALLBACK_COLOR
 } from '~/utils/ride'
 import { CalendarDate, Time } from '@internationalized/date'
+import { useAuth } from '~/composables/useAuth.js'
+import { useConnexionModal } from '~/composables/useConnexionModal.js'
 
 interface IProps {
   displayFilters?: boolean
   displayEnlargeButton?: boolean
-  displayAddButton?: boolean
+  displayAddRideButton?: boolean
   displayRideList?: boolean
   displayMapLoader?: boolean
   displayRide?: boolean
@@ -33,7 +35,7 @@ interface IProps {
 const props = withDefaults(defineProps<IProps>(), {
   displayFilters: false,
   displayEnlargeButton: false,
-  displayAddButton: false,
+  displayAddRideButton: false,
   displayRideList: false,
   displayMapLoader: true,
   displayRide: false,
@@ -42,8 +44,6 @@ const props = withDefaults(defineProps<IProps>(), {
   disableCreating: false,
   disableDeleting: false
 })
-
-const emit = defineEmits<{ add: [] }>()
 
 // INSTANCES LEAFLET
 const map = ref<any>(null) // Instance principale de la carte Leaflet
@@ -56,6 +56,22 @@ let drawControl: any = null // Contrôle Leaflet-Draw gérant les boutons de cr�
 
 const route = useRoute() // Récupérer les paramètres get passé (notamment pour le scroll automatique)
 const router = useRouter() // Changer l'URL pour enlever le paramètre GET quand le scroll est fini
+
+const { user } = useAuth()
+const { open: openConnexionModal } = useConnexionModal()
+
+// Redirige vers le formulaire d'ajout de balade (ouvre la connexion si non connecté)
+const goToAddRide = async () => {
+  if (!user.value?._id) {
+    openConnexionModal()
+    return
+  }
+
+  await navigateTo({
+    path: '/ride/addRide',
+    query: { scroll: 'true' }
+  })
+}
 
 // GeoJSON du tracé dessiné, partagé avec le composant parent
 const geom = defineModel('geom', {
@@ -964,8 +980,8 @@ watch(
       </div>
     </div>
     <div
-      v-if="props.displayEnlargeButton || props.displayAddButton"
-      class="pointer-events-none absolute right-4 bottom-6 z-1010 flex items-center gap-2"
+      v-if="props.displayEnlargeButton || props.displayAddRideButton"
+      class="pointer-events-none absolute right-4 bottom-6 z-1010 flex flex-col items-end gap-2"
     >
       <UButton
         v-if="props.displayEnlargeButton"
@@ -976,12 +992,13 @@ watch(
         @click="toggleFullScreen"
       />
       <UButton
-        v-if="props.displayAddButton"
+        v-if="props.displayAddRideButton"
         icon="i-lucide-plus"
-        color="primary"
         size="lg"
-        class="pointer-events-auto cursor-pointer text-white! shadow-(--shadow-lg)"
-        @click="emit('add')"
+        color="primary"
+        variant="solid"
+        class="pointer-events-auto cursor-pointer text-white!"
+        @click="goToAddRide"
       >
         Ajouter une balade
       </UButton>
