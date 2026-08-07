@@ -11,10 +11,13 @@ import PanelRides from './PanelRides.vue'
 import FormFilters from './FormFilters.vue'
 import { getWeightByZoom, getMapPinSvg } from '~/utils/ride'
 import { CalendarDate, Time } from '@internationalized/date'
+import { useAuth } from '~/composables/useAuth.js'
+import { useConnexionModal } from '~/composables/useConnexionModal.js'
 
 interface IProps {
   displayFilters?: boolean
   displayEnlargeButton?: boolean
+  displayAddRideButton?: boolean
   displayRideList?: boolean
   displayMapLoader?: boolean
   displayRide?: boolean
@@ -27,6 +30,7 @@ interface IProps {
 const props = withDefaults(defineProps<IProps>(), {
   displayFilters: false,
   displayEnlargeButton: false,
+  displayAddRideButton: false,
   displayRideList: false,
   displayMapLoader: true,
   displayRide: false,
@@ -47,6 +51,22 @@ let drawControl: any = null // Contrôle Leaflet-Draw gérant les boutons de cr�
 
 const route = useRoute() // Récupérer les paramètres get passé (notamment pour le scroll automatique)
 const router = useRouter() // Changer l'URL pour enlever le paramètre GET quand le scroll est fini
+
+const { user } = useAuth()
+const { open: openConnexionModal } = useConnexionModal()
+
+// Redirige vers le formulaire d'ajout de balade (ouvre la connexion si non connecté)
+const goToAddRide = async () => {
+  if (!user.value?._id) {
+    openConnexionModal()
+    return
+  }
+
+  await navigateTo({
+    path: '/ride/addRide',
+    query: { scroll: 'true' }
+  })
+}
 
 // GeoJSON du tracé dessiné, partagé avec le composant parent
 const geom = defineModel('geom', {
@@ -926,14 +946,29 @@ watch(
         </UButton>
       </div>
     </div>
-    <UButton
-      v-if="props.displayEnlargeButton"
-      :icon="isFullScreen ? 'i-lucide-minimize' : 'i-lucide-maximize'"
-      class="pointer-events-auto absolute right-4 bottom-6 z-1010 cursor-pointer"
-      color="neutral"
-      variant="subtle"
-      @click="toggleFullScreen"
-    />
+    <div
+      class="pointer-events-none absolute right-4 bottom-6 z-1010 flex flex-col items-end gap-2"
+    >
+      <UButton
+        v-if="props.displayEnlargeButton"
+        :icon="isFullScreen ? 'i-lucide-minimize' : 'i-lucide-maximize'"
+        class="pointer-events-auto cursor-pointer"
+        color="neutral"
+        variant="subtle"
+        @click="toggleFullScreen"
+      />
+      <UButton
+        v-if="props.displayAddRideButton"
+        icon="i-lucide-plus"
+        size="lg"
+        color="primary"
+        variant="solid"
+        class="pointer-events-auto cursor-pointer text-white!"
+        @click="goToAddRide"
+      >
+        Ajouter une balade
+      </UButton>
+    </div>
 
     <FormFilters
       v-if="showFilters && distanceMax > 1 && props.displayFilters"
