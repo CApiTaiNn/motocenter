@@ -79,7 +79,10 @@ async function fetchMotocycles() {
     `${apiBase}motorcycles`,
     {
       params: {
-        project: 'name,horsePower,torque,price,imageUrl'
+        // The card shows brand, category/A2, year, weight and comparison count —
+        // all must be projected or they render blank.
+        project:
+          'name,year,horsePower,torque,weight,price,imageUrl,brand,category,isAvailableA2,numberOfComparison'
       }
     }
   )

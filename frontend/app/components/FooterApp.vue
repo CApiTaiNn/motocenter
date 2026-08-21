@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import LogoApp from '~/components/LogoApp.vue'
 
+// Site name from runtime config (override in prod with NUXT_PUBLIC_APP_NAME).
+const appName = useRuntimeConfig().public.appName
+
 const guides = [
   { label: 'Accueil', to: '/' },
   { label: 'Comparateur', to: '/comparo' },
@@ -94,7 +97,7 @@ const contactEmail = 'contact@mgtsoftware.com'
 
     <div class="mx-auto flex max-w-[1400px] items-center justify-between px-[5%] py-4 max-lg:flex-col! max-lg:gap-2! max-lg:py-4! max-lg:text-center">
       <p class="footer-bottom-text text-sm font-light text-(--label-text)">
-        &copy; 2026 MotoCenter &mdash; Tout droit réservé
+        &copy; 2026 {{ appName }} &mdash; Tous droits réservés
       </p>
       <div class="flex items-center gap-2">
         <NuxtLink class="footer-bottom-link text-sm font-light text-(--label-text) no-underline transition-colors duration-200 hover:text-(--ui-primary)" to="/legal/mentions-legales">Mentions légales</NuxtLink>
