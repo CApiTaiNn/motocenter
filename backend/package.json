@@ -32,6 +32,8 @@
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.2.1",
     "multer": "^2.1.1",
+    "pino": "^10.3.1",
+    "pino-http": "^11.0.0",
     "resend": "^6.18.1",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",

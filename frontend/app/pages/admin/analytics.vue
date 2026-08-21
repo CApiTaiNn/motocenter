@@ -8,6 +8,8 @@ definePageMeta({
   middleware: 'auth'
 })
 
+useSeoMeta({ title: 'Analytics', robots: 'noindex, nofollow' })
+
 interface RideStats {
   title: string
   value: number

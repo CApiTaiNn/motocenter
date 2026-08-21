@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, computed, watch, nextTick, reactive } from 'vue'
+import { onMounted, ref, computed, nextTick, reactive } from 'vue'
 import type { IMotorcycle } from '~/types/motorcycles'
 import CountUp from 'vue-countup-v3'
 import type { IMessage } from '~/types/messages'
@@ -30,7 +30,23 @@ interface IMaxStats {
 const route = useRoute()
 const id = route.params.id as string
 const apiBase = useRuntimeConfig().public.apiBase
-const m = ref<IMotorcycle | null>(null)
+// Fetched during SSR so the bike's name and specs are in the initial HTML
+// (crawlable). The comments and stat bars stay client-side below.
+const { data: m } = await useAsyncData(`motorcycle-${id}`, async () => {
+  const data = await $fetch<{ motorcycles: IMotorcycle[] }>(
+    `${apiBase}motorcycles`,
+    { params: { filter: JSON.stringify({ _id: id }), project: 'all' } }
+  )
+  return data.motorcycles?.[0] ?? null
+})
+
+useSeoMeta({
+  title: () => m.value?.name ?? 'Moto',
+  description: () =>
+    m.value
+      ? `${m.value.brand?.name ?? ''} ${m.value.name} : fiche technique et caractéristiques.`.trim()
+      : 'Fiche technique et caractéristiques moto sur Vroom.'
+})
 const commentsMotorcycle = ref<IMessage[]>([])
 const comment = ref<ICommentInput>({
   motorcycleId: id,
@@ -125,19 +141,6 @@ function getCountUpOptions(key: string) {
   }
 }
 
-async function fetchData() {
-  const data = await $fetch<{ motorcycles: IMotorcycle[] }>(
-    `${apiBase}motorcycles`,
-    {
-      params: {
-        filter: JSON.stringify({ _id: id }),
-        project: 'all'
-      }
-    }
-  )
-  m.value = data.motorcycles?.[0] ?? null
-}
-
 async function fetchMax() {
   const data = await $fetch<IMaxStats>(`${apiBase}motorcycles/max-stats`)
   fieldMaxRef.year = data.maxYear
@@ -216,15 +219,13 @@ async function postComment() {
 }
 
 onMounted(async () => {
-  await Promise.all([fetchData(), fetchMax()])
+  // Client-only: max-stats drive the visual bars, comments are user content.
+  await fetchMax()
   await fetchMessages()
-})
 
-watch(
-  m,
-  async () => {
-    await nextTick()
-
+  // Start the count-up when the stats block scrolls into view.
+  await nextTick()
+  if (statsRef.value) {
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0]?.isIntersecting) {
@@ -234,11 +235,9 @@ watch(
       },
       { threshold: 0.3 }
     )
-
-    if (statsRef.value) observer.observe(statsRef.value)
-  },
-  { once: true }
-)
+    observer.observe(statsRef.value)
+  }
+})
 </script>
 
 <template>

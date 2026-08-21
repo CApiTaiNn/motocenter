@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { FormError } from '@nuxt/ui'
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed } from 'vue'
 import { useCreateAccountModal } from '~/composables/useCreateAccountModal'
 import { useAuth } from '~/composables/useAuth'
 
@@ -25,6 +25,8 @@ const state = reactive({
 })
 
 const experienceLevels = ['Débutant', 'Confirmé', 'Expert', 'Autre']
+
+const passwordScore = computed(() => passwordStrength(state.password))
 
 // Validation par étape
 const validateStep = (step: number): FormError[] => {
@@ -59,11 +61,14 @@ const validateStep = (step: number): FormError[] => {
         name: 'password',
         message: 'Le mot de passe est requis'
       })
-    if (state.password && state.password.length < 8)
-      errors.push({
-        name: 'password',
-        message: 'Le mot de passe doit contenir au moins 8 caractères'
+    if (state.password) {
+      const passwordError = validatePasswordRules(state.password, {
+        email: state.email,
+        pseudo: state.pseudo
       })
+      if (passwordError)
+        errors.push({ name: 'password', message: passwordError })
+    }
     if (state.password !== state.confirmPassword)
       errors.push({
         name: 'confirmPassword',
@@ -329,6 +334,19 @@ const handleSubmit = async () => {
                       @click="show = !show"
                     /> </template
                 ></UInput>
+                <div v-if="state.password" class="mt-2 flex flex-col gap-1">
+                  <div class="flex gap-1" aria-hidden="true">
+                    <span
+                      v-for="i in 4"
+                      :key="i"
+                      class="h-1 flex-1 rounded-full bg-gray-200 transition-colors"
+                      :class="i <= passwordScore.score ? passwordScore.color : ''"
+                    />
+                  </div>
+                  <p class="text-xs text-gray-500">
+                    Force : {{ passwordScore.label }}
+                  </p>
+                </div>
               </UFormField>
               <UFormField
                 label="Confirmer le mot de passe"

@@ -97,6 +97,36 @@ export function useAuth() {
     user.value = null
   }
 
+  // Request a reset link. The API always succeeds (it never reveals whether the
+  // email exists), so this resolves regardless.
+  async function forgotPassword(email: string) {
+    await $fetch(`${apiBase}auth/forgot-password`, {
+      method: 'POST',
+      body: { email }
+    })
+  }
+
+  async function resetPassword(token: string, password: string) {
+    await $fetch(`${apiBase}auth/reset-password`, {
+      method: 'POST',
+      body: { token, password }
+    })
+  }
+
+  async function verifyEmail(token: string) {
+    await $fetch(`${apiBase}auth/verify-email`, {
+      method: 'POST',
+      body: { token }
+    })
+  }
+
+  async function resendVerification(email: string) {
+    await $fetch(`${apiBase}auth/resend-verification`, {
+      method: 'POST',
+      body: { email }
+    })
+  }
+
   return {
     user: readonly(user),
     isAuthenticated,
@@ -105,6 +135,10 @@ export function useAuth() {
     updateProfile,
     fetchUser,
     login,
-    logout
+    logout,
+    forgotPassword,
+    resetPassword,
+    verifyEmail,
+    resendVerification
   }
 }

@@ -6,6 +6,8 @@ import swaggerUi from 'swagger-ui-express'
 import { swaggerSpec } from './swagger'
 import { errorHandler } from './utils/errorHandler'
 import { makeRateLimiter } from './utils/rateLimit'
+import { logger } from './utils/logger'
+import pinoHttp from 'pino-http'
 
 import cookieParser from 'cookie-parser'
 
@@ -15,10 +17,24 @@ const app = express()
 // (otherwise express-rate-limit keys every request on the proxy address).
 app.set('trust proxy', 1)
 
+// Structured request logging (one JSON line per request). Silent in tests.
+app.use(pinoHttp({ logger }))
+
 app.use(helmet())
+
+// Allowed browser origins. Set CORS_ORIGINS in prod (comma-separated) so a new
+// frontend URL never needs a code change. Falls back to the known dev + Vercel
+// origins when unset.
+const allowedOrigins = (
+  process.env.CORS_ORIGINS ?? 'http://localhost:3000,https://vroom-delta.vercel.app'
+)
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean)
+
 app.use(
   cors({
-    origin: ['http://localhost:3000', 'https://vroom-delta.vercel.app'],
+    origin: allowedOrigins,
     credentials: true
   })
 )

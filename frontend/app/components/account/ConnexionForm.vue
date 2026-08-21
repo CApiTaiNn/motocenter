@@ -43,6 +43,11 @@ const connexion = async () => {
   }
 }
 
+const goToForgot = () => {
+  close()
+  navigateTo('/forgot-password')
+}
+
 const resetForm = () => {
   form.value?.clear()
   state.value.email = ''
@@ -91,6 +96,13 @@ watch(isOpen, (newVal) => {
                 /> </template
             ></UInput>
           </UFormField>
+          <div class="flex justify-end">
+            <span
+              class="cursor-pointer text-xs underline"
+              @click="goToForgot"
+              >Mot de passe oublié ?</span
+            >
+          </div>
           <UButton
             type="submit"
             label="Se connecter"

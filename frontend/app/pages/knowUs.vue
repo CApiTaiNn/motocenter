@@ -1,4 +1,9 @@
 <script setup lang="ts">
+useSeoMeta({
+  title: 'Qui sommes-nous',
+  description: "L'équipe derrière Vroom et le projet."
+})
+
 const team = [
   { name: 'Sloan Morgant', role: 'Chef de projet' },
   { name: 'Loris Caruhel', role: 'Expert BDD' },

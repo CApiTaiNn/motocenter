@@ -56,6 +56,7 @@ export default withNuxt(
             '^stepper-(item|bullet)$',
             // :deep() / child-combinator targets and complex selectors
             '^invisible-background$',
+            '^legal-content$',
             '^button$',
             '^filters$',
             '^invitation$',

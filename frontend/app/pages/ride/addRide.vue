@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import AddRideForm from '~/components/ride/AddRideForm.vue'
 import HeaderInfo from '../../components/global/HeaderInfo.vue'
+
+useSeoMeta({
+  title: 'Créer une balade',
+  description: 'Tracez et partagez un nouvel itinéraire de balade à moto.'
+})
 </script>
 <template>
   <div>

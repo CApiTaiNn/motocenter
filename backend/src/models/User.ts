@@ -47,6 +47,28 @@ const userSchema = new Schema(
     },
     image: {
       type: String
+    },
+    // Not select:false — the frontend shows the verified state to the user.
+    emailVerified: {
+      type: Boolean,
+      default: false
+    },
+    // One-time tokens: stored hashed, never returned to any client.
+    emailVerificationToken: {
+      type: String,
+      select: false
+    },
+    emailVerificationExpires: {
+      type: Date,
+      select: false
+    },
+    passwordResetToken: {
+      type: String,
+      select: false
+    },
+    passwordResetExpires: {
+      type: Date,
+      select: false
     }
   },
   { timestamps: true, toJSON: stripInternalFields }

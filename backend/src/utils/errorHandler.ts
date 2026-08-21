@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from 'express'
 import { HttpError } from './errors'
+import { logger } from './logger'
 
 // Map an unknown thrown value to an HTTP status + safe client message.
 // Mongoose CastError (malformed ObjectId) and ValidationError are client
@@ -37,7 +38,7 @@ export function errorHandler(
 
   const { status, message } = classifyError(err)
   if (status >= 500) {
-    console.error(err)
+    logger.error({ err }, 'Unhandled error')
   }
   res.status(status).json({ error: message })
 }

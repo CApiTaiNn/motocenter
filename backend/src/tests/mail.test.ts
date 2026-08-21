@@ -15,7 +15,7 @@ const newUser = {
   lastname: 'Roe',
   pseudo: 'janer',
   email: 'jane@test.com',
-  password: 'secretpass',
+  password: 'secureRiderPass',
   userType: 'confirmed' as const
 }
 
@@ -29,10 +29,14 @@ describe('Signup confirmation email', () => {
 
     expect(res.status).toBe(201)
     expect(sendWelcomeEmail).toHaveBeenCalledTimes(1)
-    expect(sendWelcomeEmail).toHaveBeenCalledWith({
-      to: newUser.email,
-      firstname: newUser.firstname
-    })
+    // The call also carries a verifyUrl with a random token, so match loosely.
+    expect(sendWelcomeEmail).toHaveBeenCalledWith(
+      expect.objectContaining({
+        to: newUser.email,
+        firstname: newUser.firstname,
+        verifyUrl: expect.stringContaining('/verify-email?token=')
+      })
+    )
   })
 
   it('does not send an email when validation fails', async () => {

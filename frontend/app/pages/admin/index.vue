@@ -14,6 +14,8 @@ definePageMeta({
   middleware: 'auth'
 })
 
+useSeoMeta({ title: 'Administration', robots: 'noindex, nofollow' })
+
 const userName: string = 'Admin'
 const apiBase = useRuntimeConfig().public.apiBase
 const stats = ref<Stat[]>([])

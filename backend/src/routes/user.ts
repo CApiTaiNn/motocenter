@@ -8,6 +8,8 @@ import { prepareQuery, ADMIN_MAX_LIMIT, type ReqQuery } from '../utils/find'
 import { argon2PasswordHasher } from '../utils/hash'
 import { sendWelcomeEmail } from '../utils/mail'
 import { makeRateLimiter } from '../utils/rateLimit'
+import { validatePassword } from '../utils/passwordPolicy'
+import { generateToken } from '../utils/tokens'
 import { type Request, Response, Router } from 'express'
 import type { Types } from 'mongoose'
 
@@ -174,6 +176,11 @@ router.post('/account', makeRateLimiter(20), async (req: Request, res: Response)
       .json({ error: 'Firstname, lastname and pseudo are required' })
   }
 
+  const passwordCheck = validatePassword(password, { email, pseudo })
+  if (!passwordCheck.valid) {
+    return res.status(400).json({ error: passwordCheck.message })
+  }
+
   if (await User.findOne({ email })) {
     return res.status(409).json({ error: 'User already exists' })
   }
@@ -183,6 +190,9 @@ router.post('/account', makeRateLimiter(20), async (req: Request, res: Response)
   if (await User.findOne({ pseudo })) {
     return res.status(409).json({ error: 'Pseudo already taken' })
   }
+
+  // Email-verification token: store the hash, send the raw value in the link.
+  const verification = generateToken()
 
   const newUser: IUser = {
     email,
@@ -195,14 +205,19 @@ router.post('/account', makeRateLimiter(20), async (req: Request, res: Response)
     ridingStartYear,
     createdAt: new Date(),
     isAdmin: false,
-    idMoto: ''
+    idMoto: '',
+    emailVerified: false,
+    emailVerificationToken: verification.hash,
+    emailVerificationExpires: new Date(Date.now() + 24 * 60 * 60 * 1000)
   }
 
   const created = await User.insertOne(newUser)
 
-  // Fire-and-forget confirmation email: delivery is best-effort and must never
-  // block or fail signup (no-ops when Resend isn't configured).
-  void sendWelcomeEmail({ to: email, firstname }).catch((err) =>
+  // Fire-and-forget welcome + verification email: delivery is best-effort and
+  // must never block or fail signup (no-ops when Resend isn't configured).
+  const appUrl = process.env.APP_URL || 'http://localhost:3000'
+  const verifyUrl = `${appUrl}/verify-email?token=${verification.raw}`
+  void sendWelcomeEmail({ to: email, firstname, verifyUrl }).catch((err) =>
     console.error('Failed to send welcome email:', err)
   )
 
@@ -306,7 +321,13 @@ router.put(
       }
     }
 
-    if (updateData.password) {
+    if (updateData.password !== undefined) {
+      const passwordCheck = validatePassword(updateData.password, {
+        pseudo: updateData.pseudo
+      })
+      if (!passwordCheck.valid) {
+        return res.status(400).json({ error: passwordCheck.message })
+      }
       updateData.password = await hash(updateData.password)
     }
 

@@ -20,6 +20,7 @@ interface IStatCount {
 }
 
 const connexionModal = useConnexionModal()
+const toast = useToast()
 
 const itemsCaroussel = ref<IMotorcycle[]>([])
 const apiBase = useRuntimeConfig().public.apiBase
@@ -31,15 +32,15 @@ const statsRow = ref<HTMLElement | null>(null)
 const statsStarted = ref(false)
 const itemsTab = reactive<IItemTab[]>([
   {
-    content: 'Base de données complètes',
+    content: 'Base de données complète',
     urlImg: '/images/accueil/icon_checked_classic.png'
   },
   {
-    content: 'Communautée active',
+    content: 'Communauté active',
     urlImg: '/images/accueil/icon_clock.png'
   },
   {
-    content: 'Equipe passionée',
+    content: 'Équipe passionnée',
     urlImg: '/images/accueil/icon_idea.png'
   }
 ])
@@ -99,7 +100,15 @@ onMounted(async () => {
     observer.observe(statsRow.value)
   }
 
-  await Promise.all([fetchMotocycles(), fetchStats(), fetchUserCount()])
+  try {
+    await Promise.all([fetchMotocycles(), fetchStats(), fetchUserCount()])
+  } catch {
+    toast.add({
+      title: 'Chargement impossible',
+      description: 'Impossible de charger les données. Réessayez plus tard.',
+      color: 'error'
+    })
+  }
 })
 </script>
 <template>

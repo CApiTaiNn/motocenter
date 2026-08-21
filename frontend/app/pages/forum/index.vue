@@ -4,6 +4,11 @@ import HeaderInfo from '~/components/global/HeaderInfo.vue'
 import type { IPost } from '~/types/post'
 import type { IMessage } from '~/types/messages'
 
+useSeoMeta({
+  title: 'Forum',
+  description: 'Échangez avec la communauté moto : questions, avis et discussions.'
+})
+
 const posts = ref<IPost[]>([])
 const loading = ref(true)
 const filters = ref({

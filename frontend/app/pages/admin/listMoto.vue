@@ -21,6 +21,8 @@ definePageMeta({
   layout: 'admin',
   middleware: 'auth'
 })
+
+useSeoMeta({ title: 'Gestion des motos', robots: 'noindex, nofollow' })
 const table = useTemplateRef('table')
 const UBadge = resolveComponent('UBadge')
 const apiBase = useRuntimeConfig().public.apiBase

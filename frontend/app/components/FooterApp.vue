@@ -97,9 +97,11 @@ const contactEmail = 'contact@mgtsoftware.com'
         &copy; 2026 MotoCenter &mdash; Tout droit réservé
       </p>
       <div class="flex items-center gap-2">
-        <NuxtLink class="footer-bottom-link text-sm font-light text-(--label-text) no-underline transition-colors duration-200 hover:text-(--ui-primary)" to="/">Mentions légales</NuxtLink>
+        <NuxtLink class="footer-bottom-link text-sm font-light text-(--label-text) no-underline transition-colors duration-200 hover:text-(--ui-primary)" to="/legal/mentions-legales">Mentions légales</NuxtLink>
         <span class="text-sm text-(--label-text)">&middot;</span>
-        <NuxtLink class="footer-bottom-link text-sm font-light text-(--label-text) no-underline transition-colors duration-200 hover:text-(--ui-primary)" to="/">Confidentialité</NuxtLink>
+        <NuxtLink class="footer-bottom-link text-sm font-light text-(--label-text) no-underline transition-colors duration-200 hover:text-(--ui-primary)" to="/legal/confidentialite">Confidentialité</NuxtLink>
+        <span class="text-sm text-(--label-text)">&middot;</span>
+        <NuxtLink class="footer-bottom-link text-sm font-light text-(--label-text) no-underline transition-colors duration-200 hover:text-(--ui-primary)" to="/legal/cgu">CGU</NuxtLink>
       </div>
     </div>
   </footer>

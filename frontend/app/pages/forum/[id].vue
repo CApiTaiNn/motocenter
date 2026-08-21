@@ -8,33 +8,39 @@ import type { IPost } from '~/types/post'
 import { POST_CATEGORY_META } from '~/utils/postCategory'
 
 const route = useRoute()
-
-const post = ref<IPost>()
-const responses = ref<IMessage[]>([])
 const apiBase = useRuntimeConfig().public.apiBase
 const { user } = useAuth()
 const { open } = useConnexionModal()
-const newReponseOfPost = ref('')
 const toast = useToast()
-const isLoaded = ref(false)
+
+// Fetched during SSR so the post title and body are in the initial HTML
+// (crawlable). useRequestFetch forwards the auth cookie on the server pass, so
+// favoritedByMe (derived from userFavoritePost) is correct there too.
+const request = useRequestFetch()
+const { data: post, refresh: refreshPost } = await useAsyncData(
+  `post-${route.params.id}`,
+  () =>
+    request<{ posts: IPost[] }>(`${apiBase}posts`, {
+      params: {
+        filter: JSON.stringify({ _id: route.params.id }),
+        project:
+          'image,content,title,category,user,brand,createdAt,views,userFavoritePost',
+        deep: true
+      }
+    }).then((data) => data.posts[0] ?? null)
+)
+
+useSeoMeta({
+  title: () => post.value?.title ?? 'Forum',
+  description: () =>
+    post.value?.content?.slice(0, 150) ?? 'Discussions de la communauté Vroom.'
+})
+
+const responses = ref<IMessage[]>([])
+const newReponseOfPost = ref('')
 const isSolidStar = computed(
   () => user.value && post.value?.favoritedByMe === true
 )
-
-const getPost = async () => {
-  const data = await $fetch<{ posts: IPost[] }>(`${apiBase}posts`, {
-    params: {
-      filter: JSON.stringify({ _id: route.params.id }),
-      // user/brand/category are rendered by the template; userFavoritePost is
-      // selected so the API can derive favoritedByMe.
-      project:
-        'image,content,title,category,user,brand,createdAt,views,userFavoritePost',
-      deep: true
-    }
-  })
-
-  post.value = data.posts[0]
-}
 
 const getResponsesOfPost = async () => {
   const res = await $fetch<{ messages: IMessage[] }>(
@@ -103,14 +109,14 @@ const handleAddFavorite = async () => {
         description: 'Votre post a été ajouté aux favoris.',
         color: 'success'
       })
-      await getPost()
+      await refreshPost()
     } else if (response.isAdded === false) {
       toast.add({
         title: 'Succès',
         description: 'Votre post a été supprimé de vos favoris.',
         color: 'success'
       })
-      await getPost()
+      await refreshPost()
     } else {
       toast.add({
         title: 'Erreur',
@@ -122,16 +128,16 @@ const handleAddFavorite = async () => {
 }
 
 onMounted(async () => {
+  // The post is server-rendered; only the responses load client-side.
   try {
-    await Promise.all([getPost(), getResponsesOfPost()])
+    await getResponsesOfPost()
   } catch {
     toast.add({
       title: 'Erreur',
-      description: "Le post n'a pas pu être chargé.",
+      description: "Les commentaires n'ont pas pu être chargés.",
       color: 'error'
     })
   } finally {
-    isLoaded.value = true
     scrollToMap('post')
   }
 })
@@ -154,7 +160,7 @@ onMounted(async () => {
       <div class="shrink-0">
         <ForumPanel />
       </div>
-      <USkeleton v-if="!isLoaded" class="size-20 min-w-0 flex-1 rounded-full" />
+      <USkeleton v-if="!post" class="size-20 min-w-0 flex-1 rounded-full" />
       <div v-else class="min-w-0 flex-1">
         <div class="my-4 flex flex-row items-center gap-3">
           <UAvatar

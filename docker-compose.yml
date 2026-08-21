@@ -1,6 +1,9 @@
 services:
   backend:
-    build: ./backend
+    build:
+      context: ./backend
+      target: build
+    command: npm run dev
     container_name: backend
     networks:
       - mongodb_express

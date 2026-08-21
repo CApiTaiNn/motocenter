@@ -11,6 +11,12 @@ import DualMotorcycle from '~/components/card/DualMotorcycle.vue'
 import { useAuth } from '~/composables/useAuth'
 import { useConnexionModal } from '~/composables/useConnexionModal'
 
+useSeoMeta({
+  title: 'Comparateur de motos',
+  description:
+    'Comparez deux motos côte à côte : puissance, couple, prix, son et plus.'
+})
+
 interface ICommentInput {
   motorcycleId: string
   content: string

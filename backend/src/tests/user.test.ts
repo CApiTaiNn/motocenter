@@ -177,7 +177,7 @@ describe('User Routes - /api/v1/users', () => {
       lastname: 'Roe',
       pseudo: 'janer',
       email: 'jane@test.com',
-      password: 'secretpass',
+      password: 'secureRiderPass',
       userType: 'confirmed' as const,
       ridingStartYear: 2010
     }
@@ -256,6 +256,33 @@ describe('User Routes - /api/v1/users', () => {
 
       expect(res.status).toBe(400)
       expect(res.body.error).toBe('Firstname, lastname and pseudo are required')
+    })
+
+    it('should reject a too-short password with 400', async () => {
+      const res = await request(app)
+        .post('/api/v1/users/account')
+        .send({ ...newUser, email: 'short@test.com', pseudo: 'shorty', password: 'short' })
+
+      expect(res.status).toBe(400)
+      expect(res.body.error).toContain('at least')
+    })
+
+    it('should reject a common password with 400', async () => {
+      const res = await request(app)
+        .post('/api/v1/users/account')
+        .send({ ...newUser, email: 'common@test.com', pseudo: 'commoner', password: 'aaaaaaaaaaaa' })
+
+      expect(res.status).toBe(400)
+      expect(res.body.error).toBe('Password is too common')
+    })
+
+    it('should reject a password containing the pseudo with 400', async () => {
+      const res = await request(app)
+        .post('/api/v1/users/account')
+        .send({ ...newUser, email: 'rider@test.com', pseudo: 'bikerjoe', password: 'mybikerjoe2026' })
+
+      expect(res.status).toBe(400)
+      expect(res.body.error).toBe('Password must not contain your pseudo')
     })
   })
 

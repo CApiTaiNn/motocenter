@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import HeaderInfo from '../../components/global/HeaderInfo.vue'
 import RideBrowseMap from '../../components/ride/RideBrowseMap.vue'
+
+useSeoMeta({
+  title: 'Balades à moto',
+  description: 'Découvrez et partagez des itinéraires de balades à moto.'
+})
 </script>
 <template>
   <div>
