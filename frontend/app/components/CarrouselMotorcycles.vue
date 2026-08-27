@@ -40,7 +40,7 @@ function handleCompareClick(itemId: string, imgUrl: string) {
     arrows
     :items="items"
     :ui="{
-      viewport: 'px-4',
+      viewport: 'px-4 py-4',
       container: 'flex items-stretch h-full',
       item: 'flex-none px-2 sm:px-3 self-stretch',
       prev: 'start-0',

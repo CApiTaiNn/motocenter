@@ -90,7 +90,7 @@ export function passwordStrength(password: string): PasswordStrength {
     'bg-yellow-500',
     'bg-lime-500',
     'bg-green-500'
-  ]
+  ] as const
 
   const make = (score: 0 | 1 | 2 | 3 | 4): PasswordStrength => ({
     score,
