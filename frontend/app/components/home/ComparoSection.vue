@@ -31,7 +31,7 @@ const SPECS = ['horsePower', 'torque', 'price'] as const
         </p>
       </div>
 
-      <UButton size="xl" color="primary" to="/comparo" class="self-start rounded-full" style="color: white">
+      <UButton size="xl" color="primary" to="/comparo" class="self-start rounded-full text-white">
         Lancer une comparaison
       </UButton>
     </div>

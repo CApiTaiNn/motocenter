@@ -154,12 +154,9 @@ onMounted(async () => {
             @click="handleAddLikeOrDislike(true, message._id)"
           >
             <UIcon
-              :name="
-                isSolidThumbUp
-                  ? 'i-heroicons-hand-thumb-up-solid'
-                  : 'i-heroicons-hand-thumb-up'
-              "
+              name="i-lucide-thumbs-up"
               class="size-6"
+              :class="isSolidThumbUp ? 'text-(--ui-primary)' : ''"
             />
             <p>{{ message.like }}</p>
           </div>
@@ -168,12 +165,9 @@ onMounted(async () => {
             @click="handleAddLikeOrDislike(false, message._id)"
           >
             <UIcon
-              :name="
-                isSolidThumbDown
-                  ? 'i-heroicons-hand-thumb-down-solid'
-                  : 'i-heroicons-hand-thumb-down'
-              "
+              name="i-lucide-thumbs-down"
               class="size-6"
+              :class="isSolidThumbDown ? 'text-(--ui-primary)' : ''"
             />
             <p>{{ message.dislike }}</p>
           </div>

@@ -116,7 +116,7 @@ const goToRide = (ride: IRide) =>
         </li>
       </ul>
 
-      <UButton size="xl" color="primary" to="/ride" class="self-start rounded-full" style="color: white">
+      <UButton size="xl" color="primary" to="/ride" class="self-start rounded-full text-white">
         Explorer la carte
       </UButton>
     </div>

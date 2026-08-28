@@ -15,7 +15,7 @@ withDefaults(defineProps<{ reverse?: boolean }>(), { reverse: false })
         </p>
       </div>
 
-      <UButton size="xl" color="primary" to="/forum" class="self-start rounded-full" style="color: white">
+      <UButton size="xl" color="primary" to="/forum" class="self-start rounded-full text-white">
         Rejoindre le forum
       </UButton>
     </div>

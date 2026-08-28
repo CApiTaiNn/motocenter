@@ -122,7 +122,7 @@ onMounted(async () => {
     <section class="relative isolate flex h-screen flex-col items-center justify-center py-0! max-lg:h-[60vh]! max-lg:gap-8!">
       <span class="hero-glow" aria-hidden="true" />
       <h1 class="text-center">
-        Trouver <span style="color: var(--ui-primary)">la moto</span>
+        Trouver <span class="text-(--ui-primary)">la moto</span>
         <br />
         qui vous convient
       </h1>
@@ -131,8 +131,7 @@ onMounted(async () => {
         <UButton
           size="xl"
           color="primary"
-          class="button rounded-full max-lg:px-[30px]! max-lg:py-[10px]! max-lg:text-sm!"
-          style="color: white"
+          class="button rounded-full text-white max-lg:px-[30px]! max-lg:py-[10px]! max-lg:text-sm!"
           to="/comparo"
           >Essayer</UButton
         >
@@ -179,7 +178,7 @@ onMounted(async () => {
     </section>
     <section class="flex flex-col gap-8 lg:min-h-screen lg:justify-center">
       <h2 style="text-align: center">
-        <span style="color: var(--ui-primary)">Motocenter</span>
+        <span class="text-(--ui-primary)">Motocenter</span>
         en quelques chiffres
       </h2>
       <article class="flex flex-col gap-16">

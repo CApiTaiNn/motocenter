@@ -59,8 +59,7 @@ const resend = async () => {
         to="/"
         label="Aller à l'accueil"
         color="primary"
-        class="mx-auto rounded-full font-bold"
-        style="color: white"
+        class="mx-auto rounded-full font-bold text-white"
       />
     </template>
 
@@ -85,8 +84,7 @@ const resend = async () => {
             type="submit"
             label="Renvoyer le lien"
             color="primary"
-            class="w-full justify-center rounded-full font-bold"
-            style="color: white"
+            class="w-full justify-center rounded-full font-bold text-white"
             :loading="isResending"
             :disabled="isResending"
           />

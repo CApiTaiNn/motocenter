@@ -115,8 +115,7 @@ const submit = async () => {
         type="submit"
         label="Réinitialiser"
         color="primary"
-        class="w-full justify-center rounded-full font-bold"
-        style="color: white"
+        class="w-full justify-center rounded-full font-bold text-white"
         :loading="isLoading"
         :disabled="isLoading"
       />

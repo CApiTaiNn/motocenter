@@ -171,12 +171,13 @@ onMounted(async () => {
           />
           <h2 class="flex-1">{{ post?.title }}</h2>
           <UButton
-            :icon="isSolidStar ? 'i-heroicons-star-solid' : 'i-heroicons-star'"
+            icon="i-lucide-star"
             color="neutral"
             variant="ghost"
             size="xl"
             :aria-label="isSolidStar ? 'Retirer des favoris' : 'Ajouter aux favoris'"
-            class="cursor-pointer text-(--ui-primary)"
+            class="cursor-pointer"
+            :class="isSolidStar ? 'text-(--ui-primary)' : 'text-gray-400'"
             @click="handleAddFavorite"
           />
         </div>
