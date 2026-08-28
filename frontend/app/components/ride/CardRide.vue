@@ -6,6 +6,8 @@ import { useAuth } from '~/composables/useAuth'
 import type { IUserPublic } from '~/types/users.js'
 import { useConnexionModal } from '~/composables/useConnexionModal.js'
 
+const toast = useToast()
+
 interface IProps {
   ride: IRide
   // Couleur attribuée par rang de longueur (vert → rouge), fournie par la carte
@@ -132,6 +134,11 @@ const participateGestion = async () => {
     emit('update:participants', res.updatedParticipants)
   } catch (error) {
     console.error('Erreur participation:', error)
+    toast.add({
+      title: 'Erreur',
+      description: "Votre participation n'a pas pu être enregistrée.",
+      color: 'error'
+    })
   }
 }
 
@@ -199,16 +206,13 @@ onMounted(async () => {
         </div>
 
         <UButton
-          :icon="
-            isLikedCurrent
-              ? 'i-heroicons-hand-thumb-up-solid'
-              : 'i-heroicons-hand-thumb-up'
-          "
+          icon="i-lucide-thumbs-up"
           :label="props.ride.like?.toString() || '0'"
           variant="ghost"
           color="neutral"
           size="xs"
-          class="cursor-pointer font-bold text-white! transition-transform hover:bg-white/15 active:scale-120"
+          class="cursor-pointer font-bold transition-transform hover:bg-white/15 active:scale-120"
+          :class="isLikedCurrent ? 'text-(--ui-primary)!' : 'text-white!'"
           @click.stop="likeGestion"
         />
       </header>

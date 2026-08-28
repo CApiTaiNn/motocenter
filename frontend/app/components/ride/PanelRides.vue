@@ -6,6 +6,7 @@ import CardRide from './CardRide.vue'
 interface IProps {
   filteredRides: IRide[]
   colorMap: Record<string, string>
+  loading?: boolean
 }
 
 const props = defineProps<IProps>()
@@ -52,21 +53,39 @@ const selectRide = (rideId: string) => {
         </UBadge>
       </div>
       <div class="flex flex-col gap-6 pb-6">
-        <div
-          v-for="ride in props.filteredRides"
-          :key="ride._id"
-          class="h-auto w-full zoom-[0.8] rounded-xl"
-        >
-          <CardRide
-            :ride="ride"
-            :color="props.colorMap[ride._id]"
-            @select="selectRide"
-            @update:like="(newCount) => (ride.like = newCount)"
-            @update:participants="
-              (newList) => (ride.participating_user = newList)
-            "
+        <template v-if="props.loading">
+          <USkeleton
+            v-for="n in 4"
+            :key="n"
+            class="h-[124px] w-full rounded-xl"
           />
+        </template>
+
+        <div
+          v-else-if="props.filteredRides.length === 0"
+          class="flex flex-col items-center gap-2 py-12 text-center text-(--text-color)/60"
+        >
+          <UIcon name="i-lucide-route-off" class="size-8" aria-hidden="true" />
+          <p class="text-sm">Aucune balade trouvée</p>
         </div>
+
+        <template v-else>
+          <div
+            v-for="ride in props.filteredRides"
+            :key="ride._id"
+            class="h-auto w-full zoom-[0.8] rounded-xl"
+          >
+            <CardRide
+              :ride="ride"
+              :color="props.colorMap[ride._id]"
+              @select="selectRide"
+              @update:like="(newCount) => (ride.like = newCount)"
+              @update:participants="
+                (newList) => (ride.participating_user = newList)
+              "
+            />
+          </div>
+        </template>
       </div>
     </div>
   </div>

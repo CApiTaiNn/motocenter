@@ -167,6 +167,8 @@ const listStartTown = ref<string[]>([]) // Liste de toutes les villes de départ
 const listEndTown = ref<string[]>([]) // Liste de toutes les villes d'arrivée de balades qui existe (des balades en BDD)
 
 // ÉTAT DES BALADES AFFICHÉS
+const isRidesLoading = ref<boolean>(false) // Chargement de la liste des balades
+const toast = useToast()
 const dataRides = ref<IRide[]>([]) // Toutes les balades récupérées depuis le back
 const visibleRides = ref<IRide[]>([]) // Balades dont le point de départ est visible dans la vue courante de la carte
 
@@ -716,6 +718,7 @@ onMounted(async () => {
   // Affichage des balades
   if (props.displayRide) {
     const runtimeConfig = useRuntimeConfig()
+    isRidesLoading.value = true
     try {
       const res = await fetch(
         `${runtimeConfig.public.apiBase}rides?project=all&deep=true`
@@ -740,8 +743,14 @@ onMounted(async () => {
       }
     } catch (e) {
       console.error('Erreur fetch:', e)
+      toast.add({
+        title: 'Erreur',
+        description: "Les balades n'ont pas pu être chargées.",
+        color: 'error'
+      })
     } finally {
       isMapLoading.value = false
+      isRidesLoading.value = false
     }
 
     // Adapte l'épaisseur des tracés au niveau de zoom et met à jour la liste des balades visibles
@@ -857,7 +866,7 @@ watch(
 
 <template>
   <div
-    class="map-container relative! mx-auto mb-6 h-[80dvh] w-full max-w-[1680px] overflow-hidden rounded-xl bg-[#f8f9fa]"
+    class="map-container relative! mx-auto mb-6 h-[80dvh] w-full max-w-[1680px] overflow-hidden rounded-xl bg-gray-50"
     :class="{ 'is-fullscreen': isFullScreen }"
     tabindex="0"
     @keydown.esc="toggleFullScreen"
@@ -1018,6 +1027,7 @@ watch(
       v-if="props.displayRideList"
       :filtered-rides="visibleRides"
       :color-map="rideColorMap"
+      :loading="isRidesLoading"
       @select="focusRide"
     />
   </div>
