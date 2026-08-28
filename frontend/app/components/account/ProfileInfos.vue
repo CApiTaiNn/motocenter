@@ -53,10 +53,22 @@ watch(
 
 <template>
   <UModal v-model:open="isOpen">
-    <template #content>
-      <div class="flex flex-col items-center overflow-y-auto p-12">
+    <template #header>
+      <div class="flex w-full items-center justify-between">
         <h3>Mon Profil</h3>
+        <UButton
+          color="primary"
+          variant="outline"
+          icon="i-lucide-x"
+          class="cursor-pointer rounded-full"
+          aria-label="Fermer"
+          @click="close"
+        />
+      </div>
+    </template>
 
+    <template #body>
+      <div class="flex flex-col items-center">
         <div class="mb-6 flex size-[100px] items-center justify-center overflow-hidden rounded-full bg-(--ui-color-error-50) text-4xl font-bold text-(--ui-color-error-500)">
           <img v-if="state.image" :src="state.image" alt="Avatar" class="size-full object-cover" />
           <span v-else>{{ getInitials }}</span>

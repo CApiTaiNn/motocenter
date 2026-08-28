@@ -1,13 +1,24 @@
 <script setup lang="ts">
 import type { FormError } from '@nuxt/ui'
+import * as v from 'valibot'
 import { ref, reactive, computed } from 'vue'
 import { useCreateAccountModal } from '~/composables/useCreateAccountModal'
 import { useAuth } from '~/composables/useAuth'
 
 const { register } = useAuth()
-const { isOpen } = useCreateAccountModal()
+const { isOpen, openConnexionModal } = useCreateAccountModal()
 const currentStep = ref(1)
 const formErrors = ref<FormError[]>([])
+// Server-side failure shown under the buttons (duplicate email/pseudo, upload
+// error, network). Without this the modal looked frozen on any API rejection.
+const submitError = ref('')
+// When the email is already registered, offer a jump to the login modal.
+const emailAlreadyExists = ref(false)
+
+const clearSubmitError = () => {
+  submitError.value = ''
+  emailAlreadyExists.value = false
+}
 const show = ref(false)
 const isLoading = ref(false)
 const apiBase = useRuntimeConfig().public.apiBase
@@ -28,53 +39,103 @@ const experienceLevels = ['Débutant', 'Confirmé', 'Expert', 'Autre']
 
 const passwordScore = computed(() => passwordStrength(state.password))
 
-// Validation par étape
+// Per-step valibot schemas: the wizard validates one step at a time, so each
+// step owns its own schema rather than one form-wide :schema.
+const step1Schema = v.object({
+  firstname: v.pipe(v.string(), v.minLength(1, 'Le prénom est requis')),
+  lastname: v.pipe(v.string(), v.minLength(1, 'Le nom est requis'))
+})
+
+const step2Schema = v.object({
+  pseudo: v.pipe(v.string(), v.minLength(1, 'Pseudo requis')),
+  yearsExperience: v.pipe(
+    v.string(),
+    v.check((val) => {
+      const n = Number(val)
+      return val.trim() !== '' && Number.isInteger(n) && n >= 0
+    }, 'Veuillez entrer un nombre entier positif')
+  )
+})
+
+const step3Schema = v.pipe(
+  v.object({
+    email: v.pipe(
+      v.string(),
+      v.minLength(1, "L'email est requis"),
+      v.email("L'email n'est pas valide")
+    ),
+    password: v.string(),
+    confirmPassword: v.string()
+  }),
+  v.forward(
+    v.rawCheck(({ dataset, addIssue }) => {
+      if (!dataset.typed) return
+      if (!dataset.value.password) {
+        addIssue({ message: 'Le mot de passe est requis' })
+        return
+      }
+      const message = validatePasswordRules(dataset.value.password, {
+        email: dataset.value.email,
+        pseudo: state.pseudo
+      })
+      if (message) addIssue({ message })
+    }),
+    ['password']
+  ),
+  v.forward(
+    v.check(
+      (input) => input.password === input.confirmPassword,
+      'Les mots de passe ne correspondent pas'
+    ),
+    ['confirmPassword']
+  )
+)
+
+// Validation par étape (valibot). Each step maps its schema issues to the
+// FormError list the fields display via getError().
+const collectIssues = (issues?: v.BaseIssue<unknown>[]): FormError[] =>
+  (issues ?? []).map((issue) => ({
+    name: String(issue.path?.[0]?.key ?? ''),
+    message: issue.message
+  }))
+
 const validateStep = (step: number): FormError[] => {
   const errors: FormError[] = []
 
   if (step === 1 || step === 3) {
-    if (!state.firstname)
-      errors.push({ name: 'firstname', message: 'Le prénom est requis' })
-    if (!state.lastname)
-      errors.push({ name: 'lastname', message: 'Le nom est requis' })
+    errors.push(
+      ...collectIssues(
+        v.safeParse(step1Schema, {
+          firstname: state.firstname,
+          lastname: state.lastname
+        }).issues
+      )
+    )
   }
 
   if (step === 2 || step === 3) {
-    const years = Number(state.yearsExperience)
-    if (isNaN(years) || years < 0 || !Number.isInteger(years)) {
-      errors.push({
-        name: 'yearsExperience',
-        message: 'Veuillez entrer un nombre entier positif'
-      })
-    }
-    if (!state.pseudo) errors.push({ name: 'pseudo', message: 'Pseudo requis' })
+    errors.push(
+      ...collectIssues(
+        v.safeParse(step2Schema, {
+          pseudo: state.pseudo,
+          yearsExperience: state.yearsExperience
+        }).issues
+      )
+    )
   }
 
   if (step === 3) {
-    if (!state.email)
-      errors.push({ name: 'email', message: "L'email est requis" })
-    if (state.email && !isValidEmail(state.email))
-      errors.push({ name: 'email', message: "L'email n'est pas valide" })
-
-    if (!state.password)
-      errors.push({
-        name: 'password',
-        message: 'Le mot de passe est requis'
-      })
-    if (state.password) {
-      const passwordError = validatePasswordRules(state.password, {
-        email: state.email,
-        pseudo: state.pseudo
-      })
-      if (passwordError)
-        errors.push({ name: 'password', message: passwordError })
-    }
-    if (state.password !== state.confirmPassword)
-      errors.push({
-        name: 'confirmPassword',
-        message: 'Les mots de passe ne correspondent pas'
-      })
+    errors.push(
+      ...collectIssues(
+        v.safeParse(step3Schema, {
+          email: state.email,
+          password: state.password,
+          confirmPassword: state.confirmPassword
+        }).issues
+      )
+    )
   }
+
   formErrors.value = errors
   return errors
 }
@@ -96,6 +157,7 @@ const getError = (path: string) => {
 }
 
 const nextStep = async () => {
+  clearSubmitError()
   validateStep(currentStep.value)
 
   if (formErrors.value.length === 0) {
@@ -105,6 +167,7 @@ const nextStep = async () => {
 
 const prevStep = () => {
   formErrors.value = []
+  clearSubmitError()
   currentStep.value--
 }
 
@@ -125,10 +188,42 @@ const resetForm = () => {
 
   // Effacer les erreurs
   formErrors.value = []
+  clearSubmitError()
+}
+
+// Map the API's error code to a French message, and send the user back to the
+// step holding the offending field so they can fix it. Keying on the stable
+// `code` avoids matching on the backend's English message text.
+const applyApiError = (err: any) => {
+  switch (err?.data?.code) {
+    case 'PSEUDO_TAKEN':
+      submitError.value = 'Ce pseudo est déjà utilisé'
+      formErrors.value = [{ name: 'pseudo', message: submitError.value }]
+      currentStep.value = 2
+      break
+    case 'EMAIL_TAKEN':
+      submitError.value = 'Un compte existe déjà avec cet e-mail.'
+      emailAlreadyExists.value = true
+      formErrors.value = [{ name: 'email', message: submitError.value }]
+      break
+    case 'WEAK_PASSWORD':
+      submitError.value =
+        'Le mot de passe ne respecte pas les règles de sécurité'
+      break
+    default:
+      submitError.value = "Une erreur est survenue lors de l'inscription"
+  }
+}
+
+// Close signup and open the login modal.
+const goToLogin = () => {
+  resetForm()
+  openConnexionModal()
 }
 
 const handleSubmit = async () => {
   try {
+    clearSubmitError()
     validateStep(currentStep.value)
     if (formErrors.value.length > 0) return
 
@@ -167,6 +262,7 @@ const handleSubmit = async () => {
     resetForm()
   } catch (err) {
     console.error('Erreur lors de la soumission:', err)
+    applyApiError(err)
   } finally {
     isLoading.value = false
   }
@@ -175,10 +271,22 @@ const handleSubmit = async () => {
 
 <template>
   <UModal v-model:open="isOpen">
-    <template #content>
-      <div class="flex h-[65vh] flex-col overflow-y-auto p-8">
+    <template #header>
+      <div class="flex w-full items-center justify-between">
         <h3>S'inscrire</h3>
+        <UButton
+          color="primary"
+          variant="outline"
+          icon="i-lucide-x"
+          class="cursor-pointer rounded-full"
+          aria-label="Fermer"
+          @click="isOpen = false"
+        />
+      </div>
+    </template>
 
+    <template #body>
+      <div class="flex flex-col">
         <!-- Indicateur de progression -->
         <div class="mb-8 flex justify-center gap-2">
           <div class="progress-dot" :class="{ active: currentStep >= 1 }" />
@@ -328,9 +436,12 @@ const handleSubmit = async () => {
                       variant="link"
                       size="sm"
                       :icon="show ? 'i-lucide-eye-off' : 'i-lucide-eye'"
-                      :aria-label="show ? 'Hide password' : 'Show password'"
+                      :aria-label="
+                        show
+                          ? 'Masquer le mot de passe'
+                          : 'Afficher le mot de passe'
+                      "
                       :aria-pressed="show"
-                      aria-controls="password"
                       @click="show = !show"
                     /> </template
                 ></UInput>
@@ -366,9 +477,12 @@ const handleSubmit = async () => {
                       variant="link"
                       size="sm"
                       :icon="show ? 'i-lucide-eye-off' : 'i-lucide-eye'"
-                      :aria-label="show ? 'Hide password' : 'Show password'"
+                      :aria-label="
+                        show
+                          ? 'Masquer le mot de passe'
+                          : 'Afficher le mot de passe'
+                      "
                       :aria-pressed="show"
-                      aria-controls="password"
                       @click="show = !show"
                     /> </template
                 ></UInput>
@@ -405,6 +519,18 @@ const handleSubmit = async () => {
               :disabled="isLoading"
             />
           </div>
+
+          <p v-if="submitError" class="text-center text-xs text-(--ui-error)">
+            {{ submitError }}
+            <button
+              v-if="emailAlreadyExists"
+              type="button"
+              class="cursor-pointer underline"
+              @click="goToLogin"
+            >
+              Se connecter
+            </button>
+          </p>
         </UForm>
       </div>
     </template>
