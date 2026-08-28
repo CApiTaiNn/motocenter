@@ -13,7 +13,7 @@ import { generateToken } from '../utils/tokens'
 import { type Request, Response, Router } from 'express'
 import type { Types } from 'mongoose'
 
-const { hash } = argon2PasswordHasher
+const { hash, verify } = argon2PasswordHasher
 
 const router = Router()
 
@@ -178,17 +178,24 @@ router.post('/account', makeRateLimiter(20), async (req: Request, res: Response)
 
   const passwordCheck = validatePassword(password, { email, pseudo })
   if (!passwordCheck.valid) {
-    return res.status(400).json({ error: passwordCheck.message })
+    // `code` lets the client react without matching on the English message.
+    return res
+      .status(400)
+      .json({ error: passwordCheck.message, code: 'WEAK_PASSWORD' })
   }
 
   if (await User.findOne({ email })) {
-    return res.status(409).json({ error: 'User already exists' })
+    return res
+      .status(409)
+      .json({ error: 'User already exists', code: 'EMAIL_TAKEN' })
   }
 
   // pseudo is the public display identity; enforce uniqueness at signup
   // (the schema's unique index is the backstop against races).
   if (await User.findOne({ pseudo })) {
-    return res.status(409).json({ error: 'Pseudo already taken' })
+    return res
+      .status(409)
+      .json({ error: 'Pseudo already taken', code: 'PSEUDO_TAKEN' })
   }
 
   // Email-verification token: store the hash, send the raw value in the link.
@@ -317,16 +324,38 @@ router.put(
         _id: { $ne: id }
       })
       if (existingUser) {
-        return res.status(409).json({ error: 'Pseudo already taken' })
+        return res
+          .status(409)
+          .json({ error: 'Pseudo already taken', code: 'PSEUDO_TAKEN' })
       }
     }
 
     if (updateData.password !== undefined) {
+      // Changing the password requires proving the current one, so a hijacked
+      // session or an unattended browser cannot silently take over the account.
+      const { currentPassword } = req.body
+      if (typeof currentPassword !== 'string' || !currentPassword) {
+        return res.status(400).json({
+          error: 'Current password is required',
+          code: 'CURRENT_PASSWORD_REQUIRED'
+        })
+      }
+      const current = await User.findById(id).select('+password')
+      if (!current || !(await verify(currentPassword, current.password))) {
+        return res.status(401).json({
+          error: 'Current password is incorrect',
+          code: 'CURRENT_PASSWORD_INVALID'
+        })
+      }
+
       const passwordCheck = validatePassword(updateData.password, {
-        pseudo: updateData.pseudo
+        email: current.email,
+        pseudo: updateData.pseudo ?? current.pseudo
       })
       if (!passwordCheck.valid) {
-        return res.status(400).json({ error: passwordCheck.message })
+        return res
+          .status(400)
+          .json({ error: passwordCheck.message, code: 'WEAK_PASSWORD' })
       }
       updateData.password = await hash(updateData.password)
     }

@@ -3,6 +3,7 @@ import request from 'supertest'
 import jwt from 'jsonwebtoken'
 import app from '../app'
 import User from '../models/User'
+import { argon2PasswordHasher } from '../utils/hash'
 
 describe('User Routes - /api/v1/users', () => {
   const userData = {
@@ -18,7 +19,12 @@ describe('User Routes - /api/v1/users', () => {
   let authCookie: string
 
   beforeEach(async () => {
-    const user = await User.create(userData)
+    // Store a real argon2 hash so password verification (login, password
+    // change) works against this user.
+    const user = await User.create({
+      ...userData,
+      password: await argon2PasswordHasher.hash(userData.password)
+    })
     userId = user._id.toString()
     const token = jwt.sign(
       { id: userId, email: userData.email },
@@ -381,7 +387,7 @@ describe('User Routes - /api/v1/users', () => {
       const res = await request(app)
         .put('/api/v1/users/account')
         .set('Cookie', authCookie)
-        .send({ password: newPassword })
+        .send({ password: newPassword, currentPassword: userData.password })
 
       expect(res.status).toBe(200)
 
@@ -420,6 +426,76 @@ describe('User Routes - /api/v1/users', () => {
 
       expect(res.status).toBe(401)
       expect(res.body.message).toBe('Non authentifié')
+    })
+  })
+
+  describe('PUT /api/v1/users/account — password change', () => {
+    // A user whose stored password is a real argon2 hash, so verify() works.
+    const currentPassword = 'currentSecret42'
+    const newPassword = 'brandNewSecret42'
+    let pwCookie: string
+
+    beforeEach(async () => {
+      const { hash } = argon2PasswordHasher
+      const u = await User.create({
+        firstname: 'Pass',
+        lastname: 'Word',
+        pseudo: 'passworder',
+        email: 'pw@test.com',
+        password: await hash(currentPassword)
+      })
+      const token = jwt.sign(
+        { id: u._id.toString(), email: u.email },
+        process.env.JWT_SECRET!
+      )
+      pwCookie = `accessToken=${token}`
+    })
+
+    it('rejects a password change without the current password (400)', async () => {
+      const res = await request(app)
+        .put('/api/v1/users/account')
+        .set('Cookie', pwCookie)
+        .send({ password: newPassword })
+
+      expect(res.status).toBe(400)
+      expect(res.body.code).toBe('CURRENT_PASSWORD_REQUIRED')
+    })
+
+    it('rejects a wrong current password (401)', async () => {
+      const res = await request(app)
+        .put('/api/v1/users/account')
+        .set('Cookie', pwCookie)
+        .send({ password: newPassword, currentPassword: 'wrongPassword99' })
+
+      expect(res.status).toBe(401)
+      expect(res.body.code).toBe('CURRENT_PASSWORD_INVALID')
+    })
+
+    it('changes the password with the correct current password (200)', async () => {
+      const res = await request(app)
+        .put('/api/v1/users/account')
+        .set('Cookie', pwCookie)
+        .send({ password: newPassword, currentPassword })
+
+      expect(res.status).toBe(200)
+
+      // The stored hash now verifies against the new password, not the old one.
+      const { verify } = argon2PasswordHasher
+      const stored = await User.findOne({ email: 'pw@test.com' }).select(
+        '+password'
+      )
+      expect(await verify(newPassword, stored!.password)).toBe(true)
+      expect(await verify(currentPassword, stored!.password)).toBe(false)
+    })
+
+    it('still updates non-password fields without a current password', async () => {
+      const res = await request(app)
+        .put('/api/v1/users/account')
+        .set('Cookie', pwCookie)
+        .send({ firstname: 'Renamed' })
+
+      expect(res.status).toBe(200)
+      expect(res.body.users.firstname).toBe('Renamed')
     })
   })
 

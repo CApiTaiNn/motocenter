@@ -70,6 +70,8 @@ export function useAuth() {
     if (formData.has('email')) updateData.email = formData.get('email')
     if (formData.has('image')) updateData.image = formData.get('image')
     if (formData.has('password')) updateData.password = formData.get('password')
+    if (formData.has('currentPassword'))
+      updateData.currentPassword = formData.get('currentPassword')
 
     await $fetch(`${apiBase}users/account`, {
       method: 'PUT',
