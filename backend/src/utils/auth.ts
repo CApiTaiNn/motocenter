@@ -21,7 +21,11 @@ const verifyToken = (token: string): AuthUser | null => {
   if (!process.env.JWT_SECRET) {
     throw new Error('JWT_SECRET is not defined in the environment variables')
   }
-  return toAuthUser(jwt.verify(token, process.env.JWT_SECRET))
+  // Pin the algorithm so a token forged with a different alg (e.g. "none") is
+  // rejected outright.
+  return toAuthUser(
+    jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] })
+  )
 }
 
 // Keys are looked up by the SHA-256 of the presented value, so only the hash

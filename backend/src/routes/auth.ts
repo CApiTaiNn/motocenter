@@ -18,6 +18,12 @@ const VERIFICATION_TOKEN_TTL_MS = 24 * 60 * 60 * 1000
 const GENERIC_EMAIL_MESSAGE =
   'If an account exists for this email, a message has been sent'
 
+// Verified against when the email is unknown, so login timing does not reveal
+// whether an account exists. Computed once, lazily.
+let dummyHash: string | null = null
+const getDummyHash = async (): Promise<string> =>
+  (dummyHash ??= await hash('user-enumeration-timing-guard'))
+
 const router = Router()
 /**
  * @openapi
@@ -80,7 +86,13 @@ router.post('/', async (req: Request, res: Response) => {
 
     const user = await User.findOne({ email }).select('+password')
 
-    if (!user || !(await verify(password, user.password))) {
+    // Always run argon2, even for an unknown email, so a missing account costs
+    // the same time as a wrong password (no user enumeration by timing).
+    const passwordOk = await verify(
+      password,
+      user?.password ?? (await getDummyHash())
+    )
+    if (!user || !passwordOk) {
       return res
         .status(401)
         .json({ message: 'Email ou mot de passe incorrect' })
@@ -89,7 +101,7 @@ router.post('/', async (req: Request, res: Response) => {
     const token = jwt.sign(
       { id: user._id, email: user.email },
       process.env.JWT_SECRET!,
-      { expiresIn: '24h' }
+      { expiresIn: '24h', algorithm: 'HS256' }
     )
 
     const isProd = process.env.NODE_ENV === 'production'

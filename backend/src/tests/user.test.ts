@@ -52,6 +52,17 @@ describe('User Routes - /api/v1/users', () => {
       expect(res.body.message).toBe('Non authentifié')
     })
 
+    it('should reject a token forged with the "none" algorithm', async () => {
+      const forged = jwt.sign({ id: userId, email: userData.email }, '', {
+        algorithm: 'none'
+      })
+      const res = await request(app)
+        .get('/api/v1/users/account')
+        .set('Cookie', `accessToken=${forged}`)
+
+      expect(res.status).toBe(401)
+    })
+
     it('should return 401 with invalid token', async () => {
       const res = await request(app)
         .get('/api/v1/users/account')

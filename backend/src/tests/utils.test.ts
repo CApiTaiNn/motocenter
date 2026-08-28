@@ -410,10 +410,10 @@ describe('config/env validateEnv', () => {
     vi.restoreAllMocks()
   })
 
-  it('does not exit when all required vars are present', () => {
+  it('does not exit when all required vars are present and strong', () => {
     process.env.MONGO_URI = 'mongodb://localhost/x'
-    process.env.JWT_SECRET = 'secret'
-    process.env.PASSWORD_PEPPER = 'pepper'
+    process.env.JWT_SECRET = 'a'.repeat(32)
+    process.env.PASSWORD_PEPPER = 'b'.repeat(32)
 
     const exitSpy = vi
       .spyOn(process, 'exit')
@@ -424,6 +424,22 @@ describe('config/env validateEnv', () => {
 
     expect(exitSpy).not.toHaveBeenCalled()
     expect(errorSpy).not.toHaveBeenCalled()
+  })
+
+  it('warns but does not exit when a secret is too short', () => {
+    process.env.MONGO_URI = 'mongodb://localhost/x'
+    process.env.JWT_SECRET = 'short'
+    process.env.PASSWORD_PEPPER = 'b'.repeat(32)
+
+    const exitSpy = vi
+      .spyOn(process, 'exit')
+      .mockImplementation((() => undefined) as never)
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+    validateEnv()
+
+    expect(warnSpy).toHaveBeenCalled()
+    expect(exitSpy).not.toHaveBeenCalled()
   })
 
   it('exits with code 1 when a required var is missing', () => {
