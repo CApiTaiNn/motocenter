@@ -2,6 +2,8 @@
 import type { IUser } from '~/types/users'
 import StatsAnalytics from '~/components/admin/StatsAnalytics.vue'
 
+const toast = useToast()
+
 interface Stat {
   title: string
   value: number
@@ -67,6 +69,11 @@ async function fetchStats() {
     ]
   } catch (error) {
     console.error('Erreur lors de la récupération des statistiques :', error)
+    toast.add({
+      title: 'Erreur',
+      description: 'Les statistiques n’ont pas pu être chargées.',
+      color: 'error'
+    })
   }
 }
 

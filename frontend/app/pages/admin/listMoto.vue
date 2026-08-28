@@ -6,6 +6,8 @@ import { getPaginationRowModel } from '@tanstack/vue-table'
 import type { ColumnDef } from '@tanstack/vue-table'
 import type { TableRow } from '@nuxt/ui'
 
+const toast = useToast()
+
 // The table only displays a flattened subset of a motorcycle; CardMoto
 // refetches the full record by _id when editing.
 interface MotoRow {
@@ -165,6 +167,11 @@ async function fetchData() {
     }
   } catch (err) {
     console.error('Erreur fetch motos:', err)
+    toast.add({
+      title: 'Erreur',
+      description: 'La liste des motos n’a pas pu être chargée.',
+      color: 'error'
+    })
   }
 }
 

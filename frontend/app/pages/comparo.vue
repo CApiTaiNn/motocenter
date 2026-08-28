@@ -49,6 +49,17 @@ const resultatTemplate = useTemplateRef('resultat')
 const carousselBeginnerBikes = ref<IMotorcycle[]>([])
 const carousselSportBikes = ref<IMotorcycle[]>([])
 const carousselAdventureBikes = ref<IMotorcycle[]>([])
+const loadingCarousels = ref(true)
+const loadingResultat = ref(false)
+const carouselError = ref(false)
+const noCarouselData = computed(
+  () =>
+    !loadingCarousels.value &&
+    !carouselError.value &&
+    carousselSportBikes.value.length === 0 &&
+    carousselBeginnerBikes.value.length === 0 &&
+    carousselAdventureBikes.value.length === 0
+)
 const { isAuthenticated } = useAuth()
 const messagePosted = ref<boolean>(false)
 const optionMotorcycles = computed(() => {
@@ -125,42 +136,58 @@ function createResultat() {
 }
 
 async function fetchMotocycles() {
-  const data = await $fetch<{ motorcycles: IMotorcycle[] }>(
-    `${apiBase}motorcycles`,
-    {
-      params: {
-        filter: JSON.stringify({
-          _id: { $in: [motorcycle1Id.value, motorcycle2Id.value] }
-        }),
-        project: 'all'
+  loadingResultat.value = true
+  showResultat.value = false
+  try {
+    const data = await $fetch<{ motorcycles: IMotorcycle[] }>(
+      `${apiBase}motorcycles`,
+      {
+        params: {
+          filter: JSON.stringify({
+            _id: { $in: [motorcycle1Id.value, motorcycle2Id.value] }
+          }),
+          project: 'all'
+        }
       }
+    )
+    motorcycle1.value = data.motorcycles.find(
+      (m) => m._id === motorcycle1Id.value
+    )
+    motorcycle2.value = data.motorcycles.find(
+      (m) => m._id === motorcycle2Id.value
+    )
+
+    // If either id didn't resolve (e.g. an unavailable/private bike), don't show
+    // a half-empty comparison.
+    if (!motorcycle1.value || !motorcycle2.value) {
+      showResultat.value = false
+      return
     }
-  )
-  motorcycle1.value = data.motorcycles.find(
-    (m) => m._id === motorcycle1Id.value
-  )
-  motorcycle2.value = data.motorcycles.find(
-    (m) => m._id === motorcycle2Id.value
-  )
 
-  // If either id didn't resolve (e.g. an unavailable/private bike), don't show
-  // a half-empty comparison.
-  if (!motorcycle1.value || !motorcycle2.value) {
-    showResultat.value = false
-    return
+    // Single source of truth for the DualMotorcycle preview: derive it from the
+    // resolved bikes so it stays correct whichever input path was used (carousel
+    // or the form). The form never set these previews, which left stale/blank
+    // images in the dock.
+    motorcycle1PreviewUrl.value = motorcycle1.value.imageUrl ?? ''
+    motorcycle2PreviewUrl.value = motorcycle2.value.imageUrl ?? ''
+
+    createResultat()
+    showResultat.value = true
+    await nextTick()
+    resultatTemplate.value?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    })
+  } catch (error) {
+    console.error('Erreur comparaison:', error)
+    toast.add({
+      title: 'Erreur',
+      description: "La comparaison n'a pas pu être chargée.",
+      color: 'error'
+    })
+  } finally {
+    loadingResultat.value = false
   }
-
-  // Single source of truth for the DualMotorcycle preview: derive it from the
-  // resolved bikes so it stays correct whichever input path was used (carousel
-  // or the form). The form never set these previews, which left stale/blank
-  // images in the dock.
-  motorcycle1PreviewUrl.value = motorcycle1.value.imageUrl ?? ''
-  motorcycle2PreviewUrl.value = motorcycle2.value.imageUrl ?? ''
-
-  createResultat()
-  showResultat.value = true
-  await nextTick()
-  resultatTemplate.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
 
 async function fetchCarrouselMotorcycles() {
@@ -171,15 +198,26 @@ async function fetchCarrouselMotorcycles() {
     { target: carousselBeginnerBikes, filter: { isAvailableA2: true } },
     { target: carousselAdventureBikes, filter: { category: 'adventure' } }
   ]
-  await Promise.all(
-    groups.map(async ({ target, filter }) => {
-      const data = await $fetch<{ motorcycles: IMotorcycle[] }>(
-        `${apiBase}motorcycles`,
-        { params: { filter: JSON.stringify(filter), project, limit } }
-      )
-      target.value = data.motorcycles
-    })
-  )
+  loadingCarousels.value = true
+  carouselError.value = false
+  try {
+    await Promise.all(
+      groups.map(async ({ target, filter }) => {
+        const data = await $fetch<{ motorcycles: IMotorcycle[] }>(
+          `${apiBase}motorcycles`,
+          { params: { filter: JSON.stringify(filter), project, limit } }
+        )
+        target.value = data.motorcycles
+      })
+    )
+  } catch (error) {
+    // Without this the empty-state would reassure ("catalogue se remplit") on a
+    // real load failure.
+    console.error('Erreur chargement carrousels:', error)
+    carouselError.value = true
+  } finally {
+    loadingCarousels.value = false
+  }
 }
 
 async function fetchMessages() {
@@ -233,6 +271,11 @@ async function postComment() {
       selectedMotorcycle.post = postId
     } catch (error) {
       console.error('Error creating post:', error)
+      toast.add({
+        title: 'Erreur',
+        description: "La discussion n'a pas pu être créée.",
+        color: 'error'
+      })
       return
     }
   }
@@ -359,6 +402,17 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
           Choisissez deux motos différentes pour les comparer.
         </p>
       </div>
+      <div
+        v-if="loadingResultat"
+        class="mx-auto flex w-full max-w-3xl flex-col gap-4 px-4"
+      >
+        <USkeleton class="mx-auto h-10 w-80 rounded-full" />
+        <USkeleton
+          v-for="n in 4"
+          :key="n"
+          class="h-16 w-full rounded-xl"
+        />
+      </div>
       <Transition>
         <div v-if="showResultat" ref="resultat" class="scroll-mt-24">
           <nav class="mx-auto mb-12 flex w-fit max-w-full flex-wrap justify-center gap-1 rounded-full border border-(--border-gray) bg-(--background) p-1" role="tablist">
@@ -463,7 +517,7 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
             >
               <h4 class="text-center">
                 Déjà roulé une de ces motos ?<br />
-                Faite le savoir à la communauté !
+                Faites le savoir à la communauté !
               </h4>
               <div class="flex flex-col gap-4">
                 <USelect
@@ -476,7 +530,7 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
                 <UTextarea
                   v-model="comment.content"
                   size="xl"
-                  placeholder="Un retour d'expérience, un conseil d'entretient ou encore une question"
+                  placeholder="Un retour d'expérience, un conseil d'entretien ou encore une question"
                 />
               </div>
               <UButton
@@ -501,27 +555,66 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
         </div>
       </Transition>
       <div class="mx-[10%] flex flex-col gap-20 max-lg:mx-[6%]! max-md:mx-4!">
-        <div>
-          <h3 class="m-6 text-left">Pour la performance</h3>
-          <CarrouselMotorcycles
-            :items="carousselSportBikes"
-            @selected="handleCaroussel"
-          />
-        </div>
-        <div>
-          <h3 class="m-6 text-left">Pour le A2</h3>
-          <CarrouselMotorcycles
-            :items="carousselBeginnerBikes"
-            @selected="handleCaroussel"
-          />
-        </div>
-        <div>
-          <h3 class="m-6 text-left">Pour l'aventure</h3>
-          <CarrouselMotorcycles
-            :items="carousselAdventureBikes"
-            @selected="handleCaroussel"
-          />
-        </div>
+        <template v-if="loadingCarousels">
+          <div v-for="n in 3" :key="n">
+            <USkeleton class="m-6 h-8 w-48 rounded-sm" />
+            <div class="flex gap-4 overflow-hidden">
+              <USkeleton
+                v-for="i in 4"
+                :key="i"
+                class="h-40 w-64 shrink-0 rounded-xl"
+              />
+            </div>
+          </div>
+        </template>
+        <UCard v-else-if="carouselError">
+          <div class="flex flex-col items-center gap-4 py-8 text-center">
+            <UIcon
+              name="i-lucide-triangle-alert"
+              class="size-16 text-(--ui-error)"
+            />
+            <div class="flex flex-col gap-1">
+              <h4>Chargement impossible</h4>
+              <p class="text-sm text-gray-400">
+                Les motos n’ont pas pu être chargées. Réessayez plus tard.
+              </p>
+            </div>
+          </div>
+        </UCard>
+        <UCard v-else-if="noCarouselData">
+          <div class="flex flex-col items-center gap-4 py-8 text-center">
+            <UIcon name="i-lucide-bike" class="size-16 text-gray-400" />
+            <div class="flex flex-col gap-1">
+              <h4>Aucune moto à comparer pour le moment</h4>
+              <p class="text-sm text-gray-400">
+                Revenez bientôt, le catalogue se remplit.
+              </p>
+            </div>
+          </div>
+        </UCard>
+        <template v-else>
+          <div>
+            <h3 class="m-6 text-left">Pour la performance</h3>
+            <CarrouselMotorcycles
+              :items="carousselSportBikes"
+              @selected="handleCaroussel"
+            />
+          </div>
+          <div>
+            <h3 class="m-6 text-left">Pour le A2</h3>
+            <CarrouselMotorcycles
+              :items="carousselBeginnerBikes"
+              @selected="handleCaroussel"
+            />
+          </div>
+          <div>
+            <h3 class="m-6 text-left">Pour l'aventure</h3>
+            <CarrouselMotorcycles
+              :items="carousselAdventureBikes"
+              @selected="handleCaroussel"
+            />
+          </div>
+        </template>
         <div class="pointer-events-none sticky bottom-0 flex justify-center">
           <DualMotorcycle
             class="pointer-events-auto"

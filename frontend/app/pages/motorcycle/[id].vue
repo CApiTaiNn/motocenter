@@ -40,6 +40,15 @@ const { data: m } = await useAsyncData(`motorcycle-${id}`, async () => {
   return data.motorcycles?.[0] ?? null
 })
 
+// A deleted or unknown id would otherwise render a blank page.
+if (!m.value) {
+  throw createError({
+    statusCode: 404,
+    statusMessage: 'Moto introuvable',
+    fatal: true
+  })
+}
+
 useSeoMeta({
   title: () => m.value?.name ?? 'Moto',
   description: () =>
@@ -58,6 +67,7 @@ const comment = ref<ICommentInput>({
 const messagePosted = ref<boolean>(false)
 const { isAuthenticated, user } = useAuth()
 const { open } = useConnexionModal()
+const toast = useToast()
 
 const statsRef = ref<HTMLElement | null>(null)
 const countStarted = ref(false)
@@ -197,6 +207,11 @@ async function postComment() {
       }
     } catch (error) {
       console.error('Error creating post:', error)
+      toast.add({
+        title: 'Erreur',
+        description: "La discussion n'a pas pu être créée.",
+        color: 'error'
+      })
       return
     }
   }
@@ -214,6 +229,11 @@ async function postComment() {
     messagePosted.value = true
   } catch (error) {
     console.error('Error posting comment:', error)
+    toast.add({
+      title: 'Erreur',
+      description: "Votre commentaire n'a pas pu être ajouté.",
+      color: 'error'
+    })
   }
   await fetchMessages()
 }
@@ -249,7 +269,7 @@ onMounted(async () => {
       <p><span class="font-bold">Marque:</span> {{ m.brand.name }}</p>
       <p><span class="font-bold">Modèle:</span> {{ m.name }}</p>
       <p><span class="font-bold">Année:</span> {{ m.year }}</p>
-      <p><span class="font-bold">Moteur:</span> {{ m.engine_size }} m3</p>
+      <p><span class="font-bold">Moteur:</span> {{ m.engine_size }} cm³</p>
     </div>
 
     <div ref="statsRef" class="w-3/5 max-lg:w-[75%]! max-md:w-[90%]!">
@@ -308,7 +328,7 @@ onMounted(async () => {
       <div v-if="!messagePosted" class="flex h-full min-h-100 flex-col justify-between p-8 max-lg:min-h-auto max-lg:p-4">
         <h4 class="text-center">
           Déjà roulé sur cette moto ?<br />
-          Faite le savoir à la communauté !
+          Faites le savoir à la communauté !
         </h4>
         <div class="flex flex-col gap-4">
           <UTextarea
