@@ -99,7 +99,12 @@ function sanitizeFilter(
         }
         // Literal, case-insensitive substring match: escaping the source and
         // dictating the options removes both ReDoS and regex injection.
-        ;(node as Record<string, unknown>)[key] = escapeRegex(value)
+        // Runs of spaces or hyphens are treated as interchangeable, so
+        // "mt 07" also finds "MT-07" and "MT07".
+        ;(node as Record<string, unknown>)[key] = escapeRegex(value).replace(
+          /[-\s]+/g,
+          '[-\\s]*'
+        )
         ;(node as Record<string, unknown>).$options = 'i'
       } else if (key === '$options') {
         // Options are dictated by us, never trusted from the client.

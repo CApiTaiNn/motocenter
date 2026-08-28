@@ -152,6 +152,16 @@ describe('utils/find prepareQuery', () => {
     })
   })
 
+  it('treats runs of spaces and hyphens as interchangeable', () => {
+    const { filter } = prepareQuery(
+      { filter: '{"title":{"$regex":"mt 07"}}' },
+      { regexFields: ['title'] }
+    )
+    expect(filter).toEqual({
+      title: { $regex: 'mt[-\\s]*07', $options: 'i' }
+    })
+  })
+
   it('rejects a regex source longer than the cap (400)', () => {
     const long = 'a'.repeat(65)
     try {
