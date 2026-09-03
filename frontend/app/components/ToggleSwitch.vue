@@ -1,5 +1,8 @@
-<script setup lang="ts">
-const mode = defineModel<boolean>()
+<script setup>
+const mode = defineModel({ type: Boolean })
+defineProps({
+  isPc: Boolean
+})
 </script>
 
 <template>

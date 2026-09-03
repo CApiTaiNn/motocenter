@@ -49,6 +49,7 @@ async function fetchMotoDetails(_id: string) {
   const data = await $fetch<{ motorcycles: IMotorcycle[] }>(
     `${apiBase}motorcycles`,
     {
+      credentials: 'include',
       params: {
         filter: JSON.stringify({ _id: _id }),
         project: 'all'
@@ -267,11 +268,11 @@ async function removeMotorcycle() {
 </script>
 
 <template>
-  <div class="flex justify-between items-center">
+  <div class="flex items-center justify-between">
     <h3>{{ mode === 'edit' ? 'Modifier la moto' : "Ajout d'une moto" }}</h3>
     <UIcon
       name="i-lucide-x"
-      class="cursor-pointer size-6"
+      class="size-6 cursor-pointer"
       @click="props.onClosePanel"
     />
   </div>
@@ -328,7 +329,7 @@ async function removeMotorcycle() {
         accept="audio/mpeg,audio/wav,audio/ogg"
         @update:model-value="onSoundChange"
       />
-      <p v-if="state.soundLink" class="text-sm text-gray-500 mt-1">
+      <p v-if="state.soundLink" class="mt-1 text-sm text-gray-500">
         ✓ {{ state.soundLink }}
       </p>
     </UFormField>
@@ -343,7 +344,8 @@ async function removeMotorcycle() {
       <img
         v-if="state.imageUrl"
         :src="state.imageUrl"
-        class="mt-2 h-24 rounded object-cover"
+        alt="Aperçu de l'image de la moto"
+        class="mt-2 h-24 rounded-sm object-cover"
       />
     </UFormField>
 
@@ -369,12 +371,12 @@ async function removeMotorcycle() {
       <USwitch v-model="state.is_public" label="Public" />
     </UFormField>
 
-    <div class="flex justify-between items-center">
+    <div class="flex items-center justify-between">
       <UButton type="submit" color="primary"> Enregistrer </UButton>
       <UIcon
         v-if="mode === 'edit'"
         name="i-lucide-trash-2"
-        class="cursor-pointer size-6"
+        class="size-6 cursor-pointer"
         @click="removeMotorcycle()"
       />
     </div>

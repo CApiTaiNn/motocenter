@@ -39,7 +39,7 @@ const value = computed({
           variant="link"
           size="sm"
           icon="i-lucide-calendar"
-          class="px-0 cursor-pointer"
+          class="cursor-pointer px-0"
         />
         <template #content>
           <UCalendar

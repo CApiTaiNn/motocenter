@@ -1,4 +1,5 @@
 import swaggerJsdoc from 'swagger-jsdoc'
+import { MotorcycleCategory } from './constants/MotorcycleCategory'
 
 const options: swaggerJsdoc.Options = {
   definition: {
@@ -63,12 +64,12 @@ const options: swaggerJsdoc.Options = {
             createdAt: { type: 'string', format: 'date-time' },
           },
         },
-        // --- MODÈLE CATEGORY ---
-        Category: {
+        // --- SNAPSHOT BRAND (embarqué sur Post/Motorcycle) ---
+        BrandSnapshot: {
           type: 'object',
-          required: ['name', 'icon'],
+          required: ['_id', 'name', 'icon'],
           properties: {
-            _id: { type: 'string' },
+            _id: { type: 'string', description: 'ID de la marque source' },
             name: { type: 'string' },
             icon: { type: 'string' },
           },
@@ -79,20 +80,12 @@ const options: swaggerJsdoc.Options = {
           required: ['brand', 'name', 'year', 'category', 'price'],
           properties: {
             _id: { type: 'string' },
-            brand: { type: 'string', description: 'ID de la marque' },
+            brand: { $ref: '#/components/schemas/BrandSnapshot' },
             name: { type: 'string' },
             year: { type: 'integer' },
             category: {
               type: 'string',
-              enum: [
-                'sportsbike',
-                'roadster',
-                'adventure',
-                'custom',
-                'touring',
-                'sport-touring',
-                'supermotard',
-              ],
+              enum: Object.values(MotorcycleCategory),
             },
             engine_size: { type: 'number' },
             horsePower: { type: 'number' },
@@ -127,7 +120,7 @@ const options: swaggerJsdoc.Options = {
             content: { type: 'string' },
             category: { type: 'string', description: 'ID de la catégorie' },
             user: { type: 'string', description: 'ID de l’utilisateur' },
-            brand: { type: 'string', description: 'ID de la marque' },
+            brand: { $ref: '#/components/schemas/BrandSnapshot' },
             views: { type: 'integer' },
             image: { type: 'string' },
             isNewMotoComment: { type: 'boolean' },

@@ -39,10 +39,10 @@ const selectTime = (h: number) => {
           variant="link"
           size="sm"
           icon="i-lucide-clock"
-          class="px-0 cursor-pointer"
+          class="cursor-pointer px-0"
         />
         <template #content>
-          <div class="flex flex-col gap-1 p-2 h-48 overflow-y-auto">
+          <div class="flex h-48 flex-col gap-1 overflow-y-auto p-2">
             <UButton
               v-for="h in 24"
               :key="h"

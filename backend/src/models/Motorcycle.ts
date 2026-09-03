@@ -1,15 +1,18 @@
 import type { IMotorcycle } from '../types/motorcycle'
 import { Schema, Types, model } from 'mongoose'
 import { MotorcycleCategory } from '../constants/MotorcycleCategory'
+import { brandSnapshotSchema } from './Brand'
+import { stripInternalFields } from '../utils/serialize'
 
 // Re-exported for back-compat: existing imports of MotorcycleCategory from
 // this model keep working. The enum now lives in constants/MotorcycleCategory.ts.
 export { MotorcycleCategory }
 
 const motorcycleSchema = new Schema({
+  // Embedded snapshot (not a ref): brand display data is stable, so it's
+  // denormalized for read speed. Resolved server-side on write.
   brand: {
-    type: Types.ObjectId,
-    ref: 'Brand',
+    type: brandSnapshotSchema,
     required: true
   },
   name: {
@@ -41,9 +44,10 @@ const motorcycleSchema = new Schema({
     type: Number,
     required: true
   },
+  // Optional: standardized fuel-consumption (WLTP) figures often weren't
+  // published for older/performance models, so this can be genuinely unknown.
   consumption: {
-    type: Number,
-    required: true
+    type: Number
   },
   soundLink: {
     type: String
@@ -55,7 +59,8 @@ const motorcycleSchema = new Schema({
     type: Boolean
   },
   is_public: {
-    type: Boolean
+    type: Boolean,
+    default: false
   },
   acceleration: {
     time_0_100: { type: Number },
@@ -85,6 +90,9 @@ const motorcycleSchema = new Schema({
     type: Types.ObjectId,
     ref: 'Post'
   }
-})
+}, { toJSON: stripInternalFields })
+
+// brand._id: the "motorcycles of this brand" lookup in the admin form.
+motorcycleSchema.index({ 'brand._id': 1 })
 
 export default model<IMotorcycle>('Motorcycle', motorcycleSchema)

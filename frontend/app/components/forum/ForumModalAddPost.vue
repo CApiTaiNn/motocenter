@@ -17,6 +17,7 @@ const toast = useToast()
 const emit = defineEmits(['added-post'])
 const displayModal = defineModel<boolean>('open', { default: false })
 const isHover = ref(false)
+const isLoading = ref(false)
 const initialState = ref({
   title: '',
   category: '',
@@ -77,6 +78,7 @@ const uploadImage = async (file: File, name: string): Promise<string> => {
 }
 
 const onSubmit = async () => {
+  isLoading.value = true
   const payload = {
     brand: state.brand,
     title: state.title,
@@ -131,6 +133,8 @@ const onSubmit = async () => {
       description: `Votre post n'a pas pu être ${props.isNewPost ? 'ajouté' : 'modifié'}`,
       color: 'error'
     })
+  } finally {
+    isLoading.value = false
   }
 }
 
@@ -192,21 +196,24 @@ onMounted(async () => {
 <template>
   <div>
     <UModal v-model:open="displayModal" :close="true">
-      <UIcon v-if="isSameUser && isNewPost === false" class="size-6" name="i-lucide-square-pen" @click.stop />
-      <UButton
+      <!-- Default trigger; override with the #trigger slot for a custom button. -->
+      <slot name="trigger">
+        <UIcon v-if="isSameUser && isNewPost === false" class="size-6" name="i-lucide-square-pen" @click.stop />
+        <UButton
 v-if="isNewPost === true" icon="i-lucide-plus" size="sm" color="primary" variant="solid"
-        class="cursor-pointer" />
+          class="cursor-pointer" />
+      </slot>
       <template #header>
-        <div class="w-full flex justify-between items-center">
+        <div class="flex w-full items-center justify-between">
           <h3>{{ modalTitle() }}</h3>
           <UButton
-color="primary" variant="outline" icon="i-lucide-x" class="rounded-full cursor-pointer"
+color="primary" variant="outline" icon="i-lucide-x" class="cursor-pointer rounded-full"
             @click="handleCloseModal" />
         </div>
       </template>
       <template #body>
         <div>
-          <UForm :schema :state="state" class="w-full flex flex-col gap-2" @submit="onSubmit">
+          <UForm :schema :state="state" class="flex w-full flex-col gap-2" @submit="onSubmit">
             <UFormField label="Titre du post" required name="title">
               <UInput v-model="state.title" placeholder="Titre du post" size="md" class="w-full" />
             </UFormField>
@@ -218,7 +225,7 @@ v-model="state.category" placeholder="Sélectionnez la catégorie du post" :item
                   icon: 'i-lucide-search'
                 }" size="md" class="w-full">
                 <template #empty>
-                  <span class="text-gray-500 text-sm p-2">
+                  <span class="p-2 text-sm text-gray-500">
                     Aucune catégorie trouvée
                   </span>
                 </template>
@@ -232,7 +239,7 @@ v-model="state.brand" placeholder="Sélectionnez la marque du post" :items="bran
                   icon: 'i-lucide-search'
                 }" size="md" class="w-full">
                 <template #empty>
-                  <span class="text-gray-500 text-sm p-2">
+                  <span class="p-2 text-sm text-gray-500">
                     Aucune marque trouvée
                   </span>
                 </template>
@@ -246,31 +253,47 @@ v-model="state.brand" placeholder="Sélectionnez la marque du post" :items="bran
                 <template #default="{ open }">
                   <div @click="() => open()" @mouseover="isHover = true" @mouseleave="isHover = false">
                     <div class="cursor-pointer" :class="isHover ? 'blur-[2px]' : ''">
-                      <img :src="getPreviewUrl()" class="max-w-[80%]" />
+                      <img
+                        :src="getPreviewUrl()"
+                        alt="Aperçu de l'image du post"
+                        class="max-w-[80%]"
+                      />
                     </div>
                     <div
 v-if="props.isNewPost && getPreviewUrl() === ''"
-                      class="cursor-pointer text-center min-h-25 max-h-25 border-2 border-dashed border-(--border-gray) rounded-xl">
-                      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
+                      class="max-h-[100px] min-h-[100px] cursor-pointer rounded-xl border-2 border-dashed border-(--border-gray) text-center">
+                      <div class="absolute top-1/2 left-1/2 -translate-1/2 text-center">
                         <UIcon name="i-lucide-cloud-upload" class="size-10" />
                         <p class="text-base">Sélectionner votre fichier</p>
                       </div>
                     </div>
                     <div
 v-if="isHover && getPreviewUrl() !== ''"
-                      class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center cursor-pointer"
+                      class="absolute top-1/2 left-1/2 -translate-1/2 cursor-pointer text-center"
                       @click="() => open()">
-                      <h4 class="text-sm p-2 text-(--background) bg-[rgba(128,128,128,0.865)]">Cliquer pour modifier la photo</h4>
+                      <h4 class="bg-[rgba(128,128,128,0.865)] p-2 text-sm text-(--background)">Cliquer pour modifier la photo</h4>
                     </div>
                   </div>
                 </template>
               </UFileUpload>
             </UFormField>
-            <div class="flex gap-2 mt-8">
-              <UButton v-if="isNewPost" class="cursor-pointer" type="submit">
+            <div class="mt-8 flex gap-2">
+              <UButton
+                v-if="isNewPost"
+                class="cursor-pointer"
+                type="submit"
+                :loading="isLoading"
+                :disabled="isLoading"
+              >
                 Ajouter
               </UButton>
-              <UButton v-else class="cursor-pointer" type="submit" :disabled="!isSameValues">
+              <UButton
+                v-else
+                class="cursor-pointer"
+                type="submit"
+                :loading="isLoading"
+                :disabled="!isSameValues || isLoading"
+              >
                 Modifier
               </UButton>
               <UButton class="cursor-pointer" variant="outline" @click="resetForm">

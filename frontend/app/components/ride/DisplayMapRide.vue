@@ -9,12 +9,20 @@ import type {
 } from '~/types/ride'
 import PanelRides from './PanelRides.vue'
 import FormFilters from './FormFilters.vue'
-import { getWeightByZoom, getMapPinSvg } from '~/utils/ride'
+import {
+  getWeightByZoom,
+  getMapPinSvg,
+  buildRideColorMap,
+  RIDE_FALLBACK_COLOR
+} from '~/utils/ride'
 import { CalendarDate, Time } from '@internationalized/date'
+import { useAuth } from '~/composables/useAuth.js'
+import { useConnexionModal } from '~/composables/useConnexionModal.js'
 
 interface IProps {
   displayFilters?: boolean
   displayEnlargeButton?: boolean
+  displayAddRideButton?: boolean
   displayRideList?: boolean
   displayMapLoader?: boolean
   displayRide?: boolean
@@ -27,6 +35,7 @@ interface IProps {
 const props = withDefaults(defineProps<IProps>(), {
   displayFilters: false,
   displayEnlargeButton: false,
+  displayAddRideButton: false,
   displayRideList: false,
   displayMapLoader: true,
   displayRide: false,
@@ -48,6 +57,22 @@ let drawControl: any = null // Contrôle Leaflet-Draw gérant les boutons de cr�
 const route = useRoute() // Récupérer les paramètres get passé (notamment pour le scroll automatique)
 const router = useRouter() // Changer l'URL pour enlever le paramètre GET quand le scroll est fini
 
+const { user } = useAuth()
+const { open: openConnexionModal } = useConnexionModal()
+
+// Redirige vers le formulaire d'ajout de balade (ouvre la connexion si non connecté)
+const goToAddRide = async () => {
+  if (!user.value?._id) {
+    openConnexionModal()
+    return
+  }
+
+  await navigateTo({
+    path: '/ride/addRide',
+    query: { scroll: 'true' }
+  })
+}
+
 // GeoJSON du tracé dessiné, partagé avec le composant parent
 const geom = defineModel('geom', {
   type: Object as () => IGeoJSON | null,
@@ -66,6 +91,11 @@ const drawInstruction = ref<string | null>(null) // Message affiché en bas de l
 const selectedId = ref<string>('default') // Identifiant du fond de plan sélectionné
 
 let activeTraceLayer: any = null
+
+// Marker + cluster refs kept so an external caller (e.g. the homepage teaser
+// linking to /ride?ride=<id>) can focus a specific ride after load.
+let markersById: Record<string, any> = {}
+let markersClusterRef: any = null
 
 // Liste des fonds de carte disponibles avec leur URL
 const mapItems = ref<MapItem[]>([
@@ -137,6 +167,8 @@ const listStartTown = ref<string[]>([]) // Liste de toutes les villes de départ
 const listEndTown = ref<string[]>([]) // Liste de toutes les villes d'arrivée de balades qui existe (des balades en BDD)
 
 // ÉTAT DES BALADES AFFICHÉS
+const isRidesLoading = ref<boolean>(false) // Chargement de la liste des balades
+const toast = useToast()
 const dataRides = ref<IRide[]>([]) // Toutes les balades récupérées depuis le back
 const visibleRides = ref<IRide[]>([]) // Balades dont le point de départ est visible dans la vue courante de la carte
 
@@ -242,6 +274,13 @@ const filteredRides = computed<IRide[]>(() => {
   return rides
 })
 
+// Couleur de chaque balade affichée, attribuée par rang de longueur sur
+// l'ensemble filtré (vert → rouge). Recalculée quand les balades affichées
+// changent ; partagée par les pins, les tracés et la liste.
+const rideColorMap = computed<Record<string, string>>(() =>
+  buildRideColorMap(filteredRides.value)
+)
+
 // FONCTIONS SUR LA CARTE
 /**
  * Met à jour le fond de carte (tiles) de l'instance Leaflet
@@ -322,10 +361,15 @@ const renderRides = (isZooming = false) => {
     animateAddingMarkers: false,
     zoomToBoundsOnClick: true
   })
+  markersClusterRef = markersCluster
+  markersById = {}
 
   filteredRides.value.forEach((ride: IRide) => {
+    // Couleur attribuée par rang de longueur (vert → rouge)
+    const rideColor = rideColorMap.value[ride._id] || RIDE_FALLBACK_COLOR
+
     const dynamicIcon = L.divIcon({
-      html: getMapPinSvg(ride.color || '#3b82f6'),
+      html: getMapPinSvg(rideColor),
       iconSize: [26, 26],
       iconAnchor: [13, 10],
       className: 'custom-dynamic-pin'
@@ -336,11 +380,39 @@ const renderRides = (isZooming = false) => {
     const hour = Math.floor(ride.duration)
     const minutes = Math.round((ride.duration - hour) * 60)
 
+    // Build the popup via DOM nodes (textContent), never an HTML string, so a
+    // crafted ride title can't inject markup/script — Leaflet renders popup
+    // strings as raw HTML.
+    const popupEl = document.createElement('div')
+    popupEl.className = 'ride-detail-container'
+    // Titre non gras : plus léger au-dessus du tracé qu'il recouvre.
+    const titleEl = document.createElement('span')
+    titleEl.textContent = ride.title
+    popupEl.appendChild(titleEl)
+    popupEl.appendChild(document.createElement('br'))
+    popupEl.append(`${ride.distance}km - ${hour}h ${minutes}min`)
+
+    // Popup juste à côté du départ, du côté opposé au tracé (tracé à l'est →
+    // popup à gauche) : décalage minimal pour rester collée au point de départ
+    // sans recouvrir la balade.
+    const coords = ride.geom.features[0].geometry.coordinates
+    let dLng = 0
+    for (const p of coords) {
+      dLng += p[0] - start[0]
+    }
+    // Popup à côté du départ + flèche pointant vers lui : tracé à l'est → popup
+    // à gauche, flèche sur son bord droit (et inversement).
+    const traceEast = dLng >= 0
+    const popupOffset = L.point(traceEast ? -120 : 120, 34)
+    const popupClass = `ride-popup ride-popup--tail-${traceEast ? 'right' : 'left'}`
+
     // Création du marker du point de départ
     const marker = L.marker([start[1], start[0]], { icon: dynamicIcon })
-      .bindPopup(
-        `<div class="ride-detail-container"><b>${ride.title}</b><br>${ride.distance}km - ${hour}h ${minutes}min</div>`
-      )
+      .bindPopup(popupEl, {
+        offset: popupOffset,
+        maxWidth: 180,
+        className: popupClass
+      })
       .on('popupopen', () => {
         if (activeTraceLayer) {
           map.value.removeLayer(activeTraceLayer)
@@ -348,7 +420,7 @@ const renderRides = (isZooming = false) => {
 
         activeTraceLayer = L.geoJSON(ride.geom as any, {
           style: {
-            color: ride.color || '#3B82F6',
+            color: rideColor,
             weight: getWeightByZoom(currentZoom),
             opacity: 1
           }
@@ -356,12 +428,26 @@ const renderRides = (isZooming = false) => {
       })
 
     markersCluster.addLayer(marker)
+    markersById[ride._id] = marker
     bounds.extend([start[1], start[0]])
   })
 
   // On ajoute la couche de cluster et on l'ajoute à la carte
   ridesLayerGroup.value.addLayer(markersCluster)
   ridesLayerGroup.value.addTo(map.value)
+}
+
+/**
+ * Centre la carte sur une balade et ouvre sa popup (déclenchant l'affichage du
+ * tracé). Utilisé quand on arrive sur /ride?ride=<id> depuis une autre page.
+ */
+const focusRide = (rideId: string) => {
+  const marker = markersById[rideId]
+  if (!marker || !markersClusterRef) return
+
+  // zoomToShowLayer dézoome/recentre pour sortir le marker de son cluster, puis
+  // on ouvre la popup une fois qu'il est visible.
+  markersClusterRef.zoomToShowLayer(marker, () => marker.openPopup())
 }
 
 const onApplyFilters = (payload: IFilterObject) => {
@@ -632,6 +718,7 @@ onMounted(async () => {
   // Affichage des balades
   if (props.displayRide) {
     const runtimeConfig = useRuntimeConfig()
+    isRidesLoading.value = true
     try {
       const res = await fetch(
         `${runtimeConfig.public.apiBase}rides?project=all&deep=true`
@@ -646,11 +733,24 @@ onMounted(async () => {
         listStartTown.value = getUniqueValues(data.rides, 'start_town')
         listEndTown.value = getUniqueValues(data.rides, 'end_town')
         renderRides()
+
+        // Focus a specific ride when linked from elsewhere (e.g. homepage
+        // teaser → /ride?ride=<id>).
+        const rideIdParam = route.query.ride
+        if (typeof rideIdParam === 'string') {
+          setTimeout(() => focusRide(rideIdParam), 300)
+        }
       }
     } catch (e) {
       console.error('Erreur fetch:', e)
+      toast.add({
+        title: 'Erreur',
+        description: "Les balades n'ont pas pu être chargées.",
+        color: 'error'
+      })
     } finally {
       isMapLoading.value = false
+      isRidesLoading.value = false
     }
 
     // Adapte l'épaisseur des tracés au niveau de zoom et met à jour la liste des balades visibles
@@ -766,7 +866,7 @@ watch(
 
 <template>
   <div
-    class="map-container relative! w-full h-[80dvh] mb-6 overflow-hidden bg-[#f8f9fa]"
+    class="map-container relative! mx-auto mb-6 h-[80dvh] w-full max-w-[1680px] overflow-hidden rounded-xl bg-gray-50"
     :class="{ 'is-fullscreen': isFullScreen }"
     tabindex="0"
     @keydown.esc="toggleFullScreen"
@@ -774,9 +874,9 @@ watch(
     <Transition name="slide-fade">
       <div
         v-if="drawInstruction"
-        class="draw-instruction-banner absolute w-auto bottom-3.75 left-1/2 -translate-x-1/2 z-2000 bg-(--background) text-(--text-color) py-3 px-6 rounded-full shadow-(--shadow-xl) flex items-center text-sm font-medium border border-solid border-primary backdrop-blur-[8px]"
+        class="absolute bottom-[15px] left-1/2 z-2000 flex w-auto -translate-x-1/2 items-center rounded-full border border-solid border-(--ui-primary) bg-(--background) px-6 py-3 text-sm font-medium text-(--text-color) shadow-(--shadow-xl) backdrop-blur-sm"
       >
-        <UIcon name="i-lucide-info" class="w-5 h-5 mr-2" />
+        <UIcon name="i-lucide-info" class="mr-2 size-5" />
         {{ drawInstruction }}
       </div>
     </Transition>
@@ -784,102 +884,134 @@ watch(
     <div id="map"></div>
     <div
       v-if="isMapLoading && props.displayMapLoader"
-      class="loader-overlay absolute top-0 left-0 w-full h-full bg-(--overlay-loading-background) backdrop-blur-[4px] flex items-center justify-center z-2000"
+      class="absolute top-0 left-0 z-2000 flex size-full items-center justify-center bg-(--overlay-loading-background) backdrop-blur-xs"
     >
       <div class="flex flex-col items-center gap-3">
-        <UIcon name="i-lucide-loader-2" class="loader-icon w-10 h-10 text-primary" />
+        <UIcon name="i-lucide-loader-2" class="loader-icon size-10 text-(--ui-primary)" />
         <span class="text-sm font-medium text-(--text-color)">Chargement de la carte...</span>
       </div>
     </div>
     <div
       v-if="props.displayFilters"
-      class="filters absolute top-3.75 left-3.75 flex flex-row items-center flex-wrap gap-3 z-1001 pointer-events-none"
+      class="filters pointer-events-auto absolute top-[15px] left-[15px] z-1001 flex max-w-[calc(100%-30px)] flex-col gap-2 rounded-xl border border-(--border-gray) bg-(--background)/90 p-2 shadow-(--shadow-lg) backdrop-blur-md"
     >
-      <USelect
-        v-model="selectedId"
-        :items="mapItems"
-        value-key="id"
-        class="w-44"
-        icon="i-lucide-layers"
+      <!-- Ligne principale : fond de carte, recherche, ouverture des filtres -->
+      <div class="flex flex-wrap items-center gap-2">
+        <USelect
+          v-model="selectedId"
+          :items="mapItems"
+          value-key="id"
+          class="w-40"
+          icon="i-lucide-layers"
+          color="neutral"
+          variant="subtle"
+        />
+
+        <UInput
+          v-model="searchValue"
+          color="neutral"
+          placeholder="Rechercher une balade..."
+          icon="i-lucide-search"
+        />
+
+        <UButton
+          icon="i-lucide-sliders-horizontal"
+          color="primary"
+          variant="solid"
+          class="cursor-pointer text-white!"
+          @click="handleFilters"
+        >
+          Filtres
+        </UButton>
+      </div>
+
+      <!-- Filtres rapides -->
+      <div class="flex flex-wrap items-center gap-2">
+        <UButton
+          icon="i-lucide-clock"
+          size="sm"
+          :color="filterTime ? 'primary' : 'neutral'"
+          :variant="filterTime ? 'solid' : 'subtle'"
+          class="cursor-pointer"
+          :class="filterTime ? 'text-white!' : ''"
+          @click="filterTime = !filterTime"
+        >
+          -1h30
+        </UButton>
+
+        <UButton
+          icon="i-lucide-route"
+          size="sm"
+          :color="filterDistance ? 'primary' : 'neutral'"
+          :variant="filterDistance ? 'solid' : 'subtle'"
+          class="cursor-pointer"
+          :class="filterDistance ? 'text-white!' : ''"
+          @click="filterDistance = !filterDistance"
+        >
+          -50km
+        </UButton>
+
+        <UButton
+          icon="i-lucide-heart"
+          size="sm"
+          :color="filterLike ? 'primary' : 'neutral'"
+          :variant="filterLike ? 'solid' : 'subtle'"
+          class="cursor-pointer"
+          :class="filterLike ? 'text-white!' : ''"
+          @click="filterLike = !filterLike"
+        >
+          Coups de coeur
+        </UButton>
+
+        <UButton
+          icon="i-lucide-history"
+          size="sm"
+          :color="filterRecent ? 'primary' : 'neutral'"
+          :variant="filterRecent ? 'solid' : 'subtle'"
+          class="cursor-pointer"
+          :class="filterRecent ? 'text-white!' : ''"
+          @click="filterRecent = !filterRecent"
+        >
+          Les plus récentes
+        </UButton>
+
+        <UButton
+          icon="i-lucide-calendar-days"
+          size="sm"
+          :color="filterEvent ? 'primary' : 'neutral'"
+          :variant="filterEvent ? 'solid' : 'subtle'"
+          class="cursor-pointer"
+          :class="filterEvent ? 'text-white!' : ''"
+          @click="filterEvent = !filterEvent"
+        >
+          Événement
+        </UButton>
+      </div>
+    </div>
+    <div
+      v-if="props.displayEnlargeButton || props.displayAddRideButton"
+      class="pointer-events-none absolute right-4 bottom-6 z-1010 flex flex-col items-end gap-2"
+    >
+      <UButton
+        v-if="props.displayEnlargeButton"
+        :icon="isFullScreen ? 'i-lucide-minimize' : 'i-lucide-maximize'"
+        class="pointer-events-auto cursor-pointer"
         color="neutral"
         variant="subtle"
+        @click="toggleFullScreen"
       />
-
       <UButton
-        icon="i-lucide-filter"
+        v-if="props.displayAddRideButton"
+        icon="i-lucide-plus"
+        size="lg"
         color="primary"
         variant="solid"
-        class="cursor-pointer text-white!"
-        @click="handleFilters"
+        class="pointer-events-auto cursor-pointer text-white!"
+        @click="goToAddRide"
       >
-        Filtres
-      </UButton>
-
-      <UInput
-        v-model="searchValue"
-        color="neutral"
-        placeholder="Rechercher une balade..."
-        icon="i-lucide-search"
-      />
-
-      <UButton
-        icon="i-lucide-clock"
-        :color="filterTime ? 'primary' : 'neutral'"
-        :variant="filterTime ? 'solid' : 'subtle'"
-        class="cursor-pointer"
-        @click="filterTime = !filterTime"
-      >
-        -1h30
-      </UButton>
-
-      <UButton
-        icon="i-lucide-route"
-        :color="filterDistance ? 'primary' : 'neutral'"
-        :variant="filterDistance ? 'solid' : 'subtle'"
-        class="cursor-pointer"
-        @click="filterDistance = !filterDistance"
-      >
-        -50km
-      </UButton>
-
-      <UButton
-        icon="i-lucide-heart"
-        :color="filterLike ? 'primary' : 'neutral'"
-        :variant="filterLike ? 'solid' : 'subtle'"
-        class="cursor-pointer"
-        @click="filterLike = !filterLike"
-      >
-        Coups de coeur
-      </UButton>
-
-      <UButton
-        icon="i-lucide-history"
-        :color="filterRecent ? 'primary' : 'neutral'"
-        :variant="filterRecent ? 'solid' : 'subtle'"
-        class="cursor-pointer"
-        @click="filterRecent = !filterRecent"
-      >
-        Les plus récentes
-      </UButton>
-
-      <UButton
-        icon="i-lucide-calendar-days"
-        :color="filterEvent ? 'primary' : 'neutral'"
-        :variant="filterEvent ? 'solid' : 'subtle'"
-        class="cursor-pointer"
-        @click="filterEvent = !filterEvent"
-      >
-        Événement
+        Ajouter une balade
       </UButton>
     </div>
-    <UButton
-      v-if="props.displayEnlargeButton"
-      :icon="isFullScreen ? 'i-lucide-minimize' : 'i-lucide-maximize'"
-      class="absolute bottom-6 right-4 z-1010 cursor-pointer pointer-events-auto"
-      color="neutral"
-      variant="subtle"
-      @click="toggleFullScreen"
-    />
 
     <FormFilters
       v-if="showFilters && distanceMax > 1 && props.displayFilters"
@@ -891,15 +1023,17 @@ watch(
       @apply="onApplyFilters"
     />
 
-    <PanelRides v-if="props.displayRideList" :filtered-rides="visibleRides" />
+    <PanelRides
+      v-if="props.displayRideList"
+      :filtered-rides="visibleRides"
+      :color-map="rideColorMap"
+      :loading="isRidesLoading"
+      @select="focusRide"
+    />
   </div>
 </template>
 
 <style scoped>
-/* Classe utilisée dans le HTML de la popup Leaflet (string JS, pas dans le template) */
-.ride-detail-container {
-  margin-bottom: 20em;
-}
 
 /* Animation du loader (keyframes non exprimable en utilitaire) */
 .loader-icon {
@@ -929,6 +1063,7 @@ watch(
   right: 0 !important;
   bottom: 0 !important;
   width: 100vw !important;
+  max-width: none !important;
   height: 100dvh !important;
   z-index: 99999 !important;
   margin: 0 !important;
@@ -946,11 +1081,7 @@ watch(
 }
 
 /* --- FILTRES --- */
-/* Combinateur enfant : cible chaque enfant direct, pas un élément unique du template */
-.filters > * {
-  pointer-events: auto;
-  box-shadow: var(--shadow-md);
-}
+/* La barre est un panneau unique : les contrôles n'ont plus d'ombre propre. */
 
 /* --- LEAFLET UI CUSTOM --- */
 :deep(.custom-dynamic-pin) {
@@ -971,6 +1102,61 @@ watch(
 :deep(.leaflet-draw-tooltip),
 :deep(.leaflet-popup-content) {
   font-family: 'Poppins', sans-serif !important;
+}
+
+/* Popup thématisée (clair/sombre) au lieu du chrome Leaflet par défaut */
+:deep(.leaflet-popup-content-wrapper) {
+  position: relative;
+  background: var(--background) !important;
+  color: var(--text-color) !important;
+  border: 1px solid var(--border-gray) !important;
+  border-radius: 12px !important;
+  box-shadow: var(--shadow-lg) !important;
+}
+
+/* On masque la flèche Leaflet par défaut (en bas) au profit d'une flèche
+   latérale pointant vers le point de départ de la balade. */
+:deep(.leaflet-popup-tip-container) {
+  display: none !important;
+}
+
+:deep(.ride-popup .leaflet-popup-content-wrapper)::before,
+:deep(.ride-popup .leaflet-popup-content-wrapper)::after {
+  content: '';
+  position: absolute;
+  /* Le point de départ est toujours à 14px du bas de la bulle (mesuré) : on
+     ancre la flèche par le bas pour qu'elle vise le marker quelle que soit la
+     hauteur de la bulle. */
+  bottom: 5px;
+  width: 0;
+  height: 0;
+  border-top: 9px solid transparent;
+  border-bottom: 9px solid transparent;
+}
+
+/* Popup à gauche du départ → flèche sur son bord droit, pointant à droite. */
+:deep(.ride-popup--tail-right .leaflet-popup-content-wrapper)::before {
+  left: 100%;
+  border-left: 9px solid var(--border-gray);
+}
+:deep(.ride-popup--tail-right .leaflet-popup-content-wrapper)::after {
+  left: 100%;
+  margin-left: -1px;
+  border-left: 8px solid var(--background);
+}
+
+/* Popup à droite du départ → flèche sur son bord gauche, pointant à gauche. */
+:deep(.ride-popup--tail-left .leaflet-popup-content-wrapper)::before {
+  right: 100%;
+  border-right: 9px solid var(--border-gray);
+}
+:deep(.ride-popup--tail-left .leaflet-popup-content-wrapper)::after {
+  right: 100%;
+  margin-right: -1px;
+  border-right: 8px solid var(--background);
+}
+:deep(.leaflet-popup-close-button) {
+  color: var(--text-color) !important;
 }
 
 :deep(.leaflet-control) {

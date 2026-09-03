@@ -9,20 +9,15 @@ const toast = useToast()
 
 const getFavoritesPostsOfUser = async () => {
   try {
-    const response = await $fetch<{ posts: IPost[] }>(`${apiBase}posts`, {
-      params: {
-        project:
-          'image,content,title,createdAt,views,userFavoritePost,brand,user,brand,category',
-        deep: true
-      }
-    })
+    // Dedicated server-side endpoint: returns only the caller's favorites
+    // instead of downloading every post and filtering client-side (and never
+    // discloses other users' favorites).
+    const response = await $fetch<{ posts: IPost[] }>(
+      `${apiBase}posts/favorites`,
+      { credentials: 'include' }
+    )
 
-    const userId = user.value?._id
-    if (userId) {
-      myFavoritesPosts.value = response.posts.filter((post) =>
-        post.userFavoritePost?.includes(userId)
-      )
-    }
+    myFavoritesPosts.value = response.posts
   } catch {
     toast.add({
       title: 'Erreur',
@@ -45,14 +40,17 @@ watch(user, async (newUser) => {
   <div>
     <UCard variant="outline" class="w-full border-[0.5px] border-(--border-gray)">
       <template #header>
-        <h3>Mes favoris</h3>
+        <h3 class="flex items-center gap-2">
+          <UIcon name="i-lucide-star" class="size-5 text-(--ui-primary)" />
+          Mes favoris
+        </h3>
       </template>
       <template #default>
         <div v-if="myFavoritesPosts.length">
           <div
             v-for="post in myFavoritesPosts"
             :key="post._id"
-            class="cursor-pointer mb-4 border-b border-solid border-(--border-gray)"
+            class="mb-4 cursor-pointer border-b border-solid border-(--border-gray)"
             @click="navigateTo(`/forum/${post._id}`)"
           >
             {{ post.title }}

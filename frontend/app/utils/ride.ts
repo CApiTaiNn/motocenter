@@ -23,6 +23,35 @@ export const getMapPinSvg = (color: string) => {
 `
 }
 
+// Échelle de couleur des balades, des plus courtes aux plus longues :
+// vert → bleu → jaune → rouge.
+export const RIDE_LENGTH_COLOR_SCALE = [
+  '#15803d', // vert profond  – plus courtes
+  '#1d4ed8', // bleu profond
+  '#ca8a04', // or / jaune foncé
+  '#b91c1c' // rouge profond – plus longues
+] as const
+
+export const RIDE_FALLBACK_COLOR = RIDE_LENGTH_COLOR_SCALE[0]
+
+// Assigne une couleur à chaque balade selon sa longueur RELATIVE à l'ensemble
+// affiché : on trie par distance puis on répartit les balades en bandes égales
+// le long de l'échelle (vert → rouge). La couleur d'une balade dépend donc de
+// son rang parmi celles affichées, pas d'un seuil absolu en km.
+export const buildRideColorMap = (rides: IRide[]): Record<string, string> => {
+  const sorted = [...rides].sort((a, b) => a.distance - b.distance)
+  const n = sorted.length
+  const bands = RIDE_LENGTH_COLOR_SCALE.length
+  const map: Record<string, string> = {}
+
+  sorted.forEach((ride, i) => {
+    const band = n <= 1 ? 0 : Math.min(bands - 1, Math.floor((i / n) * bands))
+    map[ride._id] = RIDE_LENGTH_COLOR_SCALE[band] as string
+  })
+
+  return map
+}
+
 export const getWeightByZoom = (zoom: number) => {
   if (zoom < 8) return 3
   if (zoom < 10) return 5

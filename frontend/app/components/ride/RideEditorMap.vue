@@ -21,6 +21,6 @@ const isMapLoading = defineModel<boolean>('isMapLoading', { default: false })
     :display-editor-container="!isGpsRoute && !isMobile"
     :disable-editing="isGpsRoute"
     :disable-creating="isGpsRoute"
-    class="grow min-h-100 lg:min-h-0"
+    class="min-h-100 grow lg:min-h-0"
   />
 </template>

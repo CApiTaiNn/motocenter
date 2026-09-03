@@ -13,13 +13,14 @@ const props = defineProps<{
 </script>
 
 <template>
-  <div class="flex flex-col items-center justify-center text-center gap-4 border-solid border-2 border-(--border-gray) rounded-xl w-[20%] aspect-square max-lg:flex-1 max-lg:min-w-0! max-lg:aspect-[3/4]! max-lg:gap-2! max-lg:p-1 max-lg:border-(--background-secondary)!">
-    <img :src="props.urlImg" class="max-lg:w-10 max-lg:h-auto" />
+  <div class="flex aspect-square w-[20%] flex-col items-center justify-center gap-4 rounded-xl border-2 border-solid border-(--border-gray) text-center max-lg:aspect-3/4! max-lg:min-w-0! max-lg:flex-1 max-lg:gap-2! max-lg:border-(--background-secondary)! max-lg:p-1">
+    <img :src="props.urlImg" class="max-lg:h-auto max-lg:w-[40px]" />
     <p v-if="props.value !== undefined" class="max-lg:text-xs! max-lg:leading-tight">
       <CountUp
         v-if="props.started"
+        :start-val="(props.value ?? 0) * 0.2"
         :end-val="props.value"
-        :duration="3.5"
+        :duration="2.8"
       />
       <span v-else>0</span>
       {{ props.suffix }}

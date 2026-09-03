@@ -2,9 +2,11 @@
 import {
   RideType,
   type ICommune,
+  type IGeoJSON,
   type IValueCommuneSelect,
   type IValueForm
 } from '~/types/ride'
+import * as v from 'valibot'
 import RideEditorMap from './RideEditorMap.vue'
 import * as turf from '@turf/turf'
 import { useAuth } from '~/composables/useAuth.js'
@@ -367,22 +369,33 @@ async function onSubmit() {
   }
 }
 
-// Message personnalisé pour les champs requis
-async function validate(data: Partial<typeof stateForm>) {
-  if (!data.title?.length)
-    return [{ name: 'title', message: 'Le titre de la balade est requis' }]
-  if (!data.startTown?.label.length)
-    return [{ name: 'startTown', message: 'La ville de départ est requise' }]
-  if (!data.endTown?.label.length)
-    return [{ name: 'endTown', message: "La ville d'arrivée est requise" }]
-  if (!data.rideType?.length)
-    return [{ name: 'rideType', message: 'Le type de balade est requis' }]
-  if (!data.picture)
-    return [{ name: 'picture', message: "L'image de la balade est requise" }]
-  if (!data.geom)
-    return [{ name: 'geom', message: 'Le tracé de la balade est requis' }]
-  return []
-}
+// Règles de validation des champs requis (messages en français)
+const schema = v.object({
+  title: v.pipe(
+    v.string(),
+    v.minLength(1, 'Le titre de la balade est requis')
+  ),
+  startTown: v.custom<IValueCommuneSelect | undefined>(
+    (val) => !!(val as IValueCommuneSelect | undefined)?.label?.length,
+    'La ville de départ est requise'
+  ),
+  endTown: v.custom<IValueCommuneSelect | undefined>(
+    (val) => !!(val as IValueCommuneSelect | undefined)?.label?.length,
+    "La ville d'arrivée est requise"
+  ),
+  rideType: v.pipe(
+    v.string(),
+    v.minLength(1, 'Le type de balade est requis')
+  ),
+  picture: v.custom<File | undefined>(
+    (val) => !!val,
+    "L'image de la balade est requise"
+  ),
+  geom: v.custom<IGeoJSON | null>(
+    (val) => !!val,
+    'Le tracé de la balade est requis'
+  )
+})
 
 const canAdvanceStep = computed(() => {
   if (currentStep.value === 0) {
@@ -552,13 +565,13 @@ watch(
 <template>
   <div id="container-form" class="w-full p-4 md:p-8!">
     <UForm
-      class="flex flex-col gap-12 w-full items-stretch lg:flex-row! lg:flex-wrap"
+      class="flex w-full flex-col items-stretch gap-12 lg:flex-row! lg:flex-wrap"
       :state="stateForm"
-      :validate="validate"
+      :schema="schema"
       @submit="onSubmit"
     >
-      <UContainer class="column-info flex flex-col space-y-6 lg:flex-1 lg:order-1 lg:w-1/2">
-        <header class="form-header">
+      <UContainer class="flex flex-col space-y-6 lg:order-1 lg:w-1/2 lg:flex-1">
+        <header>
           <UButton
             to="/ride?scroll=true"
             icon="i-lucide-chevron-left"
@@ -566,27 +579,27 @@ watch(
             color="neutral"
             label="Retour"
           />
-          <h3 class="text-xl font-bold mt-2">Nouvelle balade</h3>
+          <h3 class="mt-2 text-xl font-bold">Nouvelle balade</h3>
         </header>
 
         <nav class="w-full" aria-label="Étapes de création">
-          <ol class="list-none p-0 m-0 flex gap-2 items-stretch">
+          <ol class="m-0 flex list-none items-stretch gap-2 p-0">
             <li
               v-for="(step, idx) in steps"
               :key="step.label"
-              class="flex items-center gap-2 flex-1 py-2 px-3 rounded-lg"
+              class="flex flex-1 items-center gap-2 rounded-lg px-3 py-2"
               :class="['stepper-item', {
                 active: currentStep === idx,
                 done: currentStep > idx
               }]"
             >
-              <span class="stepper-bullet size-7 rounded-full bg-gray-300 text-(--background) inline-flex items-center justify-center font-semibold text-sm shrink-0">
+              <span class="stepper-bullet inline-flex size-7 shrink-0 items-center justify-center rounded-full bg-gray-300 text-sm font-semibold text-(--background)">
                 <UIcon v-if="currentStep > idx" name="i-lucide-check" class="size-4" />
                 <span v-else>{{ idx + 1 }}</span>
               </span>
-              <span class="flex flex-col leading-[1.1] min-w-0">
-                <span class="font-semibold text-sm">{{ step.label }}</span>
-                <span class="text-xs text-gray-500 overflow-hidden text-ellipsis whitespace-nowrap max-sm:hidden">{{ step.description }}</span>
+              <span class="flex min-w-0 flex-col leading-[1.1]">
+                <span class="text-sm font-semibold">{{ step.label }}</span>
+                <span class="truncate text-xs text-gray-500 max-sm:hidden">{{ step.description }}</span>
               </span>
             </li>
           </ol>
@@ -624,13 +637,13 @@ watch(
         </div>
 
         <div v-show="currentStep === 1" class="flex flex-col gap-6">
-          <p v-if="!isMobile" class="text-gray-500 text-sm">
+          <p v-if="!isMobile" class="text-sm text-gray-500">
             Tracez à la main avec
             <UIcon name="i-lucide-pen" class="size-4 text-primary" /> ou
             <strong class="text-primary">choisissez deux villes</strong> puis
             calculer l'itinéraire.
           </p>
-          <p v-else class="text-gray-500 text-sm">
+          <p v-else class="text-sm text-gray-500">
             Tracez une balade en
             <strong class="text-primary">choisissant deux villes</strong> puis
             calculer l'itinéraire.
@@ -708,7 +721,7 @@ watch(
               variant="subtle"
               :loading="isMapLoading"
               :disabled="!stateForm.startTown?.value || !stateForm.endTown?.value"
-              class="w-full sm:w-fit justify-center cursor-pointer"
+              class="w-full cursor-pointer justify-center sm:w-fit"
               @click="calculateRouteFromCities"
             >
               Calculer le tracé GPS
@@ -718,13 +731,13 @@ watch(
 
         <div v-show="currentStep === 2" class="flex flex-col gap-6">
           <UFormField label="Image de la balade" name="picture" required>
-            <div class="w-full h-50 overflow-hidden">
-              <UFileUpload v-model="stateForm.picture" class="w-full h-full" />
+            <div class="h-[200px] w-full overflow-hidden">
+              <UFileUpload v-model="stateForm.picture" class="size-full" />
             </div>
           </UFormField>
 
           <UFormField name="groupRide" required>
-            <div class="flex flex-row justify-start items-center gap-3">
+            <div class="flex flex-row items-center justify-start gap-3">
               <USwitch v-model="stateForm.isEvent" />
               <p class="text-[medium]">Créer une balade groupée</p>
             </div>
@@ -751,7 +764,7 @@ watch(
           </div>
         </div>
 
-        <div class="flex items-center gap-3 mt-4">
+        <div class="mt-4 flex items-center gap-3">
           <UButton
             v-if="currentStep > 0"
             type="button"
@@ -776,12 +789,12 @@ watch(
         </div>
       </UContainer>
 
-      <UContainer class="column-map flex flex-col lg:flex-1 lg:order-2 lg:w-1/2">
+      <UContainer class="flex flex-col lg:order-2 lg:w-1/2 lg:flex-1">
         <UFormField
           label="Tracé de la balade"
           name="geom"
           required
-          class="flex flex-col grow mt-25"
+          class="mt-25 flex grow flex-col"
           :ui="{ container: 'flex-grow' }"
         >
           <RideEditorMap
@@ -794,15 +807,15 @@ watch(
 
           <div
             v-if="isGpsRoute || isMobile"
-            class="mt-2 text-orange-500 flex items-center gap-2 text-sm font-medium"
+            class="mt-2 flex items-center gap-2 text-sm font-medium text-orange-500"
           >
             <UIcon name="i-lucide-info" class="size-5" />
             Modification désactivée pour les tracés GPS et sur téléphone
           </div>
 
-          <div class="flex flex-col gap-4 min-w-50 mt-4 lg:flex-row! lg:gap-10! lg:items-center">
-            <div v-if="rideDistance > 0" class="flex flex-row gap-3 justify-start items-center whitespace-nowrap">
-              <UIcon name="i-lucide-map-pinned" class="w-4 h-4 text-primary" />
+          <div class="mt-4 flex min-w-[200px] flex-col gap-4 lg:flex-row! lg:items-center lg:gap-10!">
+            <div v-if="rideDistance > 0" class="flex flex-row items-center justify-start gap-3 whitespace-nowrap">
+              <UIcon name="i-lucide-map-pinned" class="size-4 text-primary" />
               <span
                 >Distance :
                 <strong class="text-primary"
@@ -810,8 +823,8 @@ watch(
                 ></span
               >
             </div>
-            <div class="flex flex-row gap-3 justify-start items-center whitespace-nowrap">
-              <UIcon name="i-lucide-timer" class="w-4 h-4 text-primary" />
+            <div class="flex flex-row items-center justify-start gap-3 whitespace-nowrap">
+              <UIcon name="i-lucide-timer" class="size-4 text-primary" />
               <div class="flex items-center gap-2">
                 <UInputNumber v-model="durationHours" class="w-22" size="md" />
                 <span>h</span>
@@ -830,14 +843,14 @@ watch(
 
       <div
         v-show="currentStep === steps.length - 1"
-        class="submit-container flex justify-start ml-7 lg:order-3 lg:w-full lg:mt-4"
+        class="ml-7 flex justify-start lg:order-3 lg:mt-4 lg:w-full"
       >
         <UButton
           type="submit"
           label="Créer la balade"
           color="primary"
           size="xl"
-          class="w-full lg:w-fit justify-center cursor-pointer text-white!"
+          class="w-full cursor-pointer justify-center text-white! lg:w-fit"
           icon="i-lucide-check"
           loading-auto
         />
@@ -856,8 +869,8 @@ watch(
 
 /* --- STEPPER (état actif/terminé piloté par les classes .active/.done) --- */
 .stepper-item {
-  border: 1px solid #d1d5db;
-  color: #6b7280;
+  border: 1px solid var(--color-gray-300);
+  color: var(--color-gray-500);
   transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease;
 }
 

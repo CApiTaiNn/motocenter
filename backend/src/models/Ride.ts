@@ -1,5 +1,6 @@
 import type { IRide } from '../types/ride'
 import { model, Schema } from 'mongoose'
+import { stripInternalFields } from '../utils/serialize'
 
 const rideSchema = new Schema({
   title: {
@@ -85,23 +86,25 @@ const rideSchema = new Schema({
     type: Boolean,
     default: false
   },
+  // `required` (unlike a custom validator) also fires when the field is
+  // absent, and rejects '' for strings — events must carry a date and hour.
   date_event: {
     type: String,
-    validate: {
-      validator: function (v: string) {
-        return this.is_event ? v && v.length > 0 : true
+    required: [
+      function (this: { is_event?: boolean }) {
+        return this.is_event === true
       },
-      message: "La date de l'événement est requise lorsque c'est un événement."
-    }
+      "La date de l'événement est requise lorsque c'est un événement."
+    ]
   },
   hour_event: {
     type: String,
-    validate: {
-      validator: function (v: string) {
-        return this.is_event ? v && v.length > 0 : true
+    required: [
+      function (this: { is_event?: boolean }) {
+        return this.is_event === true
       },
-      message: "L'heure de l'événement est requise lorsque c'est un événement."
-    }
+      "L'heure de l'événement est requise lorsque c'est un événement."
+    ]
   },
   participating_user: {
     type: [Schema.Types.ObjectId],
@@ -112,6 +115,9 @@ const rideSchema = new Schema({
     type: Date,
     default: Date.now
   }
-})
+}, { toJSON: stripInternalFields })
+
+// createdAt: default list sort + the /count month-range queries.
+rideSchema.index({ createdAt: -1 })
 
 export default model<IRide>('Ride', rideSchema)

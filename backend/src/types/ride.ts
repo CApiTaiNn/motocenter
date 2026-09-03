@@ -1,6 +1,8 @@
 export interface IRide {
   title: string
   description: string
+  // Creator's user id (schema stores it as a plain string, not an ObjectId)
+  user_id: string
   color: string
   geom: IGeoJSON
   duration: number

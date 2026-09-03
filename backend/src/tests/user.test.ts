@@ -3,6 +3,7 @@ import request from 'supertest'
 import jwt from 'jsonwebtoken'
 import app from '../app'
 import User from '../models/User'
+import { argon2PasswordHasher } from '../utils/hash'
 
 describe('User Routes - /api/v1/users', () => {
   const userData = {
@@ -18,7 +19,12 @@ describe('User Routes - /api/v1/users', () => {
   let authCookie: string
 
   beforeEach(async () => {
-    const user = await User.create(userData)
+    // Store a real argon2 hash so password verification (login, password
+    // change) works against this user.
+    const user = await User.create({
+      ...userData,
+      password: await argon2PasswordHasher.hash(userData.password)
+    })
     userId = user._id.toString()
     const token = jwt.sign(
       { id: userId, email: userData.email },
@@ -56,34 +62,440 @@ describe('User Routes - /api/v1/users', () => {
     })
   })
 
-  describe('GET /api/v1/users', () => {
-    it('should return users list', async () => {
-      const res = await request(app).get('/api/v1/users?project=email,pseudo')
+  describe('GET /api/v1/users (admin only)', () => {
+    let adminCookie: string
+
+    beforeEach(async () => {
+      const admin = await User.create({
+        firstname: 'Admin',
+        lastname: 'Root',
+        pseudo: 'root',
+        email: 'admin@test.com',
+        password: 'password123',
+        isAdmin: true
+      })
+      const token = jwt.sign(
+        { id: admin._id.toString(), email: 'admin@test.com' },
+        process.env.JWT_SECRET!
+      )
+      adminCookie = `accessToken=${token}`
+    })
+
+    it('should return 401 without a token', async () => {
+      const res = await request(app).get('/api/v1/users')
+      expect(res.status).toBe(401)
+    })
+
+    it('should return 403 for a non-admin user', async () => {
+      const res = await request(app)
+        .get('/api/v1/users')
+        .set('Cookie', authCookie)
+      expect(res.status).toBe(403)
+    })
+
+    it('should return the users list for an admin', async () => {
+      const res = await request(app)
+        .get('/api/v1/users?project=email,pseudo')
+        .set('Cookie', adminCookie)
 
       expect(res.status).toBe(200)
       expect(res.body.users).toBeInstanceOf(Array)
+      // the test user plus the admin created above
+      expect(res.body.users.length).toBe(2)
+    })
+
+    it('should never return the password, even with project=all', async () => {
+      const res = await request(app)
+        .get('/api/v1/users?project=all')
+        .set('Cookie', adminCookie)
+
+      expect(res.status).toBe(200)
+      expect(res.body.users.every((u: any) => u.password === undefined)).toBe(
+        true
+      )
+      // admins are allowed to read private fields such as email
+      expect(res.body.users.some((u: any) => u.email === userData.email)).toBe(
+        true
+      )
+    })
+
+    it('should respect the limit parameter', async () => {
+      const res = await request(app)
+        .get('/api/v1/users?project=pseudo&limit=1')
+        .set('Cookie', adminCookie)
+
+      expect(res.status).toBe(200)
       expect(res.body.users.length).toBe(1)
     })
 
-    it('should filter only allowed fields (no password)', async () => {
-      const res = await request(app).get('/api/v1/users?project=password,email')
+    it('should allow an admin to filter on private fields', async () => {
+      const res = await request(app)
+        .get(
+          `/api/v1/users?filter=${JSON.stringify({ isAdmin: true })}&project=pseudo`
+        )
+        .set('Cookie', adminCookie)
 
       expect(res.status).toBe(200)
-      const user = res.body.users[0]
-      expect(user.password).toBeUndefined()
-      expect(user.email).toBe(userData.email)
+      expect(res.body.users.length).toBe(1)
+      expect(res.body.users[0].pseudo).toBe('root')
     })
 
-    it('should respect limit parameter', async () => {
+    it('should reject an invalid limit', async () => {
+      const zero = await request(app)
+        .get('/api/v1/users?limit=0')
+        .set('Cookie', adminCookie)
+      expect(zero.status).toBe(400)
+
+      const nan = await request(app)
+        .get('/api/v1/users?limit=abc')
+        .set('Cookie', adminCookie)
+      expect(nan.status).toBe(400)
+    })
+  })
+
+  describe('GET /api/v1/users/:id (public profile)', () => {
+    it('should return public fields only, without authentication', async () => {
+      const res = await request(app).get(`/api/v1/users/${userId}`)
+
+      expect(res.status).toBe(200)
+      expect(res.body.users.pseudo).toBe(userData.pseudo)
+      expect(res.body.users.email).toBeUndefined()
+      expect(res.body.users.password).toBeUndefined()
+      expect(res.body.users.isAdmin).toBeUndefined()
+    })
+
+    it('should return 404 for a non-existent id', async () => {
+      const res = await request(app).get(
+        '/api/v1/users/507f1f77bcf86cd799439011'
+      )
+      expect(res.status).toBe(404)
+    })
+
+    it('should return 400 for a malformed id', async () => {
+      const res = await request(app).get('/api/v1/users/not-an-id')
+      expect(res.status).toBe(400)
+    })
+  })
+
+  describe('POST /api/v1/users/account', () => {
+    const newUser = {
+      firstname: 'Jane',
+      lastname: 'Roe',
+      pseudo: 'janer',
+      email: 'jane@test.com',
+      password: 'secureRiderPass',
+      userType: 'confirmed' as const,
+      ridingStartYear: 2010
+    }
+
+    it('should create a new account and echo only the id', async () => {
+      const res = await request(app)
+        .post('/api/v1/users/account')
+        .send(newUser)
+
+      expect(res.status).toBe(201)
+      // Minimal response: just the id, never the user object.
+      expect(res.body._id).toBeTruthy()
+      expect(res.body.users).toBeUndefined()
+      expect(res.body.email).toBeUndefined()
+      expect(res.body.isAdmin).toBeUndefined()
+
+      // The account is persisted, not an admin, with a hashed (never returned)
+      // password.
+      const stored = await User.findOne({ email: newUser.email }).select(
+        '+password'
+      )
+      expect(stored).not.toBeNull()
+      expect(stored!.isAdmin).toBe(false)
+      expect(stored!.password).not.toBe(newUser.password)
+    })
+
+    it('should reject a duplicate email with 409', async () => {
+      const res = await request(app)
+        .post('/api/v1/users/account')
+        .send({ ...newUser, email: userData.email, pseudo: 'other' })
+
+      expect(res.status).toBe(409)
+      expect(res.body.error).toBe('User already exists')
+    })
+
+    it('should reject a missing email with 400', async () => {
+      const rest: Partial<typeof newUser> = { ...newUser }
+      delete rest.email
+      const res = await request(app).post('/api/v1/users/account').send(rest)
+
+      expect(res.status).toBe(400)
+      expect(res.body.error).toBe('Email and password are required')
+    })
+
+    it('should reject a missing password with 400', async () => {
+      const rest: Partial<typeof newUser> = { ...newUser }
+      delete rest.password
+      const res = await request(app).post('/api/v1/users/account').send(rest)
+
+      expect(res.status).toBe(400)
+      expect(res.body.error).toBe('Email and password are required')
+    })
+
+    it('should reject a non-string email with 400', async () => {
+      const res = await request(app)
+        .post('/api/v1/users/account')
+        .send({ ...newUser, email: { $gt: '' } })
+
+      expect(res.status).toBe(400)
+      expect(res.body.error).toBe('Email and password are required')
+    })
+
+    it('should reject a non-string password with 400', async () => {
+      const res = await request(app)
+        .post('/api/v1/users/account')
+        .send({ ...newUser, password: { $gt: '' } })
+
+      expect(res.status).toBe(400)
+      expect(res.body.error).toBe('Email and password are required')
+    })
+
+    it('should reject missing profile fields with 400 (not 500)', async () => {
+      const rest: Partial<typeof newUser> = { ...newUser }
+      delete rest.pseudo
+      const res = await request(app).post('/api/v1/users/account').send(rest)
+
+      expect(res.status).toBe(400)
+      expect(res.body.error).toBe('Firstname, lastname and pseudo are required')
+    })
+
+    it('should reject a too-short password with 400', async () => {
+      const res = await request(app)
+        .post('/api/v1/users/account')
+        .send({ ...newUser, email: 'short@test.com', pseudo: 'shorty', password: 'short' })
+
+      expect(res.status).toBe(400)
+      expect(res.body.error).toContain('at least')
+    })
+
+    it('should reject a common password with 400', async () => {
+      const res = await request(app)
+        .post('/api/v1/users/account')
+        .send({ ...newUser, email: 'common@test.com', pseudo: 'commoner', password: 'aaaaaaaaaaaa' })
+
+      expect(res.status).toBe(400)
+      expect(res.body.error).toBe('Password is too common')
+    })
+
+    it('should reject a password containing the pseudo with 400', async () => {
+      const res = await request(app)
+        .post('/api/v1/users/account')
+        .send({ ...newUser, email: 'rider@test.com', pseudo: 'bikerjoe', password: 'mybikerjoe2026' })
+
+      expect(res.status).toBe(400)
+      expect(res.body.error).toBe('Password must not contain your pseudo')
+    })
+  })
+
+  describe('PUT /api/v1/users/account', () => {
+    it('should update allowed fields (firstname, pseudo)', async () => {
+      const res = await request(app)
+        .put('/api/v1/users/account')
+        .set('Cookie', authCookie)
+        .send({ firstname: 'Johnny', pseudo: 'newpseudo' })
+
+      expect(res.status).toBe(200)
+      expect(res.body.users.firstname).toBe('Johnny')
+      expect(res.body.users.pseudo).toBe('newpseudo')
+      expect(res.body.users.password).toBeUndefined()
+    })
+
+    it('should reject a pseudo already taken by another user with 409', async () => {
       await User.create({
         ...userData,
-        email: 'john2@test.com',
-        pseudo: 'johnd2'
+        email: 'taken@test.com',
+        pseudo: 'takenpseudo'
       })
-      const res = await request(app).get('/api/v1/users?project=email&limit=1')
+
+      const res = await request(app)
+        .put('/api/v1/users/account')
+        .set('Cookie', authCookie)
+        .send({ pseudo: 'takenpseudo' })
+
+      expect(res.status).toBe(409)
+      expect(res.body.error).toBe('Pseudo already taken')
+    })
+
+    it('should allow keeping your own pseudo', async () => {
+      const res = await request(app)
+        .put('/api/v1/users/account')
+        .set('Cookie', authCookie)
+        .send({ pseudo: userData.pseudo })
 
       expect(res.status).toBe(200)
-      expect(res.body.users.length).toBe(1)
+      expect(res.body.users.pseudo).toBe(userData.pseudo)
+    })
+
+    it('should reject a non-string pseudo with 400', async () => {
+      const res = await request(app)
+        .put('/api/v1/users/account')
+        .set('Cookie', authCookie)
+        .send({ pseudo: { $ne: null } })
+
+      expect(res.status).toBe(400)
+      expect(res.body.error).toBe('Pseudo must be a string')
+    })
+
+    it('should reject ridingStartYear before 1950 with 400', async () => {
+      const res = await request(app)
+        .put('/api/v1/users/account')
+        .set('Cookie', authCookie)
+        .send({ ridingStartYear: 1900 })
+
+      expect(res.status).toBe(400)
+      expect(res.body.error).toContain('Riding start year must be between 1950')
+    })
+
+    it('should reject a falsy ridingStartYear (0) with 400', async () => {
+      const res = await request(app)
+        .put('/api/v1/users/account')
+        .set('Cookie', authCookie)
+        .send({ ridingStartYear: 0 })
+
+      expect(res.status).toBe(400)
+      expect(res.body.error).toContain('Riding start year must be between 1950')
+    })
+
+    it('should reject a future ridingStartYear with 400', async () => {
+      const future = new Date().getFullYear() + 1
+      const res = await request(app)
+        .put('/api/v1/users/account')
+        .set('Cookie', authCookie)
+        .send({ ridingStartYear: future })
+
+      expect(res.status).toBe(400)
+      expect(res.body.error).toContain('Riding start year must be between 1950')
+    })
+
+    it('should reject a non-numeric ridingStartYear with 400', async () => {
+      const res = await request(app)
+        .put('/api/v1/users/account')
+        .set('Cookie', authCookie)
+        .send({ ridingStartYear: 'abc' })
+
+      expect(res.status).toBe(400)
+      expect(res.body.error).toContain('Riding start year must be between 1950')
+    })
+
+    it('should change the password so the user can log in with the new one', async () => {
+      const newPassword = 'brandNewPass456'
+      const res = await request(app)
+        .put('/api/v1/users/account')
+        .set('Cookie', authCookie)
+        .send({ password: newPassword, currentPassword: userData.password })
+
+      expect(res.status).toBe(200)
+
+      const login = await request(app)
+        .post('/api/v1/auth')
+        .send({ email: userData.email, password: newPassword })
+
+      expect(login.status).toBe(200)
+      expect(login.body.message).toBe('Connected')
+
+      const oldLogin = await request(app)
+        .post('/api/v1/auth')
+        .send({ email: userData.email, password: userData.password })
+
+      expect(oldLogin.status).toBe(401)
+    })
+
+    it('should ignore disallowed fields (email, isAdmin)', async () => {
+      const res = await request(app)
+        .put('/api/v1/users/account')
+        .set('Cookie', authCookie)
+        .send({ email: 'hacker@test.com', isAdmin: true, firstname: 'Changed' })
+
+      expect(res.status).toBe(200)
+      expect(res.body.users.firstname).toBe('Changed')
+
+      const stored = await User.findById(userId)
+      expect(stored?.email).toBe(userData.email)
+      expect(stored?.isAdmin).toBe(false)
+    })
+
+    it('should return 401 without token', async () => {
+      const res = await request(app)
+        .put('/api/v1/users/account')
+        .send({ firstname: 'Nope' })
+
+      expect(res.status).toBe(401)
+      expect(res.body.message).toBe('Non authentifié')
+    })
+  })
+
+  describe('PUT /api/v1/users/account — password change', () => {
+    // A user whose stored password is a real argon2 hash, so verify() works.
+    const currentPassword = 'currentSecret42'
+    const newPassword = 'brandNewSecret42'
+    let pwCookie: string
+
+    beforeEach(async () => {
+      const { hash } = argon2PasswordHasher
+      const u = await User.create({
+        firstname: 'Pass',
+        lastname: 'Word',
+        pseudo: 'passworder',
+        email: 'pw@test.com',
+        password: await hash(currentPassword)
+      })
+      const token = jwt.sign(
+        { id: u._id.toString(), email: u.email },
+        process.env.JWT_SECRET!
+      )
+      pwCookie = `accessToken=${token}`
+    })
+
+    it('rejects a password change without the current password (400)', async () => {
+      const res = await request(app)
+        .put('/api/v1/users/account')
+        .set('Cookie', pwCookie)
+        .send({ password: newPassword })
+
+      expect(res.status).toBe(400)
+      expect(res.body.code).toBe('CURRENT_PASSWORD_REQUIRED')
+    })
+
+    it('rejects a wrong current password (401)', async () => {
+      const res = await request(app)
+        .put('/api/v1/users/account')
+        .set('Cookie', pwCookie)
+        .send({ password: newPassword, currentPassword: 'wrongPassword99' })
+
+      expect(res.status).toBe(401)
+      expect(res.body.code).toBe('CURRENT_PASSWORD_INVALID')
+    })
+
+    it('changes the password with the correct current password (200)', async () => {
+      const res = await request(app)
+        .put('/api/v1/users/account')
+        .set('Cookie', pwCookie)
+        .send({ password: newPassword, currentPassword })
+
+      expect(res.status).toBe(200)
+
+      // The stored hash now verifies against the new password, not the old one.
+      const { verify } = argon2PasswordHasher
+      const stored = await User.findOne({ email: 'pw@test.com' }).select(
+        '+password'
+      )
+      expect(await verify(newPassword, stored!.password)).toBe(true)
+      expect(await verify(currentPassword, stored!.password)).toBe(false)
+    })
+
+    it('still updates non-password fields without a current password', async () => {
+      const res = await request(app)
+        .put('/api/v1/users/account')
+        .set('Cookie', pwCookie)
+        .send({ firstname: 'Renamed' })
+
+      expect(res.status).toBe(200)
+      expect(res.body.users.firstname).toBe('Renamed')
     })
   })
 
@@ -93,6 +505,24 @@ describe('User Routes - /api/v1/users', () => {
 
       expect(res.status).toBe(200)
       expect(res.body).toBe(1)
+    })
+
+    it('should reflect multiple users', async () => {
+      await User.create({
+        ...userData,
+        email: 'second@test.com',
+        pseudo: 'second'
+      })
+      await User.create({
+        ...userData,
+        email: 'third@test.com',
+        pseudo: 'third'
+      })
+
+      const res = await request(app).get('/api/v1/users/count')
+
+      expect(res.status).toBe(200)
+      expect(res.body).toBe(3)
     })
   })
 
@@ -106,19 +536,53 @@ describe('User Routes - /api/v1/users', () => {
       expect(res.body.stats[0]).toHaveProperty('month')
       expect(res.body.stats[0]).toHaveProperty('total')
     })
+
+    it('should count the current month cumulative total as at least 1', async () => {
+      const res = await request(app).get('/api/v1/users/stats/monthly')
+
+      expect(res.status).toBe(200)
+      const currentMonth = new Date().getMonth() + 1
+      const entry = res.body.stats.find(
+        (s: { month: number; total: number }) => s.month === currentMonth
+      )
+      expect(entry).toBeDefined()
+      expect(entry.total).toBeGreaterThanOrEqual(1)
+    })
   })
 
   describe('Query hardening', () => {
-    it('rejects a $where filter with 400', async () => {
-      const res = await request(app).get(
-        `/api/v1/users?filter=${encodeURIComponent('{"$where":"1==1"}')}`
+    // The list route is admin-gated, so authenticate before exercising the
+    // filter parser that runs inside the handler.
+    let adminCookie: string
+
+    beforeEach(async () => {
+      const admin = await User.create({
+        firstname: 'Admin',
+        lastname: 'Root',
+        pseudo: 'root',
+        email: 'admin@test.com',
+        password: 'password123',
+        isAdmin: true
+      })
+      const token = jwt.sign(
+        { id: admin._id.toString(), email: 'admin@test.com' },
+        process.env.JWT_SECRET!
       )
+      adminCookie = `accessToken=${token}`
+    })
+
+    it('rejects a $where filter with 400', async () => {
+      const res = await request(app)
+        .get(`/api/v1/users?filter=${encodeURIComponent('{"$where":"1==1"}')}`)
+        .set('Cookie', adminCookie)
 
       expect(res.status).toBe(400)
     })
 
     it('rejects a malformed filter with 400', async () => {
-      const res = await request(app).get('/api/v1/users?filter=not-json')
+      const res = await request(app)
+        .get('/api/v1/users?filter=not-json')
+        .set('Cookie', adminCookie)
 
       expect(res.status).toBe(400)
     })

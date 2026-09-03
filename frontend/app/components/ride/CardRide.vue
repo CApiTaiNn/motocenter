@@ -1,19 +1,24 @@
 <script setup lang="ts">
 import type { IRide } from '~/types/ride'
 import { computed } from 'vue'
+import { RIDE_FALLBACK_COLOR } from '~/utils/ride'
 import { useAuth } from '~/composables/useAuth'
-import type { IUser } from '~/types/users.js'
+import type { IUserPublic } from '~/types/users.js'
 import { useConnexionModal } from '~/composables/useConnexionModal.js'
+
+const toast = useToast()
 
 interface IProps {
   ride: IRide
+  // Couleur attribuée par rang de longueur (vert → rouge), fournie par la carte
+  // pour rester identique au pin et au tracé.
+  color?: string
 }
 
 const { user } = useAuth()
 const props = defineProps<IProps>()
-const isLikedCurrent = ref<boolean>(
-  props.ride.liked_id?.includes(user.value?._id ?? '') ?? false
-)
+// Server-derived per-viewer flag — no need to scan a raw liker array.
+const isLikedCurrent = ref<boolean>(props.ride.likedByMe ?? false)
 const { open } = useConnexionModal()
 const creator = ref<any>(null)
 
@@ -56,7 +61,9 @@ const participantsAvatars = computed(() => {
   })
 })
 
-const emit = defineEmits(['update:like', 'update:participants'])
+const emit = defineEmits(['update:like', 'update:participants', 'select'])
+
+const dotColor = computed(() => props.color ?? RIDE_FALLBACK_COLOR)
 
 const srcAvatarCreator = computed<string>(() => {
   return creator.value?.image || '/images/users/default.svg'
@@ -127,6 +134,11 @@ const participateGestion = async () => {
     emit('update:participants', res.updatedParticipants)
   } catch (error) {
     console.error('Erreur participation:', error)
+    toast.add({
+      title: 'Erreur',
+      description: "Votre participation n'a pas pu être enregistrée.",
+      color: 'error'
+    })
   }
 }
 
@@ -136,60 +148,51 @@ const fetchCreatorInfos = async () => {
   if (!props.ride.user_id) return
 
   try {
-    const data: any = await $fetch<{ user: IUser }>(
-      `${runtimeConfig.public.apiBase}users`,
-      {
-        params: {
-          filter: JSON.stringify({ _id: props.ride.user_id }),
-          project: 'pseudo,image'
-        }
-      }
+    const data = await $fetch<{ users: IUserPublic }>(
+      `${runtimeConfig.public.apiBase}users/${props.ride.user_id}`
     )
 
-    creator.value = data.users[0] || data
+    creator.value = data.users
   } catch (e) {
     console.error("Erreur lors de la récupération de l'auteur", e)
   }
 }
 
 onMounted(async () => {
+  // The connected user is already in shared auth state; no per-card refetch.
   await fetchCreatorInfos()
-
-  const runtimeConfig = useRuntimeConfig()
-  const currentUser: any = await $fetch(
-    `${runtimeConfig.public.apiBase}users/account`,
-    { credentials: 'include' }
-  )
-  if (currentUser.users && props.ride.liked_id) {
-    isLikedCurrent.value = props.ride.liked_id.includes(currentUser.users._id)
-  }
+  isLikedCurrent.value = props.ride.likedByMe ?? false
 })
 </script>
 
 <template>
   <div
-    class="relative flex w-full h-auto min-h-55 flex-col overflow-visible rounded-xl bg-cover bg-center shadow-[0_4px_12px_rgba(0,0,0,0.15)]"
+    class="relative flex h-auto min-h-[124px] w-full cursor-pointer flex-col overflow-visible rounded-xl bg-cover bg-center shadow-[0_4px_12px_rgba(0,0,0,0.15)] transition-shadow hover:shadow-[0_6px_18px_rgba(0,0,0,0.28)]"
     :style="{ backgroundImage: `url(${imageUrl})` }"
+    role="button"
+    tabindex="0"
+    @click="emit('select', props.ride._id)"
+    @keydown.enter="emit('select', props.ride._id)"
   >
-    <div class="overlay absolute inset-0 z-1 rounded-xl bg-gradient-to-t from-black/95 via-black/70 to-black/40"></div>
+    <div class="absolute inset-0 z-1 rounded-xl bg-linear-to-t from-black/95 via-black/70 to-black/40"></div>
 
-    <div class="card-content relative z-2 flex flex-col gap-2 p-4 text-white md:p-6!">
+    <div class="relative z-2 flex flex-col gap-1 p-2 text-white md:p-3!">
       <header class="flex w-full flex-wrap items-center justify-between gap-3">
         <div class="flex min-w-0 flex-1 flex-row flex-wrap items-center gap-2">
           <span
-            class="h-3.5 w-3.5 rounded-full shadow-[0_0_10px_rgba(255,255,255,0.3)]"
-            :style="{ backgroundColor: props.ride.color || '#3b82f6' }"
+            class="size-[10px] rounded-full shadow-[0_0_10px_rgba(255,255,255,0.3)]"
+            :style="{ backgroundColor: dotColor }"
             aria-hidden="true"
           ></span>
 
-          <h2 class="m-0 shrink overflow-hidden text-ellipsis whitespace-normal text-xl font-bold text-shadow-[0_2px_4px_rgba(0,0,0,0.5)] md:text-2xl!">{{ props.ride.title }}</h2>
+          <h2 class="m-0 shrink overflow-hidden text-base font-bold text-ellipsis whitespace-normal [text-shadow:0_2px_4px_rgba(0,0,0,0.5)] md:text-lg!">{{ props.ride.title }}</h2>
 
           <UBadge
             v-if="props.ride.is_event"
             variant="subtle"
-            size="md"
+            size="sm"
             icon="i-lucide-calendar-days"
-            class="bg-white/15 backdrop-blur-xs text-white border border-white/20 text-xs py-0.5 px-2 whitespace-nowrap shrink-0"
+            class="shrink-0 border border-white/20 bg-white/15 px-1.5 py-0.5 text-xs whitespace-nowrap text-white backdrop-blur-xs"
           >
             {{ dateEvent.toLocaleDateString('fr-FR') }}
             •
@@ -203,27 +206,24 @@ onMounted(async () => {
         </div>
 
         <UButton
-          :icon="
-            isLikedCurrent
-              ? 'i-heroicons-hand-thumb-up-solid'
-              : 'i-heroicons-hand-thumb-up'
-          "
+          icon="i-lucide-thumbs-up"
           :label="props.ride.like?.toString() || '0'"
-          variant="subtle"
+          variant="ghost"
           color="neutral"
-          size="md"
-          class="text-white! font-bold transition-transform active:scale-120 cursor-pointer"
-          @click="likeGestion"
+          size="xs"
+          class="cursor-pointer font-bold transition-transform hover:bg-white/15 active:scale-120"
+          :class="isLikedCurrent ? 'text-(--ui-primary)!' : 'text-white!'"
+          @click.stop="likeGestion"
         />
       </header>
 
-      <p class="mt-1 mb-3 line-clamp-2 text-sm opacity-85">{{ props.ride.description }}</p>
+      <p class="mt-0.5 mb-1.5 line-clamp-2 text-xs opacity-85">{{ props.ride.description }}</p>
 
       <footer>
-        <div class="mb-3 flex flex-wrap gap-x-3 gap-y-1">
+        <div class="mb-1.5 flex flex-wrap gap-x-3 gap-y-1">
           <UBadge
             variant="subtle"
-            size="lg"
+            size="sm"
             icon="i-lucide-map-pinned"
             class="invisible-background"
           >
@@ -231,7 +231,7 @@ onMounted(async () => {
           </UBadge>
           <UBadge
             variant="subtle"
-            size="lg"
+            size="sm"
             icon="i-lucide-clock"
             class="invisible-background"
           >
@@ -239,7 +239,7 @@ onMounted(async () => {
           </UBadge>
           <UBadge
             variant="subtle"
-            size="lg"
+            size="sm"
             icon="i-lucide-map-pin"
             class="invisible-background"
           >
@@ -247,7 +247,7 @@ onMounted(async () => {
           </UBadge>
           <UBadge
             variant="subtle"
-            size="lg"
+            size="sm"
             icon="i-lucide-route"
             class="invisible-background"
           >
@@ -255,10 +255,11 @@ onMounted(async () => {
           </UBadge>
         </div>
 
-        <div class="flex flex-wrap items-center justify-between gap-3 border-t border border-white/10 pt-3 text-sm max-[480px]:flex-col! max-[480px]:items-stretch! max-[480px]:gap-3!">
-          <div class="flex items-center gap-3 max-[480px]:w-full max-[480px]:justify-start max-[480px]:flex-wrap">
+        <div class="flex flex-wrap items-center justify-between gap-3 pt-1.5 text-xs max-[480px]:flex-col! max-[480px]:items-stretch! max-[480px]:gap-3!">
+          <div class="flex items-center gap-3 max-[480px]:w-full max-[480px]:flex-wrap max-[480px]:justify-start">
             <template v-if="creator">
               <UAvatar
+                size="xs"
                 :alt="`Avatar de ${creator.pseudo || 'MotoCenter'}`"
                 :src="srcAvatarCreator"
               />
@@ -273,15 +274,15 @@ onMounted(async () => {
             </template>
           </div>
 
-          <div v-if="ride.is_event" class="flex items-center gap-3 max-[480px]:w-full max-[480px]:justify-start max-[480px]:flex-wrap">
+          <div v-if="ride.is_event" class="flex items-center gap-3 max-[480px]:w-full max-[480px]:flex-wrap max-[480px]:justify-start">
             <UButton
               :label="isParticipating ? 'Ne plus participer' : 'Participer'"
               :color="isParticipating ? 'neutral' : 'error'"
               :variant="isParticipating ? 'subtle' : 'solid'"
-              size="lg"
-              class="px-5 font-bold max-[480px]:flex-1 max-[480px]:justify-center cursor-pointer"
+              size="sm"
+              class="cursor-pointer px-4 font-bold max-[480px]:flex-1 max-[480px]:justify-center"
               :class="!isParticipating ? 'text-white!' : ''"
-              @click="participateGestion"
+              @click.stop="participateGestion"
             />
 
             <div v-if="participatingCount > 0" class="flex items-center gap-2 rounded-[20px] bg-white/90 py-1 pr-3 pl-2 text-gray-700">

@@ -1,13 +1,45 @@
 import User from '../models/User'
+import Post from '../models/Post'
+import Message from '../models/Message'
+import Ride from '../models/Ride'
 import { IUser } from '../types/user'
-import { authenticateToken } from '../utils/auth'
-import { prepareQuery, type ReqQuery } from '../utils/find'
+import { authenticateToken, requireAdmin, getAuthUser } from '../utils/auth'
+import { prepareQuery, ADMIN_MAX_LIMIT, type ReqQuery } from '../utils/find'
 import { argon2PasswordHasher } from '../utils/hash'
+import { sendWelcomeEmail } from '../utils/mail'
+import { makeRateLimiter } from '../utils/rateLimit'
+import { validatePassword } from '../utils/passwordPolicy'
+import { generateToken } from '../utils/tokens'
 import { type Request, Response, Router } from 'express'
+import type { Types } from 'mongoose'
 
-const { hash } = argon2PasswordHasher
+const { hash, verify } = argon2PasswordHasher
 
 const router = Router()
+
+// Shared placeholder that inherits the content of deleted accounts, so posts,
+// messages and rides others replied to stay readable instead of dangling.
+const DELETED_PLACEHOLDER = {
+  email: 'deleted-user@motocenter.invalid',
+  pseudo: 'compte-supprimé',
+  firstname: 'Compte',
+  lastname: 'Supprimé'
+}
+
+// Get (or lazily create) the singleton placeholder user.
+async function getDeletedPlaceholderId(): Promise<Types.ObjectId> {
+  const existing = await User.findOne({
+    email: DELETED_PLACEHOLDER.email
+  }).select('_id')
+  if (existing) return existing._id
+  const created = await User.create({
+    ...DELETED_PLACEHOLDER,
+    password: await hash('deleted-account-no-login'),
+    isAdmin: false,
+    idMoto: ''
+  })
+  return created._id
+}
 
 /**
  * @openapi
@@ -42,17 +74,12 @@ const router = Router()
 router.get(
   '/account',
   authenticateToken,
-  async (req: Request<unknown, unknown, unknown, ReqQuery>, res: Response) => {
-    const { project } = prepareQuery(req.query)
-    const { id } = req.user as { id: string }
+  async (req: Request, res) => {
+    const { project } = prepareQuery(req.query as ReqQuery)
+    const { id } = getAuthUser(req)
 
-    try {
-      const users = await User.findById(id).select(project)
-      res.status(200).json({ users })
-    } catch (error) {
-      console.error('Error accessing user route:', error)
-      res.status(500).json({ error: 'Internal server error' })
-    }
+    const users = await User.findById(id).select(project)
+    res.status(200).json({ users })
   }
 )
 
@@ -116,7 +143,8 @@ router.get(
  *       500:
  *         description: Erreur serveur
  */
-router.post('/account', async (req: Request, res: Response) => {
+// Throttle account creation to slow mass-registration / enumeration probing.
+router.post('/account', makeRateLimiter(20), async (req: Request, res: Response) => {
   const {
     email,
     password,
@@ -128,38 +156,80 @@ router.post('/account', async (req: Request, res: Response) => {
     image
   } = req.body
 
-  if (!email || !password) {
+  // Strings only: objects here would reach Mongo queries as operators.
+  if (typeof email !== 'string' || typeof password !== 'string') {
     return res.status(400).json({ error: 'Email and password are required' })
   }
 
-  try {
-    if (await User.findOne({ email })) {
-      return res.status(409).json({ error: 'User already exists' })
-    }
-
-    const newUser: IUser = {
-      email,
-      password: await hash(password),
-      firstname,
-      lastname,
-      pseudo,
-      userType,
-      image,
-      ridingStartYear,
-      createdAt: new Date(),
-      isAdmin: false,
-      idMoto: ''
-    }
-
-    const created = await User.insertOne(newUser)
-    const users = created.toObject() as unknown as Record<string, unknown>
-    delete users.password
-
-    res.status(201).json({ users })
-  } catch (error) {
-    console.error('Error accessing user route:', error)
-    res.status(500).json({ error: 'Internal server error' })
+  // The model requires these; check here so a bad payload gets a 400
+  // instead of a Mongoose validation 500.
+  if (
+    typeof firstname !== 'string' ||
+    typeof lastname !== 'string' ||
+    typeof pseudo !== 'string' ||
+    !firstname ||
+    !lastname ||
+    !pseudo
+  ) {
+    return res
+      .status(400)
+      .json({ error: 'Firstname, lastname and pseudo are required' })
   }
+
+  const passwordCheck = validatePassword(password, { email, pseudo })
+  if (!passwordCheck.valid) {
+    // `code` lets the client react without matching on the English message.
+    return res
+      .status(400)
+      .json({ error: passwordCheck.message, code: 'WEAK_PASSWORD' })
+  }
+
+  if (await User.findOne({ email })) {
+    return res
+      .status(409)
+      .json({ error: 'User already exists', code: 'EMAIL_TAKEN' })
+  }
+
+  // pseudo is the public display identity; enforce uniqueness at signup
+  // (the schema's unique index is the backstop against races).
+  if (await User.findOne({ pseudo })) {
+    return res
+      .status(409)
+      .json({ error: 'Pseudo already taken', code: 'PSEUDO_TAKEN' })
+  }
+
+  // Email-verification token: store the hash, send the raw value in the link.
+  const verification = generateToken()
+
+  const newUser: IUser = {
+    email,
+    password: await hash(password),
+    firstname,
+    lastname,
+    pseudo,
+    userType,
+    image,
+    ridingStartYear,
+    createdAt: new Date(),
+    isAdmin: false,
+    idMoto: '',
+    emailVerified: false,
+    emailVerificationToken: verification.hash,
+    emailVerificationExpires: new Date(Date.now() + 24 * 60 * 60 * 1000)
+  }
+
+  const created = await User.insertOne(newUser)
+
+  // Fire-and-forget welcome + verification email: delivery is best-effort and
+  // must never block or fail signup (no-ops when Resend isn't configured).
+  const appUrl = process.env.APP_URL || 'http://localhost:3000'
+  const verifyUrl = `${appUrl}/verify-email?token=${verification.raw}`
+  void sendWelcomeEmail({ to: email, firstname, verifyUrl }).catch((err) =>
+    console.error('Failed to send welcome email:', err)
+  )
+
+  // Minimal echo: the client only needs the new id (it re-fetches via login).
+  res.status(201).json({ _id: created._id })
 })
 
 /**
@@ -226,7 +296,7 @@ router.put(
   authenticateToken,
 
   async (req: Request, res: Response) => {
-    const { id } = req.user as { id: string }
+    const { id } = getAuthUser(req)
 
     const allowedFields = [
       'firstname',
@@ -245,47 +315,75 @@ router.put(
       }
     })
 
-    try {
-      if (updateData.pseudo) {
-        const existingUser = await User.findOne({
-          pseudo: updateData.pseudo,
-          _id: { $ne: id }
-        })
-        if (existingUser) {
-          return res.status(409).json({ error: 'Pseudo already taken' })
-        }
-      }
-
-      if (updateData.password) {
-        updateData.password = await hash(updateData.password)
-      }
-
-      if (updateData.ridingStartYear) {
-        const year = Number(updateData.ridingStartYear)
-        const currentYear = new Date().getFullYear()
-        if (isNaN(year) || year < 1950 || year > currentYear) {
-          return res.status(400).json({
-            error: `Riding start year must be between 1950 and ${currentYear}`
-          })
-        }
-      }
-
-      updateData.updatedAt = new Date()
-
-      const users = await User.findByIdAndUpdate(id, updateData, {
-        returnDocument: 'after',
-        runValidators: true
-      }).select('-password') // Ne pas retourner le mot de passe
-
-      if (!users) {
-        return res.status(404).json({ error: 'User not found' })
-      }
-
-      res.status(200).json({ users })
-    } catch (error) {
-      console.error('Error updating user:', error)
-      res.status(500).json({ error: 'Internal server error' })
+    if (updateData.pseudo !== undefined && typeof updateData.pseudo !== 'string') {
+      return res.status(400).json({ error: 'Pseudo must be a string' })
     }
+    if (updateData.pseudo) {
+      const existingUser = await User.findOne({
+        pseudo: updateData.pseudo,
+        _id: { $ne: id }
+      })
+      if (existingUser) {
+        return res
+          .status(409)
+          .json({ error: 'Pseudo already taken', code: 'PSEUDO_TAKEN' })
+      }
+    }
+
+    if (updateData.password !== undefined) {
+      // Changing the password requires proving the current one, so a hijacked
+      // session or an unattended browser cannot silently take over the account.
+      const { currentPassword } = req.body
+      if (typeof currentPassword !== 'string' || !currentPassword) {
+        return res.status(400).json({
+          error: 'Current password is required',
+          code: 'CURRENT_PASSWORD_REQUIRED'
+        })
+      }
+      const current = await User.findById(id).select('+password')
+      if (!current || !(await verify(currentPassword, current.password))) {
+        return res.status(401).json({
+          error: 'Current password is incorrect',
+          code: 'CURRENT_PASSWORD_INVALID'
+        })
+      }
+
+      const passwordCheck = validatePassword(updateData.password, {
+        email: current.email,
+        pseudo: updateData.pseudo ?? current.pseudo
+      })
+      if (!passwordCheck.valid) {
+        return res
+          .status(400)
+          .json({ error: passwordCheck.message, code: 'WEAK_PASSWORD' })
+      }
+      updateData.password = await hash(updateData.password)
+    }
+
+    // !== undefined (not truthiness): 0 or '' must be validated, not
+    // silently written through.
+    if (updateData.ridingStartYear !== undefined) {
+      const year = Number(updateData.ridingStartYear)
+      const currentYear = new Date().getFullYear()
+      if (isNaN(year) || year < 1950 || year > currentYear) {
+        return res.status(400).json({
+          error: `Riding start year must be between 1950 and ${currentYear}`
+        })
+      }
+    }
+
+    updateData.updatedAt = new Date()
+
+    const users = await User.findByIdAndUpdate(id, updateData, {
+      returnDocument: 'after',
+      runValidators: true
+    }).select('-password') // Ne pas retourner le mot de passe
+
+    if (!users) {
+      return res.status(404).json({ error: 'User not found' })
+    }
+
+    res.status(200).json({ users })
   }
 )
 
@@ -320,20 +418,62 @@ router.delete(
   '/account',
   authenticateToken,
   async (req: Request, res: Response) => {
-    const { id } = req.user as { id: string }
+    const { id } = getAuthUser(req)
 
-    try {
-      const deletedUser = await User.findByIdAndDelete(id)
-
-      if (!deletedUser) {
-        return res.status(404).json({ error: 'User not found' })
-      }
-
-      res.status(200).json({ message: 'User deleted successfully' })
-    } catch (error) {
-      console.error('Error deleting user:', error)
-      res.status(500).json({ error: 'Internal server error' })
+    const user = await User.findById(id).select('_id')
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' })
     }
+
+    const placeholderId = await getDeletedPlaceholderId()
+
+    // Reassign authored content to the placeholder so it never dangles.
+    await Post.updateMany({ user: id } as never, { user: placeholderId } as never)
+    await Message.updateMany(
+      { user: id } as never,
+      { user: placeholderId } as never
+    )
+    await Ride.updateMany({ user_id: id }, { user_id: placeholderId.toString() })
+
+    // Pull the user from every reaction/participation array, recomputing the
+    // denormalised counters from the (string) arrays in the same update.
+    await Ride.updateMany(
+      { liked_id: id },
+      [
+        { $set: { liked_id: { $setDifference: ['$liked_id', [id]] } } },
+        { $set: { like: { $size: '$liked_id' } } }
+      ],
+      { updatePipeline: true }
+    )
+    await Ride.updateMany(
+      { participating_user: id },
+      { $pull: { participating_user: id } }
+    )
+    await Message.updateMany(
+      { $or: [{ usersLikeId: id }, { usersDislikeId: id }] },
+      [
+        {
+          $set: {
+            usersLikeId: { $setDifference: ['$usersLikeId', [id]] },
+            usersDislikeId: { $setDifference: ['$usersDislikeId', [id]] }
+          }
+        },
+        {
+          $set: {
+            like: { $size: '$usersLikeId' },
+            dislike: { $size: '$usersDislikeId' }
+          }
+        }
+      ],
+      { updatePipeline: true }
+    )
+    await Post.updateMany(
+      { userFavoritePost: id },
+      { $pull: { userFavoritePost: id } }
+    )
+
+    await User.findByIdAndDelete(id)
+    res.status(200).json({ message: 'User deleted successfully' })
   }
 )
 
@@ -341,15 +481,17 @@ router.delete(
  * @openapi
  * /users:
  *   get:
- *     summary: Récupérer la liste des utilisateurs (champs publics uniquement)
+ *     summary: Récupérer la liste complète des utilisateurs (réservé aux administrateurs)
  *     tags:
  *       - Users
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: project
  *         schema:
  *           type: string
- *         description: Champs à retourner (limités à email, pseudo, userType, ridingStartYear, image)
+ *         description: Champs à retourner (le mot de passe est toujours exclu)
  *       - in: query
  *         name: sort
  *         schema:
@@ -377,39 +519,34 @@ router.delete(
  *                   type: array
  *                   items:
  *                     $ref: '#/components/schemas/User'
+ *       401:
+ *         description: Token manquant ou invalide
+ *       403:
+ *         description: Accès réservé aux administrateurs
  *       500:
  *         description: Erreur serveur
  */
 router.get(
   '/',
+  authenticateToken,
+  requireAdmin,
   async (req: Request<unknown, unknown, unknown, ReqQuery>, res: Response) => {
-    const allowedFields = [
-      'email',
-      'pseudo',
-      'userType',
-      'ridingStartYear',
-      'image'
-    ]
+    // Admin-only and trusted: no field allowlist, but the central operator
+    // hardening still applies and admins keep the high limit their tables need.
+    const { project, sort, limit, skip, filter } = prepareQuery(req.query, {
+      maxLimit: ADMIN_MAX_LIMIT
+    })
 
-    const { project, sort, limit, filter } = prepareQuery(req.query)
+    // Admins may read any field, but never the password hash. Strip it from
+    // the projection: with project=all (project === {}) fall back to an
+    // explicit -password exclusion; otherwise drop an explicit request for it.
+    const projection = { ...project }
+    delete projection.password
 
-    const safeProject = Object.fromEntries(
-      Object.entries(project).filter(([key]) => allowedFields.includes(key))
-    )
-
-    const finalProject =
-      Object.keys(safeProject).length > 0 ? safeProject : { _id: 1 }
-
-    try {
-      const users = await User.find(filter)
-        .select(finalProject)
-        .sort(sort)
-        .limit(limit)
-      res.status(200).json({ users })
-    } catch (error) {
-      console.error('Error accessing user route:', error)
-      res.status(500).json({ error: 'Internal server error' })
-    }
+    const query = User.find(filter).sort(sort).skip(skip).limit(limit)
+    query.select(Object.keys(projection).length > 0 ? projection : '-password')
+    const users = await query
+    res.status(200).json({ users })
   }
 )
 
@@ -432,13 +569,8 @@ router.get(
  *         description: Erreur serveur
  */
 router.get('/count', async (req: Request, res: Response) => {
-  try {
-    const totalUsers: number = await User.countDocuments()
-    res.status(200).json(totalUsers)
-  } catch (error) {
-    console.error('Error accessing user route:', error)
-    res.status(500).json({ error: 'Internal server error' })
-  }
+  const totalUsers: number = await User.countDocuments()
+  res.status(200).json(totalUsers)
 })
 
 /**
@@ -471,43 +603,85 @@ router.get('/count', async (req: Request, res: Response) => {
  *         description: Erreur serveur
  */
 router.get('/stats/monthly', async (req: Request, res: Response) => {
-  try {
-    const currentYear = new Date().getFullYear()
+  const currentYear = new Date().getFullYear()
 
-    const baseCount = await User.countDocuments({
-      createdAt: { $lt: new Date(currentYear, 0, 1) }
-    })
+  const baseCount = await User.countDocuments({
+    createdAt: { $lt: new Date(currentYear, 0, 1) }
+  })
 
-    const monthly = await User.aggregate([
-      {
-        $match: {
-          createdAt: {
-            $gte: new Date(currentYear, 0, 1),
-            $lt: new Date(currentYear + 1, 0, 1)
-          }
+  const monthly = await User.aggregate([
+    {
+      $match: {
+        createdAt: {
+          $gte: new Date(currentYear, 0, 1),
+          $lt: new Date(currentYear + 1, 0, 1)
         }
-      },
-      {
-        $group: {
-          _id: { $month: '$createdAt' },
-          count: { $sum: 1 }
-        }
-      },
-      { $sort: { _id: 1 } }
-    ])
+      }
+    },
+    {
+      $group: {
+        _id: { $month: '$createdAt' },
+        count: { $sum: 1 }
+      }
+    },
+    { $sort: { _id: 1 } }
+  ])
 
-    let cumulative = baseCount
-    const stats = Array.from({ length: 12 }, (_, i) => {
-      const found = monthly.find((m) => m._id === i + 1)
-      cumulative += found?.count ?? 0
-      return { month: i + 1, total: cumulative }
-    })
+  let cumulative = baseCount
+  const stats = Array.from({ length: 12 }, (_, i) => {
+    const found = monthly.find((m) => m._id === i + 1)
+    cumulative += found?.count ?? 0
+    return { month: i + 1, total: cumulative }
+  })
 
-    res.status(200).json({ stats })
-  } catch (error) {
-    console.error('Error accessing user route:', error)
-    res.status(500).json({ error: 'Internal server error' })
+  res.status(200).json({ stats })
+})
+
+/**
+ * @openapi
+ * /users/{id}:
+ *   get:
+ *     summary: Récupérer le profil public d'un utilisateur
+ *     description: Champs publics uniquement (pseudo, userType, ridingStartYear, image). Utilisé pour afficher l'auteur d'une sortie.
+ *     tags:
+ *       - Users
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Identifiant de l'utilisateur
+ *     responses:
+ *       200:
+ *         description: Profil public de l'utilisateur
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 users:
+ *                   $ref: '#/components/schemas/User'
+ *       400:
+ *         description: Identifiant invalide
+ *       404:
+ *         description: Utilisateur non trouvé
+ *       500:
+ *         description: Erreur serveur
+ */
+router.get('/:id', async (req: Request, res: Response) => {
+  // Public profile data only — never email or other private fields.
+  // A malformed ObjectId throws a CastError, which the central handler maps
+  // to a 400.
+  const users = await User.findById(req.params.id).select(
+    'pseudo userType ridingStartYear image'
+  )
+
+  if (!users) {
+    return res.status(404).json({ error: 'User not found' })
   }
+
+  res.status(200).json({ users })
 })
 
 export default router

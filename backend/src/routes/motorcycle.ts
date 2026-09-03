@@ -1,8 +1,58 @@
 import Motorcycle from '../models/Motorcycle'
+import Brand, { toBrandSnapshot } from '../models/Brand'
+import Post from '../models/Post'
+import Message from '../models/Message'
 import { type Request, Response, Router } from 'express'
-import { prepareQuery, type ReqQuery } from '../utils/find'
-import { authenticateToken, requireAdmin } from '../utils/auth'
+import { isValidObjectId } from 'mongoose'
+import {
+  prepareQuery,
+  ADMIN_MAX_LIMIT,
+  PUBLIC_MAX_LIMIT,
+  type ReqQuery
+} from '../utils/find'
+import { authenticateToken, requireAdmin, optionalAuth, isAdminUser } from '../utils/auth'
 const router = Router()
+
+// Resolve the client-sent brand (an id string, or an object carrying _id)
+// to the embedded snapshot. Never trusts a client-built snapshot.
+const resolveBrandSnapshot = async (value: unknown) => {
+  const brandId =
+    typeof value === 'string' ? value : (value as { _id?: string } | null)?._id
+  if (!brandId || !isValidObjectId(brandId)) return null
+  const brand = await Brand.findById(brandId)
+  return brand ? toBrandSnapshot(brand) : null
+}
+
+// Fields an admin may set through the API — everything except _id/createdAt,
+// so the raw body is never mass-assigned into the document.
+const EDITABLE_FIELDS = [
+  'brand',
+  'name',
+  'year',
+  'category',
+  'engine_size',
+  'horsePower',
+  'torque',
+  'weight',
+  'consumption',
+  'soundLink',
+  'imageUrl',
+  'isAvailableA2',
+  'is_public',
+  'acceleration',
+  'speedMax',
+  'numberOfComparison',
+  'withAllField',
+  'price',
+  'post'
+] as const
+
+const pickEditableFields = (body: Record<string, unknown>) =>
+  Object.fromEntries(
+    EDITABLE_FIELDS.filter((field) => body[field] !== undefined).map(
+      (field) => [field, body[field]]
+    )
+  )
 
 /**
  * @openapi
@@ -49,20 +99,36 @@ const router = Router()
  */
 router.get(
   '/',
+  optionalAuth,
   async (req: Request<unknown, unknown, unknown, ReqQuery>, res: Response) => {
-    const { project, sort, limit, filter } = prepareQuery(req.query)
-    try {
-      const motorcycles = await Motorcycle.find()
-        .where(filter)
-        .select(project)
-        .sort(sort)
-        .limit(limit)
-        .populate('brand')
-      res.status(200).json({ motorcycles })
-    } catch (error) {
-      console.error('Error accessing motorcycle route:', error)
-      res.status(500).json({ error: 'Internal server error' })
-    }
+    // Non-public motorcycles are drafts: only admins may list them, and only
+    // admins get the high limit the management table needs.
+    const userId = req.user?.id
+    const isAdmin = userId ? await isAdminUser(userId) : false
+
+    const { project, sort, limit, skip, filter } = prepareQuery(req.query, {
+      filterable: [
+        '_id',
+        'brand._id',
+        'category',
+        'isAvailableA2',
+        'is_public',
+        'year'
+      ],
+      maxLimit: isAdmin ? ADMIN_MAX_LIMIT : PUBLIC_MAX_LIMIT
+    })
+
+    // For anyone but an admin, force is_public:true last so a client-supplied
+    // filter can't override the restriction.
+    const effectiveFilter = isAdmin ? filter : { ...filter, is_public: true }
+
+    // brand is embedded on the document — no populate needed.
+    const motorcycles = await Motorcycle.find(effectiveFilter)
+      .select(project)
+      .sort(sort)
+      .skip(skip)
+      .limit(limit)
+    res.status(200).json({ motorcycles })
   }
 )
 
@@ -90,14 +156,15 @@ router.get(
  *         description: Erreur serveur
  */
 router.post('/', authenticateToken, requireAdmin, async (req: Request, res: Response) => {
-  try {
-    const newMotorcycle = new Motorcycle(req.body)
-    const savedMotorcycle = await newMotorcycle.save()
-    res.status(201).json(savedMotorcycle)
-  } catch (error) {
-    console.error('Error creating motorcycle:', error)
-    res.status(500).json({ error: 'Internal server error' })
+  const fields = pickEditableFields(req.body)
+  const brand = await resolveBrandSnapshot(fields.brand)
+  if (!brand) {
+    return res.status(400).json({ error: 'Unknown brand' })
   }
+  fields.brand = brand
+  const newMotorcycle = new Motorcycle(fields)
+  const savedMotorcycle = await newMotorcycle.save()
+  res.status(201).json({ _id: savedMotorcycle._id })
 })
 
 /**
@@ -119,13 +186,8 @@ router.post('/', authenticateToken, requireAdmin, async (req: Request, res: Resp
  *         description: Erreur serveur
  */
 router.get('/count', async (req: Request, res: Response) => {
-  try {
-    const totalMotorcycles: number = await Motorcycle.countDocuments()
-    res.status(200).json(totalMotorcycles)
-  } catch (error) {
-    console.error('Error accessing motorcycle route:', error)
-    res.status(500).json({ error: 'Internal server error' })
-  }
+  const totalMotorcycles: number = await Motorcycle.countDocuments()
+  res.status(200).json(totalMotorcycles)
 })
 
 /**
@@ -147,20 +209,15 @@ router.get('/count', async (req: Request, res: Response) => {
  *         description: Erreur serveur
  */
 router.get('/stats', async (req: Request, res: Response) => {
-  try {
-    const totalHorsePower = await Motorcycle.aggregate([
-      {
-        $group: {
-          _id: null,
-          totalHorsePower: { $sum: '$horsePower' }
-        }
+  const totalHorsePower = await Motorcycle.aggregate([
+    {
+      $group: {
+        _id: null,
+        totalHorsePower: { $sum: '$horsePower' }
       }
-    ])
-    res.status(200).json(totalHorsePower[0]?.totalHorsePower ?? 0)
-  } catch (error) {
-    console.error('Error accessing motorcycle route:', error)
-    res.status(500).json({ error: 'Internal server error' })
-  }
+    }
+  ])
+  res.status(200).json(totalHorsePower[0]?.totalHorsePower ?? 0)
 })
 
 /**
@@ -199,20 +256,26 @@ router.get('/stats', async (req: Request, res: Response) => {
  *         description: Erreur serveur
  */
 router.put('/:id', authenticateToken, requireAdmin, async (req: Request, res: Response) => {
-  try {
-    const updatedMotorcycle = await Motorcycle.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { returnDocument: 'after', runValidators: true }
-    ).populate('brand')
-    if (!updatedMotorcycle) {
-      return res.status(404).json({ error: 'Motorcycle not found' })
-    }
-    res.status(200).json({ motorcycle: updatedMotorcycle })
-  } catch (error) {
-    console.error('Error updating motorcycle:', error)
-    res.status(500).json({ error: 'Internal server error' })
+  if (!isValidObjectId(req.params.id)) {
+    return res.status(404).json({ error: 'Motorcycle not found' })
   }
+  const fields = pickEditableFields(req.body)
+  if (fields.brand !== undefined) {
+    const brand = await resolveBrandSnapshot(fields.brand)
+    if (!brand) {
+      return res.status(400).json({ error: 'Unknown brand' })
+    }
+    fields.brand = brand
+  }
+  const updatedMotorcycle = await Motorcycle.findByIdAndUpdate(
+    req.params.id,
+    fields,
+    { returnDocument: 'after', runValidators: true }
+  )
+  if (!updatedMotorcycle) {
+    return res.status(404).json({ error: 'Motorcycle not found' })
+  }
+  res.status(204).end()
 })
 
 /**
@@ -246,16 +309,23 @@ router.put('/:id', authenticateToken, requireAdmin, async (req: Request, res: Re
  *         description: Erreur serveur
  */
 router.delete('/:id', authenticateToken, requireAdmin, async (req: Request, res: Response) => {
-  try {
-    const deletedMotorcycle = await Motorcycle.findByIdAndDelete(req.params.id)
-    if (!deletedMotorcycle) {
-      return res.status(404).json({ error: 'Motorcycle not found' })
-    }
-    res.status(200).json({ message: 'Motorcycle deleted successfully' })
-  } catch (error) {
-    console.error('Error deleting motorcycle:', error)
-    res.status(500).json({ error: 'Internal server error' })
+  if (!isValidObjectId(req.params.id)) {
+    return res.status(404).json({ error: 'Motorcycle not found' })
   }
+  const deletedMotorcycle = await Motorcycle.findByIdAndDelete(req.params.id)
+  if (!deletedMotorcycle) {
+    return res.status(404).json({ error: 'Motorcycle not found' })
+  }
+  // Cascade: the linked discussion thread is owned by this motorcycle, so
+  // drop it and its messages instead of leaving an orphaned post.
+  if (deletedMotorcycle.post) {
+    await Message.deleteMany({
+      reference: deletedMotorcycle.post,
+      referenceModel: 'Post'
+    })
+    await Post.findByIdAndDelete(deletedMotorcycle.post)
+  }
+  res.status(200).json({ message: 'Motorcycle deleted successfully' })
 })
 
 /**
@@ -304,28 +374,23 @@ router.delete('/:id', authenticateToken, requireAdmin, async (req: Request, res:
  *         description: Erreur serveur
  */
 router.get('/max-stats', async (req: Request, res: Response) => {
-  try {
-    const maxStats = await Motorcycle.aggregate([
-      {
-        $group: {
-          _id: null,
-          maxYear: { $max: '$year' },
-          maxEngineSize: { $max: '$engine_size' },
-          maxHorsePower: { $max: '$horsePower' },
-          maxTorque: { $max: '$torque' },
-          maxWeight: { $max: '$weight' },
-          maxConsumption: { $max: '$consumption' },
-          maxAcceleration: { $max: '$acceleration.time_0_100' },
-          maxSpeedMax: { $max: '$speedMax' },
-          maxPrice: { $max: '$price' }
-        }
+  const maxStats = await Motorcycle.aggregate([
+    {
+      $group: {
+        _id: null,
+        maxYear: { $max: '$year' },
+        maxEngineSize: { $max: '$engine_size' },
+        maxHorsePower: { $max: '$horsePower' },
+        maxTorque: { $max: '$torque' },
+        maxWeight: { $max: '$weight' },
+        maxConsumption: { $max: '$consumption' },
+        maxAcceleration: { $max: '$acceleration.time_0_100' },
+        maxSpeedMax: { $max: '$speedMax' },
+        maxPrice: { $max: '$price' }
       }
-    ])
-    res.status(200).json(maxStats[0] ?? {})
-  } catch (error) {
-    console.error('Error accessing motorcycle route:', error)
-    res.status(500).json({ error: 'Internal server error' })
-  }
+    }
+  ])
+  res.status(200).json(maxStats[0] ?? {})
 })
 
 export default router

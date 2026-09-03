@@ -17,8 +17,7 @@ const brands = ref<IBrand[]>([])
 const filters = ref({
   brandIds: [...(props.activeFilters?.brandIds || [])],
   categoryIds: [...(props.activeFilters?.categoryIds || [])],
-  onlyMyPost: props.activeFilters?.onlyMyPost || false,
-  searchBar: ''
+  onlyMyPost: props.activeFilters?.onlyMyPost || false
 })
 
 watch(
@@ -28,10 +27,17 @@ watch(
       filters.value.brandIds = [...(newVal.brandIds || [])]
       filters.value.categoryIds = [...(newVal.categoryIds || [])]
       filters.value.onlyMyPost = newVal.onlyMyPost
-      filters.value.searchBar = newVal.searchBar
     }
   },
   { deep: true }
+)
+
+// Count of selected items per section, surfaced as badges in the headers.
+const categoryCount = computed(() => filters.value.categoryIds.length)
+const brandCount = computed(() => filters.value.brandIds.length)
+// "Effacer" only makes sense once a filter narrows the list.
+const hasActiveFilters = computed(
+  () => categoryCount.value > 0 || brandCount.value > 0
 )
 
 const handleHaveAllPosts = () => {
@@ -46,12 +52,13 @@ const getBrands = async () => {
   brands.value = data.brands
 }
 
+// Search is owned by the page toolbar now, so we never emit searchBar here —
+// that keeps a category/brand toggle from wiping the active search term.
 const emitFilters = () => {
   emits('change', {
     brandIds: filters.value.brandIds,
     categoryIds: filters.value.categoryIds,
-    onlyMyPost: filters.value.onlyMyPost,
-    searchBar: filters.value.searchBar
+    onlyMyPost: filters.value.onlyMyPost
   })
 }
 
@@ -79,7 +86,9 @@ const handleClickOnBrand = (filterBrandId: string) => {
   emitFilters()
 }
 
-const handleSearch = () => {
+const clearAllFilters = () => {
+  filters.value.brandIds = []
+  filters.value.categoryIds = []
   emitFilters()
 }
 
@@ -89,102 +98,102 @@ onMounted(async () => {
 </script>
 
 <template>
-  <UInput
-    v-model="filters.searchBar"
-    placeholder="Rechercher un post dans le forum"
-    @update:model-value="handleSearch"
-  >
-    <template v-if="filters.searchBar?.length" #trailing>
-      <UButton
-        color="neutral"
-        variant="link"
-        size="sm"
-        icon="i-lucide-circle-x"
-        aria-label="Clear input"
-        class="cursor-pointer"
-        @click="
-          filters.searchBar = '';
-          emitFilters();
-        "
-      />
-    </template>
-  </UInput>
-  <div
-    class="flex flex-row items-center my-8 mx-8 max-lg:my-3! max-lg:mx-4! cursor-pointer"
-    @click="handleHaveAllPosts"
-  >
-    <UIcon class="size-7 mr-2" name="i-lucide-messages-square" />
-    <p>Tous les posts</p>
-  </div>
-  <div
-    class="flex flex-row items-center my-8 mx-8 max-lg:my-3! max-lg:mx-4! cursor-pointer"
-    @click="handleHaveMyFavorites"
-  >
-    <UIcon class="size-7 mr-2" name="i-lucide-star" />
-    <p>Mes favoris</p>
-  </div>
-  <div class="my-8 mx-8 max-lg:my-3! max-lg:mx-4!">
-    <div class="flex flex-row items-center">
-      <UIcon class="size-7 mr-2" name="i-lucide-grid-2x2-check" />
-      <p>Catégories</p>
-    </div>
-    <div class="my-8 mx-8 max-lg:my-3! max-lg:mx-4!">
-      <USkeleton v-if="props.loading" class="size-12 rounded-full" />
-      <div
-        v-for="category in categories"
-        v-else
-        :key="category.value"
-        class="flex flex-row items-center my-2 mx-4 p-[0.3em] cursor-pointer hover:bg-[rgba(109,100,100,0.097)] hover:rounded-xl hover:w-fit"
-        :class="{
-          'background-selected': filters.categoryIds.includes(category.value)
-        }"
-        @click="handlClickOnCategory(category.value)"
-      >
-        <UIcon class="size-7 mr-2" :name="category.icon" />
-        <p>{{ category.label }}</p>
-      </div>
-    </div>
-  </div>
-  <div class="my-8 mx-8 max-lg:my-3! max-lg:mx-4!">
-    <div class="flex flex-row items-center">
-      <UIcon class="size-7 mr-2" name="i-lucide-warehouse" />
-      <p>Marques</p>
-    </div>
-    <div class="my-8 mx-8 max-lg:my-3! max-lg:mx-4!">
-      <USkeleton v-if="props.loading" class="size-12 rounded-full" />
-      <div
-        v-for="brand in brands"
-        v-else
-        :key="brand._id"
-        class="flex flex-row items-center my-2 mx-4 p-[0.3em] cursor-pointer hover:bg-[rgba(109,100,100,0.097)] hover:rounded-xl hover:w-fit"
-        :class="{ 'background-selected': filters.brandIds.includes(brand._id) }"
-        @click="handleClickOnBrand(brand._id)"
-      >
-        <img
-          :src="brand.icon"
-          :alt="brand.name"
-          :title="brand.name"
-          width="40"
-          height="40"
-          class="mr-2"
-        />
-        <p>{{ brand.name }}</p>
-      </div>
-    </div>
-  </div>
-  <USwitch
-    v-model="filters.onlyMyPost"
-    label="Uniquement mes posts"
-    class="my-8 mx-8 max-lg:my-3! max-lg:mx-4!"
-  />
-</template>
+  <div class="flex flex-col gap-5">
+    <!-- Quick links -->
+    <nav class="flex flex-col gap-1">
+      <FilterRow label="Tous les posts" @select="handleHaveAllPosts">
+        <template #leading>
+          <UIcon class="size-5 shrink-0" name="i-lucide-messages-square" />
+        </template>
+      </FilterRow>
+      <FilterRow label="Mes favoris" @select="handleHaveMyFavorites">
+        <template #leading>
+          <UIcon class="size-5 shrink-0" name="i-lucide-star" />
+        </template>
+      </FilterRow>
+    </nav>
 
-<style scoped>
-.background-selected {
-  background-color: rgba(109, 100, 100, 0.325);
-  border-radius: 12px;
-  padding-right: 0.3em;
-  padding-left: 0.3em;
-  width: fit-content;
-}
-</style>
+    <!-- Catégories -->
+    <section class="flex flex-col gap-2">
+      <div class="flex items-center justify-between border-l-[3px] border-solid border-(--ui-primary) pl-2">
+        <span class="font-['Krona_One',sans-serif] text-xs tracking-widest text-gray-500 uppercase">Catégories</span>
+        <UBadge
+          v-if="categoryCount"
+          :label="String(categoryCount)"
+          color="primary"
+          variant="subtle"
+          size="sm"
+        />
+      </div>
+      <USkeleton v-if="props.loading" class="h-8 w-full rounded-lg" />
+      <div v-else class="flex flex-col gap-1">
+        <FilterRow
+          v-for="category in categories"
+          :key="category.value"
+          :label="category.label"
+          :selected="filters.categoryIds.includes(category.value)"
+          @select="handlClickOnCategory(category.value)"
+        >
+          <template #leading>
+            <UIcon class="size-5 shrink-0" :name="category.icon" />
+          </template>
+        </FilterRow>
+      </div>
+    </section>
+
+    <!-- Marques -->
+    <section class="flex flex-col gap-2">
+      <div class="flex items-center justify-between border-l-[3px] border-solid border-(--ui-primary) pl-2">
+        <span class="font-['Krona_One',sans-serif] text-xs tracking-widest text-gray-500 uppercase">Marques</span>
+        <UBadge
+          v-if="brandCount"
+          :label="String(brandCount)"
+          color="primary"
+          variant="subtle"
+          size="sm"
+        />
+      </div>
+      <USkeleton v-if="props.loading" class="h-8 w-full rounded-lg" />
+      <div v-else class="flex flex-col gap-1">
+        <FilterRow
+          v-for="brand in brands"
+          :key="brand._id"
+          :label="brand.name"
+          :selected="filters.brandIds.includes(brand._id)"
+          @select="handleClickOnBrand(brand._id)"
+        >
+          <template #leading>
+            <img
+              :src="brand.icon"
+              :alt="brand.name"
+              :title="brand.name"
+              width="24"
+              height="24"
+              class="size-6 shrink-0 object-contain"
+            />
+          </template>
+        </FilterRow>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <div class="flex flex-col gap-3 border-t border-solid border-(--border-gray) pt-4">
+      <USwitch
+        v-model="filters.onlyMyPost"
+        label="Uniquement mes posts"
+        @update:model-value="emitFilters"
+      />
+      <UButton
+        v-if="hasActiveFilters"
+        label="Effacer les filtres"
+        icon="i-lucide-x"
+        color="neutral"
+        variant="subtle"
+        size="sm"
+        block
+        class="cursor-pointer"
+        @click="clearAllFilters"
+      />
+    </div>
+  </div>
+</template>

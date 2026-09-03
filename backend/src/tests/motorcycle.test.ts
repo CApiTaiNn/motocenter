@@ -8,6 +8,7 @@ import User from '../models/User'
 
 describe('Motorcycle Routes - /api/v1/motorcycles', () => {
   let brandId: string
+  let brandSnapshot: { _id: unknown; name: string; icon: string }
   let adminCookie: string
   let userCookie: string
 
@@ -26,6 +27,7 @@ describe('Motorcycle Routes - /api/v1/motorcycles', () => {
   beforeEach(async () => {
     const brand = await Brand.create({ name: 'Yamaha', icon: 'yamaha.svg' })
     brandId = brand._id.toString()
+    brandSnapshot = { _id: brand._id, name: brand.name, icon: brand.icon }
 
     const admin = await User.create({
       firstname: 'Admin',
@@ -57,33 +59,43 @@ describe('Motorcycle Routes - /api/v1/motorcycles', () => {
   })
 
   describe('POST /api/v1/motorcycles', () => {
-    it('should create a new motorcycle', async () => {
+    it('should create a new motorcycle and echo only the id', async () => {
       const res = await request(app)
         .post('/api/v1/motorcycles')
         .set('Cookie', adminCookie)
         .send({ ...motoData, brand: brandId })
 
       expect(res.status).toBe(201)
-      expect(res.body.name).toBe('MT-07')
-      expect(res.body.horsePower).toBe(73)
+      expect(res.body._id).toBeTruthy()
+      expect(res.body.name).toBeUndefined()
+
+      const stored = await Motorcycle.findById(res.body._id)
+      expect(stored!.name).toBe('MT-07')
+      expect(stored!.horsePower).toBe(73)
     })
 
     it('should fail without required fields', async () => {
+      // No brand at all -> rejected up front by the brand resolution.
       const res = await request(app)
         .post('/api/v1/motorcycles')
         .set('Cookie', adminCookie)
         .send({ name: 'Incomplete' })
 
-      expect(res.status).toBe(500)
+      expect(res.status).toBe(400)
+      expect(res.body.error).toBe('Unknown brand')
     })
   })
 
   describe('GET /api/v1/motorcycles', () => {
     beforeEach(async () => {
-      await Motorcycle.create({ ...motoData, brand: brandId })
+      await Motorcycle.create({
+        ...motoData,
+        brand: brandSnapshot,
+        is_public: true
+      })
     })
 
-    it('should return motorcycles with populated brand', async () => {
+    it('should return public motorcycles to anonymous callers', async () => {
       const res = await request(app).get('/api/v1/motorcycles?project=all')
 
       expect(res.status).toBe(200)
@@ -93,13 +105,71 @@ describe('Motorcycle Routes - /api/v1/motorcycles', () => {
     })
 
     it('should respect limit', async () => {
-      await Motorcycle.create({ ...motoData, name: 'MT-09', brand: brandId })
+      await Motorcycle.create({
+        ...motoData,
+        name: 'MT-09',
+        brand: brandSnapshot,
+        is_public: true
+      })
       const res = await request(app).get(
         '/api/v1/motorcycles?project=all&limit=1'
       )
 
       expect(res.status).toBe(200)
       expect(res.body.motorcycles.length).toBe(1)
+    })
+
+    it('should hide non-public motorcycles from anonymous and non-admin callers', async () => {
+      await Motorcycle.create({
+        ...motoData,
+        name: 'Secret',
+        brand: brandSnapshot,
+        is_public: false
+      })
+
+      const anon = await request(app).get('/api/v1/motorcycles?project=all')
+      expect(anon.body.motorcycles.length).toBe(1)
+      expect(anon.body.motorcycles[0].name).toBe('MT-07')
+
+      const user = await request(app)
+        .get('/api/v1/motorcycles?project=all')
+        .set('Cookie', userCookie)
+      expect(user.body.motorcycles.length).toBe(1)
+      expect(user.body.motorcycles[0].name).toBe('MT-07')
+    })
+
+    it('should return all motorcycles (public and non-public) to an admin', async () => {
+      await Motorcycle.create({
+        ...motoData,
+        name: 'Secret',
+        brand: brandSnapshot,
+        is_public: false
+      })
+
+      const res = await request(app)
+        .get('/api/v1/motorcycles?project=all')
+        .set('Cookie', adminCookie)
+      expect(res.body.motorcycles.length).toBe(2)
+    })
+
+    it('should not let a non-admin reveal drafts via an is_public filter', async () => {
+      await Motorcycle.create({
+        ...motoData,
+        name: 'Secret',
+        brand: brandSnapshot,
+        is_public: false
+      })
+
+      const res = await request(app)
+        .get(
+          `/api/v1/motorcycles?project=all&filter=${JSON.stringify({ is_public: false })}`
+        )
+        .set('Cookie', userCookie)
+
+      // The forced is_public:true wins, so the draft stays hidden.
+      expect(res.body.motorcycles.every((m: any) => m.name !== 'Secret')).toBe(
+        true
+      )
     })
   })
 
@@ -112,7 +182,7 @@ describe('Motorcycle Routes - /api/v1/motorcycles', () => {
     })
 
     it('should return correct count', async () => {
-      await Motorcycle.create({ ...motoData, brand: brandId })
+      await Motorcycle.create({ ...motoData, brand: brandSnapshot })
       const res = await request(app).get('/api/v1/motorcycles/count')
 
       expect(res.status).toBe(200)
@@ -122,12 +192,12 @@ describe('Motorcycle Routes - /api/v1/motorcycles', () => {
 
   describe('GET /api/v1/motorcycles/stats', () => {
     it('should return total horsePower sum', async () => {
-      await Motorcycle.create({ ...motoData, brand: brandId })
+      await Motorcycle.create({ ...motoData, brand: brandSnapshot })
       await Motorcycle.create({
         ...motoData,
         name: 'R1',
         horsePower: 200,
-        brand: brandId
+        brand: brandSnapshot
       })
 
       const res = await request(app).get('/api/v1/motorcycles/stats')
@@ -139,13 +209,13 @@ describe('Motorcycle Routes - /api/v1/motorcycles', () => {
 
   describe('GET /api/v1/motorcycles/max-stats', () => {
     it('should return max values for numeric fields', async () => {
-      await Motorcycle.create({ ...motoData, brand: brandId })
+      await Motorcycle.create({ ...motoData, brand: brandSnapshot })
       await Motorcycle.create({
         ...motoData,
         name: 'R1',
         horsePower: 200,
         price: 20000,
-        brand: brandId
+        brand: brandSnapshot
       })
 
       const res = await request(app).get('/api/v1/motorcycles/max-stats')
@@ -157,16 +227,19 @@ describe('Motorcycle Routes - /api/v1/motorcycles', () => {
   })
 
   describe('PUT /api/v1/motorcycles/:id', () => {
-    it('should update a motorcycle', async () => {
-      const moto = await Motorcycle.create({ ...motoData, brand: brandId })
+    it('should update a motorcycle and return no content', async () => {
+      const moto = await Motorcycle.create({ ...motoData, brand: brandSnapshot })
 
       const res = await request(app)
         .put(`/api/v1/motorcycles/${moto._id}`)
         .set('Cookie', adminCookie)
         .send({ name: 'MT-07 Updated' })
 
-      expect(res.status).toBe(200)
-      expect(res.body.motorcycle).toBeDefined()
+      expect(res.status).toBe(204)
+      expect(res.body).toEqual({})
+
+      const updated = await Motorcycle.findById(moto._id)
+      expect(updated!.name).toBe('MT-07 Updated')
     })
 
     it('should return 404 for non-existent id', async () => {
@@ -178,11 +251,37 @@ describe('Motorcycle Routes - /api/v1/motorcycles', () => {
 
       expect(res.status).toBe(404)
     })
+
+    it('should ignore createdAt, _id and unknown fields (mass-assignment guard)', async () => {
+      const moto = await Motorcycle.create({ ...motoData, brand: brandSnapshot })
+      const originalId = moto._id.toString()
+      const originalCreatedAt = moto.createdAt!.toISOString()
+      const fakeId = '507f1f77bcf86cd799439011'
+
+      const res = await request(app)
+        .put(`/api/v1/motorcycles/${moto._id}`)
+        .set('Cookie', adminCookie)
+        .send({
+          name: 'MT-07 Renamed',
+          _id: fakeId,
+          createdAt: '2000-01-01T00:00:00.000Z',
+          hackerField: 'pwned'
+        })
+
+      expect(res.status).toBe(204)
+
+      const updated = await Motorcycle.findById(originalId)
+      expect(updated!.name).toBe('MT-07 Renamed')
+      expect(updated).not.toBeNull()
+      expect(updated!._id.toString()).toBe(originalId)
+      expect(updated!.createdAt!.toISOString()).toBe(originalCreatedAt)
+      expect((updated!.toObject() as Record<string, unknown>).hackerField).toBeUndefined()
+    })
   })
 
   describe('DELETE /api/v1/motorcycles/:id', () => {
     it('should delete a motorcycle', async () => {
-      const moto = await Motorcycle.create({ ...motoData, brand: brandId })
+      const moto = await Motorcycle.create({ ...motoData, brand: brandSnapshot })
 
       const res = await request(app)
         .delete(`/api/v1/motorcycles/${moto._id}`)
@@ -240,7 +339,7 @@ describe('Motorcycle Routes - /api/v1/motorcycles', () => {
     })
 
     it('PUT should return 401 without a token', async () => {
-      const moto = await Motorcycle.create({ ...motoData, brand: brandId })
+      const moto = await Motorcycle.create({ ...motoData, brand: brandSnapshot })
       const res = await request(app)
         .put(`/api/v1/motorcycles/${moto._id}`)
         .send({ name: 'Hacked' })
@@ -249,7 +348,7 @@ describe('Motorcycle Routes - /api/v1/motorcycles', () => {
     })
 
     it('PUT should return 403 for a non-admin user', async () => {
-      const moto = await Motorcycle.create({ ...motoData, brand: brandId })
+      const moto = await Motorcycle.create({ ...motoData, brand: brandSnapshot })
       const res = await request(app)
         .put(`/api/v1/motorcycles/${moto._id}`)
         .set('Cookie', userCookie)
@@ -259,14 +358,14 @@ describe('Motorcycle Routes - /api/v1/motorcycles', () => {
     })
 
     it('DELETE should return 401 without a token', async () => {
-      const moto = await Motorcycle.create({ ...motoData, brand: brandId })
+      const moto = await Motorcycle.create({ ...motoData, brand: brandSnapshot })
       const res = await request(app).delete(`/api/v1/motorcycles/${moto._id}`)
 
       expect(res.status).toBe(401)
     })
 
     it('DELETE should return 403 for a non-admin user', async () => {
-      const moto = await Motorcycle.create({ ...motoData, brand: brandId })
+      const moto = await Motorcycle.create({ ...motoData, brand: brandSnapshot })
       const res = await request(app)
         .delete(`/api/v1/motorcycles/${moto._id}`)
         .set('Cookie', userCookie)

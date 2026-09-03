@@ -1,5 +1,6 @@
 import type { IMessage } from '../types/messages'
 import { Schema, Types, model } from 'mongoose'
+import { stripInternalFields } from '../utils/serialize'
 
 const messageSchema = new Schema(
   {
@@ -47,8 +48,12 @@ const messageSchema = new Schema(
     }
   },
   {
-    validateBeforeSave: true
+    validateBeforeSave: true,
+    toJSON: stripInternalFields
   }
 )
+
+// The responses lookups always filter on both fields together.
+messageSchema.index({ reference: 1, referenceModel: 1 })
 
 export default model<IMessage>('Message', messageSchema)

@@ -12,16 +12,17 @@ const postOfUser = ref<IPost[]>([])
 
 const getMyPost = async () => {
   if (user.value) {
+    // Filter server-side by author instead of downloading every post and
+    // filtering on the client.
     const response = await $fetch<{ posts: IPost[] }>(`${apiBase}posts`, {
       params: {
         project: 'title,user',
-        deep: true
+        deep: true,
+        filter: JSON.stringify({ user: user.value._id })
       }
     })
 
-    postOfUser.value = response.posts.filter(
-      (post) => post.user._id === user.value?._id
-    )
+    postOfUser.value = response.posts
   }
 }
 
@@ -58,7 +59,10 @@ watch(
     >
       <template #header>
         <div class="flex flex-row items-center justify-between gap-2">
-          <h3>Mes posts</h3>
+          <h3 class="flex items-center gap-2">
+            <UIcon name="i-lucide-file-text" class="size-5 text-(--ui-primary)" />
+            Mes posts
+          </h3>
           <UButton
             v-if="!isAuthenticated"
             icon="i-lucide-plus"
@@ -80,7 +84,7 @@ watch(
           <div
             v-for="post in postOfUser"
             :key="post._id"
-            class="cursor-pointer mb-4 border-b border-solid border-(--border-gray)"
+            class="mb-4 cursor-pointer border-b border-solid border-(--border-gray)"
             @click="navigateTo(`/forum/${post._id}`)"
           >
             {{ post.title }}

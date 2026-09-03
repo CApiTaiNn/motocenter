@@ -13,12 +13,12 @@ const logos = Object.values(modules).map((mod) => mod as string)
       <div
         v-for="card in [...logos, ...logos]"
         :key="card"
-        class="flex w-[10%] shrink-0 items-center justify-center mx-3"
+        class="mx-3 flex w-[10%] shrink-0 items-center justify-center"
       >
         <img
           :src="card"
           :alt="`Sponsor ${card}`"
-          class="max-w-full max-h-full object-contain rounded-[20px]"
+          class="max-h-full max-w-full rounded-[20px] object-contain"
         />
       </div>
     </div>

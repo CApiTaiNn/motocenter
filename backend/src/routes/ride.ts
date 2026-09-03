@@ -1,12 +1,40 @@
 import Ride from '../models/Ride'
 import { type Request, Router } from 'express'
-import { prepareQuery, type ReqQuery } from '../utils/find'
+import { type ReqQuery } from '../utils/find'
 import { RideColor, ICreateRideBody } from '../types/ride'
-import { Types } from 'mongoose'
+import { Types, isValidObjectId } from 'mongoose'
 import { attachUsers } from '../utils/attach'
-import { authenticateToken } from '../utils/auth'
+import {
+  authenticateToken,
+  optionalAuth,
+  getAuthUser,
+  assertOwnerOrAdmin
+} from '../utils/auth'
+import { fetchList } from '../utils/list'
+import { summarizeReactionsMany } from '../utils/reactions'
 
 const router = Router()
+
+const RIDE_REACTIONS = [{ array: 'liked_id', flag: 'likedByMe' }]
+
+// Whether an event's date/hour is already in the past (Europe/Paris). Computed
+// on read instead of being persisted, so listing rides never mutates them.
+function isEventExpired(ride: {
+  is_event?: boolean
+  date_event?: string
+  hour_event?: string
+}): boolean {
+  if (!ride.is_event || !ride.date_event) return false
+  const now = new Date(
+    new Date().toLocaleString('en-US', { timeZone: 'Europe/Paris' })
+  )
+  const eventDate = new Date(ride.date_event)
+  if (ride.hour_event) {
+    const [hours, minutes] = ride.hour_event.split(':').map(Number)
+    eventDate.setHours(hours, minutes, 0, 0)
+  }
+  return eventDate < now
+}
 
 /**
  * @openapi
@@ -15,79 +43,36 @@ const router = Router()
  *     summary: Récupérer la liste des balades
  *     tags:
  *       - Rides
- *     parameters:
- *       - in: query
- *         name: project
- *         schema:
- *           type: string
- *         description: Champs à retourner
- *       - in: query
- *         name: sort
- *         schema:
- *           type: string
- *         description: Tri des résultats
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *         description: Nombre maximum de résultats
- *       - in: query
- *         name: deep
- *         schema:
- *           type: boolean
- *         description: Inclure les données des participants (populate)
  *     responses:
  *       200:
  *         description: Liste des balades
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 rides:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/Ride'
- *       500:
- *         description: Erreur serveur
  */
 router.get(
   '/',
-  async (req: Request<unknown, unknown, unknown, ReqQuery>, res: any) => {
-    const { project, sort, limit, deep } = prepareQuery(req.query)
-    try {
-      const rides = await Ride.find().select(project).sort(sort).limit(limit)
-      const now = new Date(
-        new Date().toLocaleString('en-US', { timeZone: 'Europe/Paris' })
-      )
-
-      await Promise.all(
-        rides.map(async (ride) => {
-          if (ride.is_event && ride.date_event) {
-            const eventDate = new Date(ride.date_event)
-
-            if (ride.hour_event) {
-              const [hours, minutes] = ride.hour_event.split(':').map(Number)
-              eventDate.setHours(hours, minutes, 0, 0)
-            }
-            if (eventDate < now) {
-              ride.is_event = false
-              await ride.save()
-            }
-          }
-        })
-      )
-
-      const ridesOut = rides.map((r) => r.toObject()) as any[]
-      if (deep) {
-        await attachUsers(ridesOut, 'participating_user')
+  optionalAuth,
+  async (req: Request<unknown, unknown, unknown, ReqQuery>, res) => {
+    const viewerId = req.user?.id
+    const rides = await fetchList(
+      Ride,
+      req.query,
+      { filterable: ['_id', 'is_event', 'ride_type', 'user_id', 'createdAt'] },
+      {
+        lean: true,
+        attach: (docs, deep) =>
+          deep
+            ? attachUsers(docs, 'participating_user').then(() => {})
+            : Promise.resolve()
       }
+    )
 
-      res.status(200).json({ rides: ridesOut })
-    } catch (error) {
-      console.error('Error accessing ride route:', error)
-      res.status(500).json({ error: 'Internal server error' })
+    // Reflect event expiry in the response without persisting it (no
+    // write-on-read): a past event is reported as is_event:false.
+    for (const ride of rides) {
+      if (isEventExpired(ride)) ride.is_event = false
     }
+    summarizeReactionsMany(rides, viewerId, RIDE_REACTIONS)
+
+    res.status(200).json({ rides })
   }
 )
 
@@ -95,7 +80,7 @@ router.get(
  * @openapi
  * /rides/{id}/like:
  *   patch:
- *     summary: Liker ou unliker un balade
+ *     summary: Liker ou unliker une balade
  *     tags:
  *       - Rides
  *     parameters:
@@ -104,71 +89,44 @@ router.get(
  *         required: true
  *         schema:
  *           type: string
- *         description: ID du balade
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - userId
- *             properties:
- *               userId:
- *                 type: string
- *                 description: ID de l'utilisateur
  *     responses:
  *       200:
  *         description: Like mis à jour
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 like:
- *                   type: integer
- *                   description: Nombre total de likes
- *                 isLiked:
- *                   type: boolean
- *                   description: Statut du like pour l'utilisateur
- *       400:
- *         description: userId manquant
  *       404:
  *         description: Balade non trouvée
- *       500:
- *         description: Erreur serveur
  */
 router.patch(
   '/:id/like',
   authenticateToken,
-  async (req: Request<{ id: string }>, res: any) => {
-    const { id: userId } = req.user as { id: string }
+  async (req: Request<{ id: string }>, res) => {
+    const { id: userId } = getAuthUser(req)
     const rideId = req.params.id
 
-    try {
-      const ride = await Ride.findById(rideId)
-      if (!ride) return res.status(404).json({ error: 'Ride not found' })
-
-      const hasLiked = ride.liked_id.includes(userId.toString())
-
-      const update = hasLiked
-        ? { $pull: { liked_id: userId }, $inc: { like: -1 } }
-        : { $addToSet: { liked_id: userId }, $inc: { like: 1 } }
-
-      const updatedRide = await Ride.findByIdAndUpdate(rideId, update, {
-        returnDocument: 'after'
-      })
-
-      if (!updatedRide) return res.status(404).json({ error: 'Update failed' })
-
-      res.status(200).json({
-        like: updatedRide.like,
-        isLiked: !hasLiked
-      })
-    } catch (error) {
-      console.error('Error liking ride:', error)
-      res.status(500).json({ error: 'Internal server error' })
+    if (!isValidObjectId(rideId)) {
+      return res.status(404).json({ error: 'Ride not found' })
     }
+    const ride = await Ride.findById(rideId)
+    if (!ride) return res.status(404).json({ error: 'Ride not found' })
+
+    const hasLiked = ride.liked_id.includes(userId)
+    const update = hasLiked
+      ? { $pull: { liked_id: userId } }
+      : { $addToSet: { liked_id: userId } }
+
+    const updatedRide = await Ride.findByIdAndUpdate(rideId, update, {
+      returnDocument: 'after'
+    })
+    if (!updatedRide) return res.status(404).json({ error: 'Update failed' })
+
+    // Recompute the counter from the authoritative array so concurrent toggles
+    // can never drift `like` away from liked_id.length.
+    updatedRide.like = updatedRide.liked_id.length
+    await updatedRide.save()
+
+    res.status(200).json({
+      like: updatedRide.like,
+      isLiked: updatedRide.liked_id.includes(userId)
+    })
   }
 )
 
@@ -176,190 +134,92 @@ router.patch(
  * @openapi
  * /rides/count:
  *   get:
- *     summary: Compter les balades créés sur les deux derniers mois
+ *     summary: Compter les balades créées sur les deux derniers mois
  *     tags:
  *       - Rides
  *     responses:
  *       200:
  *         description: Nombre de balades et évolution en pourcentage
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 count:
- *                   type: integer
- *                   description: Nombre de balades créés sur le mois en cours
- *                 percent:
- *                   type: number
- *                   description: Évolution en % par rapport au mois précédent
- *       500:
- *         description: Erreur serveur
  */
 router.get('/count', async (req, res) => {
-  try {
-    const now = new Date()
-    const start = new Date(now.getFullYear(), now.getMonth() - 1, 1)
-    const intermediate = new Date(now.getFullYear(), now.getMonth(), 1)
-    const end = now
-    const countFirstPeriod = await Ride.countDocuments({
-      createdAt: { $gte: start, $lt: intermediate }
-    })
-    const countSecondPeriod = await Ride.countDocuments({
-      createdAt: { $gte: intermediate, $lt: end }
-    })
+  const now = new Date()
+  const start = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+  const intermediate = new Date(now.getFullYear(), now.getMonth(), 1)
+  // Count the whole current month, not just up to `now`, so the comparison
+  // against the previous month covers equivalent full-month windows.
+  const end = new Date(now.getFullYear(), now.getMonth() + 1, 1)
+  const countFirstPeriod = await Ride.countDocuments({
+    createdAt: { $gte: start, $lt: intermediate }
+  })
+  const countSecondPeriod = await Ride.countDocuments({
+    createdAt: { $gte: intermediate, $lt: end }
+  })
 
-    const percent =
-      countFirstPeriod === 0
-        ? countSecondPeriod * 100
-        : ((countSecondPeriod - countFirstPeriod) / countFirstPeriod) * 100
+  const percent =
+    countFirstPeriod === 0
+      ? countSecondPeriod * 100
+      : ((countSecondPeriod - countFirstPeriod) / countFirstPeriod) * 100
 
-    res.status(200).json({ count: countSecondPeriod, percent })
-  } catch (error) {
-    console.error('Error counting rides:', error)
-    res.status(500).json({ error: 'Internal server error' })
-  }
+  res.status(200).json({ count: countSecondPeriod, percent })
 })
 
 /**
  * @openapi
  * /rides:
  *   post:
- *     summary: Créer un balade
+ *     summary: Créer une balade
  *     tags:
  *       - Rides
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - title
- *               - duration
- *               - distance
- *               - startTown
- *               - endTown
- *               - rideType
- *               - imageLink
- *               - userId
- *             properties:
- *               title:
- *                 type: string
- *                 description: Titre du balade
- *               description:
- *                 type: string
- *                 description: Description du balade
- *               duration:
- *                 type: number
- *                 description: Durée du balade (en minutes)
- *               distance:
- *                 type: number
- *                 description: Distance du balade (en km)
- *               startTown:
- *                 type: object
- *                 properties:
- *                   value:
- *                     type: string
- *                 description: Ville de départ
- *               endTown:
- *                 type: object
- *                 properties:
- *                   value:
- *                     type: string
- *                 description: Ville d'arrivée
- *               rideType:
- *                 type: string
- *                 description: Type de balade
- *               imageLink:
- *                 type: string
- *                 description: Lien vers l'image du balade
- *               userId:
- *                 type: string
- *                 description: ID de l'utilisateur créateur
- *               isEvent:
- *                 type: boolean
- *                 description: Indique si le balade est un événement
- *               dateEvent:
- *                 type: string
- *                 description: Date de l'événement (requis si isEvent est true)
- *               hourEvent:
- *                 type: string
- *                 description: Heure de l'événement (requis si isEvent est true)
- *               geom:
- *                 type: object
- *                 description: Géométrie GeoJSON (FeatureCollection)
  *     responses:
  *       201:
- *         description: Balade créé avec succès
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                 ride:
- *                   $ref: '#/components/schemas/Ride'
+ *         description: Balade créée avec succès
  *       400:
  *         description: Données invalides
- *       500:
- *         description: Erreur serveur
  */
 router.post(
   '/',
   authenticateToken,
-  async (
-    req: Request<unknown, unknown, ICreateRideBody, ReqQuery>,
-    res: any
-  ) => {
-    try {
-      const { id: userId } = req.user as { id: string }
-      const {
-        title,
-        description,
-        duration,
-        distance,
-        startTown,
-        endTown,
-        rideType,
-        imageLink,
-        isEvent,
-        dateEvent,
-        hourEvent,
-        geom
-      } = req.body
+  async (req: Request, res) => {
+    const { id: userId } = getAuthUser(req)
+    const {
+      title,
+      description,
+      duration,
+      distance,
+      startTown,
+      endTown,
+      rideType,
+      imageLink,
+      isEvent,
+      dateEvent,
+      hourEvent,
+      geom
+    } = req.body as ICreateRideBody
 
-      const colors = Object.values(RideColor)
-      const randomColor = colors[Math.floor(Math.random() * colors.length)]
+    const colors = Object.values(RideColor)
+    const randomColor = colors[Math.floor(Math.random() * colors.length)]
 
-      const newRide = new Ride({
-        title: title,
-        description: description,
-        color: randomColor,
-        geom: geom,
-        duration: duration,
-        distance: distance,
-        start_town: startTown?.value,
-        end_town: endTown?.value,
-        ride_type: rideType,
-        user_id: userId,
-        image_link: imageLink,
-        is_event: isEvent,
-        date_event: dateEvent,
-        hour_event: hourEvent
-      })
+    const newRide = new Ride({
+      title,
+      description,
+      color: randomColor,
+      geom,
+      duration,
+      distance,
+      start_town: startTown?.value,
+      end_town: endTown?.value,
+      ride_type: rideType,
+      user_id: userId,
+      image_link: imageLink,
+      is_event: isEvent,
+      date_event: dateEvent,
+      hour_event: hourEvent
+    })
 
-      const savedRide = await newRide.save()
-
-      res.status(201).json({
-        message: 'Ride created successfully',
-        ride: savedRide
-      })
-    } catch (error) {
-      console.error('Error creating ride:', error)
-      res.status(400).json({ error: 'Failed to create ride' })
-    }
+    // A schema ValidationError bubbles to the central handler as a 400; only a
+    // genuine fault becomes a 500 (instead of every error masquerading as 400).
+    const savedRide = await newRide.save()
+    res.status(201).json({ _id: savedRide._id })
   }
 )
 
@@ -376,94 +236,98 @@ router.post(
  *         required: true
  *         schema:
  *           type: string
- *         description: ID du balade
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - userId
- *             properties:
- *               userId:
- *                 type: string
- *                 description: ID de l'utilisateur
  *     responses:
  *       200:
  *         description: Participation mise à jour
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 participatingCount:
- *                   type: integer
- *                   description: Nombre total de participants
- *                 isParticipating:
- *                   type: boolean
- *                   description: Statut de participation de l'utilisateur
- *                 updatedParticipants:
- *                   type: array
- *                   items:
- *                     type: object
- *                     properties:
- *                       _id:
- *                         type: string
- *                       image:
- *                         type: string
- *                       pseudo:
- *                         type: string
  *       400:
  *         description: userId manquant, format invalide ou balade non-événement
  *       404:
  *         description: Balade non trouvée
- *       500:
- *         description: Erreur serveur
  */
 router.patch(
   '/:id/participate',
   authenticateToken,
-  async (req: Request<{ id: string }>, res: any) => {
-    const { id: userId } = req.user as { id: string }
+  async (req: Request<{ id: string }>, res) => {
+    const { id: userId } = getAuthUser(req)
     const rideId = req.params.id
 
     if (!Types.ObjectId.isValid(userId))
       return res.status(400).json({ error: 'Invalid User ID format' })
 
-    try {
-      const ride = await Ride.findById(rideId)
-      if (!ride) return res.status(404).json({ error: 'Ride not found' })
-
-      if (!ride.is_event) {
-        return res.status(400).json({ error: 'This ride is not an event' })
-      }
-
-      const isParticipating = ride.participating_user.some(
-        (id) => id.toString() === userId.toString()
-      )
-
-      const update = isParticipating
-        ? { $pull: { participating_user: userId } }
-        : { $addToSet: { participating_user: userId } }
-
-      const updatedRide = await Ride.findByIdAndUpdate(rideId, update, {
-        returnDocument: 'after'
-      }).lean()
-
-      if (!updatedRide) return res.status(404).json({ error: 'Update failed' })
-
-      await attachUsers([updatedRide as any], 'participating_user')
-
-      res.status(200).json({
-        participatingCount: updatedRide.participating_user.length,
-        isParticipating: !isParticipating,
-        updatedParticipants: updatedRide.participating_user
-      })
-    } catch (error) {
-      console.error('Participation error:', error)
-      res.status(500).json({ error: 'Internal server error' })
+    if (!isValidObjectId(rideId)) {
+      return res.status(404).json({ error: 'Ride not found' })
     }
+
+    const ride = await Ride.findById(rideId)
+    if (!ride) return res.status(404).json({ error: 'Ride not found' })
+
+    if (!ride.is_event || isEventExpired(ride)) {
+      return res.status(400).json({ error: 'This ride is not an event' })
+    }
+
+    const isParticipating = ride.participating_user.some(
+      (id) => id.toString() === userId.toString()
+    )
+
+    const update = isParticipating
+      ? { $pull: { participating_user: userId } }
+      : { $addToSet: { participating_user: userId } }
+
+    const updatedRide = await Ride.findByIdAndUpdate(rideId, update, {
+      returnDocument: 'after'
+    }).lean()
+
+    if (!updatedRide) return res.status(404).json({ error: 'Update failed' })
+
+    await attachUsers([updatedRide as any], 'participating_user')
+
+    res.status(200).json({
+      participatingCount: updatedRide.participating_user.length,
+      isParticipating: !isParticipating,
+      updatedParticipants: updatedRide.participating_user
+    })
+  }
+)
+
+/**
+ * @openapi
+ * /rides/{id}:
+ *   delete:
+ *     summary: Supprimer une balade (créateur ou admin)
+ *     tags:
+ *       - Rides
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       204:
+ *         description: Balade supprimée
+ *       403:
+ *         description: Non autorisé (ni créateur ni admin)
+ *       404:
+ *         description: Balade non trouvée
+ */
+router.delete(
+  '/:id',
+  authenticateToken,
+  async (req: Request<{ id: string }>, res) => {
+    const { id: authUserId } = getAuthUser(req)
+    if (!isValidObjectId(req.params.id)) {
+      return res.status(404).json({ error: 'Ride not found' })
+    }
+    const ride = await Ride.findById(req.params.id)
+    if (!ride) {
+      return res.status(404).json({ error: 'Ride not found' })
+    }
+
+    // Only the creator (or an admin) may delete a ride.
+    await assertOwnerOrAdmin(ride.user_id, authUserId)
+
+    await ride.deleteOne()
+    res.status(204).end()
   }
 )
 

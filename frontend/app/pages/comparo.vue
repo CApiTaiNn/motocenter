@@ -11,12 +11,15 @@ import DualMotorcycle from '~/components/card/DualMotorcycle.vue'
 import { useAuth } from '~/composables/useAuth'
 import { useConnexionModal } from '~/composables/useConnexionModal'
 
+useSeoMeta({
+  title: 'Comparateur de motos',
+  description:
+    'Comparez deux motos côte à côte : puissance, couple, prix, son et plus.'
+})
+
 interface ICommentInput {
   motorcycleId: string
-  motorcycleName: string
-  brand: string
   content: string
-  user: string
 }
 
 const apiBase = useRuntimeConfig().public.apiBase
@@ -46,6 +49,17 @@ const resultatTemplate = useTemplateRef('resultat')
 const carousselBeginnerBikes = ref<IMotorcycle[]>([])
 const carousselSportBikes = ref<IMotorcycle[]>([])
 const carousselAdventureBikes = ref<IMotorcycle[]>([])
+const loadingCarousels = ref(true)
+const loadingResultat = ref(false)
+const carouselError = ref(false)
+const noCarouselData = computed(
+  () =>
+    !loadingCarousels.value &&
+    !carouselError.value &&
+    carousselSportBikes.value.length === 0 &&
+    carousselBeginnerBikes.value.length === 0 &&
+    carousselAdventureBikes.value.length === 0
+)
 const { isAuthenticated } = useAuth()
 const messagePosted = ref<boolean>(false)
 const optionMotorcycles = computed(() => {
@@ -57,10 +71,7 @@ const optionMotorcycles = computed(() => {
 })
 const comment = ref<ICommentInput>({
   motorcycleId: '',
-  motorcycleName: '',
-  brand: '',
-  content: '',
-  user: ''
+  content: ''
 })
 // Tableau pour chaque Categories
 const resultatNumber = reactive<
@@ -125,28 +136,58 @@ function createResultat() {
 }
 
 async function fetchMotocycles() {
-  const data = await $fetch<{ motorcycles: IMotorcycle[] }>(
-    `${apiBase}motorcycles`,
-    {
-      params: {
-        filter: JSON.stringify({
-          _id: { $in: [motorcycle1Id.value, motorcycle2Id.value] }
-        }),
-        project: 'all'
+  loadingResultat.value = true
+  showResultat.value = false
+  try {
+    const data = await $fetch<{ motorcycles: IMotorcycle[] }>(
+      `${apiBase}motorcycles`,
+      {
+        params: {
+          filter: JSON.stringify({
+            _id: { $in: [motorcycle1Id.value, motorcycle2Id.value] }
+          }),
+          project: 'all'
+        }
       }
-    }
-  )
-  motorcycle1.value = data.motorcycles.find(
-    (m) => m._id === motorcycle1Id.value
-  )
-  motorcycle2.value = data.motorcycles.find(
-    (m) => m._id === motorcycle2Id.value
-  )
+    )
+    motorcycle1.value = data.motorcycles.find(
+      (m) => m._id === motorcycle1Id.value
+    )
+    motorcycle2.value = data.motorcycles.find(
+      (m) => m._id === motorcycle2Id.value
+    )
 
-  createResultat()
-  showResultat.value = true
-  await nextTick()
-  resultatTemplate.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    // If either id didn't resolve (e.g. an unavailable/private bike), don't show
+    // a half-empty comparison.
+    if (!motorcycle1.value || !motorcycle2.value) {
+      showResultat.value = false
+      return
+    }
+
+    // Single source of truth for the DualMotorcycle preview: derive it from the
+    // resolved bikes so it stays correct whichever input path was used (carousel
+    // or the form). The form never set these previews, which left stale/blank
+    // images in the dock.
+    motorcycle1PreviewUrl.value = motorcycle1.value.imageUrl ?? ''
+    motorcycle2PreviewUrl.value = motorcycle2.value.imageUrl ?? ''
+
+    createResultat()
+    showResultat.value = true
+    await nextTick()
+    resultatTemplate.value?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    })
+  } catch (error) {
+    console.error('Erreur comparaison:', error)
+    toast.add({
+      title: 'Erreur',
+      description: "La comparaison n'a pas pu être chargée.",
+      color: 'error'
+    })
+  } finally {
+    loadingResultat.value = false
+  }
 }
 
 async function fetchCarrouselMotorcycles() {
@@ -157,15 +198,26 @@ async function fetchCarrouselMotorcycles() {
     { target: carousselBeginnerBikes, filter: { isAvailableA2: true } },
     { target: carousselAdventureBikes, filter: { category: 'adventure' } }
   ]
-  await Promise.all(
-    groups.map(async ({ target, filter }) => {
-      const data = await $fetch<{ motorcycles: IMotorcycle[] }>(
-        `${apiBase}motorcycles`,
-        { params: { filter: JSON.stringify(filter), project, limit } }
-      )
-      target.value = data.motorcycles
-    })
-  )
+  loadingCarousels.value = true
+  carouselError.value = false
+  try {
+    await Promise.all(
+      groups.map(async ({ target, filter }) => {
+        const data = await $fetch<{ motorcycles: IMotorcycle[] }>(
+          `${apiBase}motorcycles`,
+          { params: { filter: JSON.stringify(filter), project, limit } }
+        )
+        target.value = data.motorcycles
+      })
+    )
+  } catch (error) {
+    // Without this the empty-state would reassure ("catalogue se remplit") on a
+    // real load failure.
+    console.error('Erreur chargement carrousels:', error)
+    carouselError.value = true
+  } finally {
+    loadingCarousels.value = false
+  }
 }
 
 async function fetchMessages() {
@@ -219,6 +271,11 @@ async function postComment() {
       selectedMotorcycle.post = postId
     } catch (error) {
       console.error('Error creating post:', error)
+      toast.add({
+        title: 'Erreur',
+        description: "La discussion n'a pas pu être créée.",
+        color: 'error'
+      })
       return
     }
   }
@@ -284,9 +341,15 @@ onMounted(() => {
   fetchCarrouselMotorcycles()
 })
 
-// Auto-trigger comparison the moment both motorcycles are picked
+// True when both sides point at the same bike — a degenerate comparison
+// ($in dedups to one document, so both columns would be identical).
+const sameMotorcycle = computed(
+  () => !!motorcycle1Id.value && motorcycle1Id.value === motorcycle2Id.value
+)
+
+// Auto-trigger comparison the moment two *different* motorcycles are picked.
 watch([motorcycle1Id, motorcycle2Id], ([id1, id2]) => {
-  if (id1 && id2) {
+  if (id1 && id2 && id1 !== id2) {
     fetchMotocycles()
   } else {
     showResultat.value = false
@@ -309,45 +372,59 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
   <div>
     <HeaderInfo :scroll-to-element-id="'form'">
       <template #title>
-        <h1 class="h1-mobile">
+        <h1>
           Comparez. Choisissez. <br />
-          <span class="text-[red]">Pilotez</span>
+          <span class="text-(--ui-primary)">Pilotez</span>
         </h1>
       </template>
       <template #subtitle>
-        <p class="p-mobile">
+        <p>
           Comparez facilement les performances, prix et caractéristiques de vos
           motos préférées.
         </p>
       </template>
     </HeaderInfo>
-    <div class="container-form flex flex-col gap-16 mt-24 justify-center">
-      <div id="form" class="flex flex-col justify-center items-center gap-6">
+    <div class="mt-24 flex flex-col justify-center gap-16">
+      <div id="form" class="flex flex-col items-center justify-center gap-6">
         <div class="flex justify-center gap-8 max-lg:flex-col! max-lg:items-center">
           <MotocyclesForm v-model="motorcycle1Id" form-title="Moto 1" />
           <UIcon
             name="i-lucide-arrow-left-right"
-            class="size-8 text-primary self-center max-lg:rotate-90"
+            class="size-8 self-center text-(--ui-primary) max-lg:rotate-90"
             aria-hidden="true"
           />
           <MotocyclesForm v-model="motorcycle2Id" form-title="Moto 2" />
         </div>
-        <p v-if="!motorcycle1Id || !motorcycle2Id" class="text-center text-gray-500 text-sm italic">
+        <p v-if="!motorcycle1Id || !motorcycle2Id" class="text-center text-sm text-gray-500 italic">
           Sélectionnez deux motos pour lancer la comparaison.
         </p>
+        <p v-else-if="sameMotorcycle" class="text-center text-sm text-(--ui-error) italic">
+          Choisissez deux motos différentes pour les comparer.
+        </p>
+      </div>
+      <div
+        v-if="loadingResultat"
+        class="mx-auto flex w-full max-w-3xl flex-col gap-4 px-4"
+      >
+        <USkeleton class="mx-auto h-10 w-80 rounded-full" />
+        <USkeleton
+          v-for="n in 4"
+          :key="n"
+          class="h-16 w-full rounded-xl"
+        />
       </div>
       <Transition>
         <div v-if="showResultat" ref="resultat" class="scroll-mt-24">
-          <nav class="flex flex-wrap gap-1 w-fit max-w-full mx-auto mb-12 p-1 bg-(--background) border border-(--border-gray) rounded-full justify-center" role="tablist">
+          <nav class="mx-auto mb-12 flex w-fit max-w-full flex-wrap justify-center gap-1 rounded-full border border-(--border-gray) bg-(--background) p-1" role="tablist">
             <button
               v-for="tab in resultTabs"
               :key="tab.key"
               type="button"
               :class="[
-                'px-6 py-2 bg-transparent border-none rounded-full cursor-pointer font-[\'Poppins\',sans-serif] text-base font-medium whitespace-nowrap transition-[background-color,color] duration-200 ease-[ease]',
+                'cursor-pointer rounded-full border-none bg-transparent px-6 py-2 font-[\'Poppins\',sans-serif] text-base font-medium whitespace-nowrap transition-[background-color,color] duration-200 ease-[ease]',
                 activeResultTab === tab.key
-                  ? 'bg-primary/10 text-primary font-semibold'
-                  : 'text-primary hover:bg-primary/5'
+                  ? 'bg-(--ui-primary)/10 font-semibold text-(--ui-primary)'
+                  : 'text-(--ui-primary) hover:bg-(--ui-primary)/5'
               ]"
               role="tab"
               :aria-selected="activeResultTab === tab.key"
@@ -386,9 +463,9 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
             </div>
           </div>
           <div v-show="activeResultTab === 'comments'" class="tab-panel">
-            <div class="flex gap-8 items-start max-lg:flex-col max-lg:items-center!">
-              <div class="flex-1 min-w-0 flex flex-col gap-3">
-                <h4 class="text-center mb-2">
+            <div class="flex items-start gap-8 max-lg:flex-col max-lg:items-center!">
+              <div class="flex min-w-0 flex-1 flex-col gap-3">
+                <h4 class="mb-2 text-center text-(--ui-primary)">
                   {{ motorcycle1?.name ?? 'Moto 1' }}
                 </h4>
                 <template v-if="commentsMotorcycle1.length > 0">
@@ -398,12 +475,12 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
                     :response="comment1"
                   />
                 </template>
-                <p v-else class="text-gray-500 italic text-center py-4">
+                <p v-else class="py-4 text-center text-gray-500 italic">
                   Postez le premier commentaire !
                 </p>
               </div>
-              <div class="flex-1 min-w-0 flex flex-col gap-3">
-                <h4 class="text-center mb-2">
+              <div class="flex min-w-0 flex-1 flex-col gap-3">
+                <h4 class="mb-2 text-center">
                   {{ motorcycle2?.name ?? 'Moto 2' }}
                 </h4>
                 <template v-if="commentsMotorcycle2.length > 0">
@@ -413,21 +490,21 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
                     :response="comment2"
                   />
                 </template>
-                <p v-else class="text-gray-500 italic text-center py-4">
+                <p v-else class="py-4 text-center text-gray-500 italic">
                   Postez le premier commentaire !
                 </p>
               </div>
             </div>
           </div>
-          <div class="relative my-12 mx-[25%] w-1/2 min-h-100 border border-solid border-gray-500 rounded-[20px] max-lg:mx-[12%]! max-lg:w-[76%]! max-lg:min-h-auto! max-md:my-6! max-md:mx-4! max-md:w-auto!">
-            <div v-if="!isAuthenticated" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 text-center max-lg:w-[90%]! max-lg:flex! max-lg:flex-col max-lg:items-center! max-lg:gap-4">
-              <h3 class="h3-mobile w-100 max-lg:w-auto! max-lg:text-lg!">
+          <div class="relative mx-[25%] my-12 min-h-100 w-1/2 rounded-[20px] border border-solid border-gray-500 max-lg:mx-[12%]! max-lg:min-h-auto! max-lg:w-[76%]! max-md:mx-4! max-md:my-6! max-md:w-auto!">
+            <div v-if="!isAuthenticated" class="absolute top-1/2 left-1/2 z-10 -translate-1/2 text-center max-lg:flex! max-lg:w-[90%]! max-lg:flex-col max-lg:items-center! max-lg:gap-4">
+              <h3 class="m-6 w-[400px] text-center max-lg:w-auto! max-lg:text-lg!">
                 Rejoignez la communauté pour débattre et partager vos avis sur
                 ces motos !
               </h3>
               <UButton
                 color="neutral"
-                class="rounded-4xl self-end text-xs p-2"
+                class="self-end rounded-4xl p-2 text-xs"
                 size="xl"
                 @click="open()"
                 >Se connecter
@@ -435,12 +512,12 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
             </div>
             <div
               v-if="!messagePosted"
-              class="flex flex-col justify-between h-full min-h-100 p-8 max-lg:min-h-auto! max-lg:p-4!"
-              :class="{ 'blur-[3px] pointer-events-none select-none': !isAuthenticated }"
+              class="flex h-full min-h-100 flex-col justify-between p-8 max-lg:min-h-auto! max-lg:p-4!"
+              :class="{ 'pointer-events-none blur-[3px] select-none': !isAuthenticated }"
             >
               <h4 class="text-center">
                 Déjà roulé une de ces motos ?<br />
-                Faite le savoir à la communauté !
+                Faites le savoir à la communauté !
               </h4>
               <div class="flex flex-col gap-4">
                 <USelect
@@ -453,11 +530,11 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
                 <UTextarea
                   v-model="comment.content"
                   size="xl"
-                  placeholder="Un retour d'expérience, un conseil d'entretient ou encore une question"
+                  placeholder="Un retour d'expérience, un conseil d'entretien ou encore une question"
                 />
               </div>
               <UButton
-                class="rounded-4xl self-end text-xs m-1"
+                class="m-1 self-end rounded-4xl text-xs"
                 size="xl"
                 @click="postComment"
                 >Poster</UButton
@@ -465,8 +542,8 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
             </div>
             <div
               v-else
-              class="flex flex-col justify-center h-fit min-h-100 p-8 gap-8 max-lg:min-h-auto! max-lg:p-4!"
-              :class="{ 'blur-[3px] pointer-events-none select-none': !isAuthenticated }"
+              class="flex h-fit min-h-100 flex-col justify-center gap-8 p-8 max-lg:min-h-auto! max-lg:p-4!"
+              :class="{ 'pointer-events-none blur-[3px] select-none': !isAuthenticated }"
             >
               <h4 class="text-center">Merci pour votre contribution !</h4>
               <p class="text-center">
@@ -477,30 +554,70 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
           </div>
         </div>
       </Transition>
-      <div class="caroussel-container flex flex-col gap-20 mx-[10%] max-md:mx-4! max-lg:mx-[6%]!">
-        <div>
-          <h3 class="h3-mobile">Pour la performance</h3>
-          <CarrouselMotorcycles
-            :items="carousselSportBikes"
-            @selected="handleCaroussel"
-          />
-        </div>
-        <div>
-          <h3 class="h3-mobile">Pour le A2</h3>
-          <CarrouselMotorcycles
-            :items="carousselBeginnerBikes"
-            @selected="handleCaroussel"
-          />
-        </div>
-        <div>
-          <h3 class="h3-mobile">Pour l'aventure</h3>
-          <CarrouselMotorcycles
-            :items="carousselAdventureBikes"
-            @selected="handleCaroussel"
-          />
-        </div>
-        <div class="dual-container sticky bottom-0 flex justify-center pointer-events-none">
+      <div class="mx-[10%] flex flex-col gap-20 max-lg:mx-[6%]! max-md:mx-4!">
+        <template v-if="loadingCarousels">
+          <div v-for="n in 3" :key="n">
+            <USkeleton class="m-6 h-8 w-48 rounded-sm" />
+            <div class="flex gap-4 overflow-hidden">
+              <USkeleton
+                v-for="i in 4"
+                :key="i"
+                class="h-40 w-64 shrink-0 rounded-xl"
+              />
+            </div>
+          </div>
+        </template>
+        <UCard v-else-if="carouselError">
+          <div class="flex flex-col items-center gap-4 py-8 text-center">
+            <UIcon
+              name="i-lucide-triangle-alert"
+              class="size-16 text-(--ui-error)"
+            />
+            <div class="flex flex-col gap-1">
+              <h4>Chargement impossible</h4>
+              <p class="text-sm text-gray-400">
+                Les motos n’ont pas pu être chargées. Réessayez plus tard.
+              </p>
+            </div>
+          </div>
+        </UCard>
+        <UCard v-else-if="noCarouselData">
+          <div class="flex flex-col items-center gap-4 py-8 text-center">
+            <UIcon name="i-lucide-bike" class="size-16 text-gray-400" />
+            <div class="flex flex-col gap-1">
+              <h4>Aucune moto à comparer pour le moment</h4>
+              <p class="text-sm text-gray-400">
+                Revenez bientôt, le catalogue se remplit.
+              </p>
+            </div>
+          </div>
+        </UCard>
+        <template v-else>
+          <div>
+            <h3 class="m-6 text-left">Pour la performance</h3>
+            <CarrouselMotorcycles
+              :items="carousselSportBikes"
+              @selected="handleCaroussel"
+            />
+          </div>
+          <div>
+            <h3 class="m-6 text-left">Pour le A2</h3>
+            <CarrouselMotorcycles
+              :items="carousselBeginnerBikes"
+              @selected="handleCaroussel"
+            />
+          </div>
+          <div>
+            <h3 class="m-6 text-left">Pour l'aventure</h3>
+            <CarrouselMotorcycles
+              :items="carousselAdventureBikes"
+              @selected="handleCaroussel"
+            />
+          </div>
+        </template>
+        <div class="pointer-events-none sticky bottom-0 flex justify-center">
           <DualMotorcycle
+            class="pointer-events-auto"
             :left-motorcycle-url="motorcycle1PreviewUrl"
             :right-motorcycle-url="motorcycle2PreviewUrl"
             :left-name="motorcycle1?.name"
@@ -515,16 +632,6 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
 </template>
 
 <style scoped>
-/* Bare-element descendant rules: apply to all section headings */
-.container-form h3 {
-  text-align: center;
-  margin: 1.5rem;
-}
-
-.caroussel-container h3 {
-  text-align: left;
-}
-
 /* Animation on tab switch */
 .tab-panel {
   animation: tab-fade 0.2s ease-out;
@@ -533,11 +640,6 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
 @keyframes tab-fade {
   from { opacity: 0; transform: translateY(4px); }
   to { opacity: 1; transform: translateY(0); }
-}
-
-/* Container lets clicks pass through its empty zones; only the panel is interactive */
-.dual-container > * {
-  pointer-events: auto;
 }
 
 /* Transitions */

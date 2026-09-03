@@ -6,6 +6,7 @@ import DisplayMapRide from './DisplayMapRide.vue'
   <DisplayMapRide
     display-filters
     display-enlarge-button
+    display-add-ride-button
     display-ride-list
     display-map-loader
     display-ride

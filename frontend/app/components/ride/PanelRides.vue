@@ -5,52 +5,88 @@ import CardRide from './CardRide.vue'
 
 interface IProps {
   filteredRides: IRide[]
+  colorMap: Record<string, string>
+  loading?: boolean
 }
 
 const props = defineProps<IProps>()
+const emit = defineEmits<{ select: [rideId: string] }>()
 const isSidebarOpen = ref(false) // État du volet latéral (ouvert/fermé)
+
+// Clic sur une balade de la liste : on la sélectionne sur la carte (centrage +
+// popup + tracé) et on referme le volet pour la laisser visible.
+const selectRide = (rideId: string) => {
+  emit('select', rideId)
+  isSidebarOpen.value = false
+}
 </script>
 
 <template>
   <div
-    class="sidebar flex absolute top-20 bottom-5 right-0 w-[40dvw] max-md:w-[90dvw]! max-lg:w-[60dvw]! bg-(--background) backdrop-blur-[8px] z-1020 transition-transform duration-300 ease-in-out translate-x-full border-l border-solid border-gray-300 rounded-l-xl rounded-r-none"
-    :class="{ 'is-open': isSidebarOpen }"
+    class="sidebar absolute top-[80px] right-0 bottom-[20px] z-1020 flex w-[40dvw] rounded-l-xl rounded-r-none border-l border-solid border-gray-300 bg-(--background) backdrop-blur-sm transition-transform duration-300 ease-in-out max-lg:w-[60dvw]! max-md:w-[90dvw]!"
+    :class="isSidebarOpen ? 'translate-x-0' : 'translate-x-full'"
   >
-    <div class="absolute -left-10 top-1/2 -translate-y-1/2 h-10 w-10 z-1002">
+    <div class="absolute top-1/2 -left-9 z-1002 -translate-y-1/2">
       <UButton
         :icon="
           isSidebarOpen ? 'i-lucide-chevron-right' : 'i-lucide-chevron-left'
         "
+        :aria-label="
+          isSidebarOpen
+            ? 'Fermer la liste des balades'
+            : 'Ouvrir la liste des balades'
+        "
+        size="xl"
         color="neutral"
         variant="subtle"
-        class="w-10 h-10 rounded-r-none rounded-l-lg cursor-pointer bg-(--background)"
+        class="h-16 w-9 cursor-pointer justify-center rounded-l-xl rounded-r-none border border-r-0 border-(--border-gray) bg-(--background) text-(--ui-primary)! shadow-(--shadow-lg) transition-colors hover:bg-(--ui-primary) hover:text-white!"
         @click="isSidebarOpen = !isSidebarOpen"
       />
     </div>
 
-    <div class="flex-1 p-6 overflow-y-auto font-sans">
-      <h3 class="text-lg font-bold mb-4 text-(--text-color)">Liste des balades</h3>
+    <div class="flex-1 overflow-y-auto p-6 font-sans">
+      <div class="mb-5 flex items-center gap-2 border-b border-(--border-gray) pb-3">
+        <UIcon name="i-lucide-route" class="size-5 shrink-0 text-(--ui-primary)" aria-hidden="true" />
+        <h3 class="text-lg font-bold text-(--text-color)">Balades</h3>
+        <UBadge color="neutral" variant="subtle" size="sm" class="ml-auto rounded-full font-semibold">
+          {{ props.filteredRides.length }}
+        </UBadge>
+      </div>
       <div class="flex flex-col gap-6 pb-6">
-        <div
-          v-for="ride in props.filteredRides"
-          :key="ride._id"
-          class="rounded-xl h-auto w-full"
-        >
-          <CardRide
-            :ride="ride"
-            @update:like="(newCount) => (ride.like = newCount)"
-            @update:participants="
-              (newList) => (ride.participating_user = newList)
-            "
+        <template v-if="props.loading">
+          <USkeleton
+            v-for="n in 4"
+            :key="n"
+            class="h-[124px] w-full rounded-xl"
           />
+        </template>
+
+        <div
+          v-else-if="props.filteredRides.length === 0"
+          class="flex flex-col items-center gap-2 py-12 text-center text-(--text-color)/60"
+        >
+          <UIcon name="i-lucide-route-off" class="size-8" aria-hidden="true" />
+          <p class="text-sm">Aucune balade trouvée</p>
         </div>
+
+        <template v-else>
+          <div
+            v-for="ride in props.filteredRides"
+            :key="ride._id"
+            class="h-auto w-full zoom-[0.8] rounded-xl"
+          >
+            <CardRide
+              :ride="ride"
+              :color="props.colorMap[ride._id]"
+              @select="selectRide"
+              @update:like="(newCount) => (ride.like = newCount)"
+              @update:participants="
+                (newList) => (ride.participating_user = newList)
+              "
+            />
+          </div>
+        </template>
       </div>
     </div>
   </div>
 </template>
-
-<style scoped>
-.sidebar.is-open {
-  transform: translateX(0);
-}
-</style>

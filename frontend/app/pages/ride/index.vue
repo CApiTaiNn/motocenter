@@ -1,35 +1,23 @@
 <script setup lang="ts">
-import { useAuth } from '~/composables/useAuth.js'
 import HeaderInfo from '../../components/global/HeaderInfo.vue'
 import RideBrowseMap from '../../components/ride/RideBrowseMap.vue'
-import { useConnexionModal } from '~/composables/useConnexionModal.js'
 
-const { user } = useAuth()
-const { open } = useConnexionModal()
-
-const goToForm = async () => {
-  if (!user.value?._id) {
-    open()
-    return
-  }
-
-  await navigateTo({
-    path: '/ride/addRide',
-    query: { scroll: 'true' }
-  })
-}
+useSeoMeta({
+  title: 'Balades à moto',
+  description: 'Découvrez et partagez des itinéraires de balades à moto.'
+})
 </script>
 <template>
   <div>
     <HeaderInfo :scroll-to-element-id="'map'">
       <template #title>
-        <h1 class="h1-mobile">
+        <h1>
           Trouver de nouveaux chemins à <br />
-          <span style="color: red">Explorer</span>
+          <span class="text-(--ui-primary)">Explorer</span>
         </h1>
       </template>
       <template #subtitle>
-        <p class="p-mobile">
+        <p>
           Trouver facilement des nouveaux lieux, des nouvelles balades et des
           nouvelles personnes pour les réaliser avec vous.
         </p>
@@ -37,23 +25,5 @@ const goToForm = async () => {
     </HeaderInfo>
 
     <RideBrowseMap />
-
-    <UCard class="max-w-240 mx-auto mt-8 mb-16">
-      <div class="flex flex-row flex-wrap items-center gap-4 max-[410px]:justify-center">
-        <UIcon name="i-lucide-map-pinned" class="size-10 text-primary" />
-        <div class="flex-1 min-w-48">
-          <h4>Pas trouvé votre balade ?</h4>
-          <p class="p-mobile">Ajoutez-la pour la partager avec la communauté.</p>
-        </div>
-        <UButton
-          color="primary"
-          icon="i-lucide-plus"
-          size="lg"
-          class="cursor-pointer text-white!"
-          @click="goToForm"
-          >Ajouter une balade</UButton
-        >
-      </div>
-    </UCard>
   </div>
 </template>

@@ -4,10 +4,10 @@ const appName: string = useRuntimeConfig().public.appName
 
 <template>
   <header
-    class="header sticky top-0 z-50 backdrop-blur-[16px] border-b border-b"
+    class="header sticky top-0 z-50 border-b backdrop-blur-lg"
   >
     <div
-      class="flex items-center justify-between max-w-350 mx-auto px-6 h-16"
+      class="mx-auto flex h-[64px] max-w-[1400px] items-center justify-between px-6"
     >
       <div class="flex items-center gap-3">
         <span
@@ -15,14 +15,14 @@ const appName: string = useRuntimeConfig().public.appName
           >{{ appName }}</span
         >
         <span
-          class="brand-tag text-xs font-bold tracking-[0.2em] uppercase text-primary py-1 px-2 rounded-sm border border"
+          class="brand-tag rounded-[4px] border px-2 py-1 text-xs font-bold tracking-[0.2em] text-(--ui-primary) uppercase"
           >BACK OFFICE</span
         >
       </div>
-      <div class="group flex items-center gap-2 cursor-pointer relative">
+      <div class="group relative flex cursor-pointer items-center gap-2">
         <UIcon
           name="i-lucide-circle-user-round"
-          class="w-9 h-9 text-muted transition-colors duration-200 group-hover:text-(--text-color)"
+          class="size-[36px] text-(--ui-text-muted) transition-colors duration-200 group-hover:text-(--text-color)"
         />
       </div>
     </div>

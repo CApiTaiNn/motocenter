@@ -5,7 +5,7 @@ export const useProfileEditModal = () => {
 
   const open = () => {
     useProfileModal().close()
-    modal.isOpen.value = true
+    modal.open()
   }
 
   return { ...modal, open }

@@ -11,8 +11,9 @@ export interface IMessage {
   parentId: string | null
   user: IUserPublic
   createdAt: string
-  usersLikeId: Array<string>
-  usersDislikeId: Array<string>
+  // Per-viewer reaction state (the raw reactor id-arrays are no longer exposed).
+  likedByMe?: boolean
+  dislikedByMe?: boolean
 }
 
 export interface IPublicationResponse extends IMessage {

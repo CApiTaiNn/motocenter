@@ -33,6 +33,7 @@ watch(() => route.path, () => {
 })
 
 const navItems = [
+  { label: 'Accueil', to: '/' },
   { label: 'Comparateur', to: '/comparo' },
   { label: 'Forum', to: '/forum' },
   { label: 'Balades', to: '/ride' },
@@ -40,6 +41,8 @@ const navItems = [
 ] as const
 
 function isActive(to: string): boolean {
+  // Root only matches exactly, otherwise '/' would highlight on every page.
+  if (to === '/') return route.path === '/'
   return route.path === to || route.path.startsWith(`${to}/`)
 }
 
@@ -54,13 +57,13 @@ function toggleOpen() {
   >
     <!-- Desktop -->
     <nav
-      class="hidden lg:flex flex-row justify-between p-2.5 bg-(--background)"
+      class="hidden flex-row justify-between bg-(--background) p-[10px] lg:flex"
     >
-      <div class="flex flex-row items-center gap-2.5 mx-[2%]">
+      <div class="mx-[2%] flex flex-row items-center gap-[10px]">
         <LogoApp />
         <ToggleSwitch v-if="isDev" v-model="mode" />
       </div>
-      <div class="flex flex-row items-center gap-10 mx-[2%]">
+      <div class="mx-[2%] flex flex-row items-center gap-4">
         <div
           v-for="item in navItems"
           :key="item.to"
@@ -71,12 +74,12 @@ function toggleOpen() {
             color="neutral"
             variant="ghost"
             :to="item.to"
-            :class="isActive(item.to) ? 'font-semibold text-primary!' : ''"
+            :class="isActive(item.to) ? 'font-semibold text-(--ui-primary)!' : ''"
           >
             {{ item.label }}
           </UButton>
           <span
-            class="absolute -bottom-1 left-1/2 -translate-x-1/2 h-0.5 w-6 rounded-full bg-primary transition-opacity duration-200"
+            class="absolute -bottom-1 left-1/2 h-[2px] w-6 -translate-x-1/2 rounded-full bg-(--ui-primary) transition-opacity duration-200"
             :class="isActive(item.to) ? 'opacity-100' : 'opacity-0'"
           />
         </div>
@@ -85,7 +88,7 @@ function toggleOpen() {
           trailing-icon="i-lucide-arrow-right"
           size="xl"
           color="neutral"
-          class="rounded-full text-sm! px-10! py-2.5!"
+          class="rounded-full px-10! py-[10px]! text-sm!"
           @click="connexionModal.open()"
         >
           Connexion
@@ -103,21 +106,30 @@ function toggleOpen() {
     </nav>
 
     <!-- Mobile -->
-    <nav class="flex flex-col lg:hidden bg-(--background)">
-      <div class="flex flex-row justify-between items-center p-2.5">
-        <div class="flex flex-row items-center gap-2.5 mx-[2%]">
+    <nav class="flex flex-col bg-(--background) lg:hidden">
+      <div class="flex flex-row items-center justify-between p-[10px]">
+        <div class="mx-[2%] flex flex-row items-center gap-[10px]">
           <LogoApp />
           <ToggleSwitch v-if="isDev" v-model="mode" />
         </div>
-        <UIcon
-          :name="isOpen ? 'i-lucide-chevron-down' : 'i-lucide-menu'"
-          class="size-10 cursor-pointer"
+        <button
+          type="button"
+          class="cursor-pointer"
+          :aria-label="isOpen ? 'Fermer le menu' : 'Ouvrir le menu'"
+          :aria-expanded="isOpen"
+          aria-controls="mobile-menu"
           @click="toggleOpen"
-        />
+        >
+          <UIcon
+            :name="isOpen ? 'i-lucide-chevron-down' : 'i-lucide-menu'"
+            class="size-10"
+          />
+        </button>
       </div>
       <div
         v-if="isOpen"
-        class="flex flex-col gap-2.5 text-center pb-2"
+        id="mobile-menu"
+        class="flex flex-col gap-[10px] pb-2 text-center"
       >
         <UButton
           v-for="item in navItems"
@@ -129,7 +141,7 @@ function toggleOpen() {
           class="justify-center border-l-4 transition-colors"
           :class="
             isActive(item.to)
-              ? 'border-primary font-semibold text-primary!'
+              ? 'border-(--ui-primary) font-semibold text-(--ui-primary)!'
               : 'border-transparent'
           "
         >

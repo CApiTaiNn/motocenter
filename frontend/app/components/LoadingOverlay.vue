@@ -10,12 +10,12 @@ defineProps<Props>()
   <Transition name="fade">
     <div
       v-if="isLoading"
-      class="fixed inset-0 flex items-center justify-center z-9999 bg-[rgba(0,0,0,0.1)] backdrop-blur-[2px]"
+      class="fixed inset-0 z-9999 flex items-center justify-center bg-[rgba(0,0,0,0.1)] backdrop-blur-[2px]"
     >
       <div class="flex items-center justify-center">
         <UIcon
           name="i-lucide-loader-circle"
-          class="spinner w-12 h-12 text-primary"
+          class="spinner size-[48px] text-(--ui-primary)"
         />
       </div>
     </div>

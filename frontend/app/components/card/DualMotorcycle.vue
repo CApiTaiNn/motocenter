@@ -11,59 +11,123 @@ const emit = defineEmits<{
 }>()
 
 const isOpen = ref(true)
+
+// Both title slots are a fixed size (see the wrapper's h-*/w-full below). A long
+// name can't grow the box or deform the card; instead we shrink its font just
+// enough to fit, so the full name stays readable (no clamp / ellipsis).
+const leftTitleBox = ref<HTMLElement | null>(null)
+const rightTitleBox = ref<HTMLElement | null>(null)
+
+const MAX_FONT_PX = 14 // matches text-sm, the desired size when the name fits
+const MIN_FONT_PX = 9 // floor so very long names stay legible
+
+function fitTitle(box: HTMLElement | null) {
+  const p = box?.querySelector('p')
+  if (!box || !p) return
+  let size = MAX_FONT_PX
+  p.style.fontSize = `${size}px`
+  // Shrink until the text fits the fixed box in both axes (or we hit the floor).
+  while (
+    (p.scrollHeight > box.clientHeight || p.scrollWidth > box.clientWidth) &&
+    size > MIN_FONT_PX
+  ) {
+    size -= 0.5
+    p.style.fontSize = `${size}px`
+  }
+}
+
+function fitTitles() {
+  fitTitle(leftTitleBox.value)
+  fitTitle(rightTitleBox.value)
+}
+
+onMounted(() => {
+  fitTitles()
+  // Web fonts change metrics after load; re-fit once they're ready.
+  document.fonts?.ready.then(fitTitles)
+  window.addEventListener('resize', fitTitles)
+})
+
+onBeforeUnmount(() => window.removeEventListener('resize', fitTitles))
+
+// Re-fit whenever a name changes (and after the box has a chance to reopen).
+watch(
+  () => [props.leftName, props.rightName, isOpen.value],
+  () => nextTick(fitTitles)
+)
 </script>
 
 <template>
-  <div class="wrapper w-100 flex flex-col items-center max-md:w-[90vw]! max-lg:w-100!">
-    <div v-if="isOpen" class="dual-motorcycle flex flex-col items-center justify-center w-100 max-lg:w-full!">
-      <div class="slot-container flex items-end justify-between w-full gap-4">
-        <div class="motorcycle-left -rotate-10 flex flex-1 flex-col items-center justify-center w-full h-37.5 border border-dashed border-(--text-color) p-4 rounded-lg bg-(--background) z-1 max-lg:h-25! max-lg:p-1.25!">
+  <div class="flex w-[400px] flex-col items-center max-lg:w-[400px]! max-md:w-[90vw]!">
+    <div v-if="isOpen" class="flex w-[400px] flex-col items-center justify-center max-lg:w-full!">
+      <div class="flex w-full items-end justify-between gap-4">
+        <div class="z-1 flex h-[150px] w-full min-w-0 flex-1 rotate-[-10deg] flex-col items-center justify-center rounded-lg border border-dashed border-(--text-color) bg-(--background) p-4 max-lg:h-[100px]! max-lg:p-[5px]!">
           <UIcon
             name="i-lucide-circle-x"
-            class="absolute top-2 right-2 size-5 self-end cursor-pointer"
+            class="absolute top-2 right-2 size-5 cursor-pointer self-end"
             @click="emit('delete', 'left')"
           />
           <img
             v-if="props.leftMotorcycleUrl"
             :src="props.leftMotorcycleUrl"
             alt="Left Motorcycle"
-            class="min-h-0 max-h-full max-w-full flex-1 object-contain"
+            class="max-h-full min-h-0 max-w-full flex-1 object-contain"
           />
           <span
             v-if="!props.leftMotorcycleUrl"
             class="skeleton-icon inline-block size-20 bg-(--text-color)"
             aria-hidden="true"
           />
-          <p class="text-sm">{{ props.leftName }}</p>
+          <div
+            ref="leftTitleBox"
+            class="flex h-9 w-full items-center justify-center overflow-hidden max-lg:h-8!"
+          >
+            <p
+              :title="props.leftName"
+              class="w-full text-center text-sm/tight wrap-break-word"
+            >
+              {{ props.leftName }}
+            </p>
+          </div>
         </div>
         <UButton
           icon="i-lucide-arrow-left-right"
-          class="text-white rounded-4xl m-1 max-lg:text-[0.7rem]! max-lg:px-2! max-lg:py-1!"
+          class="m-1 rounded-4xl text-white max-lg:px-2! max-lg:py-1! max-lg:text-[0.7rem]!"
           @click="emit('compare')"
         >
           Comparer
         </UButton>
-        <div class="motorcycle-right rotate-10 flex flex-1 flex-col items-center justify-center w-full h-37.5 border border-dashed border-(--text-color) p-4 rounded-lg bg-(--background) z-1 max-lg:h-25! max-lg:p-1.25!">
+        <div class="z-1 flex h-[150px] w-full min-w-0 flex-1 rotate-10 flex-col items-center justify-center rounded-lg border border-dashed border-(--text-color) bg-(--background) p-4 max-lg:h-[100px]! max-lg:p-[5px]!">
           <UIcon
             name="i-lucide-circle-x"
-            class="absolute top-2 right-2 size-5 self-end cursor-pointer"
+            class="absolute top-2 right-2 size-5 cursor-pointer self-end"
             @click="emit('delete', 'right')"
           />
           <img
             v-if="props.rightMotorcycleUrl"
             :src="props.rightMotorcycleUrl"
             alt="Right Motorcycle"
-            class="min-h-0 max-h-full max-w-full flex-1 -scale-x-100 object-contain"
+            class="max-h-full min-h-0 max-w-full flex-1 -scale-x-100 object-contain"
           />
           <span
             v-if="!props.rightMotorcycleUrl"
-            class="skeleton-icon inline-block size-20 bg-(--text-color) -scale-x-100"
+            class="skeleton-icon inline-block size-20 -scale-x-100 bg-(--text-color)"
             aria-hidden="true"
           />
-          <p class="text-sm">{{ props.rightName }}</p>
+          <div
+            ref="rightTitleBox"
+            class="flex h-9 w-full items-center justify-center overflow-hidden max-lg:h-8!"
+          >
+            <p
+              :title="props.rightName"
+              class="w-full text-center text-sm/tight wrap-break-word"
+            >
+              {{ props.rightName }}
+            </p>
+          </div>
         </div>
       </div>
-      <div class="footer-open flex items-center justify-center w-[94%] gap-2 py-6 px-2 rounded-b-lg text-(--background) bg-(--text-color) z-5">
+      <div class="z-5 flex w-[94%] items-center justify-center gap-2 rounded-b-lg bg-(--text-color) px-2 py-6 text-(--background)">
         <h6>Comparer les motos</h6>
         <UIcon
           name="i-lucide-circle-x"
@@ -72,7 +136,7 @@ const isOpen = ref(true)
         />
       </div>
     </div>
-    <div v-else class="footer-closed flex items-center justify-center w-[94%] gap-2 py-6 px-2 rounded-t-lg text-(--background) bg-(--text-color)">
+    <div v-else class="flex w-[94%] items-center justify-center gap-2 rounded-t-lg bg-(--text-color) px-2 py-6 text-(--background)">
       <h6>Comparer les motos</h6>
       <UIcon name="i-lucide-chevron-up" class="size-5" @click="isOpen = true" />
     </div>
@@ -83,8 +147,9 @@ const isOpen = ref(true)
 /* Placeholder bike: tinted with the theme foreground so it stays visible
    on the box's --background (white skeleton in dark mode, black in light).
    Kept in scoped CSS: -webkit-mask / mask have no Tailwind utility. */
+/* Only the alpha channel matters for a mask, so either color variant works. */
 .skeleton-icon {
-  -webkit-mask: url('/svg/motorcycleIcon.svg') center / contain no-repeat;
-  mask: url('/svg/motorcycleIcon.svg') center / contain no-repeat;
+  -webkit-mask: url('/svg/motorcycleIcon_light.svg') center / contain no-repeat;
+  mask: url('/svg/motorcycleIcon_light.svg') center / contain no-repeat;
 }
 </style>
