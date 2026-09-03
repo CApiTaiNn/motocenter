@@ -73,16 +73,16 @@ onMounted(() => {
 </script>
 
 <template>
-  <main class="max-w-[80rem] mx-auto my-16 px-6">
+  <main class="max-w-320 mx-auto my-16 px-6">
     <h3 class="text-center m-6">Bienvenue {{ userName }}</h3>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div
         v-for="stat in stats"
         :key="stat.title"
-        class="relative flex flex-col gap-2 py-4 px-6 rounded-xl border border-solid border-gray-300 border-l-4 border-l-[var(--ui-primary)] bg-[var(--background)]"
+        class="relative flex flex-col gap-2 py-4 px-6 rounded-xl border border-solid border-gray-300 border-l-4 border-l-primary bg-(--background)"
         :style="{ borderLeftColor: stat.accent }"
       >
-        <UIcon :name="stat.icon" class="w-[1.75rem] h-[1.75rem]" :style="{ color: stat.accent }" />
+        <UIcon :name="stat.icon" class="w-7 h-7" :style="{ color: stat.accent }" />
         <StatsAnalytics :title="stat.title" :value="stat.value" />
       </div>
     </div>

@@ -116,23 +116,23 @@ function tradFieldName(fieldName: string) {
   <div class="resultat flex flex-col items-center gap-3">
     <p class="p-mobile">{{ tradFieldName(props.fieldName) }}</p>
     <div class="flex items-center justify-between w-[80%] gap-6 max-lg:flex-col! max-md:w-[95%]! max-lg:w-[88%]! max-lg:gap-2!">
-      <div class="flex flex-row justify-between items-center w-[90%] max-lg:flex-row-reverse! max-lg:gap-[10px]">
+      <div class="flex flex-row justify-between items-center w-[90%] max-lg:flex-row-reverse! max-lg:gap-2.5">
         <count-up
           :end-val="parseField(props.firstValue).value"
           :options="countUpOptions(props.firstValue)"
         />
-        <div class="bar-container relative w-[80%] h-[15px] max-lg:h-[10px]! max-lg:w-[70%]!">
-          <span class="bar-value absolute top-0 right-0 h-full rounded-lg bg-[image:var(--gradient-primary)] z-[1] max-lg:right-auto! max-lg:left-0 max-lg:[transform:rotateY(180deg)]" :style="{ width: firstPercent + '%' }"></span>
-          <span class="bar-background absolute top-0 left-0 h-full w-full bg-[var(--color-track-bg)] rounded-lg"></span>
+        <div class="bar-container relative w-[80%] h-3.75 max-lg:h-2.5! max-lg:w-[70%]!">
+          <span class="bar-value absolute top-0 right-0 h-full rounded-lg bg-(image:--gradient-primary) z-1 max-lg:right-auto! max-lg:left-0 max-lg:transform-[rotateY(180deg)]" :style="{ width: firstPercent + '%' }"></span>
+          <span class="bar-background absolute top-0 left-0 h-full w-full bg-(--color-track-bg) rounded-lg"></span>
         </div>
       </div>
-      <div class="flex flex-row justify-between items-center w-[90%] max-lg:gap-[10px]">
-        <div class="bar-container relative w-[80%] h-[15px] max-lg:h-[10px]! max-lg:w-[70%]!">
+      <div class="flex flex-row justify-between items-center w-[90%] max-lg:gap-2.5">
+        <div class="bar-container relative w-[80%] h-3.75 max-lg:h-2.5! max-lg:w-[70%]!">
           <span
-            class="bar-value absolute top-0 left-0 h-full rounded-lg bg-[image:var(--gradient-primary)] z-[1] [transform:rotateY(180deg)]"
+            class="bar-value absolute top-0 left-0 h-full rounded-lg bg-(image:--gradient-primary) z-1 transform-[rotateY(180deg)]"
             :style="{ width: secondPercent + '%' }"
           ></span>
-          <span class="bar-background absolute top-0 left-0 h-full w-full bg-[var(--color-track-bg)] rounded-lg"></span>
+          <span class="bar-background absolute top-0 left-0 h-full w-full bg-(--color-track-bg) rounded-lg"></span>
         </div>
         <count-up
           :end-val="parseField(props.secondValue).value"

@@ -57,7 +57,7 @@ watch(
       <div class="flex flex-col items-center p-12 overflow-y-auto">
         <h3>Mon Profil</h3>
 
-        <div class="flex items-center justify-center w-[100px] h-[100px] rounded-full text-4xl font-bold text-[var(--ui-color-error-500)] bg-[var(--ui-color-error-50)] mb-6 overflow-hidden">
+        <div class="flex items-center justify-center w-25 h-25 rounded-full text-4xl font-bold text-error-500 bg-error-50 mb-6 overflow-hidden">
           <img v-if="state.image" :src="state.image" alt="Avatar" class="w-full h-full object-cover" />
           <span v-else>{{ getInitials }}</span>
         </div>
@@ -67,7 +67,7 @@ watch(
           <p class="text-gray-500 text-sm">@{{ state.pseudo }}</p>
         </div>
 
-        <div class="w-full max-w-[400px]">
+        <div class="w-full max-w-100">
           <div class="flex justify-between py-3 border-b border-solid border-gray-300 last:border-b-0">
             <span class="text-gray-500 text-sm">Expérience</span>
             <span class="value">{{ state.experience }}</span>

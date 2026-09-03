@@ -97,7 +97,7 @@ onMounted(async () => {
       </template>
     </HeaderInfo>
     <div id="forum" class="forum-filters flex flex-row items-start m-[2em] gap-[0.5em] md:gap-[1.25em] lg:gap-[2em]">
-      <div class="sticky top-[70px]">
+      <div class="sticky top-17.5">
         <ForumPanel :loading :active-filter="filters" @filters="handleFilter" />
       </div>
       <div class="flex-1 min-w-0 flex flex-col gap-6">
@@ -128,7 +128,7 @@ onMounted(async () => {
           />
         </div>
       </div>
-      <div class="panel hidden lg:flex lg:flex-col lg:gap-6 lg:w-[300px] lg:sticky lg:top-[70px] lg:right-0">
+      <div class="panel hidden lg:flex lg:flex-col lg:gap-6 lg:w-75 lg:sticky lg:top-17.5 lg:right-0">
         <ForumMyPosts @new-post="getPosts()" />
         <ForumMyFavoritesPost />
       </div>

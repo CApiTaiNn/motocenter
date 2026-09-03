@@ -168,21 +168,21 @@ onMounted(async () => {
 
 <template>
   <div
-    class="relative flex w-full h-auto min-h-[220px] flex-col overflow-visible rounded-xl bg-cover bg-center shadow-[0_4px_12px_rgba(0,0,0,0.15)]"
+    class="relative flex w-full h-auto min-h-55 flex-col overflow-visible rounded-xl bg-cover bg-center shadow-[0_4px_12px_rgba(0,0,0,0.15)]"
     :style="{ backgroundImage: `url(${imageUrl})` }"
   >
-    <div class="overlay absolute inset-0 z-[1] rounded-xl bg-gradient-to-t from-black/95 via-black/70 to-black/40"></div>
+    <div class="overlay absolute inset-0 z-1 rounded-xl bg-gradient-to-t from-black/95 via-black/70 to-black/40"></div>
 
-    <div class="card-content relative z-[2] flex flex-col gap-2 p-4 text-white md:p-6!">
+    <div class="card-content relative z-2 flex flex-col gap-2 p-4 text-white md:p-6!">
       <header class="flex w-full flex-wrap items-center justify-between gap-3">
         <div class="flex min-w-0 flex-1 flex-row flex-wrap items-center gap-2">
           <span
-            class="h-[14px] w-[14px] rounded-full shadow-[0_0_10px_rgba(255,255,255,0.3)]"
+            class="h-3.5 w-3.5 rounded-full shadow-[0_0_10px_rgba(255,255,255,0.3)]"
             :style="{ backgroundColor: props.ride.color || '#3b82f6' }"
             aria-hidden="true"
           ></span>
 
-          <h2 class="m-0 shrink overflow-hidden text-ellipsis whitespace-normal text-xl font-bold [text-shadow:0_2px_4px_rgba(0,0,0,0.5)] md:text-2xl!">{{ props.ride.title }}</h2>
+          <h2 class="m-0 shrink overflow-hidden text-ellipsis whitespace-normal text-xl font-bold text-shadow-[0_2px_4px_rgba(0,0,0,0.5)] md:text-2xl!">{{ props.ride.title }}</h2>
 
           <UBadge
             v-if="props.ride.is_event"

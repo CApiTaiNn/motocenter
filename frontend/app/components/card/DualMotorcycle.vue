@@ -14,10 +14,10 @@ const isOpen = ref(true)
 </script>
 
 <template>
-  <div class="wrapper w-[400px] flex flex-col items-center max-md:w-[90vw]! max-lg:w-[400px]!">
-    <div v-if="isOpen" class="dual-motorcycle flex flex-col items-center justify-center w-[400px] max-lg:w-full!">
+  <div class="wrapper w-100 flex flex-col items-center max-md:w-[90vw]! max-lg:w-100!">
+    <div v-if="isOpen" class="dual-motorcycle flex flex-col items-center justify-center w-100 max-lg:w-full!">
       <div class="slot-container flex items-end justify-between w-full gap-4">
-        <div class="motorcycle-left -rotate-[10deg] flex flex-1 flex-col items-center justify-center w-full h-[150px] border border-dashed border-[var(--text-color)] p-4 rounded-lg bg-[var(--background)] z-[1] max-lg:h-[100px]! max-lg:p-[5px]!">
+        <div class="motorcycle-left -rotate-10 flex flex-1 flex-col items-center justify-center w-full h-37.5 border border-dashed border-(--text-color) p-4 rounded-lg bg-(--background) z-1 max-lg:h-25! max-lg:p-1.25!">
           <UIcon
             name="i-lucide-circle-x"
             class="absolute top-2 right-2 size-5 self-end cursor-pointer"
@@ -31,7 +31,7 @@ const isOpen = ref(true)
           />
           <span
             v-if="!props.leftMotorcycleUrl"
-            class="skeleton-icon inline-block size-20 bg-[var(--text-color)]"
+            class="skeleton-icon inline-block size-20 bg-(--text-color)"
             aria-hidden="true"
           />
           <p class="text-sm">{{ props.leftName }}</p>
@@ -43,7 +43,7 @@ const isOpen = ref(true)
         >
           Comparer
         </UButton>
-        <div class="motorcycle-right rotate-[10deg] flex flex-1 flex-col items-center justify-center w-full h-[150px] border border-dashed border-[var(--text-color)] p-4 rounded-lg bg-[var(--background)] z-[1] max-lg:h-[100px]! max-lg:p-[5px]!">
+        <div class="motorcycle-right rotate-10 flex flex-1 flex-col items-center justify-center w-full h-37.5 border border-dashed border-(--text-color) p-4 rounded-lg bg-(--background) z-1 max-lg:h-25! max-lg:p-1.25!">
           <UIcon
             name="i-lucide-circle-x"
             class="absolute top-2 right-2 size-5 self-end cursor-pointer"
@@ -57,13 +57,13 @@ const isOpen = ref(true)
           />
           <span
             v-if="!props.rightMotorcycleUrl"
-            class="skeleton-icon inline-block size-20 bg-[var(--text-color)] -scale-x-100"
+            class="skeleton-icon inline-block size-20 bg-(--text-color) -scale-x-100"
             aria-hidden="true"
           />
           <p class="text-sm">{{ props.rightName }}</p>
         </div>
       </div>
-      <div class="footer-open flex items-center justify-center w-[94%] gap-2 py-6 px-2 rounded-b-lg text-[var(--background)] bg-[var(--text-color)] z-[5]">
+      <div class="footer-open flex items-center justify-center w-[94%] gap-2 py-6 px-2 rounded-b-lg text-(--background) bg-(--text-color) z-5">
         <h6>Comparer les motos</h6>
         <UIcon
           name="i-lucide-circle-x"
@@ -72,7 +72,7 @@ const isOpen = ref(true)
         />
       </div>
     </div>
-    <div v-else class="footer-closed flex items-center justify-center w-[94%] gap-2 py-6 px-2 rounded-t-lg text-[var(--background)] bg-[var(--text-color)]">
+    <div v-else class="footer-closed flex items-center justify-center w-[94%] gap-2 py-6 px-2 rounded-t-lg text-(--background) bg-(--text-color)">
       <h6>Comparer les motos</h6>
       <UIcon name="i-lucide-chevron-up" class="size-5" @click="isOpen = true" />
     </div>

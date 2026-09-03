@@ -167,7 +167,7 @@ onMounted(async () => {
             variant="ghost"
             size="xl"
             :aria-label="isSolidStar ? 'Retirer des favoris' : 'Ajouter aux favoris'"
-            class="cursor-pointer text-(--ui-primary)"
+            class="cursor-pointer text-primary"
             @click="handleAddFavorite"
           />
         </div>

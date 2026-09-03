@@ -120,10 +120,10 @@ onMounted(() => {
       />
     </div>
     <div class="flex justify-between flex-wrap gap-6 my-6 mx-4">
-      <UCard class="flex-[1_1_300px] max-w-[600px] items-center justify-center border border-solid border-[var(--border-gray)] rounded-lg border-t-[3px] border-t-[var(--ui-color-warning-500)]">
+      <UCard class="flex-[1_1_300px] max-w-150 items-center justify-center border border-solid border-(--border-gray) rounded-lg border-t-[3px] border-t-warning-500">
         <template #header>
           <div class="flex items-center gap-2 mb-1">
-            <UIcon name="i-lucide-trophy" class="size-5 text-(--ui-color-warning-500)" />
+            <UIcon name="i-lucide-trophy" class="size-5 text-warning-500" />
             <span class="winner-tag text-xs tracking-[0.1em] uppercase text-gray-500">Top post</span>
           </div>
           <h4>{{ bestTopic?.title }}</h4>
@@ -132,17 +132,17 @@ onMounted(() => {
           <div class="flex justify-center items-center gap-8">
             <p>Nombre de vues : {{ bestTopic?.views }}</p>
             <img
-              class="max-w-[200px] max-h-[100px] rounded-xl"
+              class="max-w-50 max-h-25 rounded-xl"
               :src="`${bestTopic?.image}`"
               :alt="bestTopic?.title"
             />
           </div>
         </template>
       </UCard>
-      <UCard class="flex-[1_1_300px] max-w-[600px] items-center justify-center border border-solid border-[var(--border-gray)] rounded-lg border-t-[3px] border-t-[var(--ui-primary)]">
+      <UCard class="flex-[1_1_300px] max-w-150 items-center justify-center border border-solid border-(--border-gray) rounded-lg border-t-[3px] border-t-primary">
         <template #header>
           <div class="flex items-center gap-2 mb-1">
-            <UIcon name="i-lucide-crown" class="size-5 text-(--ui-primary)" />
+            <UIcon name="i-lucide-crown" class="size-5 text-primary" />
             <span class="winner-tag text-xs tracking-[0.1em] uppercase text-gray-500">Top moto</span>
           </div>
           <h4>{{ bestMotorcycle?.name }}</h4>
@@ -153,7 +153,7 @@ onMounted(() => {
               Nombre de comparaisons : {{ bestMotorcycle?.numberOfComparison }}
             </p>
             <img
-              class="max-w-[200px] max-h-[100px] rounded-xl"
+              class="max-w-50 max-h-25 rounded-xl"
               :src="`${bestMotorcycle?.imageUrl}`"
               :alt="bestMotorcycle?.name"
             />
@@ -161,7 +161,7 @@ onMounted(() => {
         </template>
       </UCard>
     </div>
-    <UCard class="my-6 mx-4 border border-solid border-[var(--border-gray)] rounded-lg">
+    <UCard class="my-6 mx-4 border border-solid border-(--border-gray) rounded-lg">
       <template #header>
         <h4>Evolution des utilisateurs</h4>
       </template>

@@ -27,12 +27,12 @@ const handleFiltersChange = (payload: any) => {
         />
         <template #body>
           <section class="drawer-section flex flex-col gap-3 py-2">
-            <h5 class="drawer-section-label text-xs tracking-[0.1em] uppercase text-gray-500 pl-1 border-l-[3px] border-solid border-[var(--ui-primary)]">Filtres</h5>
+            <h5 class="drawer-section-label text-xs tracking-[0.1em] uppercase text-gray-500 pl-1 border-l-[3px] border-solid border-primary">Filtres</h5>
             <FilterContent @change="handleFiltersChange" />
           </section>
           <hr class="drawer-divider border-0 border-t border-solid border-gray-300 my-4" />
           <section class="drawer-section flex flex-col gap-3 py-2">
-            <h5 class="drawer-section-label text-xs tracking-[0.1em] uppercase text-gray-500 pl-1 border-l-[3px] border-solid border-[var(--ui-primary)]">Mon activité</h5>
+            <h5 class="drawer-section-label text-xs tracking-[0.1em] uppercase text-gray-500 pl-1 border-l-[3px] border-solid border-primary">Mon activité</h5>
             <div class="panel-mobile flex flex-col gap-[0.5em]">
               <ForumMyPosts />
               <ForumMyFavoritesPost />

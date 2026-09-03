@@ -774,7 +774,7 @@ watch(
     <Transition name="slide-fade">
       <div
         v-if="drawInstruction"
-        class="draw-instruction-banner absolute w-auto bottom-[15px] left-1/2 -translate-x-1/2 z-[2000] bg-[var(--background)] text-[var(--text-color)] py-3 px-6 rounded-full shadow-[var(--shadow-xl)] flex items-center text-sm font-medium border border-solid border-[var(--ui-primary)] backdrop-blur-[8px]"
+        class="draw-instruction-banner absolute w-auto bottom-3.75 left-1/2 -translate-x-1/2 z-2000 bg-(--background) text-(--text-color) py-3 px-6 rounded-full shadow-(--shadow-xl) flex items-center text-sm font-medium border border-solid border-primary backdrop-blur-[8px]"
       >
         <UIcon name="i-lucide-info" class="w-5 h-5 mr-2" />
         {{ drawInstruction }}
@@ -784,16 +784,16 @@ watch(
     <div id="map"></div>
     <div
       v-if="isMapLoading && props.displayMapLoader"
-      class="loader-overlay absolute top-0 left-0 w-full h-full bg-[var(--overlay-loading-background)] backdrop-blur-[4px] flex items-center justify-center z-[2000]"
+      class="loader-overlay absolute top-0 left-0 w-full h-full bg-(--overlay-loading-background) backdrop-blur-[4px] flex items-center justify-center z-2000"
     >
       <div class="flex flex-col items-center gap-3">
-        <UIcon name="i-lucide-loader-2" class="loader-icon w-10 h-10 text-[var(--ui-primary)]" />
-        <span class="text-sm font-medium text-[var(--text-color)]">Chargement de la carte...</span>
+        <UIcon name="i-lucide-loader-2" class="loader-icon w-10 h-10 text-primary" />
+        <span class="text-sm font-medium text-(--text-color)">Chargement de la carte...</span>
       </div>
     </div>
     <div
       v-if="props.displayFilters"
-      class="filters absolute top-[15px] left-[15px] flex flex-row items-center flex-wrap gap-3 z-[1001] pointer-events-none"
+      class="filters absolute top-3.75 left-3.75 flex flex-row items-center flex-wrap gap-3 z-1001 pointer-events-none"
     >
       <USelect
         v-model="selectedId"

@@ -256,7 +256,7 @@ watch(
                   class="flex-1 min-w-fit cursor-pointer rounded-full border-2 border-solid bg-transparent px-4 py-2 text-sm transition-all duration-200 ease-in-out"
                   :class="
                     state.experience === option
-                      ? 'border-[var(--ui-color-error-500)] text-[var(--ui-color-error-500)]'
+                      ? 'border-error-500 text-error-500'
                       : 'border-gray-300 text-gray-700 hover:border-gray-500'
                   "
                   @click="state.experience = option"

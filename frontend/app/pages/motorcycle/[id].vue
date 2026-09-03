@@ -246,7 +246,7 @@ watch(
     <h1 class="title flex items-center justify-center mt-4">{{ m.name }}</h1>
     <img :src="m.imageUrl" :alt="`Image de la moto ${m.name}`" class="img-cover moto-left flex-1 w-1/2 min-w-[38%] h-full object-cover object-center max-md:w-[90%]! max-lg:w-[70%]!" />
 
-    <div class="detail flex flex-col gap-2 border border-solid border-[var(--border-gray)] rounded-lg p-4 w-1/2 max-md:w-[90%]! max-lg:w-[70%]!">
+    <div class="detail flex flex-col gap-2 border border-solid border-(--border-gray) rounded-lg p-4 w-1/2 max-md:w-[90%]! max-lg:w-[70%]!">
       <p><span class="font-bold">Marque:</span> {{ m.brand.name }}</p>
       <p><span class="font-bold">Modèle:</span> {{ m.name }}</p>
       <p><span class="font-bold">Année:</span> {{ m.year }}</p>
@@ -256,7 +256,7 @@ watch(
     <div ref="statsRef" class="stats-section w-3/5 max-md:w-[90%]! max-lg:w-[75%]!">
       <h3 class="text-center mb-4">Caractéristiques</h3>
       <div v-for="group in statsGroups" :key="group.label" class="stats-group mb-8">
-        <h4 class="stats-group-label mb-3 pl-1 border-l-[3px] border-solid border-[var(--ui-primary)] uppercase text-sm text-gray-500 tracking-[0.08em] font-['Krona_One',sans-serif]">{{ group.label }}</h4>
+        <h4 class="stats-group-label mb-3 pl-1 border-l-[3px] border-solid border-primary uppercase text-sm text-gray-500 tracking-[0.08em] font-['Krona_One',sans-serif]">{{ group.label }}</h4>
         <div class="stats-grid grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-4">
           <div v-for="stat in group.stats" :key="stat.label" class="stat-card flex flex-col items-center p-4 border border-solid border-gray-300 rounded-lg gap-2">
             <span class="stat-label text-sm text-gray-500 text-center font-bold">{{ stat.label }}</span>
@@ -268,7 +268,7 @@ watch(
               :options="getCountUpOptions(stat.key)"
             />
             <span v-else class="stat-value text-2xl font-bold">0</span>
-            <div class="bar-outer w-full h-[10px] bg-[var(--color-track-bg)] rounded-lg overflow-hidden">
+            <div class="bar-outer w-full h-2.5 bg-(--color-track-bg) rounded-lg overflow-hidden">
               <div class="bar-fill h-full rounded-lg" :style="{ width: stat.percent + '%' }"></div>
             </div>
           </div>
@@ -278,7 +278,7 @@ watch(
 
     <UCard class="sound-section w-3/5 mt-8 flex flex-col items-center gap-2 max-md:w-[90%]! max-lg:w-[75%]!">
       <div class="sound-header flex items-center gap-2 mb-4">
-        <UIcon name="i-lucide-audio-waveform" class="size-6 text-(--ui-primary)" />
+        <UIcon name="i-lucide-audio-waveform" class="size-6 text-primary" />
         <h4>Son moteur</h4>
       </div>
       <AudioPlayer v-if="m.soundLink" :src="m.soundLink" />
@@ -293,11 +293,11 @@ watch(
     </div>
     <p v-else>Aucun commentaire sur la moto, ajouter le premier.</p>
 
-    <UCard v-if="!isAuthenticated" class="input-comment-box relative my-12 mx-[25%] w-1/2 min-h-[25rem] border border-solid border-gray-500 rounded-[20px] max-lg:mx-[12%] max-lg:w-[76%] max-lg:min-h-[auto] max-md:my-6 max-md:mx-4 max-md:w-auto">
+    <UCard v-if="!isAuthenticated" class="input-comment-box relative my-12 mx-[25%] w-1/2 min-h-100 border border-solid border-gray-500 rounded-[20px] max-lg:mx-[12%] max-lg:w-[76%] max-lg:min-h-auto max-md:my-6 max-md:mx-4 max-md:w-auto">
       <div class="auth-prompt flex flex-col items-center gap-4 p-8 text-center">
-        <UIcon name="i-lucide-users" class="size-12 text-(--ui-primary)" />
+        <UIcon name="i-lucide-users" class="size-12 text-primary" />
         <h3>Rejoignez la communauté</h3>
-        <p class="auth-prompt-text text-gray-500 max-w-[28rem]">
+        <p class="auth-prompt-text text-gray-500 max-w-112">
           Connectez-vous pour débattre et partager vos avis sur cette moto.
         </p>
         <UButton color="primary" size="xl" class="text-white! cursor-pointer" @click="open()">
@@ -305,8 +305,8 @@ watch(
         </UButton>
       </div>
     </UCard>
-    <div v-else class="input-comment-box relative my-12 mx-[25%] w-1/2 min-h-[25rem] border border-solid border-gray-500 rounded-[20px] max-lg:mx-[12%] max-lg:w-[76%] max-lg:min-h-[auto] max-md:my-6 max-md:mx-4 max-md:w-auto">
-      <div v-if="!messagePosted" class="input-comment-container flex flex-col justify-between h-full min-h-[25rem] p-8 max-lg:min-h-[auto] max-lg:p-4">
+    <div v-else class="input-comment-box relative my-12 mx-[25%] w-1/2 min-h-100 border border-solid border-gray-500 rounded-[20px] max-lg:mx-[12%] max-lg:w-[76%] max-lg:min-h-auto max-md:my-6 max-md:mx-4 max-md:w-auto">
+      <div v-if="!messagePosted" class="input-comment-container flex flex-col justify-between h-full min-h-100 p-8 max-lg:min-h-auto max-lg:p-4">
         <h4 class="text-center">
           Déjà roulé sur cette moto ?<br />
           Faite le savoir à la communauté !
@@ -318,7 +318,7 @@ v-model="comment.content" size="xl"
         </div>
         <UButton class="rounded-4xl self-end text-xs m-1" size="xl" @click="postComment">Poster</UButton>
       </div>
-      <div v-else class="input-posted-container flex flex-col justify-center h-fit min-h-[25rem] p-8 gap-8 max-lg:min-h-[auto] max-lg:p-4">
+      <div v-else class="input-posted-container flex flex-col justify-center h-fit min-h-100 p-8 gap-8 max-lg:min-h-auto max-lg:p-4">
         <h4 class="text-center">Merci pour votre contribution !</h4>
         <p class="text-center">
           Votre commentaire a été posté avec succès. Il apparaîtra dans la

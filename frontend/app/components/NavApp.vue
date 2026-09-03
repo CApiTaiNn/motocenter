@@ -15,7 +15,7 @@ const profileModal = useProfileModal()
 
 const isDev = import.meta.dev
 const colorMode = useColorMode()
-const mode = ref(colorMode.value === 'dark')
+const mode = ref<boolean>(colorMode.value === 'dark')
 
 watch(
   () => colorMode.value,
@@ -50,13 +50,13 @@ function toggleOpen() {
 
 <template>
   <header
-    class="sticky top-0 z-[9999] w-full bg-[var(--background)]"
+    class="sticky top-0 z-9999 w-full bg-(--background)"
   >
     <!-- Desktop -->
     <nav
-      class="hidden lg:flex flex-row justify-between p-[10px] bg-[var(--background)]"
+      class="hidden lg:flex flex-row justify-between p-2.5 bg-(--background)"
     >
-      <div class="flex flex-row items-center gap-[10px] mx-[2%]">
+      <div class="flex flex-row items-center gap-2.5 mx-[2%]">
         <LogoApp />
         <ToggleSwitch v-if="isDev" v-model="mode" />
       </div>
@@ -71,12 +71,12 @@ function toggleOpen() {
             color="neutral"
             variant="ghost"
             :to="item.to"
-            :class="isActive(item.to) ? 'font-semibold text-[var(--ui-primary)]!' : ''"
+            :class="isActive(item.to) ? 'font-semibold text-primary!' : ''"
           >
             {{ item.label }}
           </UButton>
           <span
-            class="absolute -bottom-1 left-1/2 -translate-x-1/2 h-[2px] w-6 rounded-full bg-[var(--ui-primary)] transition-opacity duration-200"
+            class="absolute -bottom-1 left-1/2 -translate-x-1/2 h-0.5 w-6 rounded-full bg-primary transition-opacity duration-200"
             :class="isActive(item.to) ? 'opacity-100' : 'opacity-0'"
           />
         </div>
@@ -85,7 +85,7 @@ function toggleOpen() {
           trailing-icon="i-lucide-arrow-right"
           size="xl"
           color="neutral"
-          class="rounded-full text-sm! px-10! py-[10px]!"
+          class="rounded-full text-sm! px-10! py-2.5!"
           @click="connexionModal.open()"
         >
           Connexion
@@ -103,9 +103,9 @@ function toggleOpen() {
     </nav>
 
     <!-- Mobile -->
-    <nav class="flex flex-col lg:hidden bg-[var(--background)]">
-      <div class="flex flex-row justify-between items-center p-[10px]">
-        <div class="flex flex-row items-center gap-[10px] mx-[2%]">
+    <nav class="flex flex-col lg:hidden bg-(--background)">
+      <div class="flex flex-row justify-between items-center p-2.5">
+        <div class="flex flex-row items-center gap-2.5 mx-[2%]">
           <LogoApp />
           <ToggleSwitch v-if="isDev" v-model="mode" />
         </div>
@@ -117,7 +117,7 @@ function toggleOpen() {
       </div>
       <div
         v-if="isOpen"
-        class="flex flex-col gap-[10px] text-center pb-2"
+        class="flex flex-col gap-2.5 text-center pb-2"
       >
         <UButton
           v-for="item in navItems"
@@ -129,7 +129,7 @@ function toggleOpen() {
           class="justify-center border-l-4 transition-colors"
           :class="
             isActive(item.to)
-              ? 'border-[var(--ui-primary)] font-semibold text-[var(--ui-primary)]!'
+              ? 'border-primary font-semibold text-primary!'
               : 'border-transparent'
           "
         >

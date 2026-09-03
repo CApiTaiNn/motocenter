@@ -147,7 +147,7 @@ onMounted(async () => {
           <p class="font-bold">{{ message.user.pseudo }},&nbsp;</p>
           <p>{{ formatTimeAgo(message.createdAt) }}</p>
         </div>
-        <p class="comment-text m-0 leading-[1.5]">{{ message.content }}</p>
+        <p class="comment-text m-0 leading-normal">{{ message.content }}</p>
         <div class="comment-actions flex items-center gap-6 mt-1">
           <div
             class="action-button flex items-center gap-2 cursor-pointer"
@@ -210,7 +210,7 @@ onMounted(async () => {
           :class="
             props.deep >= MAX_DEEP
               ? 'ml-2 pl-0 border-l-0 mt-4 max-md:ml-0! max-lg:ml-1! max-md:pl-2! max-lg:pl-3!'
-              : 'ml-4 pl-4 mt-3 border-l-2 border-solid border-[var(--border-gray)] max-md:ml-2! max-lg:ml-3! max-md:pl-2! max-lg:pl-3! max-lg:border-l-2!'
+              : 'ml-4 pl-4 mt-3 border-l-2 border-solid border-(--border-gray) max-md:ml-2! max-lg:ml-3! max-md:pl-2! max-lg:pl-3! max-lg:border-l-2!'
           "
         >
           <Comment

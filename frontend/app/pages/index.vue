@@ -100,7 +100,9 @@ onMounted(async () => {
 </script>
 <template>
   <main class="flex flex-col gap-24 overflow-x-hidden">
-    <section class="relative flex flex-col justify-center items-center h-screen max-lg:h-[60vh]! max-lg:gap-8! max-lg:mx-[5%]!">
+    <section
+      class="relative flex flex-col justify-center items-center h-screen max-lg:h-[60vh]! max-lg:gap-8! max-lg:mx-[5%]!"
+    >
       <h1 class="text-center h1-mobile">
         Trouver <span style="color: var(--ui-primary)">la moto</span>
         <br />
@@ -111,7 +113,7 @@ onMounted(async () => {
         <UButton
           size="xl"
           color="primary"
-          class="rounded-full button max-lg:px-[30px]! max-lg:py-[10px]! max-lg:text-sm!"
+          class="rounded-full button max-lg:px-7.5! max-lg:py-2.5! max-lg:text-sm!"
           style="color: white"
           to="/comparo"
           >Essayer</UButton
@@ -120,7 +122,7 @@ onMounted(async () => {
           v-if="!isAuthenticated"
           size="xl"
           color="neutral"
-          class="rounded-full button cursor-pointer max-lg:px-[30px]! max-lg:py-[10px]! max-lg:text-sm!"
+          class="rounded-full button cursor-pointer max-lg:px-7.5! max-lg:py-2.5! max-lg:text-sm!"
           trailing-icon="i-lucide-arrow-right"
           variant="outline"
           @click="connexionModal.open()"
@@ -142,7 +144,7 @@ onMounted(async () => {
       </div>
       <UIcon
         name="i-lucide-chevron-down"
-        class="scroll-cue absolute bottom-8 opacity-70 size-8 text-(--ui-primary)"
+        class="scroll-cue absolute bottom-8 opacity-70 size-8 text-primary"
         aria-hidden="true"
       />
     </section>
@@ -156,12 +158,16 @@ onMounted(async () => {
             <span class="font-bold">puissance</span>, plus de
             <span class="font-bold">couple</span>, plus de
             <span class="font-bold">vitesse</span>. Depuis
-            <span class="font-bold">1868</span>, des milliers de modèles de motos ont
-            vu le jour. Et si toi aussi tu veux savoir laquelle correspond le
-            mieux à ce que tu recherches...
+            <span class="font-bold">1868</span>, des milliers de modèles de
+            motos ont vu le jour. Et si toi aussi tu veux savoir laquelle
+            correspond le mieux à ce que tu recherches...
           </p>
         </article>
-        <img src="/images/accueil/Hornet.png" alt="Moto" class="flex-1 w-full min-w-[38%] h-auto max-h-[80vh] object-contain object-bottom" />
+        <img
+          src="/images/accueil/Hornet.png"
+          alt="Moto"
+          class="flex-1 w-full min-w-[38%] h-auto max-h-[80vh] object-contain object-bottom"
+        />
       </div>
     </section>
     <section class="flex flex-col gap-8 max-md:mx-[5%]! max-lg:mx-[8%]!">
@@ -171,7 +177,10 @@ onMounted(async () => {
       </h2>
       <article class="flex flex-col gap-16">
         <div class="flex flex-col gap-4">
-          <div ref="statsRow" class="flex flex-row justify-center gap-16 mx-[5%] max-lg:gap-4!">
+          <div
+            ref="statsRow"
+            class="flex flex-row justify-center gap-16 mx-[5%] max-lg:gap-4!"
+          >
             <StatsHome
               v-for="item in dynamicStats"
               :key="item.suffix"
@@ -183,7 +192,9 @@ onMounted(async () => {
           </div>
         </div>
         <div class="flex flex-col gap-4">
-          <div class="flex flex-row justify-center gap-16 mx-[5%] max-lg:gap-4!">
+          <div
+            class="flex flex-row justify-center gap-16 mx-[5%] max-lg:gap-4!"
+          >
             <StatsHome
               v-for="item in itemsTab"
               :key="item.content"
@@ -200,7 +211,9 @@ onMounted(async () => {
         <CarrouselMotorcycles :items="itemsCaroussel" />
       </ClientOnly>
     </section>
-    <section class="invitation relative flex flex-col justify-center items-center gap-12 mx-[20%] p-16 rounded-[20px] border-2 border-solid border-[var(--border-gray)] overflow-hidden max-md:mx-[10%]! max-lg:mx-[15%]! max-md:p-8! max-md:gap-8!">
+    <section
+      class="invitation relative flex flex-col justify-center items-center gap-12 mx-[20%] p-16 rounded-[20px] border-2 border-solid border-(--border-gray) overflow-hidden max-md:mx-[10%]! max-lg:mx-[15%]! max-md:p-8! max-md:gap-8!"
+    >
       <div class="carb-anim" aria-hidden="true">
         <span class="air air-1" />
         <span class="air air-2" />
@@ -219,7 +232,7 @@ onMounted(async () => {
         <UButton
           size="xl"
           color="primary"
-          class="rounded-full button max-lg:px-[30px]! max-lg:py-[10px]! max-lg:text-sm!"
+          class="rounded-full button max-lg:px-7.5! max-lg:py-2.5! max-lg:text-sm!"
           style="color: white"
           to="/comparo"
           >Essayer</UButton
@@ -236,7 +249,7 @@ onMounted(async () => {
       <UButton
         size="xl"
         color="neutral"
-        class="rounded-full button max-lg:px-[30px]! max-lg:py-[10px]! max-lg:text-sm!"
+        class="rounded-full button max-lg:px-7.5! max-lg:py-2.5! max-lg:text-sm!"
         icon="i-lucide-badge-check"
         style="margin-bottom: 20vh"
         >Approuvé par 100 utilisateurs</UButton
@@ -256,8 +269,13 @@ section {
 }
 
 @keyframes scroll-bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(8px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(8px);
+  }
 }
 
 .moto-left {
@@ -271,7 +289,11 @@ section {
 /* layered radial-gradient + token fallback — no single utility expresses this */
 .invitation {
   background:
-    radial-gradient(circle at top right, color-mix(in srgb, var(--ui-primary) 18%, transparent), transparent 60%),
+    radial-gradient(
+      circle at top right,
+      color-mix(in srgb, var(--ui-primary) 18%, transparent),
+      transparent 60%
+    ),
     var(--background-secondary);
 }
 
@@ -487,5 +509,4 @@ section {
     opacity: 1;
   }
 }
-
 </style>

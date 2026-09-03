@@ -38,10 +38,10 @@ const goToForm = async () => {
 
     <RideBrowseMap />
 
-    <UCard class="max-w-[60rem] mx-auto mt-8 mb-16">
+    <UCard class="max-w-240 mx-auto mt-8 mb-16">
       <div class="flex flex-row flex-wrap items-center gap-4 max-[410px]:justify-center">
-        <UIcon name="i-lucide-map-pinned" class="size-10 text-(--ui-primary)" />
-        <div class="flex-1 min-w-[12rem]">
+        <UIcon name="i-lucide-map-pinned" class="size-10 text-primary" />
+        <div class="flex-1 min-w-48">
           <h4>Pas trouvé votre balade ?</h4>
           <p class="p-mobile">Ajoutez-la pour la partager avec la communauté.</p>
         </div>

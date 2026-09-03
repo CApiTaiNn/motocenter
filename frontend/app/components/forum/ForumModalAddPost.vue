@@ -250,7 +250,7 @@ v-model="state.brand" placeholder="Sélectionnez la marque du post" :items="bran
                     </div>
                     <div
 v-if="props.isNewPost && getPreviewUrl() === ''"
-                      class="cursor-pointer text-center min-h-[100px] max-h-[100px] border-2 border-dashed border-[var(--border-gray)] rounded-xl">
+                      class="cursor-pointer text-center min-h-25 max-h-25 border-2 border-dashed border-(--border-gray) rounded-xl">
                       <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
                         <UIcon name="i-lucide-cloud-upload" class="size-10" />
                         <p class="text-base">Sélectionner votre fichier</p>
@@ -260,7 +260,7 @@ v-if="props.isNewPost && getPreviewUrl() === ''"
 v-if="isHover && getPreviewUrl() !== ''"
                       class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center cursor-pointer"
                       @click="() => open()">
-                      <h4 class="text-sm p-2 text-[var(--background)] bg-[rgba(128,128,128,0.865)]">Cliquer pour modifier la photo</h4>
+                      <h4 class="text-sm p-2 text-(--background) bg-[rgba(128,128,128,0.865)]">Cliquer pour modifier la photo</h4>
                     </div>
                   </div>
                 </template>

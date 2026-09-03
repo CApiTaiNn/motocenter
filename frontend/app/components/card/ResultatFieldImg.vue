@@ -8,7 +8,7 @@ const props = defineProps<{
 
 <template>
   <div class="resultat flex flex-col items-center gap-3">
-    <div class="container-row flex items-center justify-between w-[60%] gap-6 max-md:w-[95%]! max-lg:w-[80%]! max-md:gap-[10px]!">
+    <div class="container-row flex items-center justify-between w-[60%] gap-6 max-md:w-[95%]! max-lg:w-[80%]! max-md:gap-2.5!">
       <div class="left flex flex-row justify-between items-center w-full">
         <img
           v-if="props.firstValue"

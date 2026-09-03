@@ -52,7 +52,7 @@ watch(user, async (newUser) => {
           <div
             v-for="post in myFavoritesPosts"
             :key="post._id"
-            class="cursor-pointer mb-4 border-b border-solid border-[var(--border-gray)]"
+            class="cursor-pointer mb-4 border-b border-solid border-(--border-gray)"
             @click="navigateTo(`/forum/${post._id}`)"
           >
             {{ post.title }}

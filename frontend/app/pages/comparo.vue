@@ -327,7 +327,7 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
           <MotocyclesForm v-model="motorcycle1Id" form-title="Moto 1" />
           <UIcon
             name="i-lucide-arrow-left-right"
-            class="size-8 text-(--ui-primary) self-center max-lg:rotate-90"
+            class="size-8 text-primary self-center max-lg:rotate-90"
             aria-hidden="true"
           />
           <MotocyclesForm v-model="motorcycle2Id" form-title="Moto 2" />
@@ -338,7 +338,7 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
       </div>
       <Transition>
         <div v-if="showResultat" ref="resultat" class="scroll-mt-24">
-          <nav class="flex flex-wrap gap-1 w-fit max-w-full mx-auto mb-12 p-1 bg-[var(--background)] border border-[var(--border-gray)] rounded-full justify-center" role="tablist">
+          <nav class="flex flex-wrap gap-1 w-fit max-w-full mx-auto mb-12 p-1 bg-(--background) border border-(--border-gray) rounded-full justify-center" role="tablist">
             <button
               v-for="tab in resultTabs"
               :key="tab.key"
@@ -346,8 +346,8 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
               :class="[
                 'px-6 py-2 bg-transparent border-none rounded-full cursor-pointer font-[\'Poppins\',sans-serif] text-base font-medium whitespace-nowrap transition-[background-color,color] duration-200 ease-[ease]',
                 activeResultTab === tab.key
-                  ? 'bg-[var(--ui-primary)]/10 text-[var(--ui-primary)] font-semibold'
-                  : 'text-[var(--ui-primary)] hover:bg-[var(--ui-primary)]/5'
+                  ? 'bg-primary/10 text-primary font-semibold'
+                  : 'text-primary hover:bg-primary/5'
               ]"
               role="tab"
               :aria-selected="activeResultTab === tab.key"
@@ -419,9 +419,9 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
               </div>
             </div>
           </div>
-          <div class="relative my-12 mx-[25%] w-1/2 min-h-[25rem] border border-solid border-gray-500 rounded-[20px] max-lg:mx-[12%]! max-lg:w-[76%]! max-lg:min-h-[auto]! max-md:my-6! max-md:mx-4! max-md:w-auto!">
+          <div class="relative my-12 mx-[25%] w-1/2 min-h-100 border border-solid border-gray-500 rounded-[20px] max-lg:mx-[12%]! max-lg:w-[76%]! max-lg:min-h-auto! max-md:my-6! max-md:mx-4! max-md:w-auto!">
             <div v-if="!isAuthenticated" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 text-center max-lg:w-[90%]! max-lg:flex! max-lg:flex-col max-lg:items-center! max-lg:gap-4">
-              <h3 class="h3-mobile w-[400px] max-lg:w-auto! max-lg:text-lg!">
+              <h3 class="h3-mobile w-100 max-lg:w-auto! max-lg:text-lg!">
                 Rejoignez la communauté pour débattre et partager vos avis sur
                 ces motos !
               </h3>
@@ -435,7 +435,7 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
             </div>
             <div
               v-if="!messagePosted"
-              class="flex flex-col justify-between h-full min-h-[25rem] p-8 max-lg:min-h-[auto]! max-lg:p-4!"
+              class="flex flex-col justify-between h-full min-h-100 p-8 max-lg:min-h-auto! max-lg:p-4!"
               :class="{ 'blur-[3px] pointer-events-none select-none': !isAuthenticated }"
             >
               <h4 class="text-center">
@@ -465,7 +465,7 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
             </div>
             <div
               v-else
-              class="flex flex-col justify-center h-fit min-h-[25rem] p-8 gap-8 max-lg:min-h-[auto]! max-lg:p-4!"
+              class="flex flex-col justify-center h-fit min-h-100 p-8 gap-8 max-lg:min-h-auto! max-lg:p-4!"
               :class="{ 'blur-[3px] pointer-events-none select-none': !isAuthenticated }"
             >
               <h4 class="text-center">Merci pour votre contribution !</h4>

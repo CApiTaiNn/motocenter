@@ -273,14 +273,14 @@ watch(
         </div>
         <div
           v-if="panelOpen"
-          class="m-8 border border-solid border-[var(--border-gray)] rounded-xl p-4 h-[calc(150vh-200px)] overflow-y-auto sticky top-[60px] max-lg:w-full! max-lg:static!"
+          class="m-8 border border-solid border-(--border-gray) rounded-xl p-4 h-[calc(150vh-200px)] overflow-y-auto sticky top-15 max-lg:w-full! max-lg:static!"
         >
           <header
             class="flex items-center gap-2 pb-3 mb-4 border-b border-solid border-gray-300"
           >
             <UIcon
               :name="selectedMoto ? 'i-lucide-pencil' : 'i-lucide-plus-circle'"
-              class="size-5 text-(--ui-primary)"
+              class="size-5 text-primary"
             />
             <h4>
               {{ selectedMoto ? `Modifier · ${selectedMoto.name}` : 'Nouvelle moto' }}

@@ -38,12 +38,12 @@ const contactEmail = 'contact@mgtsoftware.com'
 
 <template>
   <footer class="mt-20">
-    <div class="footer-top-border h-[3px]" />
+    <div class="footer-top-border h-0.75" />
 
-    <div class="footer-main flex justify-between items-start gap-8 pt-16 px-[5%] pb-12 max-w-[1400px] mx-auto max-lg:flex-wrap! max-lg:pt-[2.5rem]! max-lg:px-[6%]! max-lg:pb-[2rem]! max-lg:gap-x-4! max-lg:gap-y-8!">
+    <div class="footer-main flex justify-between items-start gap-8 pt-16 px-[5%] pb-12 max-w-350 mx-auto max-lg:flex-wrap! max-lg:pt-10! max-lg:px-[6%]! max-lg:pb-8! max-lg:gap-x-4! max-lg:gap-y-8!">
       <div class="flex-[1.2] flex flex-col items-start gap-3 max-lg:flex-[1_1_100%]! max-lg:items-center! max-lg:text-center">
         <LogoApp />
-        <p class="footer-tagline text-sm font-light text-[var(--label-text)]">La communauté des passionnés de moto</p>
+        <p class="footer-tagline text-sm font-light text-(--label-text)">La communauté des passionnés de moto</p>
       </div>
 
       <nav class="flex-1 flex flex-col items-start max-lg:flex-[1_1_45%]!">
@@ -53,7 +53,7 @@ const contactEmail = 'contact@mgtsoftware.com'
             v-for="(item, idx) in guides"
             :key="`guide-${idx}`"
           >
-            <NuxtLink :to="item.to" class="footer-link text-sm font-light text-[var(--text-color)] no-underline transition-colors duration-200 break-all hover:text-[var(--ui-primary)]">{{
+            <NuxtLink :to="item.to" class="footer-link text-sm font-light text-(--text-color) no-underline transition-colors duration-200 break-all hover:text-primary">{{
               item.label
             }}</NuxtLink>
           </li>
@@ -69,7 +69,7 @@ const contactEmail = 'contact@mgtsoftware.com'
               target="_blank"
               rel="noopener noreferrer"
               :aria-label="`${item.label} (ouvre un nouvel onglet)`"
-              class="footer-social-link flex items-center gap-2 text-[var(--text-color)] no-underline transition-colors duration-200 hover:text-[var(--ui-primary)]"
+              class="footer-social-link flex items-center gap-2 text-(--text-color) no-underline transition-colors duration-200 hover:text-primary"
             >
               <UIcon :name="item.icon" class="text-xl shrink-0 max-lg:text-2xl!" />
               <span class="footer-social-label text-sm font-light max-lg:hidden">{{ item.label }}</span>
@@ -82,7 +82,7 @@ const contactEmail = 'contact@mgtsoftware.com'
         <h5 class="mb-4 uppercase tracking-[0.08em]">Contact</h5>
         <ul class="flex flex-col gap-2 list-none pl-0">
           <li>
-            <a class="footer-link text-sm font-light text-[var(--text-color)] no-underline transition-colors duration-200 break-all hover:text-[var(--ui-primary)]" :href="`mailto:${contactEmail}`">{{
+            <a class="footer-link text-sm font-light text-(--text-color) no-underline transition-colors duration-200 break-all hover:text-primary" :href="`mailto:${contactEmail}`">{{
               contactEmail
             }}</a>
           </li>
@@ -90,16 +90,16 @@ const contactEmail = 'contact@mgtsoftware.com'
       </div>
     </div>
 
-    <div class="h-px bg-[var(--border-gray)] max-w-[1400px] mx-auto" />
+    <div class="h-px bg-(--border-gray) max-w-350 mx-auto" />
 
-    <div class="flex justify-between items-center py-4 px-[5%] max-w-[1400px] mx-auto max-lg:flex-col! max-lg:gap-2! max-lg:text-center max-lg:py-4!">
-      <p class="footer-bottom-text text-sm font-light text-[var(--label-text)]">
+    <div class="flex justify-between items-center py-4 px-[5%] max-w-350 mx-auto max-lg:flex-col! max-lg:gap-2! max-lg:text-center max-lg:py-4!">
+      <p class="footer-bottom-text text-sm font-light text-(--label-text)">
         &copy; 2026 MotoCenter &mdash; Tout droit réservé
       </p>
       <div class="flex items-center gap-2">
-        <NuxtLink class="footer-bottom-link text-sm font-light text-[var(--label-text)] no-underline transition-colors duration-200 hover:text-[var(--ui-primary)]" to="/">Mentions légales</NuxtLink>
-        <span class="footer-bottom-dot text-[var(--label-text)] text-sm">&middot;</span>
-        <NuxtLink class="footer-bottom-link text-sm font-light text-[var(--label-text)] no-underline transition-colors duration-200 hover:text-[var(--ui-primary)]" to="/">Confidentialité</NuxtLink>
+        <NuxtLink class="footer-bottom-link text-sm font-light text-(--label-text) no-underline transition-colors duration-200 hover:text-primary" to="/">Mentions légales</NuxtLink>
+        <span class="footer-bottom-dot text-(--label-text) text-sm">&middot;</span>
+        <NuxtLink class="footer-bottom-link text-sm font-light text-(--label-text) no-underline transition-colors duration-200 hover:text-primary" to="/">Confidentialité</NuxtLink>
       </div>
     </div>
   </footer>

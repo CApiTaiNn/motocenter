@@ -580,7 +580,7 @@ watch(
                 done: currentStep > idx
               }]"
             >
-              <span class="stepper-bullet size-[1.75rem] rounded-full bg-gray-300 text-[var(--background)] inline-flex items-center justify-center font-semibold text-sm shrink-0">
+              <span class="stepper-bullet size-7 rounded-full bg-gray-300 text-(--background) inline-flex items-center justify-center font-semibold text-sm shrink-0">
                 <UIcon v-if="currentStep > idx" name="i-lucide-check" class="size-4" />
                 <span v-else>{{ idx + 1 }}</span>
               </span>
@@ -718,7 +718,7 @@ watch(
 
         <div v-show="currentStep === 2" class="flex flex-col gap-6">
           <UFormField label="Image de la balade" name="picture" required>
-            <div class="w-full h-[200px] overflow-hidden">
+            <div class="w-full h-50 overflow-hidden">
               <UFileUpload v-model="stateForm.picture" class="w-full h-full" />
             </div>
           </UFormField>
@@ -800,7 +800,7 @@ watch(
             Modification désactivée pour les tracés GPS et sur téléphone
           </div>
 
-          <div class="flex flex-col gap-4 min-w-[200px] mt-4 lg:flex-row! lg:gap-10! lg:items-center">
+          <div class="flex flex-col gap-4 min-w-50 mt-4 lg:flex-row! lg:gap-10! lg:items-center">
             <div v-if="rideDistance > 0" class="flex flex-row gap-3 justify-start items-center whitespace-nowrap">
               <UIcon name="i-lucide-map-pinned" class="w-4 h-4 text-primary" />
               <span

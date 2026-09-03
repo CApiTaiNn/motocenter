@@ -13,7 +13,7 @@ const isSidebarOpen = ref(false) // État du volet latéral (ouvert/fermé)
 
 <template>
   <div
-    class="sidebar flex absolute top-[80px] bottom-[20px] right-0 w-[40dvw] max-md:w-[90dvw]! max-lg:w-[60dvw]! bg-[var(--background)] backdrop-blur-[8px] z-[1020] transition-transform duration-300 ease-in-out translate-x-full border-l border-solid border-gray-300 rounded-l-xl rounded-r-none"
+    class="sidebar flex absolute top-20 bottom-5 right-0 w-[40dvw] max-md:w-[90dvw]! max-lg:w-[60dvw]! bg-(--background) backdrop-blur-[8px] z-1020 transition-transform duration-300 ease-in-out translate-x-full border-l border-solid border-gray-300 rounded-l-xl rounded-r-none"
     :class="{ 'is-open': isSidebarOpen }"
   >
     <div class="absolute -left-10 top-1/2 -translate-y-1/2 h-10 w-10 z-1002">
@@ -29,7 +29,7 @@ const isSidebarOpen = ref(false) // État du volet latéral (ouvert/fermé)
     </div>
 
     <div class="flex-1 p-6 overflow-y-auto font-sans">
-      <h3 class="text-lg font-bold mb-4 text-[var(--text-color)]">Liste des balades</h3>
+      <h3 class="text-lg font-bold mb-4 text-(--text-color)">Liste des balades</h3>
       <div class="flex flex-col gap-6 pb-6">
         <div
           v-for="ride in props.filteredRides"
