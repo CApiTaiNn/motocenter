@@ -20,25 +20,27 @@ interface IStatCount {
 }
 
 const connexionModal = useConnexionModal()
+const toast = useToast()
 
 const itemsCaroussel = ref<IMotorcycle[]>([])
 const apiBase = useRuntimeConfig().public.apiBase
 const dynamicStats = ref<IStatCount[]>([])
+const totalUsers = ref(0)
 
 // Count-up only starts once the stats row scrolls into view
 const statsRow = ref<HTMLElement | null>(null)
 const statsStarted = ref(false)
 const itemsTab = reactive<IItemTab[]>([
   {
-    content: 'Base de données complètes',
+    content: 'Base de données complète',
     urlImg: '/images/accueil/icon_checked_classic.png'
   },
   {
-    content: 'Communautée active',
+    content: 'Communauté active',
     urlImg: '/images/accueil/icon_clock.png'
   },
   {
-    content: 'Equipe passionée',
+    content: 'Équipe passionnée',
     urlImg: '/images/accueil/icon_idea.png'
   }
 ])
@@ -69,12 +71,18 @@ async function fetchStats() {
       urlImg: '/images/accueil/icon_moto.png'
     })
 }
+async function fetchUserCount() {
+  totalUsers.value = await $fetch<number>(`${apiBase}users/count`)
+}
 async function fetchMotocycles() {
   const data = await $fetch<{ motorcycles: IMotorcycle[] }>(
     `${apiBase}motorcycles`,
     {
       params: {
-        project: 'name,horsePower,torque,price,imageUrl'
+        // The card shows brand, category/A2, year, weight and comparison count —
+        // all must be projected or they render blank.
+        project:
+          'name,year,horsePower,torque,weight,price,imageUrl,brand,category,isAvailableA2,numberOfComparison'
       }
     }
   )
@@ -95,7 +103,15 @@ onMounted(async () => {
     observer.observe(statsRow.value)
   }
 
-  await Promise.all([fetchMotocycles(), fetchStats()])
+  try {
+    await Promise.all([fetchMotocycles(), fetchStats(), fetchUserCount()])
+  } catch {
+    toast.add({
+      title: 'Chargement impossible',
+      description: 'Impossible de charger les données. Réessayez plus tard.',
+      color: 'error'
+    })
+  }
 })
 </script>
 <template>
@@ -106,7 +122,7 @@ onMounted(async () => {
     <section class="relative isolate flex h-screen flex-col items-center justify-center py-0! max-lg:h-[60vh]! max-lg:gap-8!">
       <span class="hero-glow" aria-hidden="true" />
       <h1 class="text-center">
-        Trouver <span style="color: var(--ui-primary)">la moto</span>
+        Trouver <span class="text-(--ui-primary)">la moto</span>
         <br />
         qui vous convient
       </h1>
@@ -115,8 +131,7 @@ onMounted(async () => {
         <UButton
           size="xl"
           color="primary"
-          class="button rounded-full max-lg:px-[30px]! max-lg:py-[10px]! max-lg:text-sm!"
-          style="color: white"
+          class="button rounded-full text-white max-lg:px-[30px]! max-lg:py-[10px]! max-lg:text-sm!"
           to="/comparo"
           >Essayer</UButton
         >
@@ -163,7 +178,7 @@ onMounted(async () => {
     </section>
     <section class="flex flex-col gap-8 lg:min-h-screen lg:justify-center">
       <h2 style="text-align: center">
-        <span style="color: var(--ui-primary)">Motocenter</span>
+        <span class="text-(--ui-primary)">Motocenter</span>
         en quelques chiffres
       </h2>
       <article class="flex flex-col gap-16">
@@ -210,7 +225,7 @@ onMounted(async () => {
         class="button rounded-full max-lg:px-[30px]! max-lg:py-[10px]! max-lg:text-sm!"
         icon="i-lucide-badge-check"
         style="margin-bottom: 20vh"
-        >Approuvé par 100 utilisateurs</UButton
+        >Approuvé par {{ totalUsers }} utilisateurs</UButton
       >
     </section>
   </main>
@@ -323,8 +338,13 @@ section {
 }
 
 @keyframes scroll-bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(8px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(8px);
+  }
 }
 
 .moto-left {
@@ -361,5 +381,4 @@ section {
     opacity: 1;
   }
 }
-
 </style>

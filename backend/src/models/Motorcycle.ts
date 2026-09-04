@@ -44,9 +44,10 @@ const motorcycleSchema = new Schema({
     type: Number,
     required: true
   },
+  // Optional: standardized fuel-consumption (WLTP) figures often weren't
+  // published for older/performance models, so this can be genuinely unknown.
   consumption: {
-    type: Number,
-    required: true
+    type: Number
   },
   soundLink: {
     type: String

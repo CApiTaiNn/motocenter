@@ -2,9 +2,11 @@
 import {
   RideType,
   type ICommune,
+  type IGeoJSON,
   type IValueCommuneSelect,
   type IValueForm
 } from '~/types/ride'
+import * as v from 'valibot'
 import RideEditorMap from './RideEditorMap.vue'
 import * as turf from '@turf/turf'
 import { useAuth } from '~/composables/useAuth.js'
@@ -367,22 +369,33 @@ async function onSubmit() {
   }
 }
 
-// Message personnalisé pour les champs requis
-async function validate(data: Partial<typeof stateForm>) {
-  if (!data.title?.length)
-    return [{ name: 'title', message: 'Le titre de la balade est requis' }]
-  if (!data.startTown?.label.length)
-    return [{ name: 'startTown', message: 'La ville de départ est requise' }]
-  if (!data.endTown?.label.length)
-    return [{ name: 'endTown', message: "La ville d'arrivée est requise" }]
-  if (!data.rideType?.length)
-    return [{ name: 'rideType', message: 'Le type de balade est requis' }]
-  if (!data.picture)
-    return [{ name: 'picture', message: "L'image de la balade est requise" }]
-  if (!data.geom)
-    return [{ name: 'geom', message: 'Le tracé de la balade est requis' }]
-  return []
-}
+// Règles de validation des champs requis (messages en français)
+const schema = v.object({
+  title: v.pipe(
+    v.string(),
+    v.minLength(1, 'Le titre de la balade est requis')
+  ),
+  startTown: v.custom<IValueCommuneSelect | undefined>(
+    (val) => !!(val as IValueCommuneSelect | undefined)?.label?.length,
+    'La ville de départ est requise'
+  ),
+  endTown: v.custom<IValueCommuneSelect | undefined>(
+    (val) => !!(val as IValueCommuneSelect | undefined)?.label?.length,
+    "La ville d'arrivée est requise"
+  ),
+  rideType: v.pipe(
+    v.string(),
+    v.minLength(1, 'Le type de balade est requis')
+  ),
+  picture: v.custom<File | undefined>(
+    (val) => !!val,
+    "L'image de la balade est requise"
+  ),
+  geom: v.custom<IGeoJSON | null>(
+    (val) => !!val,
+    'Le tracé de la balade est requis'
+  )
+})
 
 const canAdvanceStep = computed(() => {
   if (currentStep.value === 0) {
@@ -554,7 +567,7 @@ watch(
     <UForm
       class="flex w-full flex-col items-stretch gap-12 lg:flex-row! lg:flex-wrap"
       :state="stateForm"
-      :validate="validate"
+      :schema="schema"
       @submit="onSubmit"
     >
       <UContainer class="flex flex-col space-y-6 lg:order-1 lg:w-1/2 lg:flex-1">
@@ -856,8 +869,8 @@ watch(
 
 /* --- STEPPER (état actif/terminé piloté par les classes .active/.done) --- */
 .stepper-item {
-  border: 1px solid #d1d5db;
-  color: #6b7280;
+  border: 1px solid var(--color-gray-300);
+  color: var(--color-gray-500);
   transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease;
 }
 

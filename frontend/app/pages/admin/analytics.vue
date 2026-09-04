@@ -8,6 +8,8 @@ definePageMeta({
   middleware: 'auth'
 })
 
+useSeoMeta({ title: 'Analytics', robots: 'noindex, nofollow' })
+
 interface RideStats {
   title: string
   value: number
@@ -18,18 +20,18 @@ const stats = ref<RideStats[]>([])
 const bestTopic = ref<IPost>()
 const bestMotorcycle = ref<IMotorcycle>()
 const months = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December'
+  'Janvier',
+  'Février',
+  'Mars',
+  'Avril',
+  'Mai',
+  'Juin',
+  'Juillet',
+  'Août',
+  'Septembre',
+  'Octobre',
+  'Novembre',
+  'Décembre'
 ]
 
 const chartData = ref<{ month: string; user: number }[]>([])

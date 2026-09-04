@@ -2,6 +2,8 @@
 import type { IUser } from '~/types/users'
 import StatsAnalytics from '~/components/admin/StatsAnalytics.vue'
 
+const toast = useToast()
+
 interface Stat {
   title: string
   value: number
@@ -13,6 +15,8 @@ definePageMeta({
   layout: 'admin',
   middleware: 'auth'
 })
+
+useSeoMeta({ title: 'Administration', robots: 'noindex, nofollow' })
 
 const userName: string = 'Admin'
 const apiBase = useRuntimeConfig().public.apiBase
@@ -65,6 +69,11 @@ async function fetchStats() {
     ]
   } catch (error) {
     console.error('Erreur lors de la récupération des statistiques :', error)
+    toast.add({
+      title: 'Erreur',
+      description: 'Les statistiques n’ont pas pu être chargées.',
+      color: 'error'
+    })
   }
 }
 

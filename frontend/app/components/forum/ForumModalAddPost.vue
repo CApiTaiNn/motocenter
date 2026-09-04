@@ -17,6 +17,7 @@ const toast = useToast()
 const emit = defineEmits(['added-post'])
 const displayModal = defineModel<boolean>('open', { default: false })
 const isHover = ref(false)
+const isLoading = ref(false)
 const initialState = ref({
   title: '',
   category: '',
@@ -77,6 +78,7 @@ const uploadImage = async (file: File, name: string): Promise<string> => {
 }
 
 const onSubmit = async () => {
+  isLoading.value = true
   const payload = {
     brand: state.brand,
     title: state.title,
@@ -131,6 +133,8 @@ const onSubmit = async () => {
       description: `Votre post n'a pas pu être ${props.isNewPost ? 'ajouté' : 'modifié'}`,
       color: 'error'
     })
+  } finally {
+    isLoading.value = false
   }
 }
 
@@ -274,10 +278,22 @@ v-if="isHover && getPreviewUrl() !== ''"
               </UFileUpload>
             </UFormField>
             <div class="mt-8 flex gap-2">
-              <UButton v-if="isNewPost" class="cursor-pointer" type="submit">
+              <UButton
+                v-if="isNewPost"
+                class="cursor-pointer"
+                type="submit"
+                :loading="isLoading"
+                :disabled="isLoading"
+              >
                 Ajouter
               </UButton>
-              <UButton v-else class="cursor-pointer" type="submit" :disabled="!isSameValues">
+              <UButton
+                v-else
+                class="cursor-pointer"
+                type="submit"
+                :loading="isLoading"
+                :disabled="!isSameValues || isLoading"
+              >
                 Modifier
               </UButton>
               <UButton class="cursor-pointer" variant="outline" @click="resetForm">

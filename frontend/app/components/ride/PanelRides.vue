@@ -5,10 +5,20 @@ import CardRide from './CardRide.vue'
 
 interface IProps {
   filteredRides: IRide[]
+  colorMap: Record<string, string>
+  loading?: boolean
 }
 
 const props = defineProps<IProps>()
+const emit = defineEmits<{ select: [rideId: string] }>()
 const isSidebarOpen = ref(false) // État du volet latéral (ouvert/fermé)
+
+// Clic sur une balade de la liste : on la sélectionne sur la carte (centrage +
+// popup + tracé) et on referme le volet pour la laisser visible.
+const selectRide = (rideId: string) => {
+  emit('select', rideId)
+  isSidebarOpen.value = false
+}
 </script>
 
 <template>
@@ -43,19 +53,39 @@ const isSidebarOpen = ref(false) // État du volet latéral (ouvert/fermé)
         </UBadge>
       </div>
       <div class="flex flex-col gap-6 pb-6">
-        <div
-          v-for="ride in props.filteredRides"
-          :key="ride._id"
-          class="h-auto w-full rounded-xl"
-        >
-          <CardRide
-            :ride="ride"
-            @update:like="(newCount) => (ride.like = newCount)"
-            @update:participants="
-              (newList) => (ride.participating_user = newList)
-            "
+        <template v-if="props.loading">
+          <USkeleton
+            v-for="n in 4"
+            :key="n"
+            class="h-[124px] w-full rounded-xl"
           />
+        </template>
+
+        <div
+          v-else-if="props.filteredRides.length === 0"
+          class="flex flex-col items-center gap-2 py-12 text-center text-(--text-color)/60"
+        >
+          <UIcon name="i-lucide-route-off" class="size-8" aria-hidden="true" />
+          <p class="text-sm">Aucune balade trouvée</p>
         </div>
+
+        <template v-else>
+          <div
+            v-for="ride in props.filteredRides"
+            :key="ride._id"
+            class="h-auto w-full zoom-[0.8] rounded-xl"
+          >
+            <CardRide
+              :ride="ride"
+              :color="props.colorMap[ride._id]"
+              @select="selectRide"
+              @update:like="(newCount) => (ride.like = newCount)"
+              @update:participants="
+                (newList) => (ride.participating_user = newList)
+              "
+            />
+          </div>
+        </template>
       </div>
     </div>
   </div>

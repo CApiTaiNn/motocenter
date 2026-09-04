@@ -39,8 +39,8 @@ const handlePostChange = () => {
       <USkeleton v-if="props.loading" class="size-12 shrink-0 rounded-full" />
       <UAvatar
         v-else
-        :src="props.post.user.image"
-        :alt="props.post.user.pseudo"
+        :src="props.post.user?.image"
+        :alt="props.post.user?.pseudo"
         size="xl"
         loading="lazy"
         class="shrink-0"
@@ -56,7 +56,7 @@ const handlePostChange = () => {
                 {{ POST_CATEGORY_META[props.post.category]?.label }}
               </span>
               <UBadge color="neutral" variant="subtle" size="sm">
-                {{ props.post.brand.name }}
+                {{ props.post.brand?.name }}
               </UBadge>
             </div>
             <p class="mt-1.5 line-clamp-2 text-lg/snug font-semibold transition-colors group-hover:text-(--ui-primary)">
@@ -72,7 +72,7 @@ const handlePostChange = () => {
         <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-sm text-(--label-text)">
           <span>
             Par
-            <b class="font-medium text-(--text-color)">{{ props.post.user.pseudo }}</b>
+            <b class="font-medium text-(--text-color)">{{ props.post.user?.pseudo }}</b>
             · {{ formatTimeAgo(props.post.createdAt) }}
           </span>
           <div class="flex items-center gap-4">

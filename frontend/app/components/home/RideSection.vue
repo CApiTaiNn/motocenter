@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, onBeforeUnmount, ref } from 'vue'
 import type { IRide, RideResponse } from '~/types/ride'
+import { getMapPinSvg } from '~/utils/ride'
 
 // Direction owned by the parent (see ComparoSection) — defaults to non-reversed.
 withDefaults(defineProps<{ reverse?: boolean }>(), { reverse: false })
@@ -38,10 +39,26 @@ const initPreviewMap = async () => {
   const bounds = L.latLngBounds([])
   for (const ride of rides.value) {
     if (!ride.geom) continue
+    const color = ride.color || '#3B82F6'
     const layer = L.geoJSON(ride.geom as any, {
-      style: { color: ride.color || '#3B82F6', weight: 3, opacity: 1 }
+      style: { color, weight: 3, opacity: 1 }
     }).addTo(previewMap)
     bounds.extend(layer.getBounds())
+
+    // Départ : même repère que la carte principale (coordinates[0] = début du
+    // tracé, en [lng, lat]).
+    const start = (ride.geom as any)?.features?.[0]?.geometry?.coordinates?.[0]
+    if (Array.isArray(start) && start.length >= 2) {
+      L.marker([start[1], start[0]], {
+        icon: L.divIcon({
+          html: getMapPinSvg(color),
+          iconSize: [26, 26],
+          iconAnchor: [13, 10],
+          className: 'custom-dynamic-pin'
+        }),
+        interactive: false
+      }).addTo(previewMap)
+    }
   }
   if (bounds.isValid()) previewMap.fitBounds(bounds, { padding: [24, 24] })
 
@@ -99,7 +116,7 @@ const goToRide = (ride: IRide) =>
         </li>
       </ul>
 
-      <UButton size="xl" color="primary" to="/ride" class="self-start rounded-full" style="color: white">
+      <UButton size="xl" color="primary" to="/ride" class="self-start rounded-full text-white">
         Explorer la carte
       </UButton>
     </div>
@@ -116,3 +133,13 @@ const goToRide = (ride: IRide) =>
     </NuxtLink>
   </div>
 </template>
+
+<style scoped>
+/* Leaflet gives divIcons a white box by default; the pin SVG carries its own
+   shape, so strip the container. */
+:deep(.custom-dynamic-pin) {
+  background: transparent !important;
+  border: none !important;
+  display: block !important;
+}
+</style>

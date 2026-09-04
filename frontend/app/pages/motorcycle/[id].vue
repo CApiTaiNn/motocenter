@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, computed, watch, nextTick, reactive } from 'vue'
+import { onMounted, ref, computed, nextTick, reactive } from 'vue'
 import type { IMotorcycle } from '~/types/motorcycles'
 import CountUp from 'vue-countup-v3'
 import type { IMessage } from '~/types/messages'
@@ -30,7 +30,32 @@ interface IMaxStats {
 const route = useRoute()
 const id = route.params.id as string
 const apiBase = useRuntimeConfig().public.apiBase
-const m = ref<IMotorcycle | null>(null)
+// Fetched during SSR so the bike's name and specs are in the initial HTML
+// (crawlable). The comments and stat bars stay client-side below.
+const { data: m } = await useAsyncData(`motorcycle-${id}`, async () => {
+  const data = await $fetch<{ motorcycles: IMotorcycle[] }>(
+    `${apiBase}motorcycles`,
+    { params: { filter: JSON.stringify({ _id: id }), project: 'all' } }
+  )
+  return data.motorcycles?.[0] ?? null
+})
+
+// A deleted or unknown id would otherwise render a blank page.
+if (!m.value) {
+  throw createError({
+    statusCode: 404,
+    statusMessage: 'Moto introuvable',
+    fatal: true
+  })
+}
+
+useSeoMeta({
+  title: () => m.value?.name ?? 'Moto',
+  description: () =>
+    m.value
+      ? `${m.value.brand?.name ?? ''} ${m.value.name} : fiche technique et caractéristiques.`.trim()
+      : 'Fiche technique et caractéristiques moto sur Vroom.'
+})
 const commentsMotorcycle = ref<IMessage[]>([])
 const comment = ref<ICommentInput>({
   motorcycleId: id,
@@ -42,6 +67,7 @@ const comment = ref<ICommentInput>({
 const messagePosted = ref<boolean>(false)
 const { isAuthenticated, user } = useAuth()
 const { open } = useConnexionModal()
+const toast = useToast()
 
 const statsRef = ref<HTMLElement | null>(null)
 const countStarted = ref(false)
@@ -125,19 +151,6 @@ function getCountUpOptions(key: string) {
   }
 }
 
-async function fetchData() {
-  const data = await $fetch<{ motorcycles: IMotorcycle[] }>(
-    `${apiBase}motorcycles`,
-    {
-      params: {
-        filter: JSON.stringify({ _id: id }),
-        project: 'all'
-      }
-    }
-  )
-  m.value = data.motorcycles?.[0] ?? null
-}
-
 async function fetchMax() {
   const data = await $fetch<IMaxStats>(`${apiBase}motorcycles/max-stats`)
   fieldMaxRef.year = data.maxYear
@@ -194,6 +207,11 @@ async function postComment() {
       }
     } catch (error) {
       console.error('Error creating post:', error)
+      toast.add({
+        title: 'Erreur',
+        description: "La discussion n'a pas pu être créée.",
+        color: 'error'
+      })
       return
     }
   }
@@ -211,20 +229,23 @@ async function postComment() {
     messagePosted.value = true
   } catch (error) {
     console.error('Error posting comment:', error)
+    toast.add({
+      title: 'Erreur',
+      description: "Votre commentaire n'a pas pu être ajouté.",
+      color: 'error'
+    })
   }
   await fetchMessages()
 }
 
 onMounted(async () => {
-  await Promise.all([fetchData(), fetchMax()])
+  // Client-only: max-stats drive the visual bars, comments are user content.
+  await fetchMax()
   await fetchMessages()
-})
 
-watch(
-  m,
-  async () => {
-    await nextTick()
-
+  // Start the count-up when the stats block scrolls into view.
+  await nextTick()
+  if (statsRef.value) {
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0]?.isIntersecting) {
@@ -234,23 +255,21 @@ watch(
       },
       { threshold: 0.3 }
     )
-
-    if (statsRef.value) observer.observe(statsRef.value)
-  },
-  { once: true }
-)
+    observer.observe(statsRef.value)
+  }
+})
 </script>
 
 <template>
   <div v-if="m" class="flex flex-col items-center gap-8 pb-16">
     <h1 class="mt-4 flex items-center justify-center">{{ m.name }}</h1>
-    <img :src="m.imageUrl" :alt="`Image de la moto ${m.name}`" class="h-full w-1/2 min-w-[38%] flex-1 object-cover object-center max-lg:w-[70%]! max-md:w-[90%]!" />
+    <img :src="m.imageUrl" :alt="`Image de la moto ${m.name}`" class="h-full w-1/4 min-w-[19%] flex-1 object-cover object-center max-lg:w-[35%]! max-md:w-[45%]!" />
 
     <div class="flex w-1/2 flex-col gap-2 rounded-lg border border-solid border-(--border-gray) p-4 max-lg:w-[70%]! max-md:w-[90%]!">
       <p><span class="font-bold">Marque:</span> {{ m.brand.name }}</p>
       <p><span class="font-bold">Modèle:</span> {{ m.name }}</p>
       <p><span class="font-bold">Année:</span> {{ m.year }}</p>
-      <p><span class="font-bold">Moteur:</span> {{ m.engine_size }} m3</p>
+      <p><span class="font-bold">Moteur:</span> {{ m.engine_size }} cm³</p>
     </div>
 
     <div ref="statsRef" class="w-3/5 max-lg:w-[75%]! max-md:w-[90%]!">
@@ -309,7 +328,7 @@ watch(
       <div v-if="!messagePosted" class="flex h-full min-h-100 flex-col justify-between p-8 max-lg:min-h-auto max-lg:p-4">
         <h4 class="text-center">
           Déjà roulé sur cette moto ?<br />
-          Faite le savoir à la communauté !
+          Faites le savoir à la communauté !
         </h4>
         <div class="flex flex-col gap-4">
           <UTextarea

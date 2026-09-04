@@ -6,11 +6,14 @@ import { IUser } from '../types/user'
 import { authenticateToken, requireAdmin, getAuthUser } from '../utils/auth'
 import { prepareQuery, ADMIN_MAX_LIMIT, type ReqQuery } from '../utils/find'
 import { argon2PasswordHasher } from '../utils/hash'
+import { sendWelcomeEmail } from '../utils/mail'
 import { makeRateLimiter } from '../utils/rateLimit'
+import { validatePassword } from '../utils/passwordPolicy'
+import { generateToken } from '../utils/tokens'
 import { type Request, Response, Router } from 'express'
 import type { Types } from 'mongoose'
 
-const { hash } = argon2PasswordHasher
+const { hash, verify } = argon2PasswordHasher
 
 const router = Router()
 
@@ -173,15 +176,30 @@ router.post('/account', makeRateLimiter(20), async (req: Request, res: Response)
       .json({ error: 'Firstname, lastname and pseudo are required' })
   }
 
+  const passwordCheck = validatePassword(password, { email, pseudo })
+  if (!passwordCheck.valid) {
+    // `code` lets the client react without matching on the English message.
+    return res
+      .status(400)
+      .json({ error: passwordCheck.message, code: 'WEAK_PASSWORD' })
+  }
+
   if (await User.findOne({ email })) {
-    return res.status(409).json({ error: 'User already exists' })
+    return res
+      .status(409)
+      .json({ error: 'User already exists', code: 'EMAIL_TAKEN' })
   }
 
   // pseudo is the public display identity; enforce uniqueness at signup
   // (the schema's unique index is the backstop against races).
   if (await User.findOne({ pseudo })) {
-    return res.status(409).json({ error: 'Pseudo already taken' })
+    return res
+      .status(409)
+      .json({ error: 'Pseudo already taken', code: 'PSEUDO_TAKEN' })
   }
+
+  // Email-verification token: store the hash, send the raw value in the link.
+  const verification = generateToken()
 
   const newUser: IUser = {
     email,
@@ -194,10 +212,22 @@ router.post('/account', makeRateLimiter(20), async (req: Request, res: Response)
     ridingStartYear,
     createdAt: new Date(),
     isAdmin: false,
-    idMoto: ''
+    idMoto: '',
+    emailVerified: false,
+    emailVerificationToken: verification.hash,
+    emailVerificationExpires: new Date(Date.now() + 24 * 60 * 60 * 1000)
   }
 
   const created = await User.insertOne(newUser)
+
+  // Fire-and-forget welcome + verification email: delivery is best-effort and
+  // must never block or fail signup (no-ops when Resend isn't configured).
+  const appUrl = process.env.APP_URL || 'http://localhost:3000'
+  const verifyUrl = `${appUrl}/verify-email?token=${verification.raw}`
+  void sendWelcomeEmail({ to: email, firstname, verifyUrl }).catch((err) =>
+    console.error('Failed to send welcome email:', err)
+  )
+
   // Minimal echo: the client only needs the new id (it re-fetches via login).
   res.status(201).json({ _id: created._id })
 })
@@ -294,11 +324,39 @@ router.put(
         _id: { $ne: id }
       })
       if (existingUser) {
-        return res.status(409).json({ error: 'Pseudo already taken' })
+        return res
+          .status(409)
+          .json({ error: 'Pseudo already taken', code: 'PSEUDO_TAKEN' })
       }
     }
 
-    if (updateData.password) {
+    if (updateData.password !== undefined) {
+      // Changing the password requires proving the current one, so a hijacked
+      // session or an unattended browser cannot silently take over the account.
+      const { currentPassword } = req.body
+      if (typeof currentPassword !== 'string' || !currentPassword) {
+        return res.status(400).json({
+          error: 'Current password is required',
+          code: 'CURRENT_PASSWORD_REQUIRED'
+        })
+      }
+      const current = await User.findById(id).select('+password')
+      if (!current || !(await verify(currentPassword, current.password))) {
+        return res.status(401).json({
+          error: 'Current password is incorrect',
+          code: 'CURRENT_PASSWORD_INVALID'
+        })
+      }
+
+      const passwordCheck = validatePassword(updateData.password, {
+        email: current.email,
+        pseudo: updateData.pseudo ?? current.pseudo
+      })
+      if (!passwordCheck.valid) {
+        return res
+          .status(400)
+          .json({ error: passwordCheck.message, code: 'WEAK_PASSWORD' })
+      }
       updateData.password = await hash(updateData.password)
     }
 

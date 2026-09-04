@@ -27,7 +27,7 @@ audio.addEventListener('loadedmetadata', () => {
 </script>
 
 <template>
-  <div class="flex w-[200px] items-center gap-6 rounded-full border-[0.5px] border-solid border-[#364153] p-3">
+  <div class="flex w-[200px] items-center gap-6 rounded-full border-[0.5px] border-solid border-gray-600 p-3">
     <UIcon
       :name="isPlaying ? 'i-lucide-pause' : 'i-lucide-play'"
       class="size-10 text-gray-700"

@@ -1,6 +1,8 @@
+import { createHash } from 'node:crypto'
 import jwt, { type JwtPayload } from 'jsonwebtoken'
 import type { NextFunction, Request, RequestHandler, Response } from 'express'
 import User from '../models/User'
+import ApiKey from '../models/ApiKey'
 import type { AuthUser } from '../types/auth'
 import { HttpError } from './errors'
 
@@ -22,25 +24,56 @@ const verifyToken = (token: string): AuthUser | null => {
   return toAuthUser(jwt.verify(token, process.env.JWT_SECRET))
 }
 
-export const authenticateToken: RequestHandler = (req, res, next) => {
+// Keys are looked up by the SHA-256 of the presented value, so only the hash
+// is ever stored (see models/ApiKey.ts). Exported for the key-management CLI.
+export const hashApiKey = (raw: string): string =>
+  createHash('sha256').update(raw).digest('hex')
+
+// Resolve an x-api-key header to its owner. Returns null for an unknown key.
+const resolveApiKey = async (raw: string): Promise<AuthUser | null> => {
+  const key = await ApiKey.findOne({ hash: hashApiKey(raw) }).select('user')
+  if (!key) return null
+  // Best-effort usage timestamp; never block the request on it.
+  void ApiKey.updateOne({ _id: key._id }, { lastUsedAt: new Date() }).catch(
+    () => {}
+  )
+  return { id: String(key.user) }
+}
+
+export const authenticateToken: RequestHandler = async (req, res, next) => {
+  // Cookie takes precedence: a present-but-invalid cookie is rejected outright
+  // (unchanged behaviour) rather than falling through to the API key.
   const token = req.cookies?.accessToken
-
-  if (!token) return res.status(401).json({ message: 'Non authentifié' })
-
-  try {
-    const user = verifyToken(token)
-    if (!user) return res.status(401).json({ message: 'Token invalide' })
-    req.user = user
-    next()
-  } catch {
-    return res.status(401).json({ message: 'Token invalide' })
+  if (token) {
+    try {
+      const user = verifyToken(token)
+      if (!user) return res.status(401).json({ message: 'Token invalide' })
+      req.user = user
+      return next()
+    } catch {
+      return res.status(401).json({ message: 'Token invalide' })
+    }
   }
+
+  const apiKey = req.header('x-api-key')
+  if (apiKey) {
+    try {
+      const user = await resolveApiKey(apiKey)
+      if (!user) return res.status(401).json({ message: 'Clé API invalide' })
+      req.user = user
+      return next()
+    } catch {
+      return res.status(401).json({ message: 'Clé API invalide' })
+    }
+  }
+
+  return res.status(401).json({ message: 'Non authentifié' })
 }
 
 // Like authenticateToken but never rejects: sets req.user when a valid token
-// is present, otherwise proceeds anonymously. For routes that serve both
-// public and authenticated callers with different data (e.g. is_public gating).
-export const optionalAuth: RequestHandler = (req, _res, next) => {
+// or API key is present, otherwise proceeds anonymously. For routes that serve
+// both public and authenticated callers with different data (is_public gating).
+export const optionalAuth: RequestHandler = async (req, _res, next) => {
   const token = req.cookies?.accessToken
   if (token) {
     try {
@@ -48,6 +81,16 @@ export const optionalAuth: RequestHandler = (req, _res, next) => {
       if (user) req.user = user
     } catch {
       // Invalid or expired token: treat the request as anonymous.
+    }
+  } else {
+    const apiKey = req.header('x-api-key')
+    if (apiKey) {
+      try {
+        const user = await resolveApiKey(apiKey)
+        if (user) req.user = user
+      } catch {
+        // Unknown key or DB hiccup: treat the request as anonymous.
+      }
     }
   }
   next()

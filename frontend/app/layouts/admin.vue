@@ -28,7 +28,7 @@ function getItems() {
     <UDashboardSidebar
       :collapsible="true"
       :ui="{
-        root: 'bg-[var(--ui-primary)] h-screen sticky top-0',
+        root: 'bg-primary h-screen sticky top-0',
         body: 'py-0'
       }"
     >
@@ -43,8 +43,8 @@ function getItems() {
           orientation="vertical"
           :ui="{
             linkLeadingIcon:
-              'text-white group-data-[active]:text-[var(--ui-primary)]',
-            link: 'text-white data-[active]:text-[var(--ui-primary)]'
+              'text-white group-data-[active]:text-primary',
+            link: 'text-white data-[active]:text-primary'
           }"
         />
       </template>

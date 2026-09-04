@@ -4,6 +4,11 @@ import HeaderInfo from '~/components/global/HeaderInfo.vue'
 import type { IPost } from '~/types/post'
 import type { IMessage } from '~/types/messages'
 
+useSeoMeta({
+  title: 'Forum',
+  description: 'Échangez avec la communauté moto : questions, avis et discussions.'
+})
+
 const posts = ref<IPost[]>([])
 const loading = ref(true)
 const filters = ref({
@@ -52,7 +57,10 @@ const getPosts = async () => {
     const res = await $fetch<{ posts: IPost[] }>(`${apiBase}posts`, {
       params: {
         deep: true,
-        project: 'content,title,id,createdAt,views,image',
+        // The post card renders author, brand and category, so they must be
+        // projected: without user/brand/category the card's post.user.image
+        // throws during render and the whole list fails to show.
+        project: 'content,title,category,user,brand,id,createdAt,views,image',
         filter: filter.value
       }
     })

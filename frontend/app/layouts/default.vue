@@ -9,5 +9,6 @@
     <NuxtPage />
     <FooterApp />
     <ModalsApp />
+    <CookieBanner />
   </UApp>
 </template>

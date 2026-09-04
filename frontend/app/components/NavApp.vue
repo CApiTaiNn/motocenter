@@ -15,7 +15,7 @@ const profileModal = useProfileModal()
 
 const isDev = import.meta.dev
 const colorMode = useColorMode()
-const mode = ref(colorMode.value === 'dark')
+const mode = ref<boolean>(colorMode.value === 'dark')
 
 watch(
   () => colorMode.value,

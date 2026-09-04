@@ -56,6 +56,7 @@ export default withNuxt(
             '^stepper-(item|bullet)$',
             // :deep() / child-combinator targets and complex selectors
             '^invisible-background$',
+            '^legal-content$',
             '^button$',
             '^filters$',
             '^invitation$',
@@ -73,7 +74,12 @@ export default withNuxt(
             '^stat-(card|stripes|redline|number|suffix|content)$',
             '^header$',
             '^brand-tag$',
-            '^footer-(top-border|tagline|link|social-label|bottom-text|bottom-link)$'
+            '^footer-(top-border|tagline|link|social-label|bottom-text|bottom-link)$',
+            // carousel card spec grid (scoped grid layout)
+            '^specgrid$',
+            '^cell$',
+            '^val$',
+            '^lab$'
           ]
         }
       ]

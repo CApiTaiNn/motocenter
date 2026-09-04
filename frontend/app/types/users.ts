@@ -11,6 +11,7 @@ export interface IUser {
   userType?: 'beginner' | 'confirmed' | 'expert' | 'other'
   image: string
   idMoto: string
+  emailVerified?: boolean
 }
 
 export interface IUserPublic {

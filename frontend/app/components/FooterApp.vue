@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import LogoApp from '~/components/LogoApp.vue'
 
+// Site name from runtime config (override in prod with NUXT_PUBLIC_APP_NAME).
+const appName = useRuntimeConfig().public.appName
+
 const guides = [
   { label: 'Accueil', to: '/' },
   { label: 'Comparateur', to: '/comparo' },
@@ -38,7 +41,7 @@ const contactEmail = 'contact@mgtsoftware.com'
 
 <template>
   <footer class="mt-20">
-    <div class="footer-top-border h-[3px]" />
+    <div class="footer-top-border h-0.75" />
 
     <div class="mx-auto flex max-w-[1400px] items-start justify-between gap-8 px-[5%] pt-16 pb-12 max-lg:flex-wrap! max-lg:gap-x-4! max-lg:gap-y-8! max-lg:px-[6%]! max-lg:pt-10! max-lg:pb-8!">
       <div class="flex flex-[1.2] flex-col items-start gap-3 max-lg:flex-[1_1_100%]! max-lg:items-center! max-lg:text-center">
@@ -94,12 +97,14 @@ const contactEmail = 'contact@mgtsoftware.com'
 
     <div class="mx-auto flex max-w-[1400px] items-center justify-between px-[5%] py-4 max-lg:flex-col! max-lg:gap-2! max-lg:py-4! max-lg:text-center">
       <p class="footer-bottom-text text-sm font-light text-(--label-text)">
-        &copy; 2026 MotoCenter &mdash; Tout droit réservé
+        &copy; 2026 {{ appName }} &mdash; Tous droits réservés
       </p>
       <div class="flex items-center gap-2">
-        <NuxtLink class="footer-bottom-link text-sm font-light text-(--label-text) no-underline transition-colors duration-200 hover:text-(--ui-primary)" to="/">Mentions légales</NuxtLink>
+        <NuxtLink class="footer-bottom-link text-sm font-light text-(--label-text) no-underline transition-colors duration-200 hover:text-(--ui-primary)" to="/legal/mentions-legales">Mentions légales</NuxtLink>
         <span class="text-sm text-(--label-text)">&middot;</span>
-        <NuxtLink class="footer-bottom-link text-sm font-light text-(--label-text) no-underline transition-colors duration-200 hover:text-(--ui-primary)" to="/">Confidentialité</NuxtLink>
+        <NuxtLink class="footer-bottom-link text-sm font-light text-(--label-text) no-underline transition-colors duration-200 hover:text-(--ui-primary)" to="/legal/confidentialite">Confidentialité</NuxtLink>
+        <span class="text-sm text-(--label-text)">&middot;</span>
+        <NuxtLink class="footer-bottom-link text-sm font-light text-(--label-text) no-underline transition-colors duration-200 hover:text-(--ui-primary)" to="/legal/cgu">CGU</NuxtLink>
       </div>
     </div>
   </footer>

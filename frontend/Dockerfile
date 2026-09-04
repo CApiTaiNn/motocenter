@@ -1,7 +1,8 @@
-FROM node:25-alpine
+# Local dev image only (docker-compose). Production is built and served by
+# Vercel, which ignores this Dockerfile.
+FROM node:22-alpine
 WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
-RUN npm run build
-CMD [ "npm","run","dev" ]
+CMD ["npm", "run", "dev"]
