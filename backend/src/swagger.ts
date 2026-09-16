@@ -1,14 +1,15 @@
 import swaggerJsdoc from 'swagger-jsdoc'
 import { MotorcycleCategory } from './constants/MotorcycleCategory'
 
+const appName = process.env.APP_NAME || 'Perforum'
+
 const options: swaggerJsdoc.Options = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'API MotoCenter',
+      title: `API ${appName}`,
       version: '1.0.0',
-      description:
-        'Documentation de notre API express utilisée pour motocenter',
+      description: `Documentation de notre API express utilisée pour ${appName}`,
     },
     servers: [
       {

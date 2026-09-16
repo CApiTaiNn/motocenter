@@ -10,7 +10,7 @@ const seedPost = async () => {
   await Post.deleteMany({})
 
   const user = await User.findOne({ firstname: 'Alice' })
-  const motocenterUser = await User.findOne({ firstname: 'MotoCenter' })
+  const perforumUser = await User.findOne({ firstname: 'Perforum' })
   const brandHonda = await Brand.findOne({ name: 'Honda' })
 
   // Posts liés aux motos du comparo + mise à jour des motos
@@ -24,7 +24,7 @@ const seedPost = async () => {
     !gsxr ||
     !cbr ||
     !mt07 ||
-    !motocenterUser
+    !perforumUser
   ) {
     throw new Error('Missing seeded data')
   }
@@ -59,7 +59,7 @@ const seedPost = async () => {
       content: 'GSX-R600',
       category: PostCategory.MODEL,
       brand: gsxr.brand,
-      user: motocenterUser._id
+      user: perforumUser._id
     }).save()
     await Motorcycle.findByIdAndUpdate(gsxr._id, { post: post._id })
   }
@@ -70,7 +70,7 @@ const seedPost = async () => {
       content: 'CBR1000RR-R Fireblade',
       category: PostCategory.MODEL,
       brand: cbr.brand,
-      user: motocenterUser._id
+      user: perforumUser._id
     }).save()
     await Motorcycle.findByIdAndUpdate(cbr._id, { post: post._id })
   }
@@ -81,7 +81,7 @@ const seedPost = async () => {
       content: 'MT-07',
       category: PostCategory.MODEL,
       brand: mt07.brand,
-      user: motocenterUser._id
+      user: perforumUser._id
     }).save()
     await Motorcycle.findByIdAndUpdate(mt07._id, { post: post._id })
   }

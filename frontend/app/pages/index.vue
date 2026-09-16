@@ -23,7 +23,7 @@ const connexionModal = useConnexionModal()
 const toast = useToast()
 
 const itemsCaroussel = ref<IMotorcycle[]>([])
-const apiBase = useRuntimeConfig().public.apiBase
+const { apiBase, appName } = useRuntimeConfig().public
 const dynamicStats = ref<IStatCount[]>([])
 const totalUsers = ref(0)
 
@@ -178,7 +178,7 @@ onMounted(async () => {
     </section>
     <section class="flex flex-col gap-8 lg:min-h-screen lg:justify-center">
       <h2 style="text-align: center">
-        <span class="text-(--ui-primary)">Motocenter</span>
+        <span class="text-(--ui-primary)">{{ appName }}</span>
         en quelques chiffres
       </h2>
       <article class="flex flex-col gap-16">

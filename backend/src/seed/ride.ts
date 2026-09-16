@@ -6,10 +6,10 @@ const seedRide = async () => {
   await connectToMongo()
   await Ride.deleteMany({})
 
-  const user1 = await User.findOne({ email: 'bob.martin@motocenter.com' })
+  const user1 = await User.findOne({ email: 'bob.martin@perforum.com' })
   const user1Id = user1 ? user1._id : '1'
 
-  const user2 = await User.findOne({ email: 'alice.dupont@motocenter.com' })
+  const user2 = await User.findOne({ email: 'alice.dupont@perforum.com' })
   const user2Id = user2 ? user2._id : '1'
 
   await Ride.insertMany([

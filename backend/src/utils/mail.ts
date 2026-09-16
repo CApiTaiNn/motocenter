@@ -12,7 +12,7 @@ const getResend = (): Resend | null => {
   return client
 }
 
-const appName = () => process.env.APP_NAME || 'MotoCenter'
+const appName = () => process.env.APP_NAME || 'Perforum'
 
 // Resend requires a verified sender; fall back to their shared onboarding
 // domain so a missing MAIL_FROM doesn't hard-fail in staging.

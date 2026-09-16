@@ -25,7 +25,7 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      appName: 'Vroom',
+      appName: process.env.NUXT_PUBLIC_APP_NAME || 'Perforum',
       apiBase:
         process.env.NUXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1/'
     }

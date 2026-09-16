@@ -28,13 +28,13 @@ const POST_CATEGORIES = Object.values(PostCategory)
 // and lazily created if missing so the feature never 400s on a DB that wasn't
 // seeded with it.
 async function getSystemUserId(): Promise<Types.ObjectId> {
-  const existing = await User.findOne({ firstname: 'MotoCenter' }).select('_id')
+  const existing = await User.findOne({ firstname: 'Perforum' }).select('_id')
   if (existing) return existing._id
   const created = await User.create({
-    firstname: 'MotoCenter',
+    firstname: 'Perforum',
     lastname: 'Officiel',
-    pseudo: 'MotoCenter',
-    email: 'system@motocenter.invalid',
+    pseudo: 'Perforum',
+    email: 'system@perforum.invalid',
     password: await argon2PasswordHasher.hash('system-account-no-login'),
     isAdmin: false,
     idMoto: ''
@@ -334,7 +334,7 @@ router.post('/', authenticateToken, async (req: Request, res) => {
   const { id: authUserId } = getAuthUser(req)
 
   // Motorcycle discussion thread: a system-owned container post linked to a
-  // motorcycle. Authored by the MotoCenter system user, with title/content
+  // motorcycle. Authored by the Perforum system user, with title/content
   // derived server-side from the motorcycle — so it can't be abused to publish
   // arbitrary content under the official account (the old impersonation bug).
   if (body.isNewMotoComment === true) {

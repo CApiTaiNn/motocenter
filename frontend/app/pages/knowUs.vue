@@ -1,7 +1,9 @@
 <script setup lang="ts">
+const { appName } = useRuntimeConfig().public
+
 useSeoMeta({
   title: 'Qui sommes-nous',
-  description: "L'équipe derrière Vroom et le projet."
+  description: `L'équipe derrière ${appName} et le projet.`
 })
 
 const team = [
@@ -73,7 +75,7 @@ const team = [
             class="h-auto w-[500px] max-lg:w-full! max-lg:max-w-[500px]"
           />
           <p class="w-[70dvw] flex-1 max-lg:w-full! max-lg:text-center max-lg:text-xs! max-lg:font-(--font-main)">
-            <strong>MotoCenter</strong> vise à se positionner comme une
+            <strong>{{ appName }}</strong> vise à se positionner comme une
             plateforme centrale et cohérente, combinant l'aide au choix d'une moto
             et partage communautaire.
           </p>

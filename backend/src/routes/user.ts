@@ -20,7 +20,7 @@ const router = Router()
 // Shared placeholder that inherits the content of deleted accounts, so posts,
 // messages and rides others replied to stay readable instead of dangling.
 const DELETED_PLACEHOLDER = {
-  email: 'deleted-user@motocenter.invalid',
+  email: 'deleted-user@perforum.invalid',
   pseudo: 'compte-supprimé',
   firstname: 'Compte',
   lastname: 'Supprimé'

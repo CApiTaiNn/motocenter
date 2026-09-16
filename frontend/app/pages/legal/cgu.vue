@@ -1,7 +1,9 @@
 <script setup lang="ts">
+const { appName } = useRuntimeConfig().public
+
 useSeoMeta({
   title: "Conditions générales d'utilisation",
-  description: "Les règles d'utilisation du site et des services Vroom."
+  description: `Les règles d'utilisation du site et des services ${appName}.`
 })
 </script>
 
@@ -10,7 +12,7 @@ useSeoMeta({
     <h2>1. Objet</h2>
     <p>
       Ces conditions générales d'utilisation (CGU) définissent les règles d'accès
-      et d'usage du site Vroom et de ses services : comparateur de motos, forum,
+      et d'usage du site {{ appName }} et de ses services : comparateur de motos, forum,
       balades et espace membre.
     </p>
 

@@ -36,7 +36,7 @@ const socials = [
   { label: 'X', href: 'https://www.x.com', icon: 'i-simple-icons-x' }
 ]
 
-const contactEmail = 'contact@mgtsoftware.com'
+const contactEmail = 'contact@perforum.fr'
 </script>
 
 <template>

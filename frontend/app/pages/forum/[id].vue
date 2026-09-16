@@ -8,7 +8,7 @@ import type { IPost } from '~/types/post'
 import { POST_CATEGORY_META } from '~/utils/postCategory'
 
 const route = useRoute()
-const apiBase = useRuntimeConfig().public.apiBase
+const { apiBase, appName } = useRuntimeConfig().public
 const { user } = useAuth()
 const { open } = useConnexionModal()
 const toast = useToast()
@@ -33,7 +33,7 @@ const { data: post, refresh: refreshPost } = await useAsyncData(
 useSeoMeta({
   title: () => post.value?.title ?? 'Forum',
   description: () =>
-    post.value?.content?.slice(0, 150) ?? 'Discussions de la communauté Vroom.'
+    post.value?.content?.slice(0, 150) ?? `Discussions de la communauté ${appName}.`
 })
 
 const responses = ref<IMessage[]>([])

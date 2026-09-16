@@ -29,7 +29,7 @@ interface IMaxStats {
 
 const route = useRoute()
 const id = route.params.id as string
-const apiBase = useRuntimeConfig().public.apiBase
+const { apiBase, appName } = useRuntimeConfig().public
 // Fetched during SSR so the bike's name and specs are in the initial HTML
 // (crawlable). The comments and stat bars stay client-side below.
 const { data: m } = await useAsyncData(`motorcycle-${id}`, async () => {
@@ -54,7 +54,7 @@ useSeoMeta({
   description: () =>
     m.value
       ? `${m.value.brand?.name ?? ''} ${m.value.name} : fiche technique et caractéristiques.`.trim()
-      : 'Fiche technique et caractéristiques moto sur Vroom.'
+      : `Fiche technique et caractéristiques moto sur ${appName}.`
 })
 const commentsMotorcycle = ref<IMessage[]>([])
 const comment = ref<ICommentInput>({

@@ -17,7 +17,7 @@ describe('Post Routes - /api/v1/posts', () => {
 
   beforeEach(async () => {
     const user = await User.create({
-      firstname: 'MotoCenter',
+      firstname: 'Perforum',
       lastname: 'Admin',
       pseudo: 'admin',
       email: 'admin@test.com',

@@ -29,7 +29,7 @@ const router = Router()
  * @openapi
  * /auth:
  *   post:
- *     summary: Connexion à MotoCenter
+ *     summary: Connexion à Perforum
  *     tags:
  *       - Auth
  *     requestBody:
@@ -122,7 +122,7 @@ router.post('/', async (req: Request, res: Response) => {
  * @openapi
  * /auth/logout:
  *   post:
- *     summary: Connexion à MotoCenter
+ *     summary: Connexion à Perforum
  *     tags:
  *       - Auth
  *     responses:

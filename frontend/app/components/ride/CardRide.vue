@@ -7,6 +7,7 @@ import type { IUserPublic } from '~/types/users.js'
 import { useConnexionModal } from '~/composables/useConnexionModal.js'
 
 const toast = useToast()
+const { appName } = useRuntimeConfig().public
 
 interface IProps {
   ride: IRide
@@ -260,7 +261,7 @@ onMounted(async () => {
             <template v-if="creator">
               <UAvatar
                 size="xs"
-                :alt="`Avatar de ${creator.pseudo || 'MotoCenter'}`"
+                :alt="`Avatar de ${creator.pseudo || appName}`"
                 :src="srcAvatarCreator"
               />
               <p>

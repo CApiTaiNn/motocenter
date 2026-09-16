@@ -1,7 +1,9 @@
 <script setup lang="ts">
+const { appName } = useRuntimeConfig().public
+
 useSeoMeta({
   title: 'Politique de confidentialité',
-  description: 'Comment Vroom collecte et protège vos données personnelles.'
+  description: `Comment ${appName} collecte et protège vos données personnelles.`
 })
 </script>
 
@@ -16,7 +18,7 @@ useSeoMeta({
     <h2>1. Responsable du traitement</h2>
     <p>
       Le responsable du traitement est [À COMPLÉTER : raison sociale], joignable à
-      <a href="mailto:contact@mgtsoftware.com">contact@mgtsoftware.com</a>.
+      <a href="mailto:contact@perforum.fr">contact@perforum.fr</a>.
     </p>
 
     <h2>2. Données que nous collectons</h2>
@@ -67,7 +69,7 @@ useSeoMeta({
     </ul>
     <p>
       Pour les exercer, écrivez à
-      <a href="mailto:contact@mgtsoftware.com">contact@mgtsoftware.com</a>. Vous
+      <a href="mailto:contact@perforum.fr">contact@perforum.fr</a>. Vous
       pouvez aussi déposer une réclamation auprès de la CNIL (www.cnil.fr).
     </p>
 

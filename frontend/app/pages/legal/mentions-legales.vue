@@ -1,7 +1,9 @@
 <script setup lang="ts">
+const { appName } = useRuntimeConfig().public
+
 useSeoMeta({
   title: 'Mentions légales',
-  description: 'Éditeur, hébergeur et informations légales du site Vroom.'
+  description: `Éditeur, hébergeur et informations légales du site ${appName}.`
 })
 </script>
 
@@ -9,14 +11,14 @@ useSeoMeta({
   <LegalPage title="Mentions légales" updated="21 août 2026">
     <h2>Éditeur du site</h2>
     <p>
-      Le site Vroom est édité par <strong>[À COMPLÉTER : raison sociale]</strong>,
+      Le site {{ appName }} est édité par <strong>[À COMPLÉTER : raison sociale]</strong>,
       [À COMPLÉTER : forme juridique et capital social], dont le siège est situé
       [À COMPLÉTER : adresse].
     </p>
     <ul>
       <li>Numéro SIRET : [À COMPLÉTER]</li>
       <li>Numéro de TVA intracommunautaire : [À COMPLÉTER]</li>
-      <li>Adresse électronique : contact@mgtsoftware.com</li>
+      <li>Adresse électronique : contact@perforum.fr</li>
       <li>Téléphone : [À COMPLÉTER]</li>
     </ul>
 
@@ -50,7 +52,7 @@ useSeoMeta({
     <h2>Contact</h2>
     <p>
       Pour toute question, écrivez à
-      <a href="mailto:contact@mgtsoftware.com">contact@mgtsoftware.com</a>.
+      <a href="mailto:contact@perforum.fr">contact@perforum.fr</a>.
     </p>
   </LegalPage>
 </template>
