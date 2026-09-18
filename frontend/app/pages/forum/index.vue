@@ -9,14 +9,52 @@ useSeoMeta({
   description: 'Échangez avec la communauté moto : questions, avis et discussions.'
 })
 
+const route = useRoute()
+const router = useRouter()
+
+// Read a query param as a list. Multi-valued params arrive as arrays; we also
+// accept a single comma-separated string so a shared URL stays short.
+const asArray = (value: unknown): string[] => {
+  if (Array.isArray(value)) {
+    return value.filter((v): v is string => typeof v === 'string')
+  }
+  if (typeof value === 'string' && value.length > 0) return value.split(',')
+  return []
+}
+
 const posts = ref<IPost[]>([])
 const loading = ref(true)
+// Seed the filters from the URL so a reload or a shared link restores them.
 const filters = ref({
-  brandIds: [] as string[],
-  categoryIds: [] as string[],
+  brandIds: asArray(route.query.brand),
+  categoryIds: asArray(route.query.category),
   onlyMyPost: true,
-  searchBar: ''
+  searchBar: typeof route.query.search === 'string' ? route.query.search : ''
 })
+
+// Mirror the brand/category/search filters back into the URL query. We use
+// replace(), not push(), so typing or toggling a filter never stacks a history
+// entry the user must click "back" through.
+watch(
+  () => [
+    filters.value.brandIds,
+    filters.value.categoryIds,
+    filters.value.searchBar
+  ],
+  () => {
+    const query: Record<string, string> = {}
+    if (filters.value.brandIds.length) {
+      query.brand = filters.value.brandIds.join(',')
+    }
+    if (filters.value.categoryIds.length) {
+      query.category = filters.value.categoryIds.join(',')
+    }
+    const search = filters.value.searchBar.trim()
+    if (search) query.search = search
+    void router.replace({ query })
+  },
+  { deep: true }
+)
 
 const filter = computed(() => {
   const conditions = []
