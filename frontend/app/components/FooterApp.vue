@@ -1,16 +1,9 @@
 <script setup lang="ts">
 import LogoApp from '~/components/LogoApp.vue'
+import { navItems } from '~/utils/navItems'
 
 // Site name from runtime config (override in prod with NUXT_PUBLIC_APP_NAME).
 const appName = useRuntimeConfig().public.appName
-
-const guides = [
-  { label: 'Accueil', to: '/' },
-  { label: 'Comparateur', to: '/comparo' },
-  { label: 'Forum', to: '/forum' },
-  { label: 'Balades', to: '/ride' },
-  { label: 'Nous connaitre', to: '/knowUs' }
-]
 
 const socials = [
   {
@@ -53,7 +46,7 @@ const contactEmail = 'contact@perforum.fr'
         <h5 class="mb-4 tracking-[0.08em] uppercase">Guides</h5>
         <ul class="flex list-none flex-col gap-2 pl-0">
           <li
-            v-for="(item, idx) in guides"
+            v-for="(item, idx) in navItems"
             :key="`guide-${idx}`"
           >
             <NuxtLink :to="item.to" class="footer-link text-sm font-light break-all text-(--text-color) no-underline transition-colors duration-200 hover:text-(--ui-primary)">{{

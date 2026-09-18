@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import LogoApp from './LogoApp.vue'
 import ToggleSwitch from './ToggleSwitch.vue'
+import { navItems } from '~/utils/navItems'
 import { useAuth } from '~/composables/useAuth'
 import { useConnexionModal } from '~/composables/useConnexionModal'
 import { useProfileModal } from '~/composables/useProfileModal'
@@ -31,14 +32,6 @@ watch(mode, (newVal) => {
 watch(() => route.path, () => {
   isOpen.value = false
 })
-
-const navItems = [
-  { label: 'Accueil', to: '/' },
-  { label: 'Comparateur', to: '/comparo' },
-  { label: 'Forum', to: '/forum' },
-  { label: 'Balades', to: '/ride' },
-  { label: 'Nous connaitre', to: '/knowUs' },
-] as const
 
 function isActive(to: string): boolean {
   // Root only matches exactly, otherwise '/' would highlight on every page.
