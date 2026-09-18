@@ -1,12 +1,53 @@
 import jwt from 'jsonwebtoken'
 import { Request, Response, Router } from 'express'
+import { OAuth2Client, type TokenPayload } from 'google-auth-library'
 import User from '../models/User'
+import type { IUser } from '../types/user'
 import { argon2PasswordHasher } from '../utils/hash'
 import { generateToken, hashToken } from '../utils/tokens'
 import { sendPasswordResetEmail, sendWelcomeEmail } from '../utils/mail'
 import { validatePassword } from '../utils/passwordPolicy'
 
 const { verify, hash } = argon2PasswordHasher
+
+// Sign a 24h JWT for the user and set it as the httpOnly session cookie. Shared
+// by password login and Google sign-in so both issue an identical session.
+const issueSession = (res: Response, user: IUser & { _id: unknown }) => {
+  const token = jwt.sign(
+    { id: user._id, email: user.email },
+    process.env.JWT_SECRET!,
+    { expiresIn: '24h', algorithm: 'HS256' }
+  )
+  const isProd = process.env.NODE_ENV === 'production'
+  res.cookie('accessToken', token, {
+    httpOnly: true,
+    secure: isProd,
+    sameSite: isProd ? 'none' : 'lax',
+    maxAge: 24 * 60 * 60 * 1000
+  })
+}
+
+// One reusable Google client, created lazily once the client id is configured.
+let googleClient: OAuth2Client | null = null
+const getGoogleClient = (clientId: string): OAuth2Client =>
+  (googleClient ??= new OAuth2Client(clientId))
+
+// Build a unique pseudo from the Google profile. pseudo is unique at the DB
+// level, so we probe with a numeric suffix until a free one is found.
+const uniquePseudo = async (payload: TokenPayload): Promise<string> => {
+  const base =
+    (payload.name || payload.email?.split('@')[0] || 'rider')
+      .normalize('NFKD')
+      .replace(/[^a-zA-Z0-9]/g, '')
+      .slice(0, 20) || 'rider'
+  let candidate = base
+  let n = 0
+  while (await User.exists({ pseudo: candidate })) {
+    n += 1
+    candidate = `${base}${n}`
+  }
+  return candidate
+}
 
 const appUrl = () => process.env.APP_URL || 'http://localhost:3000'
 
@@ -98,23 +139,69 @@ router.post('/', async (req: Request, res: Response) => {
         .json({ message: 'Email ou mot de passe incorrect' })
     }
 
-    const token = jwt.sign(
-      { id: user._id, email: user.email },
-      process.env.JWT_SECRET!,
-      { expiresIn: '24h', algorithm: 'HS256' }
-    )
-
-    const isProd = process.env.NODE_ENV === 'production'
-    res.cookie('accessToken', token, {
-      httpOnly: true,
-      secure: isProd,
-      sameSite: isProd ? 'none' : 'lax',
-      maxAge: 24 * 60 * 60 * 1000
-    })
+    issueSession(res, user)
     res.status(200).json({ message: 'Connected' })
   } catch (error) {
     console.error('Login error:', error)
     res.status(500).json({ message: 'Internal server error' })
+  }
+})
+
+/**
+ * @openapi
+ * /auth/google:
+ *   post:
+ *     summary: Sign in to Perforum with a Google ID token
+ *     description: Verifies the Google ID token, finds or creates the matching
+ *       user, and issues the same session cookie as password login.
+ */
+router.post('/google', async (req: Request, res: Response) => {
+  const { credential } = req.body
+
+  // Strings only, so a crafted object can never reach verifyIdToken.
+  if (typeof credential !== 'string') {
+    return res.status(400).json({ message: 'Missing Google credential' })
+  }
+
+  const clientId = process.env.GOOGLE_CLIENT_ID
+  if (!clientId) {
+    return res
+      .status(503)
+      .json({ message: 'Google sign-in is not configured' })
+  }
+
+  try {
+    const ticket = await getGoogleClient(clientId).verifyIdToken({
+      idToken: credential,
+      audience: clientId
+    })
+    const payload = ticket.getPayload()
+
+    // Only trust a verified email — it is the key we match accounts on.
+    if (!payload?.email || !payload.email_verified) {
+      return res.status(401).json({ message: 'Google account not verified' })
+    }
+
+    let user = await User.findOne({ email: payload.email })
+    if (!user) {
+      user = await User.create({
+        firstname: payload.given_name || payload.name || 'Utilisateur',
+        lastname: payload.family_name || payload.given_name || 'Google',
+        pseudo: await uniquePseudo(payload),
+        email: payload.email,
+        // Google already verified the address, so skip our own email check.
+        emailVerified: true,
+        provider: 'google',
+        providerId: payload.sub,
+        image: payload.picture || ''
+      })
+    }
+
+    issueSession(res, user)
+    res.status(200).json({ message: 'Connected' })
+  } catch (error) {
+    console.error('Google login error:', error)
+    res.status(401).json({ message: 'Invalid Google credential' })
   }
 })
 

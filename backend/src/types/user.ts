@@ -4,7 +4,9 @@ export interface IUser {
   pseudo: string
   email: string
   isAdmin: boolean
-  password: string
+  password?: string
+  provider?: 'local' | 'google'
+  providerId?: string
   ridingStartYear?: number
   createdAt: Date
   userType: 'beginner' | 'confirmed' | 'expert' | 'other'

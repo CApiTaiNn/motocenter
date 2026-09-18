@@ -341,7 +341,12 @@ router.put(
         })
       }
       const current = await User.findById(id).select('+password')
-      if (!current || !(await verify(currentPassword, current.password))) {
+      // A social (Google) account has no password to verify against.
+      if (
+        !current ||
+        !current.password ||
+        !(await verify(currentPassword, current.password))
+      ) {
         return res.status(401).json({
           error: 'Current password is incorrect',
           code: 'CURRENT_PASSWORD_INVALID'

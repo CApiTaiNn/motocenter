@@ -40,6 +40,16 @@ const connexion = async () => {
   }
 }
 
+// Google sign-in issues the session itself; mirror the password-login success
+// path (admin redirect + close).
+const onGoogleSuccess = () => {
+  if (user.value?.isAdmin) {
+    navigateTo('/admin')
+  }
+  close()
+  resetForm()
+}
+
 const goToForgot = () => {
   close()
   navigateTo('/forgot-password')
@@ -118,6 +128,10 @@ watch(isOpen, (newVal) => {
           :loading="isLoading"
           :disabled="isLoading"
         />
+
+        <USeparator label="ou" />
+
+        <GoogleSignInButton @success="onGoogleSuccess" />
 
         <p class="text-center text-sm">
           Nouveau sur ce site ?

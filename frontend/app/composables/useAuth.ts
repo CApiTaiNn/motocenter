@@ -91,6 +91,17 @@ export function useAuth() {
     await fetchUser()
   }
 
+  // Exchange a Google ID token (from Google Identity Services) for our own
+  // session cookie, then load the user like a normal login.
+  async function loginWithGoogle(credential: string) {
+    await $fetch(`${apiBase}auth/google`, {
+      method: 'POST',
+      credentials: 'include',
+      body: { credential }
+    })
+    await fetchUser()
+  }
+
   async function logout() {
     await $fetch(`${apiBase}auth/logout`, {
       method: 'POST',
@@ -137,6 +148,7 @@ export function useAuth() {
     updateProfile,
     fetchUser,
     login,
+    loginWithGoogle,
     logout,
     forgotPassword,
     resetPassword,

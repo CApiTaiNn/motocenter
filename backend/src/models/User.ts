@@ -27,7 +27,21 @@ const userSchema = new Schema(
     },
     password: {
       type: String,
-      required: true,
+      // Social accounts (Google) have no password; only local accounts need one.
+      required: function (this: { provider?: string }) {
+        return this.provider !== 'google'
+      },
+      select: false
+    },
+    // How the account signs in. 'google' users authenticate via an ID token and
+    // have no password; providerId is the Google account id (the token `sub`).
+    provider: {
+      type: String,
+      enum: ['local', 'google'],
+      default: 'local'
+    },
+    providerId: {
+      type: String,
       select: false
     },
     ridingStartYear: {
