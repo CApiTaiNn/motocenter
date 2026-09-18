@@ -170,6 +170,7 @@ onMounted(async () => {
             class="mr-2"
           />
           <h2 class="flex-1">{{ post?.title }}</h2>
+          <ShareButton :title="post?.title" />
           <UButton
             icon="i-lucide-star"
             color="neutral"
