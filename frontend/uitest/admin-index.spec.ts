@@ -41,6 +41,25 @@ test.describe('/admin dashboard', () => {
     await expect(page.getByText("Posts créés aujourd'hui")).toBeVisible()
   })
 
+  test('shows skeleton placeholders while the counts load, then the values', async ({
+    page
+  }) => {
+    await blockUnmockedApi(page)
+    // Hold the stat endpoints back so the skeletons stay on screen long enough
+    // to assert, while the auth probe still resolves fast enough to land us.
+    await mockAdminApi(page, { usersCount: 42, motosCount: 128, statDelayMs: 1500 })
+    await openAdmin(page)
+
+    // USkeleton renders with the `animate-pulse` class; the values are not out yet.
+    await expect(page.locator('.animate-pulse').first()).toBeVisible()
+    await expect(page.getByText('42', { exact: true })).toHaveCount(0)
+
+    // Once the delayed counts resolve, the skeletons give way to the real values.
+    await expect(page.getByText('42', { exact: true })).toBeVisible()
+    await expect(page.getByText('128', { exact: true })).toBeVisible()
+    await expect(page.locator('.animate-pulse')).toHaveCount(0)
+  })
+
   test('sidebar "Motos" link navigates to /admin/listMoto', async ({
     page
   }) => {

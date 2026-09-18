@@ -1,4 +1,5 @@
 import { test, expect } from './support/test'
+import { API, json } from './support/mock'
 import { installForumMocks, posts, brands } from './fixtures/forum-index'
 
 // UI tests for app/pages/forum/index.vue (route /forum). Every backend call is
@@ -15,6 +16,24 @@ test.describe('/forum index', () => {
     }
     // Result counter reflects the number of loaded discussions.
     await expect(page.getByText(`${posts.length} discussions`)).toBeVisible()
+  })
+
+  test('shows an error toast when the posts fetch fails', async ({ page }) => {
+    await installForumMocks(page)
+    // Override GET /posts with a 500 so the list fetch fails. Registered after
+    // the dispatcher, so it runs first; other routes still fall through.
+    await page.route(API, (route) => {
+      const url = new URL(route.request().url())
+      if (url.pathname.endsWith('/posts') && route.request().method() === 'GET') {
+        return json(route, { error: 'boom' }, 500)
+      }
+      return route.fallback()
+    })
+    await page.goto('/forum')
+
+    await expect(
+      page.getByText('Les discussions n’ont pas pu être chargées. Réessayez plus tard.')
+    ).toBeVisible()
   })
 
   test('the search box refetches with a title $regex filter and narrows the list', async ({

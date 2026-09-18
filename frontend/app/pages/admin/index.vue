@@ -21,6 +21,8 @@ useSeoMeta({ title: 'Administration', robots: 'noindex, nofollow' })
 const userName: string = 'Admin'
 const apiBase = useRuntimeConfig().public.apiBase
 const stats = ref<Stat[]>([])
+// Drives the skeleton cards while the four counts load, so they don't pop in.
+const loading = ref(true)
 
 async function fetchStats() {
   try {
@@ -74,6 +76,8 @@ async function fetchStats() {
       description: 'Les statistiques n’ont pas pu être chargées.',
       color: 'error'
     })
+  } finally {
+    loading.value = false
   }
 }
 
@@ -86,8 +90,20 @@ onMounted(() => {
   <main class="mx-auto my-16 max-w-7xl px-6">
     <h3 class="m-6 text-center">Bienvenue {{ userName }}</h3>
     <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <template v-if="loading">
+        <div
+          v-for="n in 4"
+          :key="n"
+          class="relative flex flex-col gap-2 rounded-xl border border-l-4 border-solid border-gray-300 border-l-(--ui-primary) bg-(--background) px-6 py-4"
+        >
+          <USkeleton class="size-7 rounded-full" />
+          <USkeleton class="h-8 w-16" />
+          <USkeleton class="h-4 w-40" />
+        </div>
+      </template>
       <div
         v-for="stat in stats"
+        v-else
         :key="stat.title"
         class="relative flex flex-col gap-2 rounded-xl border border-l-4 border-solid border-gray-300 border-l-(--ui-primary) bg-(--background) px-6 py-4"
         :style="{ borderLeftColor: stat.accent }"

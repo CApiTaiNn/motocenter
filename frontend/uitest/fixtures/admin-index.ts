@@ -40,6 +40,10 @@ export interface AdminApiState {
   // `.length` as the "new users / posts today" stats.
   users?: IUser[]
   posts?: unknown[]
+  // Hold back the stat endpoints (counts + today lists) by this many ms so a
+  // test can observe the loading skeletons before the values resolve. The
+  // `users/account` probe is never delayed, so the auth guard still passes fast.
+  statDelayMs?: number
 }
 
 /**
@@ -63,7 +67,11 @@ export async function mockAdminApi(page: Page, state: AdminApiState = {}) {
     state.posts ??
     Array.from({ length: 7 }, (_, i) => ({ _id: `post-${i + 1}` }))
 
-  await page.route(API, (route: Route) => {
+  const statDelayMs = state.statDelayMs ?? 0
+  const delay = () =>
+    statDelayMs ? new Promise((r) => setTimeout(r, statDelayMs)) : undefined
+
+  await page.route(API, async (route: Route) => {
     const { pathname } = new URL(route.request().url())
 
     // Order matters: the more specific suffixes are tested before `/users`.
@@ -72,10 +80,22 @@ export async function mockAdminApi(page: Page, state: AdminApiState = {}) {
         ? json(route, { users: account })
         : json(route, { error: 'unauthorized' }, 401)
     }
-    if (pathname.endsWith('/users/count')) return json(route, usersCount)
-    if (pathname.endsWith('/motorcycles/count')) return json(route, motosCount)
-    if (pathname.endsWith('/posts')) return json(route, { posts })
-    if (pathname.endsWith('/users')) return json(route, { users })
+    if (pathname.endsWith('/users/count')) {
+      await delay()
+      return json(route, usersCount)
+    }
+    if (pathname.endsWith('/motorcycles/count')) {
+      await delay()
+      return json(route, motosCount)
+    }
+    if (pathname.endsWith('/posts')) {
+      await delay()
+      return json(route, { posts })
+    }
+    if (pathname.endsWith('/users')) {
+      await delay()
+      return json(route, { users })
+    }
 
     // Anything else (home-page calls, sub-page data) hits blockUnmockedApi.
     return route.fallback()
