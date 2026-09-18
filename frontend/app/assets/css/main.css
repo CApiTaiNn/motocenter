@@ -19,8 +19,9 @@
 
 :root {
   /* Light theme */
-  --ui-primary: #f00;
-  --ui-secondary: #ea2222;
+  /* Softer, accessible red instead of pure #f00; secondary is a darker shade */
+  --ui-primary: #dc2626;
+  --ui-secondary: #b91c1c;
   --text-color: #000;
 
   --background: #fff;
@@ -60,8 +61,9 @@
 
 .dark {
   /* Dark theme */
-  --ui-primary: #f00;
-  --ui-secondary: #ea2222;
+  /* Lighter red so buttons and text keep contrast on a black background */
+  --ui-primary: #ef4444;
+  --ui-secondary: #dc2626;
   --text-color: #fff;
 
   --background: #000;
