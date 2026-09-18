@@ -51,6 +51,7 @@ const filter = computed(() => {
 })
 
 const apiBase = useRuntimeConfig().public.apiBase
+const toast = useToast()
 
 const getPosts = async () => {
   try {
@@ -71,10 +72,16 @@ const getPosts = async () => {
       })
     )
   } catch (error) {
-    // Surface nothing to the user here, but never leave the page stuck in the
-    // loading state on a failed fetch.
+    // Tell the user the fetch failed, so the empty state is not mistaken for a
+    // genuinely empty forum. The list resets and the page leaves its loading
+    // state in the finally block below.
     console.error('Failed to load posts', error)
     posts.value = []
+    toast.add({
+      title: 'Chargement impossible',
+      description: 'Les discussions n’ont pas pu être chargées. Réessayez plus tard.',
+      color: 'error'
+    })
   } finally {
     loading.value = false
   }
