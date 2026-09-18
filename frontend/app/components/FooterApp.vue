@@ -1,40 +1,21 @@
 <script setup lang="ts">
 import LogoApp from '~/components/LogoApp.vue'
+import { navItems } from '~/utils/navItems'
 
 // Site name from runtime config (override in prod with NUXT_PUBLIC_APP_NAME).
 const appName = useRuntimeConfig().public.appName
 
-const guides = [
-  { label: 'Accueil', to: '/' },
-  { label: 'Comparateur', to: '/comparo' },
-  { label: 'Forum', to: '/forum' },
-  { label: 'Balades', to: '/ride' },
-  { label: 'Nous connaitre', to: '/knowUs' }
-]
+interface SocialLink {
+  label: string
+  href: string
+  icon: string
+}
 
-const socials = [
-  {
-    label: 'Instagram',
-    href: 'https://www.instagram.com',
-    icon: 'i-lucide-instagram'
-  },
-  {
-    label: 'Facebook',
-    href: 'https://www.facebook.com',
-    icon: 'i-lucide-facebook'
-  },
-  {
-    label: 'Youtube',
-    href: 'https://www.youtube.com',
-    icon: 'i-lucide-youtube'
-  },
-  {
-    label: 'Linkedin',
-    href: 'https://www.linkedin.com',
-    icon: 'i-lucide-linkedin'
-  },
-  { label: 'X', href: 'https://www.x.com', icon: 'i-simple-icons-x' }
-]
+// Social links, shown only when there is a real account to point at. The bare
+// placeholder domains (instagram.com, facebook.com, ...) were dead links, so
+// they are dropped until real profiles exist. Add entries here to bring the
+// section back; the template keeps the accessible aria-label pattern.
+const socials: SocialLink[] = []
 
 const contactEmail = 'contact@perforum.fr'
 </script>
@@ -53,7 +34,7 @@ const contactEmail = 'contact@perforum.fr'
         <h5 class="mb-4 tracking-[0.08em] uppercase">Guides</h5>
         <ul class="flex list-none flex-col gap-2 pl-0">
           <li
-            v-for="(item, idx) in guides"
+            v-for="(item, idx) in navItems"
             :key="`guide-${idx}`"
           >
             <NuxtLink :to="item.to" class="footer-link text-sm font-light break-all text-(--text-color) no-underline transition-colors duration-200 hover:text-(--ui-primary)">{{
@@ -63,7 +44,7 @@ const contactEmail = 'contact@perforum.fr'
         </ul>
       </nav>
 
-      <div class="flex flex-1 flex-col items-start max-lg:order-4 max-lg:flex-[1_1_100%]! max-lg:items-center!">
+      <div v-if="socials.length" class="flex flex-1 flex-col items-start max-lg:order-4 max-lg:flex-[1_1_100%]! max-lg:items-center!">
         <h5 class="mb-4 tracking-[0.08em] uppercase max-lg:hidden">Réseaux sociaux</h5>
         <ul class="flex list-none flex-col gap-3 pl-0 max-lg:flex-row! max-lg:justify-center max-lg:gap-6!">
           <li v-for="(item, idx) in socials" :key="`social-${idx}`">

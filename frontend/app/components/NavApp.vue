@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import LogoApp from './LogoApp.vue'
 import ToggleSwitch from './ToggleSwitch.vue'
+import { navItems } from '~/utils/navItems'
 import { useAuth } from '~/composables/useAuth'
 import { useConnexionModal } from '~/composables/useConnexionModal'
 import { useProfileModal } from '~/composables/useProfileModal'
 
-const { isAuthenticated, user } = useAuth()
+const { isAuthenticated, user, logout } = useAuth()
 const route = useRoute()
 
 const isOpen = ref(false)
@@ -13,7 +14,6 @@ const isOpen = ref(false)
 const connexionModal = useConnexionModal()
 const profileModal = useProfileModal()
 
-const isDev = import.meta.dev
 const colorMode = useColorMode()
 const mode = ref<boolean>(colorMode.value === 'dark')
 
@@ -32,14 +32,6 @@ watch(() => route.path, () => {
   isOpen.value = false
 })
 
-const navItems = [
-  { label: 'Accueil', to: '/' },
-  { label: 'Comparateur', to: '/comparo' },
-  { label: 'Forum', to: '/forum' },
-  { label: 'Balades', to: '/ride' },
-  { label: 'Nous connaitre', to: '/knowUs' },
-] as const
-
 function isActive(to: string): boolean {
   // Root only matches exactly, otherwise '/' would highlight on every page.
   if (to === '/') return route.path === '/'
@@ -48,6 +40,27 @@ function isActive(to: string): boolean {
 
 function toggleOpen() {
   isOpen.value = !isOpen.value
+}
+
+// Account dropdown shown on the avatar when the user is signed in.
+const userMenuItems = computed(() => [
+  [
+    {
+      label: 'Mon profil',
+      icon: 'i-lucide-user',
+      onSelect: () => profileModal.open()
+    },
+    {
+      label: 'Se déconnecter',
+      icon: 'i-lucide-log-out',
+      onSelect: () => handleLogout()
+    }
+  ]
+])
+
+async function handleLogout() {
+  await logout()
+  await navigateTo('/')
 }
 </script>
 
@@ -61,7 +74,7 @@ function toggleOpen() {
     >
       <div class="mx-[2%] flex flex-row items-center gap-[10px]">
         <LogoApp />
-        <ToggleSwitch v-if="isDev" v-model="mode" />
+        <ToggleSwitch v-model="mode" />
       </div>
       <div class="mx-[2%] flex flex-row items-center gap-4">
         <div
@@ -93,15 +106,24 @@ function toggleOpen() {
         >
           Connexion
         </UButton>
-        <UAvatar
+        <UDropdownMenu
           v-else
-          icon="i-lucide-user"
-          :src="user?.image"
-          size="xl"
-          loading="lazy"
-          class="cursor-pointer"
-          @click="profileModal.open()"
-        />
+          :items="userMenuItems"
+          :content="{ align: 'end' }"
+        >
+          <UButton
+            color="neutral"
+            variant="ghost"
+            class="rounded-full p-0!"
+            aria-label="Menu du compte"
+            :avatar="{
+              icon: 'i-lucide-user',
+              src: user?.image,
+              size: 'xl',
+              loading: 'lazy'
+            }"
+          />
+        </UDropdownMenu>
       </div>
     </nav>
 
@@ -110,7 +132,7 @@ function toggleOpen() {
       <div class="flex flex-row items-center justify-between p-[10px]">
         <div class="mx-[2%] flex flex-row items-center gap-[10px]">
           <LogoApp />
-          <ToggleSwitch v-if="isDev" v-model="mode" />
+          <ToggleSwitch v-model="mode" />
         </div>
         <button
           type="button"
@@ -157,16 +179,26 @@ function toggleOpen() {
         >
           Connexion
         </UButton>
-        <UButton
-          v-else
-          size="md"
-          color="neutral"
-          variant="ghost"
-          class="justify-center"
-          @click="profileModal.open()"
-        >
-          Mon profil
-        </UButton>
+        <template v-else>
+          <UButton
+            size="md"
+            color="neutral"
+            variant="ghost"
+            class="justify-center"
+            @click="profileModal.open()"
+          >
+            Mon profil
+          </UButton>
+          <UButton
+            size="md"
+            color="neutral"
+            variant="ghost"
+            class="justify-center"
+            @click="handleLogout()"
+          >
+            Se déconnecter
+          </UButton>
+        </template>
       </div>
     </nav>
   </header>
