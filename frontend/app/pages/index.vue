@@ -26,6 +26,9 @@ const itemsCaroussel = ref<IMotorcycle[]>([])
 const { apiBase, appName } = useRuntimeConfig().public
 const dynamicStats = ref<IStatCount[]>([])
 const totalUsers = ref(0)
+// Holds a skeleton in the stat row until the counts arrive, so it never flashes
+// empty before the numbers load.
+const statsLoading = ref(true)
 
 // Count-up only starts once the stats row scrolls into view
 const statsRow = ref<HTMLElement | null>(null)
@@ -46,30 +49,34 @@ const itemsTab = reactive<IItemTab[]>([
 ])
 
 async function fetchStats() {
-  // Independent count endpoints — fetch concurrently
-  const [totalBrands, totalHorsePower, totalMotorcycles] = await Promise.all([
-    $fetch<number>(`${apiBase}brands/count`),
-    $fetch<number>(`${apiBase}motorcycles/stats`),
-    $fetch<number>(`${apiBase}motorcycles/count`)
-  ])
+  try {
+    // Independent count endpoints — fetch concurrently
+    const [totalBrands, totalHorsePower, totalMotorcycles] = await Promise.all([
+      $fetch<number>(`${apiBase}brands/count`),
+      $fetch<number>(`${apiBase}motorcycles/stats`),
+      $fetch<number>(`${apiBase}motorcycles/count`)
+    ])
 
-  dynamicStats.value.push({
-    value: totalBrands,
-    suffix: 'Marques',
-    urlImg: '/images/accueil/icon_Binocle.png'
-  })
-  if (totalHorsePower)
     dynamicStats.value.push({
-      value: totalHorsePower,
-      suffix: 'Chevaux',
-      urlImg: '/images/accueil/icon_Settings.png'
+      value: totalBrands,
+      suffix: 'Marques',
+      urlImg: '/images/accueil/icon_Binocle.png'
     })
-  if (totalMotorcycles)
-    dynamicStats.value.push({
-      value: totalMotorcycles,
-      suffix: 'Motos',
-      urlImg: '/images/accueil/icon_moto.png'
-    })
+    if (totalHorsePower)
+      dynamicStats.value.push({
+        value: totalHorsePower,
+        suffix: 'Chevaux',
+        urlImg: '/images/accueil/icon_Settings.png'
+      })
+    if (totalMotorcycles)
+      dynamicStats.value.push({
+        value: totalMotorcycles,
+        suffix: 'Motos',
+        urlImg: '/images/accueil/icon_moto.png'
+      })
+  } finally {
+    statsLoading.value = false
+  }
 }
 async function fetchUserCount() {
   totalUsers.value = await $fetch<number>(`${apiBase}users/count`)
@@ -184,8 +191,16 @@ onMounted(async () => {
       <article class="flex flex-col gap-16">
         <div class="flex flex-col gap-4">
           <div ref="statsRow" class="mx-[5%] flex flex-row justify-center gap-16 max-lg:gap-4!">
+            <template v-if="statsLoading">
+              <USkeleton
+                v-for="n in 3"
+                :key="n"
+                class="aspect-square w-[20%] rounded-xl max-lg:aspect-3/4! max-lg:min-w-0! max-lg:flex-1"
+              />
+            </template>
             <StatsHome
               v-for="item in dynamicStats"
+              v-else
               :key="item.suffix"
               :value="item.value"
               :suffix="item.suffix"
