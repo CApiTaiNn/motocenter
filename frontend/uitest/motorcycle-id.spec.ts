@@ -225,6 +225,38 @@ test('logged-in visitor can like a comment and the counter updates', async ({
   expect(patchBody).toMatchObject({ messageId: COMMENT_ID, like: true })
 })
 
+test('the share button copies the link and confirms with a toast', async ({
+  page
+}) => {
+  await setup(page)
+  // Force the clipboard fallback: hide navigator.share and capture writeText.
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, 'share', {
+      value: undefined,
+      configurable: true
+    })
+    ;(window as unknown as { __copied: string[] }).__copied = []
+    Object.defineProperty(navigator, 'clipboard', {
+      value: {
+        writeText: async (text: string) => {
+          ;(window as unknown as { __copied: string[] }).__copied.push(text)
+        }
+      },
+      configurable: true
+    })
+  })
+  await visitViaSpa(page, URL)
+
+  await page.getByRole('button', { name: 'Partager' }).click()
+
+  await expect(page.getByText('Lien copié', { exact: true })).toBeVisible()
+  const copied = await page.evaluate(
+    () => (window as unknown as { __copied: string[] }).__copied
+  )
+  expect(copied).toHaveLength(1)
+  expect(copied[0]).toContain(URL)
+})
+
 test('a comment reveals the reply box when "Répondre" is clicked', async ({
   page
 }) => {

@@ -57,6 +57,40 @@ test.describe('/forum index', () => {
     await expect(page.getByText('Première sortie sur circuit')).toBeHidden()
   })
 
+  test('the search filter persists in the URL query across a reload', async ({
+    page
+  }) => {
+    await installForumMocks(page)
+    await page.goto('/forum')
+    await expect(page.getByText('Problème de démarrage à froid')).toBeVisible()
+
+    await page
+      .getByPlaceholder('Rechercher une discussion, un modèle, un sujet…')
+      .fill('chaîne')
+
+    // The filter is mirrored into the URL query so the view is shareable.
+    await expect(page).toHaveURL(/[?&]search=cha/)
+    // The list narrows to the matching discussion.
+    await expect(page.getByText('Entretien de la chaîne')).toBeVisible()
+    await expect(page.getByText('Problème de démarrage à froid')).toBeHidden()
+
+    // A reload keeps the URL, and the page must rebuild the filter from it.
+    await page.reload()
+    await page.waitForLoadState('networkidle').catch(() => {})
+    await page
+      .locator('.z-9999')
+      .waitFor({ state: 'detached', timeout: 5000 })
+      .catch(() => {})
+
+    await expect(page).toHaveURL(/[?&]search=cha/)
+    await expect(
+      page.getByPlaceholder('Rechercher une discussion, un modèle, un sujet…')
+    ).toHaveValue('chaîne')
+    // The restored filter still narrows the list after the reload.
+    await expect(page.getByText('Entretien de la chaîne')).toBeVisible()
+    await expect(page.getByText('Problème de démarrage à froid')).toBeHidden()
+  })
+
   test('clicking a discussion navigates to /forum/:id', async ({ page }) => {
     await installForumMocks(page)
     await page.goto('/forum')

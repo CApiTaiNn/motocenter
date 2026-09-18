@@ -150,6 +150,39 @@ test.describe('forum discussion detail', () => {
     expect(patch?.body).toMatchObject({ like: false })
   })
 
+  test('the share button copies the link and confirms with a toast', async ({
+    page
+  }) => {
+    await installApiMocks(page)
+    // Force the clipboard fallback: hide navigator.share and capture writeText.
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, 'share', {
+        value: undefined,
+        configurable: true
+      })
+      ;(window as unknown as { __copied: string[] }).__copied = []
+      Object.defineProperty(navigator, 'clipboard', {
+        value: {
+          writeText: async (text: string) => {
+            ;(window as unknown as { __copied: string[] }).__copied.push(text)
+          }
+        },
+        configurable: true
+      })
+    })
+    await visitViaSpa(page, url)
+
+    await page.getByRole('button', { name: 'Partager' }).click()
+
+    await expect(page.getByText('Lien copié', { exact: true })).toBeVisible()
+    // The current page URL was the value copied to the clipboard.
+    const copied = await page.evaluate(
+      () => (window as unknown as { __copied: string[] }).__copied
+    )
+    expect(copied).toHaveLength(1)
+    expect(copied[0]).toContain(url)
+  })
+
   test('"Répondre" reveals a reply field with a submit disabled while empty', async ({
     page
   }) => {
