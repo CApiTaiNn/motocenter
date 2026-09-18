@@ -110,11 +110,16 @@ test.describe('admin analytics', () => {
   }) => {
     await mockAnalytics(page)
 
-    // The analytics motorcycles call is uniquely identified by its project set
-    // (the `/` landing page also lists motorcycles, with a different project).
-    const request = page.waitForRequest((r) =>
-      r.url().includes('numberOfComparison')
-    )
+    // The analytics call is the only motorcycles request with limit=1. The `/`
+    // springboard page also lists motorcycles (and its project now includes
+    // numberOfComparison too), so match on limit to pick the right one.
+    const request = page.waitForRequest((r) => {
+      const u = new URL(r.url())
+      return (
+        u.pathname.endsWith('/motorcycles') &&
+        u.searchParams.get('limit') === '1'
+      )
+    })
     await openAnalytics(page)
 
     const url = new URL((await request).url())

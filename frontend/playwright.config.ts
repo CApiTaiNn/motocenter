@@ -7,11 +7,9 @@ export default defineConfig({
   testDir: './uitest',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  // The single `nuxt dev` server compiles routes on demand, so the first hit on
-  // a route (and heavy map/chart pages) can be slow. Cap concurrency so a burst
-  // of workers doesn't overwhelm it into cascading timeouts, keep retries to
-  // absorb the residual first-compile jitter, and give each test more headroom
-  // than the 30s default.
+  // Tests run against a production build (see webServer), so there is no
+  // on-demand compilation. Retries still absorb the odd network-idle jitter,
+  // and each test keeps headroom over the 30s default.
   retries: 2,
   workers: 2,
   timeout: 60_000,
@@ -28,10 +26,15 @@ export default defineConfig({
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: {
-    // `npm run dev` needs no build step; client-side fetches are interceptable.
-    command: 'npm run dev',
+    // Run a production build, not `nuxt dev`. The dev server compiles routes and
+    // re-optimizes Vite deps on demand; under parallel workers that invalidates
+    // modules mid-flight ("Failed to fetch dynamically imported module"), which
+    // broke every heavy admin/map route. A prebuilt server serves static chunks,
+    // so there is no compilation race. SSR still runs, so client-side fetches
+    // stay interceptable via page.route exactly as before.
+    command: 'npm run build && npm run preview',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
-    timeout: 180_000
+    timeout: 300_000
   }
 })

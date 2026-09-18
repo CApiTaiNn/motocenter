@@ -290,7 +290,7 @@ test('anonymous visitor sees the join prompt and opens the connexion modal', asy
 
   // ConnexionForm modal content becomes visible.
   const dialog = page.getByRole('dialog')
-  await expect(dialog.getByText('Mot de passe')).toBeVisible()
+  await expect(dialog.getByText('Mot de passe', { exact: true })).toBeVisible()
   await expect(dialog.getByText('Nouveau sur ce site ?')).toBeVisible()
 })
 

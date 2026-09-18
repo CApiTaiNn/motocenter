@@ -1,19 +1,21 @@
 import { test, expect } from './support/test'
+import { visitViaSpa } from './support/mock'
 import { installApiMocks, POST_ID } from './fixtures/forum-id'
 
 // Route under test: app/pages/forum/[id].vue at /forum/<POST_ID>.
 //
-// SSR note: the discussion, its replies and the session probe are all fetched
-// client-side in onMounted via $fetch (post/responses in the page, user in
-// app.vue), so page.route DOES intercept them — there is no SSR-only fetch to
-// work around here. Every mock below is registered before goto().
+// SSR note: the discussion is fetched during SSR via useAsyncData, which
+// page.route cannot intercept on a direct goto. We therefore reach the page
+// through visitViaSpa() — a client-side navigation, where the fetch runs in the
+// browser and every mock below applies. Replies and the session probe are
+// client-side too. Every mock is registered before navigating.
 
 const url = `/forum/${POST_ID}`
 
 test.describe('forum discussion detail', () => {
   test('renders the discussion returned by the id mock', async ({ page }) => {
     await installApiMocks(page)
-    await page.goto(url)
+    await visitViaSpa(page, url)
 
     await expect(
       page.getByRole('heading', { name: 'Problème de démarrage à froid' })
@@ -30,7 +32,7 @@ test.describe('forum discussion detail', () => {
     page
   }) => {
     const state = await installApiMocks(page, { loggedIn: false })
-    await page.goto(url)
+    await visitViaSpa(page, url)
 
     await page.getByRole('button', { name: 'Ajouter aux favoris' }).click()
 
@@ -45,7 +47,7 @@ test.describe('forum discussion detail', () => {
     page
   }) => {
     const state = await installApiMocks(page, { loggedIn: true })
-    await page.goto(url)
+    await visitViaSpa(page, url)
 
     await page.getByRole('button', { name: 'Ajouter aux favoris' }).click()
 
@@ -63,7 +65,7 @@ test.describe('forum discussion detail', () => {
     page
   }) => {
     await installApiMocks(page)
-    await page.goto(url)
+    await visitViaSpa(page, url)
 
     const submit = page.getByRole('button', { name: 'Ajouter mon commentaire' })
     await expect(submit).toBeDisabled()
@@ -76,7 +78,7 @@ test.describe('forum discussion detail', () => {
     page
   }) => {
     const state = await installApiMocks(page, { loggedIn: false })
-    await page.goto(url)
+    await visitViaSpa(page, url)
 
     await page.getByRole('textbox').first().fill('Un commentaire anonyme')
     await page.getByRole('button', { name: 'Ajouter mon commentaire' }).click()
@@ -89,7 +91,7 @@ test.describe('forum discussion detail', () => {
     page
   }) => {
     const state = await installApiMocks(page, { loggedIn: true })
-    await page.goto(url)
+    await visitViaSpa(page, url)
 
     const textarea = page.getByRole('textbox').first()
     await textarea.fill('Je vais tester ça ce week-end.')
@@ -114,7 +116,7 @@ test.describe('forum discussion detail', () => {
 
   test('comment like opens the login modal when logged out', async ({ page }) => {
     const state = await installApiMocks(page, { loggedIn: false })
-    await page.goto(url)
+    await visitViaSpa(page, url)
 
     // The like count (2) is the clickable thumb-up; the click bubbles to its
     // parent handler.
@@ -126,7 +128,7 @@ test.describe('forum discussion detail', () => {
 
   test('comment like increments the count when logged in', async ({ page }) => {
     const state = await installApiMocks(page, { loggedIn: true })
-    await page.goto(url)
+    await visitViaSpa(page, url)
 
     await page.getByText('2', { exact: true }).click()
 
@@ -139,7 +141,7 @@ test.describe('forum discussion detail', () => {
     page
   }) => {
     const state = await installApiMocks(page, { loggedIn: true })
-    await page.goto(url)
+    await visitViaSpa(page, url)
 
     await page.getByText('5', { exact: true }).click()
 
@@ -152,7 +154,7 @@ test.describe('forum discussion detail', () => {
     page
   }) => {
     await installApiMocks(page)
-    await page.goto(url)
+    await visitViaSpa(page, url)
 
     await page.getByText('Répondre').click()
 
@@ -169,7 +171,7 @@ test.describe('forum discussion detail', () => {
     page
   }) => {
     const state = await installApiMocks(page, { loggedIn: true })
-    await page.goto(url)
+    await visitViaSpa(page, url)
 
     await page.getByText('Répondre').click()
     await page.getByPlaceholder('Ecrivez votre réponse').fill('Bonne question !')

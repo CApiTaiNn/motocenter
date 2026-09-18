@@ -1,6 +1,6 @@
 import { test, expect } from './support/test'
 import type { Page } from '@playwright/test'
-import { json, blockUnmockedApi } from './support/mock'
+import { json, blockUnmockedApi, visitViaSpa } from './support/mock'
 import type { IMotorcycle } from '~/types/motorcycles'
 import type { IUser } from '~/types/users'
 import {
@@ -16,11 +16,11 @@ import {
   likedComment
 } from './fixtures/motorcycle-id'
 
-// NOTE ON SSR: the detail page fetches the motorcycle client-side in onMounted
-// (fetchData/fetchMax/fetchMessages via $fetch), NOT through SSR useAsyncData —
-// so page.route DOES intercept every one of these calls. The only server-pass
-// concern is useAuth().fetchUser, but app.vue wires it to onMounted too, so it
-// also runs (and is mocked) client-side. No SSR gap here.
+// NOTE ON SSR: the motorcycle itself is fetched during SSR via useAsyncData,
+// which page.route cannot intercept on a direct goto (the page would 404 on the
+// dead test backend). We reach the page through visitViaSpa() — a client-side
+// navigation, where useAsyncData runs in the browser and the mocks apply. The
+// max-stats, comments and session probe are client-side (onMounted) too.
 
 const URL = `/motorcycle/${MOTO_ID}`
 
@@ -67,7 +67,7 @@ test('renders the motorcycle name, image and spec card from the load fetch', asy
   page
 }) => {
   await setup(page)
-  await page.goto(URL)
+  await visitViaSpa(page, URL)
 
   await expect(page.getByRole('heading', { name: 'MT-09', level: 1 })).toBeVisible()
   await expect(
@@ -76,12 +76,12 @@ test('renders the motorcycle name, image and spec card from the load fetch', asy
   // Spec card key/value rows.
   await expect(page.getByText('Marque:')).toBeVisible()
   await expect(page.getByText('Yamaha')).toBeVisible()
-  await expect(page.getByText('889 m3')).toBeVisible()
+  await expect(page.getByText('889 cm³')).toBeVisible()
 })
 
 test('renders the grouped characteristics section', async ({ page }) => {
   await setup(page)
-  await page.goto(URL)
+  await visitViaSpa(page, URL)
 
   // `exact` so "Caractéristiques" doesn't also match the "Caractéristiques
   // générales" group header, nor "Moteur" match the "Son moteur" heading.
@@ -103,7 +103,7 @@ test('shows the audio player when the motorcycle has a sound extract', async ({
   page
 }) => {
   await setup(page)
-  await page.goto(URL)
+  await visitViaSpa(page, URL)
 
   await expect(page.getByRole('heading', { name: 'Son moteur' })).toBeVisible()
   // AudioPlayer is present -> the "no extract" fallback is absent.
@@ -116,7 +116,7 @@ test('shows the fallback message when the motorcycle has no sound extract', asyn
   page
 }) => {
   await setup(page, { motorcycle: motorcycleNoSound })
-  await page.goto(URL)
+  await visitViaSpa(page, URL)
 
   await expect(
     page.getByText('Aucun extrait audio disponible pour cette moto.')
@@ -125,7 +125,7 @@ test('shows the fallback message when the motorcycle has no sound extract', asyn
 
 test('empty comments state invites the first comment', async ({ page }) => {
   await setup(page)
-  await page.goto(URL)
+  await visitViaSpa(page, URL)
 
   await expect(
     page.getByText('Aucun commentaire sur la moto, ajouter le premier.')
@@ -136,7 +136,7 @@ test('anonymous visitor: "Se connecter" CTA opens the connexion modal', async ({
   page
 }) => {
   await setup(page, { user: null })
-  await page.goto(URL)
+  await visitViaSpa(page, URL)
 
   // The community card CTA (distinct from the modal's own submit button).
   const cta = page.getByRole('button', { name: 'Se connecter' })
@@ -144,7 +144,7 @@ test('anonymous visitor: "Se connecter" CTA opens the connexion modal', async ({
   await cta.click()
 
   // ConnexionForm modal content becomes visible.
-  await expect(page.getByText('Mot de passe')).toBeVisible()
+  await expect(page.getByText('Mot de passe', { exact: true })).toBeVisible()
   await expect(page.getByText('Nouveau sur ce site ?')).toBeVisible()
 })
 
@@ -168,7 +168,7 @@ test('logged-in visitor can post a comment and sees the thank-you state', async 
       })
     }
   })
-  await page.goto(URL)
+  await visitViaSpa(page, URL)
 
   const textarea = page.getByRole('textbox')
   await expect(textarea).toBeVisible()
@@ -209,7 +209,7 @@ test('logged-in visitor can like a comment and the counter updates', async ({
       })
     }
   })
-  await page.goto(URL)
+  await visitViaSpa(page, URL)
 
   // The comment renders with its initial like count.
   await expect(page.getByText(comment.content)).toBeVisible()
@@ -240,7 +240,7 @@ test('a comment reveals the reply box when "Répondre" is clicked', async ({
       )
     }
   })
-  await page.goto(URL)
+  await visitViaSpa(page, URL)
 
   await expect(page.getByText(comment.content)).toBeVisible()
   // Reply box hidden until "Répondre" is clicked.

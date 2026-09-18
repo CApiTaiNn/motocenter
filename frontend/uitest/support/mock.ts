@@ -24,3 +24,31 @@ export async function blockUnmockedApi(page: Page) {
     json(route, { error: `unmocked API call: ${route.request().url()}` }, 500)
   )
 }
+
+/**
+ * Open a route whose primary data comes from SSR `useAsyncData`
+ * (motorcycle/[id], forum/[id]), while keeping page.route mocks effective.
+ *
+ * A direct `page.goto(path)` runs `useAsyncData` during SSR — on the Node
+ * server, where page.route cannot intercept the backend call. The fetch hits the
+ * dead test backend, so the page renders its 404/empty state and every
+ * assertion fails. Instead we load a static, fetch-free page first, then
+ * navigate client-side: on SPA navigation `useAsyncData` runs in the browser, so
+ * its fetch goes through page.route like every other mocked call. Mirrors the
+ * springboard pattern in openAdmin().
+ *
+ * `/legal/cgu` is the springboard because it makes no API call of its own beyond
+ * the mocked `users/account` probe, so no unmocked-call noise is generated.
+ */
+export async function visitViaSpa(page: Page, path: string) {
+  await page.goto('/legal/cgu')
+  await page.waitForLoadState('networkidle')
+  await page.evaluate((to) => {
+    const app = (document.getElementById('__nuxt') as { __vue_app__?: unknown })
+      ?.__vue_app__ as
+      | { config: { globalProperties: { $router: { push: (p: string) => Promise<unknown> } } } }
+      | undefined
+    return app?.config.globalProperties.$router.push(to).then(() => {})
+  }, path)
+  await page.waitForURL(`**${path}`)
+}

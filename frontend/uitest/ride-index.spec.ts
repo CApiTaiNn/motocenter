@@ -116,10 +116,13 @@ test.describe('/ride map page', () => {
     const mapContainer = page.locator('.map-container')
     await expect(mapContainer).not.toHaveClass(/is-fullscreen/)
 
-    await page.locator('button.z-1010').click()
+    // The enlarge toggle is the first (icon-only) button in the .z-1010 overlay
+    // container — the class is on the wrapper div, not the button itself.
+    const enlargeButton = page.locator('.z-1010 button').first()
+    await enlargeButton.click()
     await expect(mapContainer).toHaveClass(/is-fullscreen/)
 
-    await page.locator('button.z-1010').click()
+    await enlargeButton.click()
     await expect(mapContainer).not.toHaveClass(/is-fullscreen/)
   })
 
@@ -184,12 +187,19 @@ test.describe('/ride map page', () => {
         req.method() === 'PATCH'
     )
 
-    await sidebar(page).getByRole('button', { name: 'Participer' }).click()
+    // Both ride cards show a "Participer" button, so scope to the ride-event
+    // card ("Rassemblement Bretagne") whose participate endpoint we assert on.
+    const eventCard = sidebar(page)
+      .locator('div.cursor-pointer', { hasText: 'Rassemblement Bretagne' })
+      .first()
+    await eventCard.getByRole('button', { name: 'Participer', exact: true }).click()
 
     await participateRequest
     // Mock returns the current user as a participant -> button flips label.
+    // exact: true so the whole clickable card (role=button, whose name
+    // aggregates its text) is not also matched.
     await expect(
-      sidebar(page).getByRole('button', { name: 'Ne plus participer' })
+      sidebar(page).getByRole('button', { name: 'Ne plus participer', exact: true })
     ).toBeVisible()
   })
 
