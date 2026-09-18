@@ -263,6 +263,7 @@ onMounted(async () => {
 <template>
   <div v-if="m" class="flex flex-col items-center gap-8 pb-16">
     <h1 class="mt-4 flex items-center justify-center">{{ m.name }}</h1>
+    <ShareButton :title="m.name" />
     <img :src="m.imageUrl" :alt="`Image de la moto ${m.name}`" class="h-full w-1/4 min-w-[19%] flex-1 object-cover object-center max-lg:w-[35%]! max-md:w-[45%]!" />
 
     <div class="flex w-1/2 flex-col gap-2 rounded-lg border border-solid border-(--border-gray) p-4 max-lg:w-[70%]! max-md:w-[90%]!">
