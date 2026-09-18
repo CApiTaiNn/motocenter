@@ -11,6 +11,9 @@ useSeoMeta({
 
 const posts = ref<IPost[]>([])
 const loading = ref(true)
+// A toast raised during the initial load (onMounted) is not shown, so a failed
+// first fetch also sets this flag to render a persistent inline error.
+const loadError = ref(false)
 const filters = ref({
   brandIds: [] as string[],
   categoryIds: [] as string[],
@@ -54,6 +57,7 @@ const apiBase = useRuntimeConfig().public.apiBase
 const toast = useToast()
 
 const getPosts = async () => {
+  loadError.value = false
   try {
     const res = await $fetch<{ posts: IPost[] }>(`${apiBase}posts`, {
       params: {
@@ -77,6 +81,7 @@ const getPosts = async () => {
     // state in the finally block below.
     console.error('Failed to load posts', error)
     posts.value = []
+    loadError.value = true
     toast.add({
       title: 'Chargement impossible',
       description: 'Les discussions n’ont pas pu être chargées. Réessayez plus tard.',
@@ -216,6 +221,14 @@ onMounted(async () => {
         <div v-if="loading" class="flex flex-col gap-4">
           <USkeleton v-for="n in 3" :key="n" class="h-28 w-full rounded-xl" />
         </div>
+        <UAlert
+          v-else-if="loadError"
+          icon="i-lucide-alert-circle"
+          color="error"
+          variant="subtle"
+          title="Chargement impossible"
+          description="Les discussions n’ont pas pu être chargées. Réessayez plus tard."
+        />
         <UCard v-else-if="displayedPosts.length === 0">
           <div class="flex flex-col items-center gap-4 py-8 text-center">
             <UIcon
