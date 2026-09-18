@@ -14,7 +14,6 @@ const isOpen = ref(false)
 const connexionModal = useConnexionModal()
 const profileModal = useProfileModal()
 
-const isDev = import.meta.dev
 const colorMode = useColorMode()
 const mode = ref<boolean>(colorMode.value === 'dark')
 
@@ -54,7 +53,7 @@ function toggleOpen() {
     >
       <div class="mx-[2%] flex flex-row items-center gap-[10px]">
         <LogoApp />
-        <ToggleSwitch v-if="isDev" v-model="mode" />
+        <ToggleSwitch v-model="mode" />
       </div>
       <div class="mx-[2%] flex flex-row items-center gap-4">
         <div
@@ -103,7 +102,7 @@ function toggleOpen() {
       <div class="flex flex-row items-center justify-between p-[10px]">
         <div class="mx-[2%] flex flex-row items-center gap-[10px]">
           <LogoApp />
-          <ToggleSwitch v-if="isDev" v-model="mode" />
+          <ToggleSwitch v-model="mode" />
         </div>
         <button
           type="button"
