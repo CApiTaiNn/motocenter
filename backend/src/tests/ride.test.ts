@@ -442,8 +442,11 @@ describe('Ride Routes - /api/v1/rides', () => {
       expect(res.body.error).toBe('Ride not found')
     })
 
-    it('should return 400 when the token user id is not a valid ObjectId', async () => {
+    it('should reject a token whose user id matches no account', async () => {
       const ride = await Ride.create(eventData)
+      // The auth middleware now loads the user to check its tokenVersion, so a
+      // token whose id resolves to no account is rejected at auth (401) before
+      // the handler runs.
       const badToken = jwt.sign(
         { id: 'not-an-object-id', email: 'x@test.com' },
         process.env.JWT_SECRET!
@@ -453,8 +456,8 @@ describe('Ride Routes - /api/v1/rides', () => {
         .patch(`/api/v1/rides/${ride._id}/participate`)
         .set('Cookie', `accessToken=${badToken}`)
 
-      expect(res.status).toBe(400)
-      expect(res.body.error).toBe('Invalid User ID format')
+      expect(res.status).toBe(401)
+      expect(res.body.message).toBe('Token invalide')
     })
 
     it('should return 404 for an invalid ride ObjectId', async () => {

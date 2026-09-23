@@ -67,6 +67,12 @@ const userSchema = new Schema(
       type: Boolean,
       default: false
     },
+    // Session revocation counter. Stripped from JSON (see serialize.ts) but
+    // always loaded, so the auth middleware can compare it on every request.
+    tokenVersion: {
+      type: Number,
+      default: 0
+    },
     // One-time tokens: stored hashed, never returned to any client.
     emailVerificationToken: {
       type: String,

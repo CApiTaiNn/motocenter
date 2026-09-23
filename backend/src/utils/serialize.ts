@@ -6,6 +6,8 @@ export const stripInternalFields = {
   transform(_doc: any, ret: any) {
     delete ret.__v
     delete ret.password
+    // Internal session-revocation counter, never exposed to any client.
+    delete ret.tokenVersion
     return ret
   }
 }

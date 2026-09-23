@@ -619,15 +619,18 @@ describe('User Routes - /api/v1/users', () => {
       expect(res.body.message).toBe('Non authentifié')
     })
 
-    it('should return 404 if the user no longer exists', async () => {
+    it('should reject the token once the account is deleted', async () => {
+      // Deleting the account revokes its sessions: the auth middleware no longer
+      // finds the user, so the token is rejected (401) instead of reaching the
+      // handler.
       await User.findByIdAndDelete(userId)
 
       const res = await request(app)
         .delete('/api/v1/users/account')
         .set('Cookie', authCookie)
 
-      expect(res.status).toBe(404)
-      expect(res.body.error).toBe('User not found')
+      expect(res.status).toBe(401)
+      expect(res.body.message).toBe('Token invalide')
     })
   })
 })

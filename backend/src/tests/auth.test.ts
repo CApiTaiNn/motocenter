@@ -69,6 +69,54 @@ describe('Auth Routes - /api/v1/auth', () => {
     })
   })
 
+  describe('session revocation (tokenVersion)', () => {
+    // Log in and return the accessToken cookie string to replay on later calls.
+    const login = async (): Promise<string> => {
+      const res = await request(app)
+        .post('/api/v1/auth')
+        .send({ email: userData.email, password: userData.password })
+      const setCookie = res.headers['set-cookie'][0] as string
+      return setCookie.split(';')[0]
+    }
+
+    // A protected, side-effect-free route used to probe whether a token is
+    // still accepted.
+    const favorites = (cookie: string) =>
+      request(app).get('/api/v1/posts/favorites').set('Cookie', cookie)
+
+    it('accepts the session cookie while it is valid', async () => {
+      const cookie = await login()
+      expect((await favorites(cookie)).status).toBe(200)
+    })
+
+    it('rejects the captured cookie after logout', async () => {
+      const cookie = await login()
+      await request(app).post('/api/v1/auth/logout').set('Cookie', cookie)
+
+      // The stolen cookie is now useless: logout bumped tokenVersion.
+      expect((await favorites(cookie)).status).toBe(401)
+    })
+
+    it('rejects sessions opened before a password reset', async () => {
+      const cookie = await login()
+
+      const raw = 'reset-token-plain'
+      await User.updateOne(
+        { email: userData.email },
+        {
+          passwordResetToken: hashToken(raw),
+          passwordResetExpires: new Date(Date.now() + 60_000)
+        }
+      )
+      const reset = await request(app)
+        .post('/api/v1/auth/reset-password')
+        .send({ token: raw, password: 'brand-new-pass-42' })
+      expect(reset.status).toBe(200)
+
+      expect((await favorites(cookie)).status).toBe(401)
+    })
+  })
+
   describe('POST /api/v1/auth/forgot-password', () => {
     it('returns 200 for an unknown email without leaking existence', async () => {
       const res = await request(app)

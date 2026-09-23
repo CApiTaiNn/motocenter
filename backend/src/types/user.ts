@@ -13,6 +13,10 @@ export interface IUser {
   idMoto: string
   image: string
   emailVerified?: boolean
+  // Bumped to revoke every session for this user (logout, password change or
+  // reset). Each JWT carries the value it was signed with; the auth middleware
+  // rejects a token whose value no longer matches. See utils/auth.ts.
+  tokenVersion?: number
   emailVerificationToken?: string
   emailVerificationExpires?: Date
   passwordResetToken?: string

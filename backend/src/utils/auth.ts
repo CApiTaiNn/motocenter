@@ -17,15 +17,32 @@ const toAuthUser = (decoded: string | JwtPayload): AuthUser | null => {
   }
 }
 
-const verifyToken = (token: string): AuthUser | null => {
+const verifyToken = async (token: string): Promise<AuthUser | null> => {
   if (!process.env.JWT_SECRET) {
     throw new Error('JWT_SECRET is not defined in the environment variables')
   }
   // Pin the algorithm so a token forged with a different alg (e.g. "none") is
   // rejected outright.
-  return toAuthUser(
-    jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] })
-  )
+  const decoded = jwt.verify(token, process.env.JWT_SECRET, {
+    algorithms: ['HS256']
+  })
+  const authUser = toAuthUser(decoded)
+  if (!authUser) return null
+
+  // A signed JWT stays valid until it expires, so on its own it can't be
+  // revoked. We bind each token to the user's tokenVersion and re-check it here
+  // on every request: if the account was deleted, or its version was bumped
+  // (logout, password change or reset), the token no longer matches and access
+  // is refused. A token without the claim (older sessions) reads as version 0.
+  const claimedVersion =
+    typeof decoded === 'object' && typeof decoded.tv === 'number'
+      ? decoded.tv
+      : 0
+  const account = await User.findById(authUser.id).select('tokenVersion')
+  if (!account) return null
+  if ((account.tokenVersion ?? 0) !== claimedVersion) return null
+
+  return authUser
 }
 
 // Keys are looked up by the SHA-256 of the presented value, so only the hash
@@ -50,7 +67,7 @@ export const authenticateToken: RequestHandler = async (req, res, next) => {
   const token = req.cookies?.accessToken
   if (token) {
     try {
-      const user = verifyToken(token)
+      const user = await verifyToken(token)
       if (!user) return res.status(401).json({ message: 'Token invalide' })
       req.user = user
       return next()
@@ -81,7 +98,7 @@ export const optionalAuth: RequestHandler = async (req, _res, next) => {
   const token = req.cookies?.accessToken
   if (token) {
     try {
-      const user = verifyToken(token)
+      const user = await verifyToken(token)
       if (user) req.user = user
     } catch {
       // Invalid or expired token: treat the request as anonymous.

@@ -10,6 +10,7 @@ import { sendWelcomeEmail } from '../utils/mail'
 import { makeRateLimiter } from '../utils/rateLimit'
 import { validatePassword } from '../utils/passwordPolicy'
 import { generateToken } from '../utils/tokens'
+import { issueSession } from '../utils/session'
 import { type Request, Response, Router } from 'express'
 import type { Types } from 'mongoose'
 
@@ -363,6 +364,9 @@ router.put(
           .json({ error: passwordCheck.message, code: 'WEAK_PASSWORD' })
       }
       updateData.password = await hash(updateData.password)
+      // Log out every other session once the password changes, so a hijacked
+      // session can't survive the very change meant to lock it out.
+      updateData.$inc = { tokenVersion: 1 }
     }
 
     // !== undefined (not truthiness): 0 or '' must be validated, not
@@ -386,6 +390,13 @@ router.put(
 
     if (!users) {
       return res.status(404).json({ error: 'User not found' })
+    }
+
+    // A password change bumped tokenVersion, which revokes every session —
+    // including this one. Re-issue the cookie for the current device so the
+    // user stays logged in here while other devices are logged out.
+    if (updateData.$inc?.tokenVersion) {
+      issueSession(res, users)
     }
 
     res.status(200).json({ users })

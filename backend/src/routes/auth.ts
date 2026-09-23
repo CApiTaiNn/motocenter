@@ -2,30 +2,13 @@ import jwt from 'jsonwebtoken'
 import { Request, Response, Router } from 'express'
 import { OAuth2Client, type TokenPayload } from 'google-auth-library'
 import User from '../models/User'
-import type { IUser } from '../types/user'
 import { argon2PasswordHasher } from '../utils/hash'
 import { generateToken, hashToken } from '../utils/tokens'
 import { sendPasswordResetEmail, sendWelcomeEmail } from '../utils/mail'
 import { validatePassword } from '../utils/passwordPolicy'
+import { issueSession } from '../utils/session'
 
 const { verify, hash } = argon2PasswordHasher
-
-// Sign a 24h JWT for the user and set it as the httpOnly session cookie. Shared
-// by password login and Google sign-in so both issue an identical session.
-const issueSession = (res: Response, user: IUser & { _id: unknown }) => {
-  const token = jwt.sign(
-    { id: user._id, email: user.email },
-    process.env.JWT_SECRET!,
-    { expiresIn: '24h', algorithm: 'HS256' }
-  )
-  const isProd = process.env.NODE_ENV === 'production'
-  res.cookie('accessToken', token, {
-    httpOnly: true,
-    secure: isProd,
-    sameSite: isProd ? 'none' : 'lax',
-    maxAge: 24 * 60 * 60 * 1000
-  })
-}
 
 // One reusable Google client, created lazily once the client id is configured.
 let googleClient: OAuth2Client | null = null
@@ -224,7 +207,23 @@ router.post('/google', async (req: Request, res: Response) => {
  *                   type: string
  *                   example: Connected
  */
-router.post('/logout', (req: Request, res: Response) => {
+router.post('/logout', async (req: Request, res: Response) => {
+  // Really end the session, not just drop the cookie: bump tokenVersion so the
+  // JWT can no longer be replayed if it was captured. This revokes every device
+  // for the account. Best-effort — an invalid cookie is simply cleared.
+  const token = req.cookies?.accessToken
+  if (typeof token === 'string' && process.env.JWT_SECRET) {
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET, {
+        algorithms: ['HS256']
+      })
+      const id = typeof decoded === 'string' ? undefined : decoded.id
+      if (id) await User.updateOne({ _id: id }, { $inc: { tokenVersion: 1 } })
+    } catch {
+      // Invalid or expired token: nothing to revoke.
+    }
+  }
+
   const isProd = process.env.NODE_ENV === 'production'
   res.clearCookie('accessToken', {
     httpOnly: true,
@@ -286,6 +285,10 @@ router.post('/reset-password', async (req: Request, res: Response) => {
   user.passwordResetToken = undefined
   user.passwordResetExpires = undefined
   await user.save()
+
+  // Revoke any session opened before the reset — e.g. an attacker still logged
+  // in on the account being recovered. Atomic $inc, so no stale read.
+  await User.updateOne({ _id: user._id }, { $inc: { tokenVersion: 1 } })
 
   res.status(200).json({ message: 'Password updated' })
 })
