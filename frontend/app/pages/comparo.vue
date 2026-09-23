@@ -568,10 +568,10 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
           </div>
         </div>
       </Transition>
-      <div class="mx-[10%] flex flex-col gap-20 pb-56 max-lg:mx-[6%]! max-md:mx-4!">
+      <div class="flex flex-col gap-20 pb-56">
         <template v-if="loadingCarousels">
-          <div v-for="n in 3" :key="n">
-            <USkeleton class="m-6 h-8 w-48 rounded-sm" />
+          <div v-for="n in 3" :key="n" class="px-6 lg:px-12">
+            <USkeleton class="mb-4 h-8 w-48 rounded-sm" />
             <div class="flex gap-4 overflow-hidden">
               <USkeleton
                 v-for="i in 4"
@@ -583,7 +583,7 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
         </template>
         <div
           v-else-if="carouselError"
-          class="flex items-center gap-4 rounded-xl border border-(--ui-error)/40 bg-(--ui-error)/5 p-5"
+          class="mx-6 flex items-center gap-4 rounded-xl border border-(--ui-error)/40 bg-(--ui-error)/5 p-5 lg:mx-12"
         >
           <UIcon
             name="i-lucide-triangle-alert"
@@ -598,7 +598,7 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
         </div>
         <div
           v-else-if="noCarouselData"
-          class="flex items-center gap-4 rounded-xl border border-(--border-gray) p-5"
+          class="mx-6 flex items-center gap-4 rounded-xl border border-(--border-gray) p-5 lg:mx-12"
         >
           <UIcon
             name="i-lucide-bike"
@@ -613,7 +613,7 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
         </div>
         <template v-else>
           <div>
-            <h3 class="mb-4 flex items-center gap-2 text-left text-lg font-bold">
+            <h3 class="mb-4 flex items-center gap-2 px-6 text-left text-lg font-bold lg:px-12">
               <span class="h-5 w-1 rounded-full bg-(--ui-primary)" aria-hidden="true" />
               Pour la performance
             </h3>
@@ -623,7 +623,7 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
             />
           </div>
           <div>
-            <h3 class="mb-4 flex items-center gap-2 text-left text-lg font-bold">
+            <h3 class="mb-4 flex items-center gap-2 px-6 text-left text-lg font-bold lg:px-12">
               <span class="h-5 w-1 rounded-full bg-(--ui-primary)" aria-hidden="true" />
               Pour le A2
             </h3>
@@ -633,7 +633,7 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
             />
           </div>
           <div>
-            <h3 class="mb-4 flex items-center gap-2 text-left text-lg font-bold">
+            <h3 class="mb-4 flex items-center gap-2 px-6 text-left text-lg font-bold lg:px-12">
               <span class="h-5 w-1 rounded-full bg-(--ui-primary)" aria-hidden="true" />
               Pour l'aventure
             </h3>
