@@ -378,7 +378,10 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
 </script>
 
 <template>
-  <div>
+  <div class="overflow-x-hidden">
+    <div class="ambient-glow ambient-glow--left" aria-hidden="true" />
+    <div class="ambient-glow ambient-glow--right" aria-hidden="true" />
+    <div class="relative z-10">
     <HeaderInfo :scroll-to-element-id="'form'">
       <template #title>
         <h1>
@@ -639,10 +642,58 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
       </div>
       <br />
     </div>
+    </div>
   </div>
 </template>
 
 <style scoped>
+/* Ambient red "light leak" glows fixed to the viewport corners, behind the page
+   content (which sits in a relative z-10 wrapper). Decorative, matches the home
+   page so the comparo background reads with depth instead of flat white. */
+.ambient-glow {
+  position: fixed;
+  z-index: 0;
+  width: min(70vw, 760px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--ui-primary) 24%, transparent),
+    transparent 70%
+  );
+  filter: blur(130px);
+  pointer-events: none;
+}
+
+.ambient-glow--left {
+  top: -12%;
+  left: -22%;
+}
+
+.ambient-glow--right {
+  right: -22%;
+  bottom: -12%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ambient-glow {
+    animation: ambient-pulse 9s ease-in-out infinite;
+  }
+  .ambient-glow--right {
+    animation-delay: -4.5s;
+  }
+}
+
+@keyframes ambient-pulse {
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
 /* Animation on tab switch */
 .tab-panel {
   animation: tab-fade 0.2s ease-out;
