@@ -6,7 +6,11 @@ import { useAuth } from '~/composables/useAuth'
 
 const { user, updateProfile } = useAuth()
 const { isOpen, close } = useProfileEditModal()
-const show = ref(false)
+// One toggle per field: revealing the new password must not also reveal the
+// current one.
+const showCurrent = ref(false)
+const showNew = ref(false)
+const showConfirm = ref(false)
 const isLoading = ref(false)
 const submitError = ref('')
 
@@ -236,6 +240,7 @@ watch(
                 v-model="state.firstname"
                 placeholder="Jean"
                 variant="soft"
+                autofocus
                 class="w-full"
               />
             </UFormField>
@@ -270,10 +275,11 @@ watch(
                 v-for="option in experienceOptions"
                 :key="option"
                 type="button"
+                :aria-pressed="state.experience === option"
                 class="min-w-fit flex-1 cursor-pointer rounded-full border-2 border-solid bg-transparent px-4 py-2 text-sm transition-all duration-200 ease-in-out"
                 :class="
                   state.experience === option
-                    ? 'border-(--ui-color-error-500) text-(--ui-color-error-500)'
+                    ? 'border-(--ui-primary) text-(--ui-primary)'
                     : 'border-gray-300 text-gray-700 hover:border-gray-500'
                 "
                 @click="state.experience = option"
@@ -312,57 +318,73 @@ watch(
           >
             <UInput
               v-model="state.currentPassword"
-              :type="show ? 'text' : 'password'"
+              :type="showCurrent ? 'text' : 'password'"
               placeholder="Mot de passe actuel ..."
               variant="soft"
               class="w-full"
               autocomplete="current-password"
-            />
-          </UFormField>
-
-          <UFormField label="Nouveau mot de passe" name="password">
-            <UInput
-              v-model="state.password"
-              :type="show ? 'text' : 'password'"
-              placeholder="Mot de passe ..."
-              variant="soft"
-              class="w-full"
               ><template #trailing>
                 <UButton
                   color="neutral"
                   variant="link"
                   size="sm"
-                  :icon="show ? 'i-lucide-eye-off' : 'i-lucide-eye'"
+                  :icon="showCurrent ? 'i-lucide-eye-off' : 'i-lucide-eye'"
                   :aria-label="
-                    show
+                    showCurrent
                       ? 'Masquer le mot de passe'
                       : 'Afficher le mot de passe'
                   "
-                  :aria-pressed="show"
-                  @click="show = !show"
+                  :aria-pressed="showCurrent"
+                  @click="showCurrent = !showCurrent"
+                /> </template
+            ></UInput>
+          </UFormField>
+
+          <UFormField label="Nouveau mot de passe" name="password">
+            <UInput
+              v-model="state.password"
+              :type="showNew ? 'text' : 'password'"
+              placeholder="Mot de passe ..."
+              variant="soft"
+              class="w-full"
+              autocomplete="new-password"
+              ><template #trailing>
+                <UButton
+                  color="neutral"
+                  variant="link"
+                  size="sm"
+                  :icon="showNew ? 'i-lucide-eye-off' : 'i-lucide-eye'"
+                  :aria-label="
+                    showNew
+                      ? 'Masquer le mot de passe'
+                      : 'Afficher le mot de passe'
+                  "
+                  :aria-pressed="showNew"
+                  @click="showNew = !showNew"
                 /> </template
             ></UInput>
           </UFormField>
           <UFormField label="Confirmer le mot de passe" name="confirmPassword">
             <UInput
               v-model="state.confirmPassword"
-              :type="show ? 'text' : 'password'"
+              :type="showConfirm ? 'text' : 'password'"
               placeholder="Confirmation mot de passe ..."
               variant="soft"
               class="w-full"
+              autocomplete="new-password"
               ><template #trailing>
                 <UButton
                   color="neutral"
                   variant="link"
                   size="sm"
-                  :icon="show ? 'i-lucide-eye-off' : 'i-lucide-eye'"
+                  :icon="showConfirm ? 'i-lucide-eye-off' : 'i-lucide-eye'"
                   :aria-label="
-                    show
+                    showConfirm
                       ? 'Masquer le mot de passe'
                       : 'Afficher le mot de passe'
                   "
-                  :aria-pressed="show"
-                  @click="show = !show"
+                  :aria-pressed="showConfirm"
+                  @click="showConfirm = !showConfirm"
                 /> </template
             ></UInput>
           </UFormField>

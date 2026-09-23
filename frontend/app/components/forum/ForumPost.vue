@@ -11,18 +11,15 @@ const emit = defineEmits(['post-change'])
 
 const apiBase = useRuntimeConfig().public.apiBase
 
-const addViewInAPost = async (id: string) => {
-  await $fetch(`${apiBase}posts/add-view`, {
+// Fire-and-forget: bumping the view count must never delay or block opening the
+// thread. A slow or failing call is ignored.
+const addViewInAPost = (id: string) => {
+  $fetch(`${apiBase}posts/add-view`, {
     method: 'POST',
     params: {
       filter: JSON.stringify({ id: id })
     }
-  })
-}
-
-const handleOpenAPost = async (id: string) => {
-  await addViewInAPost(id)
-  navigateTo(`/forum/${id}`)
+  }).catch(() => {})
 }
 
 const handlePostChange = () => {
@@ -31,9 +28,8 @@ const handlePostChange = () => {
 </script>
 <template>
   <UCard
-    class="group w-full cursor-pointer border-[0.5px] border-l-4 border-(--border-gray) border-l-(--ui-primary) transition-colors hover:border-(--ui-primary)/50"
+    class="group relative w-full border-[0.5px] border-l-4 border-(--border-gray) border-l-(--ui-primary) transition-colors focus-within:border-(--ui-primary)/50 hover:border-(--ui-primary)/50"
     :ui="{ body: 'p-4 sm:p-5' }"
-    @click="handleOpenAPost(post._id)"
   >
     <div class="flex w-full items-start gap-4">
       <USkeleton v-if="props.loading" class="size-12 shrink-0 rounded-full" />
@@ -59,15 +55,24 @@ const handlePostChange = () => {
                 {{ props.post.brand?.name }}
               </UBadge>
             </div>
-            <p class="mt-1.5 line-clamp-2 text-lg/snug font-semibold transition-colors group-hover:text-(--ui-primary)">
+            <!-- Stretched link: the title is the real, keyboard-focusable link;
+                 the ::after overlay makes the whole card clickable while
+                 interactive children (edit menu) sit above it via z-10. -->
+            <NuxtLink
+              :to="`/forum/${props.post._id}`"
+              class="mt-1.5 line-clamp-2 text-lg/snug font-semibold transition-colors group-hover:text-(--ui-primary) after:absolute after:inset-0 after:content-[''] focus:outline-none"
+              @click="addViewInAPost(props.post._id)"
+            >
               {{ props.post.title }}
-            </p>
+            </NuxtLink>
           </div>
-          <ForumEditAPost
-            :post="post"
-            :is-new-post="false"
-            @edited-post="handlePostChange"
-          />
+          <div class="relative z-10">
+            <ForumEditAPost
+              :post="post"
+              :is-new-post="false"
+              @edited-post="handlePostChange"
+            />
+          </div>
         </div>
         <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-sm text-(--label-text)">
           <span>

@@ -75,6 +75,8 @@ const submit = async () => {
           :type="show ? 'text' : 'password'"
           placeholder="Mot de passe ..."
           variant="soft"
+          autofocus
+          autocomplete="new-password"
           class="w-full"
         >
           <template #trailing>
@@ -84,6 +86,7 @@ const submit = async () => {
               size="sm"
               :icon="show ? 'i-lucide-eye-off' : 'i-lucide-eye'"
               :aria-label="show ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
+              :aria-pressed="show"
               @click="show = !show"
             />
           </template>
@@ -107,6 +110,7 @@ const submit = async () => {
           :type="show ? 'text' : 'password'"
           placeholder="Confirmation ..."
           variant="soft"
+          autocomplete="new-password"
           class="w-full"
         />
       </UFormField>

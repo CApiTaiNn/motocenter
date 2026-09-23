@@ -42,6 +42,8 @@ const submit = async () => {
             type="email"
             placeholder="john.doe@gmail.com"
             variant="soft"
+            autofocus
+            autocomplete="email"
             class="w-full"
           />
         </UFormField>

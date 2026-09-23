@@ -207,15 +207,20 @@ v-if="isNewPost === true" icon="i-lucide-plus" size="sm" color="primary" variant
         <div class="flex w-full items-center justify-between">
           <h3>{{ modalTitle() }}</h3>
           <UButton
-color="primary" variant="outline" icon="i-lucide-x" class="cursor-pointer rounded-full"
-            @click="handleCloseModal" />
+            color="primary"
+            variant="outline"
+            icon="i-lucide-x"
+            aria-label="Fermer"
+            class="cursor-pointer rounded-full"
+            @click="handleCloseModal"
+          />
         </div>
       </template>
       <template #body>
         <div>
           <UForm :schema :state="state" class="flex w-full flex-col gap-2" @submit="onSubmit">
             <UFormField label="Titre du post" required name="title">
-              <UInput v-model="state.title" placeholder="Titre du post" size="md" class="w-full" />
+              <UInput v-model="state.title" placeholder="Titre du post" size="md" autofocus class="w-full" />
             </UFormField>
             <UFormField label="Catégorie" required name="category">
               <USelectMenu

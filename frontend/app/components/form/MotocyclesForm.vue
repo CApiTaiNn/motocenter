@@ -7,6 +7,12 @@ const props = defineProps<{
   formTitle: string
 }>()
 const selectedId = defineModel<string>()
+
+// Slot number shown in the header badge ("Moto 1" -> "1").
+const slotNumber = computed(() => props.formTitle.replace(/\D/g, ''))
+// The user has picked a full bike (brand + model + year).
+const isComplete = computed(() => !!selectedId.value)
+
 const placeholderMotorcycle = {
   brand: 'Yamaha',
   name: 'MT-07',
@@ -128,8 +134,29 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex w-full max-w-[340px] min-w-0 flex-col gap-4 rounded-xl border bg-(--background) p-4 shadow-[20px_20px_5em_var(--border-gray)] max-lg:max-w-[300px]! md:max-lg:max-w-[320px]!">
-    <h3 class="text-center">{{ props.formTitle }}</h3>
+  <div
+    class="relative flex w-full max-w-[340px] min-w-0 flex-col gap-5 overflow-hidden rounded-2xl border border-(--border-gray) bg-(--background) p-5 shadow-sm transition-shadow duration-200 hover:shadow-md max-lg:max-w-[300px]! md:max-lg:max-w-[320px]!"
+  >
+    <span
+      class="absolute inset-x-0 top-0 h-1 transition-colors duration-200"
+      :class="isComplete ? 'bg-(--ui-primary)' : 'bg-(--border-gray)'"
+      aria-hidden="true"
+    />
+    <!-- Badge kept as a corner element (a sibling, not a wrapper) so the title
+         stays a direct child of the card. -->
+    <span
+      class="absolute top-4 right-4 grid size-8 place-items-center rounded-full text-sm font-bold transition-colors duration-200"
+      :class="
+        isComplete
+          ? 'bg-(--ui-primary) text-white'
+          : 'bg-(--ui-primary)/10 text-(--ui-primary)'
+      "
+      aria-hidden="true"
+    >
+      <UIcon v-if="isComplete" name="i-lucide-check" class="size-4" />
+      <template v-else>{{ slotNumber }}</template>
+    </span>
+    <h3 class="pr-10 text-base font-semibold">{{ props.formTitle }}</h3>
     <UFormField label="Marque" name="brand">
       <UInputMenu
         v-model="selectedBrand"

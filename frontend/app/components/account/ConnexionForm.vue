@@ -92,7 +92,7 @@ watch(isOpen, (newVal) => {
         @submit="connexion"
       >
         <UFormField label="E-mail" name="email" required>
-          <UInput v-model="state.email" type="email" class="w-full" />
+          <UInput v-model="state.email" type="email" autofocus class="w-full" />
         </UFormField>
 
         <UFormField label="Mot de passe" name="password" required>

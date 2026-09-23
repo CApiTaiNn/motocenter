@@ -289,9 +289,12 @@ const handleSubmit = async () => {
       <div class="flex flex-col">
         <!-- Indicateur de progression -->
         <div class="mb-8 flex justify-center gap-2">
-          <div class="progress-dot" :class="{ active: currentStep >= 1 }" />
-          <div class="progress-dot" :class="{ active: currentStep >= 2 }" />
-          <div class="progress-dot" :class="{ active: currentStep >= 3 }" />
+          <div
+            v-for="step in 3"
+            :key="step"
+            class="size-3 rounded-full transition-colors"
+            :class="currentStep >= step ? 'bg-(--ui-primary)' : 'bg-gray-300'"
+          />
         </div>
 
         <UForm
@@ -322,6 +325,7 @@ const handleSubmit = async () => {
                     v-model="state.firstname"
                     placeholder="Jean"
                     variant="soft"
+                    autofocus
                     class="w-full"
                   />
                 </UFormField>
@@ -367,8 +371,13 @@ const handleSubmit = async () => {
                     v-for="level in experienceLevels"
                     :key="level"
                     type="button"
-                    class="experience-button cursor-pointer rounded-full border-2 border-solid border-gray-300 bg-transparent px-4 py-2 text-sm text-gray-700 transition-all hover:border-gray-500"
-                    :class="{ active: state.experience === level }"
+                    :aria-pressed="state.experience === level"
+                    class="cursor-pointer rounded-full border-2 border-solid bg-transparent px-4 py-2 text-sm transition-all"
+                    :class="
+                      state.experience === level
+                        ? 'border-(--ui-primary) text-(--ui-primary)'
+                        : 'border-gray-300 text-gray-700 hover:border-gray-500'
+                    "
                     @click="state.experience = level"
                   >
                     {{ level }}
@@ -391,6 +400,8 @@ const handleSubmit = async () => {
               >
                 <UInput
                   v-model="state.yearsExperience"
+                  type="number"
+                  inputmode="numeric"
                   min="0"
                   placeholder="12"
                   variant="soft"
@@ -536,22 +547,3 @@ const handleSubmit = async () => {
     </template>
   </UModal>
 </template>
-
-<style scoped>
-.progress-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background-color: #d1d5db;
-  transition: background-color 0.2s ease;
-}
-
-.progress-dot.active {
-  background-color: var(--ui-color-error-500);
-}
-
-.experience-button.active {
-  border-color: var(--ui-color-error-500);
-  color: var(--ui-color-error-500);
-}
-</style>

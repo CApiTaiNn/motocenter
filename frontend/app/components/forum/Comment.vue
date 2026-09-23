@@ -28,17 +28,21 @@ const isResponseOfAcommentValue = ref('')
 
 const message = ref<IMessage>({ ...props.response })
 const isSolidThumbUp = computed(
-  () => user.value && message.value.likedByMe === true
+  () => !!user.value && message.value.likedByMe === true
 )
 const isSolidThumbDown = computed(
-  () => user.value && message.value.dislikedByMe === true
+  () => !!user.value && message.value.dislikedByMe === true
 )
 const isOpen = ref(false)
+const isVoting = ref(false)
+const isSubmittingReply = ref(false)
 
 const handleAddLikeOrDislike = async (isLike: boolean, messageId: string) => {
-  if (!user.value) {
-    open()
-  } else {
+  if (!user.value) return open()
+  // Guard against double clicks: one vote at a time.
+  if (isVoting.value) return
+  isVoting.value = true
+  try {
     const updateMessage = await $fetch<{ populatedMessage: IMessage }>(
       `${apiBase}messages`,
       {
@@ -51,6 +55,14 @@ const handleAddLikeOrDislike = async (isLike: boolean, messageId: string) => {
       }
     )
     message.value = updateMessage.populatedMessage
+  } catch {
+    toast.add({
+      title: 'Erreur',
+      description: "Votre vote n'a pas pu être enregistré.",
+      color: 'error'
+    })
+  } finally {
+    isVoting.value = false
   }
 }
 
@@ -63,9 +75,10 @@ const handleSeeInputToAddResponseOfComment = () => {
 }
 
 const handleAddResponseOfComment = async (commentId: string) => {
-  if (!user.value) {
-    open()
-  } else {
+  if (!user.value) return open()
+  if (isSubmittingReply.value) return
+  isSubmittingReply.value = true
+  try {
     const newMessage = await $fetch.raw(`${apiBase}messages`, {
       method: 'POST',
       credentials: 'include',
@@ -92,6 +105,14 @@ const handleAddResponseOfComment = async (commentId: string) => {
         color: 'error'
       })
     }
+  } catch {
+    toast.add({
+      title: 'Erreur',
+      description: "Votre commentaire n'a pas pu être ajouté.",
+      color: 'error'
+    })
+  } finally {
+    isSubmittingReply.value = false
   }
 }
 
@@ -127,12 +148,23 @@ onMounted(async () => {
     >
       <div class="flex h-fit flex-row items-center gap-2">
         <div>
-          <UIcon
+          <button
             v-if="responsesOfComment.length !== 0"
-            :name="isOpen ? 'i-lucide-circle-minus' : 'i-lucide-circle-plus'"
-            class="cursor-pointer"
+            type="button"
+            class="-m-1 flex cursor-pointer p-1"
+            :aria-expanded="isOpen"
+            :aria-label="
+              isOpen
+                ? 'Masquer les réponses'
+                : `Afficher les ${responsesOfComment.length} réponses`
+            "
             @click="isOpen = !isOpen"
-          />
+          >
+            <UIcon
+              :name="isOpen ? 'i-lucide-circle-minus' : 'i-lucide-circle-plus'"
+              class="size-5"
+            />
+          </button>
         </div>
         <UAvatar
           :src="message.user.image"
@@ -149,8 +181,12 @@ onMounted(async () => {
         </div>
         <p class="m-0 leading-normal">{{ message.content }}</p>
         <div class="mt-1 flex items-center gap-6">
-          <div
-            class="flex cursor-pointer items-center gap-2"
+          <button
+            type="button"
+            class="flex cursor-pointer items-center gap-2 disabled:opacity-60"
+            :aria-pressed="isSolidThumbUp"
+            :aria-label="`J'aime (${message.like})`"
+            :disabled="isVoting"
             @click="handleAddLikeOrDislike(true, message._id)"
           >
             <UIcon
@@ -158,10 +194,14 @@ onMounted(async () => {
               class="size-6"
               :class="isSolidThumbUp ? 'text-(--ui-primary)' : ''"
             />
-            <p>{{ message.like }}</p>
-          </div>
-          <div
-            class="flex cursor-pointer items-center gap-2"
+            <span>{{ message.like }}</span>
+          </button>
+          <button
+            type="button"
+            class="flex cursor-pointer items-center gap-2 disabled:opacity-60"
+            :aria-pressed="isSolidThumbDown"
+            :aria-label="`Je n'aime pas (${message.dislike})`"
+            :disabled="isVoting"
             @click="handleAddLikeOrDislike(false, message._id)"
           >
             <UIcon
@@ -169,15 +209,16 @@ onMounted(async () => {
               class="size-6"
               :class="isSolidThumbDown ? 'text-(--ui-primary)' : ''"
             />
-            <p>{{ message.dislike }}</p>
-          </div>
-          <div
+            <span>{{ message.dislike }}</span>
+          </button>
+          <button
+            type="button"
             class="flex cursor-pointer items-center gap-2"
             @click="handleSeeInputToAddResponseOfComment"
           >
             <UIcon name="i-lucide-messages-square" class="size-6" />
-            <p>Répondre</p>
-          </div>
+            <span>Répondre</span>
+          </button>
         </div>
         <div v-if="isResponseOfAcomment" class="flex w-full flex-col gap-2">
           <UTextarea
@@ -189,6 +230,7 @@ onMounted(async () => {
             label="Envoyer ma réponse"
             class="cursor-pointer"
             size="sm"
+            :loading="isSubmittingReply"
             :disabled="isResponseOfAcommentValue.length === 0"
             @click="handleAddResponseOfComment(message._id)"
           />

@@ -238,6 +238,7 @@ onMounted(async () => {
               v-for="tab in SORT_TABS"
               :key="tab.key"
               type="button"
+              :aria-pressed="sortBy === tab.key"
               class="-mb-px cursor-pointer border-b-2 border-transparent px-3 py-2 text-sm font-semibold transition-colors"
               :class="
                 sortBy === tab.key
@@ -271,11 +272,11 @@ onMounted(async () => {
           <div class="flex flex-col items-center gap-4 py-8 text-center">
             <UIcon
               name="i-lucide-message-square-plus"
-              class="size-16 text-gray-400"
+              class="size-16 text-(--label-text)"
             />
             <div class="flex flex-col gap-1">
               <h4>Aucun post pour le moment</h4>
-              <p class="text-sm text-gray-400">
+              <p class="text-sm text-(--label-text)">
                 Soyez le premier à lancer la discussion.
               </p>
             </div>

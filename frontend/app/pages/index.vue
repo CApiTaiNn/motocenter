@@ -157,12 +157,15 @@ onMounted(async () => {
       <div class="relative flex flex-row items-end justify-center gap-4">
         <img
           src="/images/accueil/R1_fond.png"
-          alt="Moto"
+          alt=""
+          fetchpriority="high"
+          decoding="async"
           class="moto-left h-auto max-h-[80vh] w-full min-w-[38%] flex-[1.1] object-contain object-bottom"
         />
         <img
           src="/images/accueil/BMW_fond.png"
-          alt="Moto"
+          alt=""
+          decoding="async"
           class="moto-right h-auto max-h-[80vh] w-full min-w-[38%] flex-1 object-contain object-bottom"
         />
       </div>
@@ -184,7 +187,7 @@ onMounted(async () => {
       <ForumSection />
     </section>
     <section class="flex flex-col gap-8 lg:min-h-screen lg:justify-center">
-      <h2 style="text-align: center">
+      <h2 class="text-center">
         <span class="text-(--ui-primary)">{{ appName }}</span>
         en quelques chiffres
       </h2>
@@ -222,13 +225,13 @@ onMounted(async () => {
       </article>
     </section>
     <section class="band flex flex-col gap-8 lg:min-h-screen lg:justify-center">
-      <h2 style="text-align: center">Les best-sellers</h2>
+      <h2 class="text-center">Les best-sellers</h2>
       <ClientOnly>
         <CarrouselMotorcycles :items="itemsCaroussel" />
       </ClientOnly>
     </section>
     <section class="band flex flex-col gap-8 lg:min-h-screen lg:justify-center">
-      <h2 style="text-align: center">
+      <h2 class="text-center">
         Ils nous font confiance
       </h2>
       <CarrouselSponsors />
@@ -237,9 +240,8 @@ onMounted(async () => {
       <UButton
         size="xl"
         color="neutral"
-        class="button rounded-full max-lg:px-[30px]! max-lg:py-[10px]! max-lg:text-sm!"
+        class="button mb-[20vh] rounded-full max-lg:px-[30px]! max-lg:py-[10px]! max-lg:text-sm!"
         icon="i-lucide-badge-check"
-        style="margin-bottom: 20vh"
         >Approuvé par {{ totalUsers }} utilisateurs</UButton
       >
     </section>

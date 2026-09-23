@@ -65,9 +65,17 @@ const comment = ref<ICommentInput>({
   user: ''
 })
 const messagePosted = ref<boolean>(false)
+const isPosting = ref(false)
 const { isAuthenticated, user } = useAuth()
 const { open } = useConnexionModal()
 const toast = useToast()
+const router = useRouter()
+
+// Go back where the user came from, or home on a deep link (no history).
+const goBack = () => {
+  if (import.meta.client && window.history.length > 1) router.back()
+  else navigateTo('/')
+}
 
 const statsRef = ref<HTMLElement | null>(null)
 const countStarted = ref(false)
@@ -183,6 +191,8 @@ async function fetchMessages() {
 
 async function postComment() {
   if (!comment.value.content || !comment.value.motorcycleId) return
+  if (isPosting.value) return
+  isPosting.value = true
 
   let postId = m.value?.post
   if (!postId && user.value) {
@@ -212,6 +222,7 @@ async function postComment() {
         description: "La discussion n'a pas pu être créée.",
         color: 'error'
       })
+      isPosting.value = false
       return
     }
   }
@@ -234,6 +245,8 @@ async function postComment() {
       description: "Votre commentaire n'a pas pu être ajouté.",
       color: 'error'
     })
+  } finally {
+    isPosting.value = false
   }
   await fetchMessages()
 }
@@ -262,7 +275,16 @@ onMounted(async () => {
 
 <template>
   <div v-if="m" class="flex flex-col items-center gap-8 pb-16">
-    <h1 class="mt-4 flex items-center justify-center">{{ m.name }}</h1>
+    <UButton
+      variant="link"
+      color="neutral"
+      icon="i-lucide-arrow-left"
+      class="mt-4 mr-auto ml-4 px-2"
+      @click="goBack"
+    >
+      Retour
+    </UButton>
+    <h1 class="flex items-center justify-center">{{ m.name }}</h1>
     <ShareButton :title="m.name" />
     <img :src="m.imageUrl" :alt="`Image de la moto ${m.name}`" class="h-full w-1/4 min-w-[19%] flex-1 object-cover object-center max-lg:w-[35%]! max-md:w-[45%]!" />
 
@@ -274,9 +296,9 @@ onMounted(async () => {
     </div>
 
     <div ref="statsRef" class="w-3/5 max-lg:w-[75%]! max-md:w-[90%]!">
-      <h3 class="mb-4 text-center">Caractéristiques</h3>
+      <h2 class="mb-4 text-center text-3xl max-lg:text-lg">Caractéristiques</h2>
       <div v-for="group in statsGroups" :key="group.label" class="mb-8">
-        <h4 class="mb-3 border-l-[3px] border-solid border-(--ui-primary) pl-1 font-['Krona_One',sans-serif] text-sm tracking-[0.08em] text-gray-500 uppercase">{{ group.label }}</h4>
+        <h3 class="mb-3 border-l-[3px] border-solid border-(--ui-primary) pl-1 font-['Krona_One',sans-serif] text-sm tracking-[0.08em] text-gray-500 uppercase">{{ group.label }}</h3>
         <div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-4">
           <div v-for="stat in group.stats" :key="stat.label" class="flex flex-col items-center gap-2 rounded-lg border border-solid border-gray-300 p-4">
             <span class="text-center text-sm font-bold text-gray-500">{{ stat.label }}</span>
@@ -299,13 +321,13 @@ onMounted(async () => {
     <UCard class="mt-8 flex w-3/5 flex-col items-center gap-2 max-lg:w-[75%]! max-md:w-[90%]!">
       <div class="mb-4 flex items-center gap-2">
         <UIcon name="i-lucide-audio-waveform" class="size-6 text-(--ui-primary)" />
-        <h4>Son moteur</h4>
+        <h2 class="text-2xl max-lg:text-base">Son moteur</h2>
       </div>
       <AudioPlayer v-if="m.soundLink" :src="m.soundLink" />
       <p v-else class="py-4 text-center text-gray-500 italic">Aucun extrait audio disponible pour cette moto.</p>
     </UCard>
 
-    <h4>Commentaires présents sur la moto</h4>
+    <h2 class="text-2xl max-lg:text-base">Commentaires présents sur la moto</h2>
     <div v-if="commentsMotorcycle.length > 0" class="h-fit max-w-1/2 flex-1 rounded-[20px] border border-solid border-gray-300 p-8 max-lg:max-w-[72%]! max-md:max-w-[95%]!">
       <div v-for="motoComment in commentsMotorcycle" :key="motoComment._id">
         <Comment :response="motoComment" />
@@ -336,7 +358,14 @@ onMounted(async () => {
 v-model="comment.content" size="xl"
             placeholder="Un retour d'expérience, un conseil d'entretien ou encore une question" />
         </div>
-        <UButton class="m-1 self-end rounded-4xl text-xs" size="xl" @click="postComment">Poster</UButton>
+        <UButton
+          class="m-1 self-end rounded-4xl text-xs"
+          size="xl"
+          :loading="isPosting"
+          :disabled="!comment.content"
+          @click="postComment"
+          >Poster</UButton
+        >
       </div>
       <div v-else class="flex h-fit min-h-100 flex-col justify-center gap-8 p-8 max-lg:min-h-auto max-lg:p-4">
         <h4 class="text-center">Merci pour votre contribution !</h4>

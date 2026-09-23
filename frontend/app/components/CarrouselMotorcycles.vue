@@ -48,8 +48,7 @@ function handleCompareClick(itemId: string, imgUrl: string) {
     }"
   >
     <article
-      class="mx-2 flex h-full w-[240px] cursor-pointer flex-col overflow-hidden rounded-[20px] border-2 border-solid border-(--background-secondary) transition duration-200 select-none hover:-translate-y-1 hover:shadow-xl max-lg:w-[190px]!"
-      @click="navigateTo(`/motorcycle/${item._id}`)"
+      class="relative mx-2 flex h-full w-[240px] flex-col overflow-hidden rounded-[20px] border-2 border-solid border-(--background-secondary) transition duration-200 select-none focus-within:-translate-y-1 focus-within:shadow-xl hover:-translate-y-1 hover:shadow-xl max-lg:w-[190px]!"
     >
       <div class="flex items-center justify-between px-3.5 pt-3">
         <span class="flex items-center gap-2 text-xs font-semibold text-(--label-text)">
@@ -57,6 +56,8 @@ function handleCompareClick(itemId: string, imgUrl: string) {
             v-if="item.brand?.icon"
             :src="item.brand.icon"
             :alt="item.brand.name"
+            width="20"
+            height="20"
             class="size-5 rounded-md object-contain"
           />
           <span
@@ -81,7 +82,13 @@ function handleCompareClick(itemId: string, imgUrl: string) {
       </div>
 
       <h5 class="mx-3.5 mt-2 text-base font-bold">
-        {{ item.name }}
+        <!-- Stretched link: keyboard-focusable, covers the card via ::after. -->
+        <NuxtLink
+          :to="`/motorcycle/${item._id}`"
+          class="cursor-pointer after:absolute after:inset-0 after:content-[''] focus:outline-none"
+        >
+          {{ item.name }}
+        </NuxtLink>
         <span class="ml-1 text-[13px] font-medium text-(--label-text)">{{ item.year }}</span>
       </h5>
 
@@ -117,13 +124,13 @@ function handleCompareClick(itemId: string, imgUrl: string) {
         <span class="text-[11px] text-(--label-text)"
           >{{ item.numberOfComparison ?? 0 }} comparaisons</span
         >
-        <div @click.stop>
+        <div class="relative z-10" @click.stop>
           <UButton
             size="sm"
             color="primary"
             class="cursor-pointer rounded-full text-white"
             icon="i-lucide-arrow-left-right"
-            aria-label="Comparer"
+            aria-label="Comparer cette moto"
             @click.stop="handleCompareClick(item._id, item.imageUrl ? item.imageUrl : '')"
           />
         </div>

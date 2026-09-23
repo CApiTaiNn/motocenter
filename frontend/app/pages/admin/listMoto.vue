@@ -232,15 +232,16 @@ watch(
 <template>
   <div>
     <main>
-      <div class="m-12 flex items-center justify-between">
+      <div class="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4 lg:p-6">
         <UInput
           v-model="search"
           icon="i-lucide-search"
           size="md"
           variant="outline"
           placeholder="Rechercher une moto..."
+          class="w-full sm:max-w-xs"
         />
-        <UButton size="md" color="primary" label="Open" @click="openPanel"
+        <UButton size="md" color="primary" class="shrink-0" @click="openPanel"
           >Ajouter une moto</UButton
         >
       </div>

@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import Comment from '~/components/forum/Comment.vue'
-import HeaderInfo from '~/components/global/HeaderInfo.vue'
 import { useAuth } from '~/composables/useAuth'
 import { useConnexionModal } from '~/composables/useConnexionModal'
 import type { IMessage } from '~/types/messages'
@@ -38,6 +37,8 @@ useSeoMeta({
 
 const responses = ref<IMessage[]>([])
 const newReponseOfPost = ref('')
+const isSubmittingComment = ref(false)
+const isFavoriting = ref(false)
 const isSolidStar = computed(
   () => user.value && post.value?.favoritedByMe === true
 )
@@ -57,9 +58,10 @@ const getResponsesOfPost = async () => {
 }
 
 const handleAddComment = async () => {
-  if (!user.value) {
-    open()
-  } else {
+  if (!user.value) return open()
+  if (isSubmittingComment.value) return
+  isSubmittingComment.value = true
+  try {
     const newMessage = await $fetch.raw(`${apiBase}messages`, {
       method: 'POST',
       credentials: 'include',
@@ -85,13 +87,22 @@ const handleAddComment = async () => {
         color: 'error'
       })
     }
+  } catch {
+    toast.add({
+      title: 'Erreur',
+      description: "Votre commentaire n'a pas pu être ajouté.",
+      color: 'error'
+    })
+  } finally {
+    isSubmittingComment.value = false
   }
 }
 
 const handleAddFavorite = async () => {
-  if (!user.value) {
-    open()
-  } else {
+  if (!user.value) return open()
+  if (isFavoriting.value) return
+  isFavoriting.value = true
+  try {
     const response = await $fetch<{ isAdded: boolean }>(
       `${apiBase}posts/add-favorite`,
       {
@@ -124,6 +135,14 @@ const handleAddFavorite = async () => {
         color: 'error'
       })
     }
+  } catch {
+    toast.add({
+      title: 'Erreur',
+      description: "Votre post n'a pas été ajouté aux favoris.",
+      color: 'error'
+    })
+  } finally {
+    isFavoriting.value = false
   }
 }
 
@@ -137,31 +156,27 @@ onMounted(async () => {
       description: "Les commentaires n'ont pas pu être chargés.",
       color: 'error'
     })
-  } finally {
-    scrollToMap('post')
   }
 })
 </script>
 
 <template>
   <div>
-    <HeaderInfo :scroll-to-element-id="'post'">
-      <template #title>
-        <h1>
-          Bienvenue sur le <br />
-          <span class="text-(--ui-primary)">Forum</span>
-        </h1>
-      </template>
-      <template #subtitle>
-        <p>Échanger librement sur votre sujet favori en lien avec la moto.</p>
-      </template>
-    </HeaderInfo>
     <div id="post" class="mx-20 my-8 flex flex-row items-start gap-12 max-lg:m-[0.5em]! max-lg:gap-0!">
       <div class="shrink-0">
         <ForumPanel />
       </div>
       <USkeleton v-if="!post" class="size-20 min-w-0 flex-1 rounded-full" />
       <div v-else class="min-w-0 flex-1">
+        <UButton
+          to="/forum"
+          variant="link"
+          color="neutral"
+          icon="i-lucide-arrow-left"
+          class="mb-2 -ml-2 px-2"
+        >
+          Retour au forum
+        </UButton>
         <div class="my-4 flex flex-row items-center gap-3">
           <UAvatar
             :src="post?.user.image"
@@ -169,7 +184,7 @@ onMounted(async () => {
             loading="lazy"
             class="mr-2"
           />
-          <h2 class="flex-1">{{ post?.title }}</h2>
+          <h1 class="flex-1 text-2xl font-bold max-lg:text-xl">{{ post?.title }}</h1>
           <ShareButton :title="post?.title" />
           <UButton
             icon="i-lucide-star"
@@ -177,8 +192,9 @@ onMounted(async () => {
             variant="ghost"
             size="xl"
             :aria-label="isSolidStar ? 'Retirer des favoris' : 'Ajouter aux favoris'"
+            :loading="isFavoriting"
             class="cursor-pointer"
-            :class="isSolidStar ? 'text-(--ui-primary)' : 'text-gray-400'"
+            :class="isSolidStar ? 'text-(--ui-primary)' : 'text-gray-500'"
             @click="handleAddFavorite"
           />
         </div>
@@ -207,13 +223,14 @@ onMounted(async () => {
             class="mb-4 w-full md:w-5/6 lg:w-3/4"
           />
         </div>
-        <h4 class="mb-4">{{ post?.content }}</h4>
+        <p class="mb-4 whitespace-pre-line">{{ post?.content }}</p>
         <div class="flex flex-col items-start gap-2">
           <UFormField label="Ecrire un commentaire" required>
             <UTextarea v-model="newReponseOfPost" />
           </UFormField>
           <UButton
             :disabled="newReponseOfPost === ''"
+            :loading="isSubmittingComment"
             size="sm"
             class="w-3/4 md:w-1/2 lg:w-1/4"
             @click="handleAddComment"
@@ -221,8 +238,8 @@ onMounted(async () => {
             Ajouter mon commentaire</UButton
           >
         </div>
-        <p v-if="responses.length === 0">
-          Aucun commentaire à ce post, ajouter le premier
+        <p v-if="responses.length === 0" class="mt-4 text-(--label-text)">
+          Aucun commentaire pour ce post. Ajoutez le premier.
         </p>
         <div v-else class="mt-6 mb-4 flex w-5/6 flex-col gap-2">
           <div v-for="response in responses" :key="response._id">

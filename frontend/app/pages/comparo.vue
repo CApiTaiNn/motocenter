@@ -62,6 +62,7 @@ const noCarouselData = computed(
 )
 const { isAuthenticated } = useAuth()
 const messagePosted = ref<boolean>(false)
+const isPosting = ref(false)
 const optionMotorcycles = computed(() => {
   if (!motorcycle1.value || !motorcycle2.value) return []
   return [
@@ -243,12 +244,17 @@ async function fetchMessages() {
 
 async function postComment() {
   if (!comment.value.content || !comment.value.motorcycleId) return
+  if (isPosting.value) return
+  isPosting.value = true
 
   const selectedMotorcycle =
     motorcycle1.value?._id === comment.value.motorcycleId
       ? motorcycle1.value
       : motorcycle2.value
-  if (!selectedMotorcycle) return
+  if (!selectedMotorcycle) {
+    isPosting.value = false
+    return
+  }
 
   let postId = selectedMotorcycle.post
 
@@ -276,6 +282,7 @@ async function postComment() {
         description: "La discussion n'a pas pu être créée.",
         color: 'error'
       })
+      isPosting.value = false
       return
     }
   }
@@ -305,6 +312,8 @@ async function postComment() {
       description: "Votre commentaire n'a pas pu être ajouté.",
       color: 'error'
     })
+  } finally {
+    isPosting.value = false
   }
 
   await fetchMessages()
@@ -536,6 +545,8 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
               <UButton
                 class="m-1 self-end rounded-4xl text-xs"
                 size="xl"
+                :loading="isPosting"
+                :disabled="!comment.content"
                 @click="postComment"
                 >Poster</UButton
               >

@@ -14,7 +14,7 @@ const props = defineProps<{
 
 <template>
   <div class="flex aspect-square w-[20%] flex-col items-center justify-center gap-4 rounded-xl border-2 border-solid border-(--border-gray) text-center max-lg:aspect-3/4! max-lg:min-w-0! max-lg:flex-1 max-lg:gap-2! max-lg:border-(--background-secondary)! max-lg:p-1">
-    <img :src="props.urlImg" class="max-lg:h-auto max-lg:w-[40px]" />
+    <img :src="props.urlImg" alt="" class="max-lg:h-auto max-lg:w-[40px]" />
     <p v-if="props.value !== undefined" class="max-lg:text-xs! max-lg:leading-tight">
       <CountUp
         v-if="props.started"
