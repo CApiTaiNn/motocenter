@@ -143,7 +143,7 @@ onMounted(async () => {
 <template>
   <div class="ml-4 flex flex-col max-lg:ml-2! max-md:ml-1!">
     <div
-      class="relative mb-4 flex flex-row gap-4 max-lg:min-w-0"
+      class="relative mb-4 flex w-full min-w-0 flex-row gap-4"
       :class="responsesOfComment.length === 0 ? 'ml-4' : ''"
     >
       <div class="flex h-fit flex-row items-center gap-2">
@@ -169,18 +169,17 @@ onMounted(async () => {
         <UAvatar
           :src="message.user.image"
           :alt="message.user.pseudo"
-          size="3xl"
+          size="xl"
           :title="message.user.pseudo"
-          class="mr-2"
         />
       </div>
-      <div class="flex flex-1 flex-col gap-2">
-        <div class="flex items-center gap-2">
-          <p class="font-bold">{{ message.user.pseudo }},&nbsp;</p>
-          <p>{{ formatTimeAgo(message.createdAt) }}</p>
+      <div class="flex min-w-0 flex-1 flex-col gap-1.5">
+        <div class="flex flex-wrap items-center gap-x-2 text-sm">
+          <span class="font-bold">{{ message.user.pseudo }}</span>
+          <span class="text-(--label-text)">{{ formatTimeAgo(message.createdAt) }}</span>
         </div>
-        <p class="m-0 leading-normal">{{ message.content }}</p>
-        <div class="mt-1 flex items-center gap-6">
+        <p class="m-0 text-sm/normal wrap-break-word">{{ message.content }}</p>
+        <div class="mt-1 flex items-center gap-4 text-sm">
           <button
             type="button"
             class="flex cursor-pointer items-center gap-2 disabled:opacity-60"
@@ -191,7 +190,7 @@ onMounted(async () => {
           >
             <UIcon
               name="i-lucide-thumbs-up"
-              class="size-6"
+              class="size-5"
               :class="isSolidThumbUp ? 'text-(--ui-primary)' : ''"
             />
             <span>{{ message.like }}</span>
@@ -206,7 +205,7 @@ onMounted(async () => {
           >
             <UIcon
               name="i-lucide-thumbs-down"
-              class="size-6"
+              class="size-5"
               :class="isSolidThumbDown ? 'text-(--ui-primary)' : ''"
             />
             <span>{{ message.dislike }}</span>
@@ -216,7 +215,7 @@ onMounted(async () => {
             class="flex cursor-pointer items-center gap-2"
             @click="handleSeeInputToAddResponseOfComment"
           >
-            <UIcon name="i-lucide-messages-square" class="size-6" />
+            <UIcon name="i-lucide-messages-square" class="size-5" />
             <span>Répondre</span>
           </button>
         </div>

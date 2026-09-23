@@ -7,7 +7,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  (e: 'compare' | 'delete', side?: 'left' | 'right'): void
+  (e: 'delete', side?: 'left' | 'right'): void
 }>()
 
 const isOpen = ref(true)
@@ -33,9 +33,10 @@ const isOpen = ref(true)
             alt="Left Motorcycle"
             class="max-h-full min-h-0 max-w-full flex-1 object-contain"
           />
-          <span
+          <UIcon
             v-else
-            class="skeleton-icon inline-block size-16 bg-(--border-gray)"
+            name="i-lucide-bike"
+            class="skeleton-icon size-16 animate-pulse text-(--border-gray) max-lg:size-12!"
             aria-hidden="true"
           />
           <p class="w-full truncate text-center text-sm/tight font-semibold" :title="props.leftName">
@@ -43,19 +44,12 @@ const isOpen = ref(true)
           </p>
         </div>
 
-        <!-- Centre: VS badge + compare action -->
-        <div class="flex shrink-0 flex-col items-center justify-center gap-2">
-          <span class="grid size-8 place-items-center rounded-full bg-(--ui-primary) text-xs font-black text-white">
+        <!-- Centre: VS badge (comparison runs automatically once both bikes are
+             picked, so no explicit compare button is needed). -->
+        <div class="flex shrink-0 items-center justify-center">
+          <span class="grid size-9 place-items-center rounded-full bg-(--ui-primary) text-xs font-black text-white">
             VS
           </span>
-          <UButton
-            icon="i-lucide-arrow-left-right"
-            size="sm"
-            class="rounded-full text-white max-lg:px-2! max-lg:text-[0.7rem]!"
-            @click="emit('compare')"
-          >
-            Comparer
-          </UButton>
         </div>
 
         <!-- Right slot -->
@@ -71,9 +65,10 @@ const isOpen = ref(true)
             alt="Right Motorcycle"
             class="max-h-full min-h-0 max-w-full flex-1 -scale-x-100 object-contain"
           />
-          <span
+          <UIcon
             v-else
-            class="skeleton-icon inline-block size-16 -scale-x-100 bg-(--border-gray)"
+            name="i-lucide-bike"
+            class="skeleton-icon size-16 -scale-x-100 animate-pulse text-(--border-gray) max-lg:size-12!"
             aria-hidden="true"
           />
           <p class="w-full truncate text-center text-sm/tight font-semibold" :title="props.rightName">
