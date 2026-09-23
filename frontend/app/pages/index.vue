@@ -227,7 +227,12 @@ onMounted(async () => {
     <section class="band flex flex-col gap-8 lg:min-h-screen lg:justify-center">
       <h2 class="text-center">Les best-sellers</h2>
       <ClientOnly>
-        <CarrouselMotorcycles :items="itemsCaroussel" />
+        <!-- Full-bleed: break out of the section's horizontal padding so the
+             rail spans the viewport, matching the comparo carousels. -->
+        <CarrouselMotorcycles
+          :items="itemsCaroussel"
+          class="mx-[calc(50%-50vw)] w-screen max-w-[100vw]"
+        />
       </ClientOnly>
     </section>
     <section class="band flex flex-col gap-8 lg:min-h-screen lg:justify-center">

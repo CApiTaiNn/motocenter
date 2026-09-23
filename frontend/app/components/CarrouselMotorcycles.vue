@@ -44,8 +44,11 @@ function handleCompareClick(itemId: string, imgUrl: string) {
         'px-4 py-4 [mask-image:linear-gradient(to_right,transparent,#000_7%,#000_93%,transparent)] [-webkit-mask-image:linear-gradient(to_right,transparent,#000_7%,#000_93%,transparent)]',
       container: 'flex items-stretch h-full',
       item: 'flex-none px-2 sm:px-3 self-stretch',
-      prev: 'start-2',
-      next: 'end-2'
+      // Keep the arrows inside the rail at every breakpoint: the theme default
+      // pushes them off-screen (sm:-start-12 / sm:-end-12), which the page's
+      // overflow-x-hidden then clips once the rail is full-bleed.
+      prev: 'start-2 sm:start-4',
+      next: 'end-2 sm:end-4'
     }"
   >
     <article
