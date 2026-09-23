@@ -40,11 +40,12 @@ function handleCompareClick(itemId: string, imgUrl: string) {
     arrows
     :items="items"
     :ui="{
-      viewport: 'px-4 py-4',
+      viewport:
+        'px-4 py-4 [mask-image:linear-gradient(to_right,transparent,#000_7%,#000_93%,transparent)] [-webkit-mask-image:linear-gradient(to_right,transparent,#000_7%,#000_93%,transparent)]',
       container: 'flex items-stretch h-full',
       item: 'flex-none px-2 sm:px-3 self-stretch',
-      prev: 'start-0',
-      next: 'end-0'
+      prev: 'start-2',
+      next: 'end-2'
     }"
   >
     <article
