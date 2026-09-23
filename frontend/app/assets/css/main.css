@@ -19,9 +19,9 @@
 
 :root {
   /* Light theme */
-  /* Bright vivid red (not harsh pure #f00); secondary is a darker shade */
-  --ui-primary: #ef1d2b;
-  --ui-secondary: #c1121f;
+  /* Deep crimson red; secondary is a darker shade */
+  --ui-primary: #c1121f;
+  --ui-secondary: #8b0e17;
   --text-color: #000;
 
   --background: #fff;
@@ -61,9 +61,9 @@
 
 .dark {
   /* Dark theme */
-  /* Lighter red so buttons and text keep contrast on a black background */
-  --ui-primary: #ff4d4f;
-  --ui-secondary: #ef1d2b;
+  /* Same deep crimson, lifted just enough to stay legible on black */
+  --ui-primary: #e5383b;
+  --ui-secondary: #c1121f;
   --text-color: #fff;
 
   --background: #000;
