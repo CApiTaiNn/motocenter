@@ -39,6 +39,14 @@ const secondPercent = computed(() =>
   max.value ? (normalizeValue(props.secondValue) / max.value) * 100 : 0
 )
 
+// Absolute gap between the two bikes, formatted with the field's unit ("12 ch",
+// "18 kg"). Shown on the winner's badge so the duel reads at a glance.
+const deltaLabel = computed(() => {
+  const gap = Math.abs(props.firstValue - props.secondValue)
+  const { unit } = parseField(gap)
+  return `${gap.toLocaleString('fr-FR')}${unit}`
+})
+
 function countUpOptions(number: number) {
   const { unit } = parseField(number)
   return {
@@ -129,36 +137,70 @@ function tradFieldName(fieldName: string) {
 </script>
 
 <template>
-  <div class="flex flex-col items-center gap-3">
-    <p>{{ tradFieldName(props.fieldName) }}</p>
-    <div class="flex w-[80%] items-center justify-between gap-6 max-lg:w-[88%]! max-lg:flex-col! max-lg:gap-2! max-md:w-[95%]!">
-      <div class="flex w-[90%] flex-row items-center justify-between max-lg:flex-row-reverse! max-lg:gap-[10px]">
-        <span class="whitespace-nowrap" :class="{ 'font-bold': winner === 'first' }">
-          <count-up
-            :end-val="parseField(props.firstValue).value"
-            :options="countUpOptions(props.firstValue)"
-          />
-        </span>
-        <div class="relative h-[15px] w-[80%] max-lg:h-[10px]! max-lg:w-[70%]!">
-          <span class="bar-value absolute top-0 right-0 z-1 h-full rounded-lg bg-(image:--gradient-primary) max-lg:right-auto! max-lg:left-0 max-lg:transform-[rotateY(180deg)]" :style="{ width: firstPercent + '%' }"></span>
-          <span class="absolute top-0 left-0 size-full rounded-lg bg-(--color-track-bg)"></span>
-        </div>
-      </div>
-      <div class="flex w-[90%] flex-row items-center justify-between max-lg:gap-[10px]">
-        <div class="relative h-[15px] w-[80%] max-lg:h-[10px]! max-lg:w-[70%]!">
+  <div class="flex flex-col gap-2 py-2.5">
+    <p class="text-center text-xs font-semibold tracking-[0.08em] text-(--label-text) uppercase">
+      {{ tradFieldName(props.fieldName) }}
+    </p>
+
+    <div class="flex items-center gap-2 sm:gap-3">
+      <span
+        class="w-16 shrink-0 text-right text-lg font-bold tabular-nums transition-colors sm:w-20"
+        :class="winner === 'first' ? 'text-(--ui-primary)' : ''"
+      >
+        <count-up
+          :end-val="parseField(props.firstValue).value"
+          :options="countUpOptions(props.firstValue)"
+        />
+      </span>
+
+      <!-- Two bars facing off from the centre: the winner's is filled with the
+           brand red, the other stays muted. -->
+      <div class="flex flex-1 items-center gap-1">
+        <div class="relative h-2.5 flex-1">
+          <span class="absolute inset-0 rounded-full bg-(--color-track-bg)" />
           <span
-            class="bar-value absolute top-0 left-0 z-1 h-full transform-[rotateY(180deg)] rounded-lg bg-(image:--gradient-primary)"
-            :style="{ width: secondPercent + '%' }"
-          ></span>
-          <span class="absolute top-0 left-0 size-full rounded-lg bg-(--color-track-bg)"></span>
-        </div>
-        <span class="whitespace-nowrap" :class="{ 'font-bold': winner === 'second' }">
-          <count-up
-            :end-val="parseField(props.secondValue).value"
-            :options="countUpOptions(props.secondValue)"
+            class="bar-value absolute top-0 right-0 h-full rounded-full"
+            :class="
+              winner === 'first'
+                ? 'bg-(image:--gradient-primary)'
+                : 'bg-(--label-text)/35'
+            "
+            :style="{ width: firstPercent + '%' }"
           />
-        </span>
+        </div>
+        <span class="h-4 w-px shrink-0 bg-(--border-gray)" aria-hidden="true" />
+        <div class="relative h-2.5 flex-1">
+          <span class="absolute inset-0 rounded-full bg-(--color-track-bg)" />
+          <span
+            class="bar-value absolute top-0 left-0 h-full rounded-full"
+            :class="
+              winner === 'second'
+                ? 'bg-(image:--gradient-primary)'
+                : 'bg-(--label-text)/35'
+            "
+            :style="{ width: secondPercent + '%' }"
+          />
+        </div>
       </div>
+
+      <span
+        class="w-16 shrink-0 text-left text-lg font-bold tabular-nums transition-colors sm:w-20"
+        :class="winner === 'second' ? 'text-(--ui-primary)' : ''"
+      >
+        <count-up
+          :end-val="parseField(props.secondValue).value"
+          :options="countUpOptions(props.secondValue)"
+        />
+      </span>
+    </div>
+
+    <div v-if="winner" class="flex justify-center">
+      <span
+        class="inline-flex items-center gap-1 rounded-full bg-(--ui-primary)/10 px-2.5 py-0.5 text-xs font-semibold text-(--ui-primary)"
+      >
+        <UIcon name="i-lucide-trophy" class="size-3.5" />
+        {{ winner === 'first' ? 'Moto 1' : 'Moto 2' }} · {{ deltaLabel }} d'écart
+      </span>
     </div>
   </div>
 </template>

@@ -446,15 +446,17 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
             </button>
           </nav>
 
-          <div v-show="activeResultTab === 'stats'" class="tab-panel">
-            <div v-for="field in resultatNumber" :key="field.fieldName">
-              <ResultatFieldNumber
-                :field-name="field.fieldName"
-                :first-value="field.firstValue"
-                :second-value="field.secondValue"
-              />
-              <br />
-            </div>
+          <div
+            v-show="activeResultTab === 'stats'"
+            class="tab-panel mx-auto flex max-w-2xl flex-col divide-y divide-(--border-gray) px-4"
+          >
+            <ResultatFieldNumber
+              v-for="field in resultatNumber"
+              :key="field.fieldName"
+              :field-name="field.fieldName"
+              :first-value="field.firstValue"
+              :second-value="field.secondValue"
+            />
           </div>
           <div v-show="activeResultTab === 'images'" class="tab-panel">
             <div v-for="field in resultatImg" :key="field.fieldName">
@@ -608,21 +610,30 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
         </UCard>
         <template v-else>
           <div>
-            <h3 class="m-6 text-left">Pour la performance</h3>
+            <h3 class="mb-4 flex items-center gap-2 text-left text-lg font-bold">
+              <span class="h-5 w-1 rounded-full bg-(--ui-primary)" aria-hidden="true" />
+              Pour la performance
+            </h3>
             <CarrouselMotorcycles
               :items="carousselSportBikes"
               @selected="handleCaroussel"
             />
           </div>
           <div>
-            <h3 class="m-6 text-left">Pour le A2</h3>
+            <h3 class="mb-4 flex items-center gap-2 text-left text-lg font-bold">
+              <span class="h-5 w-1 rounded-full bg-(--ui-primary)" aria-hidden="true" />
+              Pour le A2
+            </h3>
             <CarrouselMotorcycles
               :items="carousselBeginnerBikes"
               @selected="handleCaroussel"
             />
           </div>
           <div>
-            <h3 class="m-6 text-left">Pour l'aventure</h3>
+            <h3 class="mb-4 flex items-center gap-2 text-left text-lg font-bold">
+              <span class="h-5 w-1 rounded-full bg-(--ui-primary)" aria-hidden="true" />
+              Pour l'aventure
+            </h3>
             <CarrouselMotorcycles
               :items="carousselAdventureBikes"
               @selected="handleCaroussel"
