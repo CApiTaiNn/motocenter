@@ -9,16 +9,20 @@ const props = defineProps<{
 </script>
 
 <template>
-  <div class="flex flex-col items-center gap-3">
-    <div class="flex w-[80%] items-center justify-center gap-6 max-lg:w-[88%]! max-md:w-[95%]! max-md:gap-[10px]!">
-      <div class="flex w-full flex-row items-center justify-center">
-        <AudioPlayer v-if="props.firstValue" :src="props.firstValue" />
-        <p v-else>Pas d'audio</p>
-      </div>
-      <div class="flex w-full flex-row items-center justify-center">
-        <AudioPlayer v-if="props.secondValue" :src="props.secondValue" />
-        <p v-else>Pas d'audio</p>
-      </div>
+  <div class="mx-auto flex max-w-2xl flex-wrap items-start justify-center gap-8 px-4 max-md:gap-4!">
+    <div class="flex flex-col items-center gap-2">
+      <AudioPlayer v-if="props.firstValue" :src="props.firstValue" />
+      <span v-else class="text-sm text-(--label-text)">Pas d'audio</span>
+      <span class="text-xs font-semibold tracking-wide text-(--label-text) uppercase">
+        Moto 1
+      </span>
+    </div>
+    <div class="flex flex-col items-center gap-2">
+      <AudioPlayer v-if="props.secondValue" :src="props.secondValue" />
+      <span v-else class="text-sm text-(--label-text)">Pas d'audio</span>
+      <span class="text-xs font-semibold tracking-wide text-(--label-text) uppercase">
+        Moto 2
+      </span>
     </div>
   </div>
 </template>

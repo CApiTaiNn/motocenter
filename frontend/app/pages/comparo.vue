@@ -382,7 +382,7 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
     <div class="ambient-glow ambient-glow--left" aria-hidden="true" />
     <div class="ambient-glow ambient-glow--right" aria-hidden="true" />
     <div class="relative z-10">
-    <HeaderInfo :scroll-to-element-id="'form'">
+    <HeaderInfo :scroll-to-element-id="'form'" compact>
       <template #title>
         <h1>
           Comparez. Choisissez. <br />
@@ -396,7 +396,7 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
         </p>
       </template>
     </HeaderInfo>
-    <div class="mt-24 flex flex-col justify-center gap-16">
+    <div class="mt-8 flex flex-col justify-center gap-16">
       <div id="form" class="flex flex-col items-center justify-center gap-6">
         <div class="flex justify-center gap-8 max-lg:flex-col! max-lg:items-center">
           <MotocyclesForm v-model="motorcycle1Id" form-title="Moto 1" />
@@ -489,7 +489,7 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
                     :response="comment1"
                   />
                 </template>
-                <p v-else class="py-4 text-center text-gray-500 italic">
+                <p v-else class="py-4 text-center text-(--label-text)">
                   Postez le premier commentaire !
                 </p>
               </div>
@@ -504,13 +504,13 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
                     :response="comment2"
                   />
                 </template>
-                <p v-else class="py-4 text-center text-gray-500 italic">
+                <p v-else class="py-4 text-center text-(--label-text)">
                   Postez le premier commentaire !
                 </p>
               </div>
             </div>
           </div>
-          <div class="relative mx-[25%] my-12 min-h-100 w-1/2 rounded-[20px] border border-solid border-gray-500 max-lg:mx-[12%]! max-lg:min-h-auto! max-lg:w-[76%]! max-md:mx-4! max-md:my-6! max-md:w-auto!">
+          <div class="relative mx-[25%] my-12 min-h-100 w-1/2 rounded-2xl border border-(--border-gray) max-lg:mx-[12%]! max-lg:min-h-auto! max-lg:w-[76%]! max-md:mx-4! max-md:my-6! max-md:w-auto!">
             <div v-if="!isAuthenticated" class="absolute top-1/2 left-1/2 z-10 -translate-1/2 text-center max-lg:flex! max-lg:w-[90%]! max-lg:flex-col max-lg:items-center! max-lg:gap-4">
               <h3 class="m-6 w-[400px] text-center max-lg:w-auto! max-lg:text-lg!">
                 Rejoignez la communauté pour débattre et partager vos avis sur
@@ -583,31 +583,36 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
             </div>
           </div>
         </template>
-        <UCard v-else-if="carouselError">
-          <div class="flex flex-col items-center gap-4 py-8 text-center">
-            <UIcon
-              name="i-lucide-triangle-alert"
-              class="size-16 text-(--ui-error)"
-            />
-            <div class="flex flex-col gap-1">
-              <h4>Chargement impossible</h4>
-              <p class="text-sm text-gray-400">
-                Les motos n’ont pas pu être chargées. Réessayez plus tard.
-              </p>
-            </div>
+        <div
+          v-else-if="carouselError"
+          class="flex items-center gap-4 rounded-xl border border-(--ui-error)/40 bg-(--ui-error)/5 p-5"
+        >
+          <UIcon
+            name="i-lucide-triangle-alert"
+            class="size-8 shrink-0 text-(--ui-error)"
+          />
+          <div>
+            <p class="font-semibold">Le garage est fermé</p>
+            <p class="text-sm text-(--label-text)">
+              Les motos n’ont pas pu être chargées. Réessayez plus tard.
+            </p>
           </div>
-        </UCard>
-        <UCard v-else-if="noCarouselData">
-          <div class="flex flex-col items-center gap-4 py-8 text-center">
-            <UIcon name="i-lucide-bike" class="size-16 text-gray-400" />
-            <div class="flex flex-col gap-1">
-              <h4>Aucune moto à comparer pour le moment</h4>
-              <p class="text-sm text-gray-400">
-                Revenez bientôt, le catalogue se remplit.
-              </p>
-            </div>
+        </div>
+        <div
+          v-else-if="noCarouselData"
+          class="flex items-center gap-4 rounded-xl border border-(--border-gray) p-5"
+        >
+          <UIcon
+            name="i-lucide-bike"
+            class="size-8 shrink-0 text-(--ui-primary)"
+          />
+          <div>
+            <p class="font-semibold">Aucune moto à comparer pour le moment</p>
+            <p class="text-sm text-(--label-text)">
+              Revenez bientôt, le catalogue se remplit.
+            </p>
           </div>
-        </UCard>
+        </div>
         <template v-else>
           <div>
             <h3 class="mb-4 flex items-center gap-2 text-left text-lg font-bold">

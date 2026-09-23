@@ -79,15 +79,16 @@ async function compareViaForms(page: Page) {
 
 // --- Header ---------------------------------------------------------------
 
-test('header "défiler" button scrolls down to the comparison form', async ({
+test('the comparison form sits near the top (compact hero, no scroll cue)', async ({
   page
 }) => {
   await setup(page)
   await page.goto(URL)
 
-  await page.getByRole('button', { name: 'Faire défiler vers le bas' }).click()
-
-  // The Moto 1 form sits below the hero; the scroll brings it into view.
+  // The hero is compact so the tool is reachable without the old scroll cue.
+  await expect(
+    page.getByRole('button', { name: 'Faire défiler vers le bas' })
+  ).toHaveCount(0)
   await expect(
     page.getByRole('heading', { name: 'Moto 1', level: 3 })
   ).toBeInViewport()

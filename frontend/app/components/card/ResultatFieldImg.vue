@@ -7,24 +7,34 @@ const props = defineProps<{
 </script>
 
 <template>
-  <div class="flex flex-col items-center gap-3">
-    <div class="flex w-[60%] items-center justify-between gap-6 max-lg:w-[80%]! max-md:w-[95%]! max-md:gap-[10px]!">
-      <div class="flex w-full flex-row items-center justify-between">
+  <div class="mx-auto flex max-w-2xl items-stretch justify-center gap-4 px-4 max-md:gap-3!">
+    <figure class="flex flex-1 flex-col items-center gap-2">
+      <div class="flex aspect-4/3 w-full items-center justify-center overflow-hidden rounded-xl border border-(--border-gray) bg-(--input-background) p-3">
         <img
           v-if="props.firstValue"
           :src="`${props.firstValue}`"
           alt="Image de la moto 1"
+          class="max-h-full max-w-full object-contain"
         />
-        <p v-else class="w-full text-center">Pas d'image</p>
+        <span v-else class="text-sm text-(--label-text)">Pas d'image</span>
       </div>
-      <div class="flex w-full flex-row items-center justify-between">
+      <figcaption class="text-xs font-semibold tracking-wide text-(--label-text) uppercase">
+        Moto 1
+      </figcaption>
+    </figure>
+    <figure class="flex flex-1 flex-col items-center gap-2">
+      <div class="flex aspect-4/3 w-full items-center justify-center overflow-hidden rounded-xl border border-(--border-gray) bg-(--input-background) p-3">
         <img
           v-if="props.secondValue"
           :src="`${props.secondValue}`"
           alt="Image de la moto 2"
+          class="max-h-full max-w-full object-contain"
         />
-        <p v-else class="w-full text-center">Pas d'image</p>
+        <span v-else class="text-sm text-(--label-text)">Pas d'image</span>
       </div>
-    </div>
+      <figcaption class="text-xs font-semibold tracking-wide text-(--label-text) uppercase">
+        Moto 2
+      </figcaption>
+    </figure>
   </div>
 </template>
