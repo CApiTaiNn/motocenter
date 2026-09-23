@@ -446,17 +446,15 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
             </button>
           </nav>
 
-          <div
-            v-show="activeResultTab === 'stats'"
-            class="tab-panel mx-auto flex max-w-2xl flex-col divide-y divide-(--border-gray) px-4"
-          >
-            <ResultatFieldNumber
-              v-for="field in resultatNumber"
-              :key="field.fieldName"
-              :field-name="field.fieldName"
-              :first-value="field.firstValue"
-              :second-value="field.secondValue"
-            />
+          <div v-show="activeResultTab === 'stats'" class="tab-panel">
+            <div v-for="field in resultatNumber" :key="field.fieldName">
+              <ResultatFieldNumber
+                :field-name="field.fieldName"
+                :first-value="field.firstValue"
+                :second-value="field.secondValue"
+              />
+              <br />
+            </div>
           </div>
           <div v-show="activeResultTab === 'images'" class="tab-panel">
             <div v-for="field in resultatImg" :key="field.fieldName">
@@ -570,7 +568,7 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
           </div>
         </div>
       </Transition>
-      <div class="mx-[10%] flex flex-col gap-20 max-lg:mx-[6%]! max-md:mx-4!">
+      <div class="mx-[10%] flex flex-col gap-20 pb-56 max-lg:mx-[6%]! max-md:mx-4!">
         <template v-if="loadingCarousels">
           <div v-for="n in 3" :key="n">
             <USkeleton class="m-6 h-8 w-48 rounded-sm" />
@@ -645,7 +643,7 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
             />
           </div>
         </template>
-        <div class="pointer-events-none sticky bottom-0 flex justify-center">
+        <div class="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center">
           <DualMotorcycle
             class="pointer-events-auto"
             :left-motorcycle-url="motorcycle1PreviewUrl"
