@@ -23,7 +23,7 @@ const selectRide = (rideId: string) => {
 
 <template>
   <div
-    class="sidebar absolute top-[80px] right-0 bottom-[20px] z-1020 flex w-[40dvw] rounded-l-xl rounded-r-none border-l border-solid border-gray-300 bg-(--background) backdrop-blur-sm transition-transform duration-300 ease-in-out max-lg:w-[60dvw]! max-md:w-[90dvw]!"
+    class="sidebar absolute top-[80px] right-0 bottom-[20px] z-1020 flex w-[34dvw] rounded-l-xl rounded-r-none border-l border-solid border-gray-300 bg-(--background) backdrop-blur-sm transition-transform duration-300 ease-in-out max-lg:w-[51dvw]! max-md:w-[90dvw]!"
     :class="isSidebarOpen ? 'translate-x-0' : 'translate-x-full'"
   >
     <div class="absolute top-1/2 -left-9 z-1002 -translate-y-1/2">
@@ -73,7 +73,7 @@ const selectRide = (rideId: string) => {
           <div
             v-for="ride in props.filteredRides"
             :key="ride._id"
-            class="h-auto w-full zoom-[0.8] rounded-xl"
+            class="h-auto w-full zoom-[0.92] rounded-xl"
           >
             <CardRide
               :ride="ride"

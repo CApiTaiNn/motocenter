@@ -105,13 +105,13 @@ const goToRide = (ride: IRide) =>
         <li v-for="ride in rides" :key="ride._id">
           <button
             type="button"
-            class="flex w-full cursor-pointer items-center gap-3 rounded-lg border border-(--border-gray) bg-(--background) p-3 text-left transition-colors hover:border-(--ui-primary)"
+            class="flex w-full cursor-pointer items-center gap-2 rounded-lg border border-(--border-gray) bg-(--background) px-3 py-2 text-left text-sm transition-colors hover:border-(--ui-primary)"
             @click="goToRide(ride)"
           >
-            <UIcon name="i-lucide-route" class="size-5 shrink-0 text-(--ui-primary)" aria-hidden="true" />
-            <span class="truncate font-semibold">{{ ride.title }}</span>
-            <span v-if="ride.start_town" class="shrink-0 text-sm text-gray-500">· {{ ride.start_town }}</span>
-            <span class="ml-auto shrink-0 text-sm text-gray-500">{{ ride.distance }} km</span>
+            <UIcon name="i-lucide-route" class="size-4 shrink-0 text-(--ui-primary)" aria-hidden="true" />
+            <span class="truncate font-medium">{{ ride.title }}</span>
+            <span v-if="ride.start_town" class="shrink-0 text-xs text-gray-500">· {{ ride.start_town }}</span>
+            <span class="ml-auto shrink-0 text-xs text-gray-500">{{ ride.distance }} km</span>
           </button>
         </li>
       </ul>

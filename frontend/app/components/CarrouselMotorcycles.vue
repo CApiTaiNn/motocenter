@@ -52,7 +52,7 @@ function handleCompareClick(itemId: string, imgUrl: string) {
     }"
   >
     <article
-      class="relative mx-2 flex h-full w-[240px] flex-col overflow-hidden rounded-[20px] border-2 border-solid border-(--background-secondary) transition duration-200 select-none focus-within:-translate-y-1 focus-within:shadow-xl hover:-translate-y-1 hover:shadow-xl max-lg:w-[190px]!"
+      class="relative mx-2 flex h-full w-[240px] flex-col overflow-hidden rounded-[20px] border border-solid border-(--ui-primary)/15 transition duration-200 select-none focus-within:-translate-y-1 focus-within:shadow-xl hover:-translate-y-1 hover:shadow-xl max-lg:w-[190px]!"
     >
       <div class="flex items-center justify-between px-3.5 pt-3">
         <span class="flex items-center gap-2 text-xs font-semibold text-(--label-text)">
@@ -148,10 +148,15 @@ article {
   background:
     radial-gradient(
       circle at top right,
-      color-mix(in srgb, var(--ui-primary) 9%, transparent),
-      transparent 62%
+      color-mix(in srgb, var(--ui-primary) 8%, transparent),
+      transparent 55%
     ),
-    var(--background-secondary);
+    radial-gradient(
+      circle at bottom left,
+      color-mix(in srgb, var(--ui-primary) 5%, transparent),
+      transparent 55%
+    ),
+    var(--background);
 }
 
 .specgrid {

@@ -8,8 +8,6 @@ const props = defineProps<{
 }>()
 const selectedId = defineModel<string>()
 
-// Slot number shown in the header badge ("Moto 1" -> "1").
-const slotNumber = computed(() => props.formTitle.replace(/\D/g, ''))
 // The user has picked a full bike (brand + model + year).
 const isComplete = computed(() => !!selectedId.value)
 
@@ -142,21 +140,7 @@ onMounted(() => {
       :class="isComplete ? 'bg-(--ui-primary)' : 'bg-(--border-gray)'"
       aria-hidden="true"
     />
-    <!-- Badge kept as a corner element (a sibling, not a wrapper) so the title
-         stays a direct child of the card. -->
-    <span
-      class="absolute top-4 right-4 grid size-8 place-items-center rounded-full text-sm font-bold transition-colors duration-200"
-      :class="
-        isComplete
-          ? 'bg-(--ui-primary) text-white'
-          : 'bg-(--ui-primary)/10 text-(--ui-primary)'
-      "
-      aria-hidden="true"
-    >
-      <UIcon v-if="isComplete" name="i-lucide-check" class="size-4" />
-      <template v-else>{{ slotNumber }}</template>
-    </span>
-    <h3 class="pr-10 text-base font-semibold">{{ props.formTitle }}</h3>
+    <h3 class="text-center text-base font-semibold">{{ props.formTitle }}</h3>
     <UFormField label="Marque" name="brand">
       <UInputMenu
         v-model="selectedBrand"

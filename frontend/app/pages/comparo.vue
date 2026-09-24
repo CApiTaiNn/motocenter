@@ -436,7 +436,7 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
                 'cursor-pointer rounded-full border-none bg-transparent px-6 py-2 font-[\'Poppins\',sans-serif] text-base font-medium whitespace-nowrap transition-[background-color,color] duration-200 ease-[ease]',
                 activeResultTab === tab.key
                   ? 'bg-(--ui-primary)/10 font-semibold text-(--ui-primary)'
-                  : 'text-(--ui-primary) hover:bg-(--ui-primary)/5'
+                  : 'text-(--text-color) hover:bg-(--ui-primary)/5 hover:text-(--ui-primary)'
               ]"
               role="tab"
               :aria-selected="activeResultTab === tab.key"

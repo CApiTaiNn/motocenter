@@ -7,7 +7,7 @@ const props = defineProps<{
 </script>
 
 <template>
-  <div class="mx-auto flex max-w-2xl items-stretch justify-center gap-4 px-4 max-md:gap-3!">
+  <div class="mx-auto flex max-w-4xl items-stretch justify-center gap-6 px-4 max-md:gap-3!">
     <figure class="flex flex-1 flex-col items-center gap-2">
       <div class="flex aspect-4/3 w-full items-center justify-center overflow-hidden rounded-xl border border-(--border-gray) bg-(--input-background) p-3">
         <img
