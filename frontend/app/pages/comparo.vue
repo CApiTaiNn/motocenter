@@ -397,7 +397,7 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
       </template>
     </HeaderInfo>
     <div class="mt-8 flex flex-col justify-center gap-16">
-      <div id="form" class="flex flex-col items-center justify-center gap-6">
+      <div id="form" v-reveal class="flex flex-col items-center justify-center gap-6">
         <div class="flex justify-center gap-8 max-lg:flex-col! max-lg:items-center">
           <MotocyclesForm v-model="motorcycle1Id" form-title="Moto 1" />
           <UIcon
@@ -613,7 +613,7 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
         </div>
         <template v-else>
           <div>
-            <h3 class="mb-4 flex items-center gap-2 px-6 text-left text-lg font-bold lg:px-12">
+            <h3 v-reveal class="mb-4 flex items-center gap-2 px-6 text-left text-lg font-bold lg:px-12">
               <span class="h-5 w-1 rounded-full bg-(--ui-primary)" aria-hidden="true" />
               Pour la performance
             </h3>
@@ -623,7 +623,7 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
             />
           </div>
           <div>
-            <h3 class="mb-4 flex items-center gap-2 px-6 text-left text-lg font-bold lg:px-12">
+            <h3 v-reveal class="mb-4 flex items-center gap-2 px-6 text-left text-lg font-bold lg:px-12">
               <span class="h-5 w-1 rounded-full bg-(--ui-primary)" aria-hidden="true" />
               Pour le A2
             </h3>
@@ -633,7 +633,7 @@ const activeResultTab = ref<'stats' | 'images' | 'sons' | 'comments'>('stats')
             />
           </div>
           <div>
-            <h3 class="mb-4 flex items-center gap-2 px-6 text-left text-lg font-bold lg:px-12">
+            <h3 v-reveal class="mb-4 flex items-center gap-2 px-6 text-left text-lg font-bold lg:px-12">
               <span class="h-5 w-1 rounded-full bg-(--ui-primary)" aria-hidden="true" />
               Pour l'aventure
             </h3>

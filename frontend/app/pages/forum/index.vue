@@ -202,7 +202,7 @@ onMounted(async () => {
       <div class="sticky top-[70px]">
         <ForumPanel :loading :active-filter="filters" @filters="handleFilter" />
       </div>
-      <div class="flex min-w-0 flex-1 flex-col gap-4">
+      <div v-reveal class="flex min-w-0 flex-1 flex-col gap-4">
         <!-- Toolbar: search + new discussion -->
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
           <UInput

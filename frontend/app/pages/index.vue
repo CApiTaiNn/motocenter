@@ -23,6 +23,18 @@ const connexionModal = useConnexionModal()
 const toast = useToast()
 
 const itemsCaroussel = ref<IMotorcycle[]>([])
+// Featured bike for the pinned product showcase (first best-seller).
+const featured = computed(() => itemsCaroussel.value[0])
+const featuredSpecs = computed(() => {
+  const m = featured.value
+  if (!m) return []
+  return [
+    { value: m.horsePower, unit: 'ch', label: 'Puissance' },
+    { value: m.torque, unit: 'Nm', label: 'Couple' },
+    { value: m.weight, unit: 'kg', label: 'Poids' },
+    { value: m.price, unit: '€', label: 'Prix' }
+  ].filter((s) => s.value != null)
+})
 const { apiBase, appName } = useRuntimeConfig().public
 const dynamicStats = ref<IStatCount[]>([])
 const totalUsers = ref(0)
@@ -186,6 +198,39 @@ onMounted(async () => {
     <section class="band flex flex-col lg:min-h-screen lg:justify-center">
       <ForumSection v-reveal />
     </section>
+
+    <!-- Pinned product showcase: the bike stays fixed while its specs scroll
+         past, the way an Apple product page reveals a device. -->
+    <section v-if="featured" class="py-0!">
+      <div class="grid gap-12 lg:grid-cols-2">
+        <div class="flex items-center justify-center max-lg:pt-8 lg:sticky lg:top-24 lg:h-screen">
+          <div class="flex flex-col items-center gap-4">
+            <span class="text-sm font-semibold tracking-[0.15em] text-(--label-text) uppercase">
+              Le modèle du moment
+            </span>
+            <img
+              :src="featured.imageUrl"
+              :alt="`${featured.brand?.name ?? ''} ${featured.name}`"
+              class="w-full max-w-xl object-contain drop-shadow-2xl"
+            />
+            <p class="text-2xl font-bold">
+              {{ featured.brand?.name }} {{ featured.name }}
+            </p>
+          </div>
+        </div>
+        <div class="flex flex-col justify-center gap-[30vh] py-[20vh] max-lg:gap-16! max-lg:py-8!">
+          <div v-for="spec in featuredSpecs" :key="spec.label" v-reveal>
+            <p class="text-sm font-semibold tracking-[0.12em] text-(--ui-primary) uppercase">
+              {{ spec.label }}
+            </p>
+            <p class="text-6xl font-bold tabular-nums max-lg:text-4xl!">
+              {{ spec.value }}<span class="ml-2 text-2xl font-medium text-(--label-text)">{{ spec.unit }}</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <section class="flex flex-col gap-8 lg:min-h-screen lg:justify-center">
       <h2 v-reveal class="text-center">
         <span class="text-(--ui-primary)">{{ appName }}</span>
