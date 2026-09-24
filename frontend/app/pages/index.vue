@@ -299,7 +299,7 @@ onMounted(async () => {
                     :class="activeSpec === i ? 'text-5xl max-lg:text-4xl!' : 'text-3xl text-(--label-text) max-lg:text-2xl!'"
                   >
                     {{ spec.value
-                    }}<span class="ml-1.5 text-2xl font-medium text-(--label-text)">{{ spec.unit }}</span>
+                    }}<span class="ml-1.5 text-2xl font-medium">{{ spec.unit }}</span>
                   </p>
                 </div>
               </article>
