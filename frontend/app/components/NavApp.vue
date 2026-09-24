@@ -11,6 +11,18 @@ const route = useRoute()
 
 const isOpen = ref(false)
 
+// Condense the header into a translucent, blurred bar once the page scrolls,
+// the way Apple's nav settles on scroll.
+const scrolled = ref(false)
+const onScroll = () => {
+  scrolled.value = window.scrollY > 8
+}
+onMounted(() => {
+  onScroll()
+  window.addEventListener('scroll', onScroll, { passive: true })
+})
+onBeforeUnmount(() => window.removeEventListener('scroll', onScroll))
+
 const connexionModal = useConnexionModal()
 const profileModal = useProfileModal()
 
@@ -66,11 +78,17 @@ async function handleLogout() {
 
 <template>
   <header
-    class="sticky top-0 z-9999 w-full bg-(--background)"
+    class="sticky top-0 z-9999 w-full transition-[background-color,box-shadow,backdrop-filter] duration-300"
+    :class="
+      scrolled
+        ? 'bg-(--background)/75 shadow-sm backdrop-blur-xl'
+        : 'bg-(--background)'
+    "
   >
     <!-- Desktop -->
     <nav
-      class="hidden flex-row justify-between bg-(--background) p-[10px] lg:flex"
+      class="hidden flex-row justify-between transition-[padding] duration-300 lg:flex"
+      :class="scrolled ? 'py-1.5' : 'p-[10px]'"
     >
       <div class="mx-[2%] flex flex-row items-center gap-[10px]">
         <LogoApp />

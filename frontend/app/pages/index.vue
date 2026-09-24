@@ -128,13 +128,13 @@ onMounted(async () => {
   <main class="relative z-10 flex flex-col overflow-x-hidden">
     <section class="relative isolate flex h-screen flex-col items-center justify-center py-0! max-lg:h-[60vh]! max-lg:gap-8!">
       <span class="hero-glow" aria-hidden="true" />
-      <h1 class="text-center">
+      <h1 v-reveal class="text-center">
         Trouver <span class="text-(--ui-primary)">la moto</span>
         <br />
         qui vous convient
       </h1>
 
-      <div class="flex flex-row items-center gap-4">
+      <div v-reveal="120" class="flex flex-row items-center gap-4">
         <UButton
           size="xl"
           color="primary"
@@ -154,7 +154,7 @@ onMounted(async () => {
         >
       </div>
 
-      <div class="relative flex flex-row items-end justify-center gap-4">
+      <div v-reveal="240" class="relative flex flex-row items-end justify-center gap-4">
         <img
           src="/images/accueil/R1_fond.png"
           alt=""
@@ -178,20 +178,20 @@ onMounted(async () => {
     <!-- Alternating zig-zag: comparo left, balade right, forum left.
          Each feature section fills the viewport height on desktop. -->
     <section class="band flex flex-col lg:min-h-screen lg:justify-center">
-      <ComparoSection :bikes="itemsCaroussel" />
+      <ComparoSection v-reveal :bikes="itemsCaroussel" />
     </section>
     <section class="flex flex-col lg:min-h-screen lg:justify-center">
-      <RideSection :reverse="true" />
+      <RideSection v-reveal :reverse="true" />
     </section>
     <section class="band flex flex-col lg:min-h-screen lg:justify-center">
-      <ForumSection />
+      <ForumSection v-reveal />
     </section>
     <section class="flex flex-col gap-8 lg:min-h-screen lg:justify-center">
-      <h2 class="text-center">
+      <h2 v-reveal class="text-center">
         <span class="text-(--ui-primary)">{{ appName }}</span>
         en quelques chiffres
       </h2>
-      <article class="flex flex-col gap-16">
+      <article v-reveal="120" class="flex flex-col gap-16">
         <div class="flex flex-col gap-4">
           <div ref="statsRow" class="mx-[5%] flex flex-row justify-center gap-16 max-lg:gap-4!">
             <template v-if="statsLoading">
@@ -225,21 +225,22 @@ onMounted(async () => {
       </article>
     </section>
     <section class="band flex flex-col gap-8 lg:min-h-screen lg:justify-center">
-      <h2 class="text-center">Les best-sellers</h2>
+      <h2 v-reveal class="text-center">Les best-sellers</h2>
       <ClientOnly>
         <!-- Full-bleed: break out of the section's horizontal padding so the
              rail spans the viewport, matching the comparo carousels. -->
         <CarrouselMotorcycles
+          v-reveal="120"
           :items="itemsCaroussel"
           class="mx-[calc(50%-50vw)] w-screen max-w-[100vw]"
         />
       </ClientOnly>
     </section>
     <section class="band flex flex-col gap-8 lg:min-h-screen lg:justify-center">
-      <h2 class="text-center">
+      <h2 v-reveal class="text-center">
         Ils nous font confiance
       </h2>
-      <CarrouselSponsors />
+      <CarrouselSponsors v-reveal="120" />
     </section>
     <section class="flex justify-center">
       <UButton
@@ -258,7 +259,7 @@ onMounted(async () => {
    content inset via padding (instead of margin), so alternating .band
    backgrounds read as edge-to-edge bands. Responsive insets live here. */
 section {
-  padding-block: 4rem;
+  padding-block: 5.5rem;
   padding-inline: 10%;
 }
 

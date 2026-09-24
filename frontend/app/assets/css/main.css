@@ -89,16 +89,22 @@ h1 {
   font-family: 'Poppins', sans-serif;
   font-size: 64px;
   font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.03;
 }
 h2 {
   font-family: 'Poppins', sans-serif;
   font-size: 49px;
   font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.06;
 }
 h3 {
   font-family: 'Poppins', sans-serif;
   font-size: 30px;
   font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
 }
 h4 {
   font-family: 'Poppins', sans-serif;
@@ -167,4 +173,36 @@ p {
     font-family: 'Poppins', sans-serif;
     font-size: 16px;
   }
+}
+
+/* Scroll reveal: elements marked with v-reveal fade/rise in when they enter the
+   viewport. The directive (plugins/reveal.client.ts) adds .reveal on mount and
+   toggles .is-visible on intersection. */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* Shared max-width content column so sections line up on one grid. */
+.container-page {
+  width: 100%;
+  max-width: 1200px;
+  margin-inline: auto;
 }
