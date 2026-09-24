@@ -36,37 +36,6 @@ const featuredSpecs = computed(() => {
   ].filter((s) => s.value != null)
 })
 
-// Pinned showcase: the section is taller than the viewport; while it scrolls
-// past, we pin its content and turn scroll progress into a Cupertino-style spec
-// wheel. Height per item (px) of the wheel row.
-const SPEC_ITEM_H = 104
-const showcaseEl = ref<HTMLElement | null>(null)
-const showcaseProgress = ref(0)
-// Continuous position on the wheel (0 → n-1) from the scroll progress.
-const wheelPos = computed(
-  () => showcaseProgress.value * Math.max(featuredSpecs.value.length - 1, 0)
-)
-const wheelActive = computed(() => Math.round(wheelPos.value))
-const specOpacity = (i: number) =>
-  Math.max(1 - Math.abs(i - wheelPos.value) * 0.6, 0.12)
-
-const onShowcaseScroll = () => {
-  const el = showcaseEl.value
-  if (!el) return
-  const travel = el.offsetHeight - window.innerHeight
-  const scrolled = Math.min(Math.max(-el.getBoundingClientRect().top, 0), travel)
-  showcaseProgress.value = travel > 0 ? scrolled / travel : 0
-}
-
-onMounted(() => {
-  window.addEventListener('scroll', onShowcaseScroll, { passive: true })
-  window.addEventListener('resize', onShowcaseScroll, { passive: true })
-  onShowcaseScroll()
-})
-onBeforeUnmount(() => {
-  window.removeEventListener('scroll', onShowcaseScroll)
-  window.removeEventListener('resize', onShowcaseScroll)
-})
 const { apiBase, appName } = useRuntimeConfig().public
 const dynamicStats = ref<IStatCount[]>([])
 const totalUsers = ref(0)
@@ -231,71 +200,44 @@ onMounted(async () => {
       <ForumSection v-reveal />
     </section>
 
-    <!-- Pinned product showcase: the whole section is taller than the screen;
-         its content pins while scroll drives a Cupertino-style spec wheel, then
-         releases so the page keeps scrolling. -->
-    <section
-      v-if="featured"
-      ref="showcaseEl"
-      class="py-0!"
-      :style="{
-        height: `calc(100vh + ${Math.max(featuredSpecs.length - 1, 1) * 22}vh)`
-      }"
-    >
-      <div class="sticky top-0 flex h-screen items-center overflow-hidden">
-        <div class="grid w-full items-center gap-12 max-lg:gap-6! lg:grid-cols-2">
-          <div class="flex flex-col items-center gap-4">
-            <span class="text-sm font-semibold tracking-[0.15em] text-(--label-text) uppercase">
-              Le modèle du moment
-            </span>
-            <img
-              :src="featured.imageUrl"
-              :alt="`${featured.brand?.name ?? ''} ${featured.name}`"
-              class="w-full max-w-xl object-contain drop-shadow-2xl max-lg:max-w-xs!"
-            />
-            <p class="text-2xl font-bold max-lg:text-xl!">
-              {{ featured.brand?.name }} {{ featured.name }}
-            </p>
-          </div>
+    <!-- Product showcase: the bike pins on the left while one spec card stacks
+         in front of the previous as you scroll (Turismo-style). Pure CSS
+         sticky, so there is no scroll lag. -->
+    <section v-if="featured" class="overflow-x-clip">
+      <div class="grid gap-8 lg:grid-cols-2">
+        <div class="flex flex-col items-center gap-4 max-lg:pt-4 lg:sticky lg:top-0 lg:h-screen lg:justify-center">
+          <span class="text-sm font-semibold tracking-[0.15em] text-(--label-text) uppercase">
+            Le modèle du moment
+          </span>
+          <img
+            :src="featured.imageUrl"
+            :alt="`${featured.brand?.name ?? ''} ${featured.name}`"
+            class="w-full max-w-lg object-contain drop-shadow-2xl max-lg:max-w-xs!"
+          />
+          <p class="text-2xl font-bold max-lg:text-xl!">
+            {{ featured.brand?.name }} {{ featured.name }}
+          </p>
+        </div>
 
-          <!-- Cupertino wheel: the active spec centres in the framed slot. -->
-          <div class="relative h-[340px] max-lg:h-[240px]">
-            <div
-              class="pointer-events-none absolute inset-x-0 top-1/2 h-[104px] -translate-y-1/2 rounded-xl border border-(--border-gray) bg-(--ui-primary)/5"
-              aria-hidden="true"
-            />
-            <div
-              class="absolute inset-x-0 top-1/2 will-change-transform"
-              :style="{
-                transform: `translateY(-${SPEC_ITEM_H / 2 + wheelPos * SPEC_ITEM_H}px)`
-              }"
-            >
-              <div
-                v-for="(spec, i) in featuredSpecs"
-                :key="spec.label"
-                class="flex flex-col items-start justify-center px-1"
-                :style="{ height: `${SPEC_ITEM_H}px`, opacity: specOpacity(i) }"
-              >
-                <p
-                  class="text-sm font-semibold tracking-[0.12em] uppercase"
-                  :class="
-                    wheelActive === i
-                      ? 'text-(--ui-primary)'
-                      : 'text-(--label-text)'
-                  "
-                >
-                  {{ spec.label }}
-                </p>
-                <p
-                  class="leading-none font-bold tabular-nums transition-[font-size] duration-300"
-                  :class="wheelActive === i ? 'text-6xl max-lg:text-4xl!' : 'text-3xl max-lg:text-2xl!'"
-                >
-                  {{ spec.value
-                  }}<span class="ml-2 text-2xl font-medium text-(--label-text) max-lg:text-lg!">{{ spec.unit }}</span>
-                </p>
-              </div>
+        <div class="flex flex-col gap-[30vh] py-[24vh] max-lg:gap-6! max-lg:py-6!">
+          <article
+            v-for="(spec, i) in featuredSpecs"
+            :key="spec.label"
+            class="sticky top-[32vh] mx-auto flex w-full max-w-sm flex-col gap-8 rounded-3xl border border-(--border-gray) bg-(--background) p-8 shadow-2xl max-lg:static!"
+          >
+            <div class="flex items-center justify-between">
+              <span class="text-sm font-semibold tracking-[0.12em] text-(--ui-primary) uppercase">
+                {{ spec.label }}
+              </span>
+              <span class="text-sm font-medium text-(--label-text) tabular-nums">
+                {{ i + 1 }} / {{ featuredSpecs.length }}
+              </span>
             </div>
-          </div>
+            <p class="text-7xl leading-none font-bold tabular-nums max-lg:text-5xl!">
+              {{ spec.value
+              }}<span class="ml-2 text-3xl font-medium text-(--label-text)">{{ spec.unit }}</span>
+            </p>
+          </article>
         </div>
       </div>
     </section>
