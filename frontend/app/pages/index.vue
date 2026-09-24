@@ -29,11 +29,39 @@ const featuredSpecs = computed(() => {
   const m = featured.value
   if (!m) return []
   return [
-    { value: m.horsePower, unit: 'ch', label: 'Puissance' },
-    { value: m.torque, unit: 'Nm', label: 'Couple' },
-    { value: m.weight, unit: 'kg', label: 'Poids' },
-    { value: m.price, unit: '€', label: 'Prix' }
+    { value: m.horsePower, unit: 'ch', label: 'Puissance', icon: 'i-lucide-zap' },
+    { value: m.torque, unit: 'Nm', label: 'Couple', icon: 'i-lucide-gauge' },
+    { value: m.weight, unit: 'kg', label: 'Poids', icon: 'i-lucide-weight' },
+    { value: m.price, unit: '€', label: 'Prix', icon: 'i-lucide-tag' }
   ].filter((s) => s.value != null)
+})
+
+// Pinned showcase: the section is taller than the viewport, and scroll progress
+// through it snaps the active spec one at a time. The spec list is translated so
+// the active card sits at the centre; the others stay visible but dimmed. Snap
+// (not a continuous slide) keeps every state clean — no half-way "lag" look.
+const SPEC_STEP = 132 // px per card row (height + gap) in the translated list
+const showcaseEl = ref<HTMLElement | null>(null)
+const showcaseProgress = ref(0)
+const activeSpec = computed(() => {
+  const n = featuredSpecs.value.length
+  return n > 1 ? Math.round(showcaseProgress.value * (n - 1)) : 0
+})
+const onShowcaseScroll = () => {
+  const el = showcaseEl.value
+  if (!el) return
+  const travel = el.offsetHeight - window.innerHeight
+  const scrolled = Math.min(Math.max(-el.getBoundingClientRect().top, 0), travel)
+  showcaseProgress.value = travel > 0 ? scrolled / travel : 0
+}
+onMounted(() => {
+  window.addEventListener('scroll', onShowcaseScroll, { passive: true })
+  window.addEventListener('resize', onShowcaseScroll, { passive: true })
+  onShowcaseScroll()
+})
+onBeforeUnmount(() => {
+  window.removeEventListener('scroll', onShowcaseScroll)
+  window.removeEventListener('resize', onShowcaseScroll)
 })
 
 const { apiBase, appName } = useRuntimeConfig().public
@@ -200,44 +228,83 @@ onMounted(async () => {
       <ForumSection v-reveal />
     </section>
 
-    <!-- Product showcase: the bike pins on the left while one spec card stacks
-         in front of the previous as you scroll (Turismo-style). Pure CSS
-         sticky, so there is no scroll lag. -->
-    <section v-if="featured" class="overflow-x-clip">
-      <div class="grid gap-8 lg:grid-cols-2">
-        <div class="flex flex-col items-center gap-4 max-lg:pt-4 lg:sticky lg:top-0 lg:h-screen lg:justify-center">
-          <span class="text-sm font-semibold tracking-[0.15em] text-(--label-text) uppercase">
-            Le modèle du moment
-          </span>
-          <img
-            :src="featured.imageUrl"
-            :alt="`${featured.brand?.name ?? ''} ${featured.name}`"
-            class="w-full max-w-lg object-contain drop-shadow-2xl max-lg:max-w-xs!"
-          />
-          <p class="text-2xl font-bold max-lg:text-xl!">
-            {{ featured.brand?.name }} {{ featured.name }}
-          </p>
-        </div>
-
-        <div class="flex flex-col gap-[30vh] py-[24vh] max-lg:gap-6! max-lg:py-6!">
-          <article
-            v-for="(spec, i) in featuredSpecs"
-            :key="spec.label"
-            class="sticky top-[32vh] mx-auto flex w-full max-w-sm flex-col gap-8 rounded-3xl border border-(--border-gray) bg-(--background) p-8 shadow-2xl max-lg:static!"
-          >
-            <div class="flex items-center justify-between">
-              <span class="text-sm font-semibold tracking-[0.12em] text-(--ui-primary) uppercase">
-                {{ spec.label }}
-              </span>
-              <span class="text-sm font-medium text-(--label-text) tabular-nums">
-                {{ i + 1 }} / {{ featuredSpecs.length }}
-              </span>
-            </div>
-            <p class="text-7xl leading-none font-bold tabular-nums max-lg:text-5xl!">
-              {{ spec.value
-              }}<span class="ml-2 text-3xl font-medium text-(--label-text)">{{ spec.unit }}</span>
+    <!-- Product showcase: the whole section pins while scroll snaps through the
+         spec list one card at a time. The active card is centred and elevated;
+         the others stay visible but dimmed and slide with a smooth transition
+         (a snap per item, so no half-way "lag"). -->
+    <section
+      v-if="featured"
+      ref="showcaseEl"
+      class="overflow-x-clip py-0!"
+      :style="{
+        height: `calc(100vh + ${Math.max(featuredSpecs.length - 1, 1) * 30}vh)`
+      }"
+    >
+      <div class="sticky top-0 flex h-screen items-center">
+        <div class="grid w-full items-center gap-8 lg:grid-cols-2">
+          <div class="flex flex-col items-center gap-4">
+            <span class="text-sm font-semibold tracking-[0.15em] text-(--label-text) uppercase">
+              Le modèle du moment
+            </span>
+            <img
+              :src="featured.imageUrl"
+              :alt="`${featured.brand?.name ?? ''} ${featured.name}`"
+              class="w-full max-w-lg object-contain drop-shadow-2xl max-lg:max-w-xs!"
+            />
+            <p class="text-2xl font-bold max-lg:text-xl!">
+              {{ featured.brand?.name }} {{ featured.name }}
             </p>
-          </article>
+          </div>
+
+          <!-- Translated spec list: active card centred, others dimmed. -->
+          <div
+            class="relative h-[460px] overflow-hidden mask-[linear-gradient(to_bottom,transparent,#000_18%,#000_82%,transparent)] max-lg:h-[360px]"
+          >
+            <div
+              class="absolute inset-x-0 top-1/2 flex flex-col items-center gap-5 will-change-transform"
+              :style="{
+                transform: `translateY(-${activeSpec * SPEC_STEP + 56}px)`,
+                transition: 'transform 0.55s cubic-bezier(0.16, 1, 0.3, 1)'
+              }"
+            >
+              <article
+                v-for="(spec, i) in featuredSpecs"
+                :key="spec.label"
+                class="flex h-[112px] w-full max-w-md shrink-0 items-center gap-5 rounded-3xl border p-6 transition-all duration-500"
+                :class="
+                  activeSpec === i
+                    ? 'border-(--border-gray) bg-(--background) opacity-100 shadow-2xl'
+                    : 'border-transparent opacity-40'
+                "
+              >
+                <span
+                  class="grid size-14 shrink-0 place-items-center rounded-2xl transition-colors duration-500"
+                  :class="
+                    activeSpec === i
+                      ? 'bg-(--ui-primary) text-white'
+                      : 'bg-(--background-secondary) text-(--label-text)'
+                  "
+                >
+                  <UIcon :name="spec.icon" class="size-7" />
+                </span>
+                <div class="min-w-0">
+                  <p
+                    class="text-sm font-semibold tracking-[0.12em] uppercase transition-colors duration-500"
+                    :class="activeSpec === i ? 'text-(--ui-primary)' : 'text-(--label-text)'"
+                  >
+                    {{ spec.label }}
+                  </p>
+                  <p
+                    class="leading-none font-bold tabular-nums transition-all duration-500"
+                    :class="activeSpec === i ? 'text-5xl max-lg:text-4xl!' : 'text-3xl text-(--label-text) max-lg:text-2xl!'"
+                  >
+                    {{ spec.value
+                    }}<span class="ml-1.5 text-2xl font-medium text-(--label-text)">{{ spec.unit }}</span>
+                  </p>
+                </div>
+              </article>
+            </div>
+          </div>
         </div>
       </div>
     </section>
