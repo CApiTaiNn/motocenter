@@ -218,7 +218,7 @@ onMounted(async () => {
         />
       </header>
 
-      <p class="mt-0.5 mb-1.5 line-clamp-2 text-xs opacity-85">{{ props.ride.description }}</p>
+      <p class="mt-0.5 mb-1.5 line-clamp-2 text-xs! opacity-85">{{ props.ride.description }}</p>
 
       <footer>
         <div class="mb-1.5 flex flex-wrap gap-x-3 gap-y-1">
@@ -264,14 +264,14 @@ onMounted(async () => {
                 :alt="`Avatar de ${creator.pseudo || appName}`"
                 :src="srcAvatarCreator"
               />
-              <p>
+              <p class="text-xs!">
                 Créée par <strong>{{ creator.pseudo }}</strong>
               </p>
             </template>
 
             <template v-else>
               <UIcon name="i-lucide-loader-2" class="animate-spin" />
-              <p>Chargement...</p>
+              <p class="text-xs!">Chargement...</p>
             </template>
           </div>
 

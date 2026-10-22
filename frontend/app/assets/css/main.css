@@ -206,3 +206,56 @@ p {
   max-width: 1200px;
   margin-inline: auto;
 }
+
+/* Popup de balade de la carte /ride, thémée clair/sombre au
+   lieu du chrome Leaflet. Popups créées par Leaflet hors des composants, donc
+   le style est global. */
+.ride-popup .leaflet-popup-content {
+  font-family: var(--font-main);
+}
+.ride-popup .leaflet-popup-content-wrapper {
+  position: relative;
+  background: var(--background);
+  color: var(--text-color);
+  border: 1px solid var(--border-gray);
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
+}
+.ride-popup .leaflet-popup-close-button {
+  color: var(--text-color) !important;
+}
+
+/* Flèche latérale qui vise le départ, à la place de la flèche Leaflet du bas.
+   Le départ est toujours à 14px du bas de la bulle : la flèche est ancrée par
+   le bas pour le viser quelle que soit la hauteur de la bulle. */
+.ride-popup .leaflet-popup-tip-container {
+  display: none;
+}
+.ride-popup .leaflet-popup-content-wrapper::before,
+.ride-popup .leaflet-popup-content-wrapper::after {
+  content: '';
+  position: absolute;
+  bottom: 5px;
+  width: 0;
+  height: 0;
+  border-top: 9px solid transparent;
+  border-bottom: 9px solid transparent;
+}
+.ride-popup--tail-right .leaflet-popup-content-wrapper::before {
+  left: 100%;
+  border-left: 9px solid var(--border-gray);
+}
+.ride-popup--tail-right .leaflet-popup-content-wrapper::after {
+  left: 100%;
+  margin-left: -1px;
+  border-left: 8px solid var(--background);
+}
+.ride-popup--tail-left .leaflet-popup-content-wrapper::before {
+  right: 100%;
+  border-right: 9px solid var(--border-gray);
+}
+.ride-popup--tail-left .leaflet-popup-content-wrapper::after {
+  right: 100%;
+  margin-right: -1px;
+  border-right: 8px solid var(--background);
+}

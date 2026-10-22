@@ -45,6 +45,7 @@ export default withNuxt(
             '^carousel$',
             '^inner$',
             '^carb-anim$',
+            '^come-forward$',
             '^air(-[1-5])?$',
             '^fuel(-[1-4])?$',
             // state classes toggled at runtime, styled via combinators

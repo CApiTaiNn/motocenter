@@ -12,6 +12,7 @@ import FormFilters from './FormFilters.vue'
 import {
   getWeightByZoom,
   getMapPinSvg,
+  buildRidePopup,
   buildRideColorMap,
   RIDE_FALLBACK_COLOR
 } from '~/utils/ride'
@@ -376,43 +377,11 @@ const renderRides = (isZooming = false) => {
     })
 
     const start = ride.geom.features[0].geometry.coordinates[0]
-
-    const hour = Math.floor(ride.duration)
-    const minutes = Math.round((ride.duration - hour) * 60)
-
-    // Build the popup via DOM nodes (textContent), never an HTML string, so a
-    // crafted ride title can't inject markup/script — Leaflet renders popup
-    // strings as raw HTML.
-    const popupEl = document.createElement('div')
-    popupEl.className = 'ride-detail-container'
-    // Titre non gras : plus léger au-dessus du tracé qu'il recouvre.
-    const titleEl = document.createElement('span')
-    titleEl.textContent = ride.title
-    popupEl.appendChild(titleEl)
-    popupEl.appendChild(document.createElement('br'))
-    popupEl.append(`${ride.distance}km - ${hour}h ${minutes}min`)
-
-    // Popup juste à côté du départ, du côté opposé au tracé (tracé à l'est →
-    // popup à gauche) : décalage minimal pour rester collée au point de départ
-    // sans recouvrir la balade.
-    const coords = ride.geom.features[0].geometry.coordinates
-    let dLng = 0
-    for (const p of coords) {
-      dLng += p[0] - start[0]
-    }
-    // Popup à côté du départ + flèche pointant vers lui : tracé à l'est → popup
-    // à gauche, flèche sur son bord droit (et inversement).
-    const traceEast = dLng >= 0
-    const popupOffset = L.point(traceEast ? -120 : 120, 34)
-    const popupClass = `ride-popup ride-popup--tail-${traceEast ? 'right' : 'left'}`
+    const popup = buildRidePopup(L, ride)
 
     // Création du marker du point de départ
     const marker = L.marker([start[1], start[0]], { icon: dynamicIcon })
-      .bindPopup(popupEl, {
-        offset: popupOffset,
-        maxWidth: 180,
-        className: popupClass
-      })
+      .bindPopup(popup.content, popup.options)
       .on('popupopen', () => {
         if (activeTraceLayer) {
           map.value.removeLayer(activeTraceLayer)
@@ -1099,64 +1068,8 @@ watch(
 
 :deep(.leaflet-draw-toolbar),
 :deep(.leaflet-draw-actions),
-:deep(.leaflet-draw-tooltip),
-:deep(.leaflet-popup-content) {
+:deep(.leaflet-draw-tooltip) {
   font-family: 'Poppins', sans-serif !important;
-}
-
-/* Popup thématisée (clair/sombre) au lieu du chrome Leaflet par défaut */
-:deep(.leaflet-popup-content-wrapper) {
-  position: relative;
-  background: var(--background) !important;
-  color: var(--text-color) !important;
-  border: 1px solid var(--border-gray) !important;
-  border-radius: 12px !important;
-  box-shadow: var(--shadow-lg) !important;
-}
-
-/* On masque la flèche Leaflet par défaut (en bas) au profit d'une flèche
-   latérale pointant vers le point de départ de la balade. */
-:deep(.leaflet-popup-tip-container) {
-  display: none !important;
-}
-
-:deep(.ride-popup .leaflet-popup-content-wrapper)::before,
-:deep(.ride-popup .leaflet-popup-content-wrapper)::after {
-  content: '';
-  position: absolute;
-  /* Le point de départ est toujours à 14px du bas de la bulle (mesuré) : on
-     ancre la flèche par le bas pour qu'elle vise le marker quelle que soit la
-     hauteur de la bulle. */
-  bottom: 5px;
-  width: 0;
-  height: 0;
-  border-top: 9px solid transparent;
-  border-bottom: 9px solid transparent;
-}
-
-/* Popup à gauche du départ → flèche sur son bord droit, pointant à droite. */
-:deep(.ride-popup--tail-right .leaflet-popup-content-wrapper)::before {
-  left: 100%;
-  border-left: 9px solid var(--border-gray);
-}
-:deep(.ride-popup--tail-right .leaflet-popup-content-wrapper)::after {
-  left: 100%;
-  margin-left: -1px;
-  border-left: 8px solid var(--background);
-}
-
-/* Popup à droite du départ → flèche sur son bord gauche, pointant à gauche. */
-:deep(.ride-popup--tail-left .leaflet-popup-content-wrapper)::before {
-  right: 100%;
-  border-right: 9px solid var(--border-gray);
-}
-:deep(.ride-popup--tail-left .leaflet-popup-content-wrapper)::after {
-  right: 100%;
-  margin-right: -1px;
-  border-right: 8px solid var(--background);
-}
-:deep(.leaflet-popup-close-button) {
-  color: var(--text-color) !important;
 }
 
 :deep(.leaflet-control) {

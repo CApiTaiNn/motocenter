@@ -70,13 +70,10 @@ function handleCompareClick(itemId: string, imgUrl: string) {
           >{{ item.brand?.name?.[0] }}</span>
           {{ item.brand?.name }}
         </span>
-        <UBadge
+        <span
           v-if="item.isAvailableA2"
-          color="success"
-          variant="soft"
-          size="sm"
-          class="rounded-md font-bold"
-          >A2</UBadge
+          class="flex items-center gap-1 rounded-md border border-(--border-gray) bg-(--background-secondary) px-2 py-0.5 text-[10px] font-bold tracking-wide text-(--label-text)"
+          ><UIcon name="i-lucide-badge-check" class="size-3" aria-hidden="true" />A2</span
         >
         <span
           v-else
@@ -85,7 +82,8 @@ function handleCompareClick(itemId: string, imgUrl: string) {
         >
       </div>
 
-      <h5 class="mx-3.5 mt-2 text-base font-bold">
+      <!-- Always 2 lines tall so the image and specs line up across cards. -->
+      <h5 class="mx-3.5 mt-2 line-clamp-2 min-h-[2lh] text-base/snug font-bold">
         <!-- Stretched link: keyboard-focusable, covers the card via ::after. -->
         <NuxtLink
           :to="`/motorcycle/${item._id}`"
@@ -93,8 +91,8 @@ function handleCompareClick(itemId: string, imgUrl: string) {
         >
           {{ item.name }}
         </NuxtLink>
-        <span class="ml-1 text-[13px] font-medium text-(--label-text)">{{ item.year }}</span>
       </h5>
+      <span class="mx-3.5 text-[13px] font-medium text-(--label-text)">{{ item.year }}</span>
 
       <img
         :src="`${item.imageUrl}`"

@@ -23,6 +23,42 @@ export const getMapPinSvg = (color: string) => {
 `
 }
 
+/**
+ * Popup d'une balade : titre, distance et durée, à côté du point de départ avec
+ * une flèche qui le vise. Elle se place à l'opposé du tracé pour ne pas le
+ * recouvrir.
+ */
+export const buildRidePopup = (L: any, ride: IRide) => {
+  const hour = Math.floor(ride.duration)
+  const minutes = Math.round((ride.duration - hour) * 60)
+
+  // Contenu en nœuds DOM (textContent), jamais en chaîne HTML : Leaflet rend les
+  // chaînes telles quelles, un titre piégé pourrait injecter du script.
+  const content = document.createElement('div')
+  content.className = 'ride-detail-container'
+  const titleEl = document.createElement('span')
+  titleEl.textContent = ride.title
+  content.appendChild(titleEl)
+  content.appendChild(document.createElement('br'))
+  content.append(`${ride.distance}km - ${hour}h ${minutes}min`)
+
+  const coords = ride.geom.features[0].geometry.coordinates
+  const start = coords[0]
+  let dLng = 0
+  for (const p of coords) dLng += p[0] - start[0]
+  const side = dLng >= 0 ? 'left' : 'right'
+
+  return {
+    content,
+    options: {
+      offset: L.point(side === 'left' ? -120 : 120, 34),
+      maxWidth: 180,
+      // La flèche est sur le bord tourné vers le départ.
+      className: `ride-popup ride-popup--tail-${side === 'left' ? 'right' : 'left'}`
+    }
+  }
+}
+
 // Échelle de couleur des balades, des plus courtes aux plus longues :
 // vert → bleu → jaune → rouge.
 export const RIDE_LENGTH_COLOR_SCALE = [
