@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import CountUp from 'vue-countup-v3'
+
 const { appName } = useRuntimeConfig().public
 
 useSeoMeta({
@@ -6,11 +8,17 @@ useSeoMeta({
   description: `L'histoire de ${appName} : une idée de motard, une équipe d'étudiants et un projet de fin d'études.`
 })
 
+// `from` is where the count-up starts: a year counting up from 0 would look odd.
 const facts = [
-  { value: '2025', label: "Naissance de l'idée" },
-  { value: '5', label: "Membres dans l'équipe" },
-  { value: '1', label: "Projet de fin d'études" }
+  { value: 2025, from: 2000, label: "Naissance de l'idée" },
+  { value: 5, from: 0, label: "Membres dans l'équipe" },
+  { value: 1, from: 0, label: "Projet de fin d'études" }
 ]
+
+// The key facts count up once they scroll into view.
+const factsEl = ref<HTMLElement | null>(null)
+const factsStarted = ref(false)
+let factsObserver: IntersectionObserver | null = null
 
 const story = [
   {
@@ -144,6 +152,15 @@ let resizeObserver: ResizeObserver | null = null
 
 onMounted(() => {
   reducedMotion.value = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  factsObserver = new IntersectionObserver(
+    ([entry]) => {
+      if (!entry?.isIntersecting) return
+      factsStarted.value = true
+      factsObserver?.disconnect()
+    },
+    { threshold: 0.4 }
+  )
+  if (factsEl.value) factsObserver.observe(factsEl.value)
   buildRoad()
   window.addEventListener('scroll', onScroll, { passive: true })
   resizeObserver = new ResizeObserver(() => buildRoad())
@@ -152,28 +169,36 @@ onMounted(() => {
 onBeforeUnmount(() => {
   window.removeEventListener('scroll', onScroll)
   resizeObserver?.disconnect()
+  factsObserver?.disconnect()
   cancelAnimationFrame(frame)
 })
 </script>
 
 <template>
-  <div>
-    <HeaderInfo :scroll-to-element-id="'content'">
-      <template #title>
-        <h1>
-          À propos de <br />
-          <span class="text-(--ui-primary)">nous</span>
-        </h1>
-      </template>
-      <template #subtitle>
-        <p class="max-lg:text-center max-lg:text-xs! max-lg:font-(--font-main)">
-          D'une idée de motard à un projet de fin d'études : découvrez l'histoire
-          de {{ appName }}.
-        </p>
-      </template>
-    </HeaderInfo>
+  <div class="overflow-x-clip">
+    <div class="relative isolate">
+      <!-- Faint red glow behind the title, for depth. -->
+      <span
+        class="absolute top-1/2 left-1/2 -z-10 aspect-square w-[min(90%,640px)] -translate-1/2 rounded-full bg-radial from-(--ui-primary)/25 to-transparent to-70% blur-3xl"
+        aria-hidden="true"
+      ></span>
+      <HeaderInfo :scroll-to-element-id="'content'" compact>
+        <template #title>
+          <h1>
+            À propos de <br />
+            <span class="text-(--ui-primary)">nous</span>
+          </h1>
+        </template>
+        <template #subtitle>
+          <p class="max-lg:text-center max-lg:text-xs! max-lg:font-(--font-main)">
+            D'une idée de motard à un projet de fin d'études : découvrez l'histoire
+            de {{ appName }}.
+          </p>
+        </template>
+      </HeaderInfo>
+    </div>
 
-    <div id="content" class="mx-auto flex max-w-[1000px] flex-col gap-24 px-4 pt-[10dvh] pb-24">
+    <div id="content" class="mx-auto flex max-w-[1000px] flex-col gap-24 px-4 pt-8 pb-24">
       <!-- Introduction and key facts -->
       <section class="flex flex-col items-center gap-10 text-center">
         <div class="flex max-w-2xl flex-col gap-4">
@@ -186,20 +211,36 @@ onBeforeUnmount(() => {
           </p>
         </div>
 
-        <dl class="grid w-full grid-cols-3 gap-4 max-md:grid-cols-1">
+        <dl ref="factsEl" class="relative isolate grid w-full grid-cols-3 gap-4 max-md:grid-cols-1">
+          <span
+            class="absolute inset-x-[10%] inset-y-0 -z-10 rounded-full bg-radial from-(--ui-primary)/15 to-transparent to-70% blur-3xl"
+            aria-hidden="true"
+          ></span>
+          <!-- A short red bar on top of each card ties them to the brand colour. -->
           <div
             v-for="fact in facts"
             :key="fact.label"
-            class="flex flex-col items-center gap-1 rounded-2xl border border-(--border-gray) bg-(--background) px-4 py-6"
+            class="relative flex flex-col items-center gap-1 overflow-hidden rounded-2xl border border-(--border-gray) bg-(--background) px-4 py-8 shadow-lg before:absolute before:inset-x-1/3 before:top-0 before:h-0.5 before:rounded-full before:bg-(--ui-primary)"
           >
             <dt class="order-2 text-sm text-(--label-text)">{{ fact.label }}</dt>
-            <dd class="order-1 text-4xl font-bold text-(--ui-primary)">{{ fact.value }}</dd>
+            <dd class="order-1 text-5xl font-bold text-(--ui-primary) tabular-nums max-lg:text-4xl">
+              <CountUp
+                v-if="factsStarted && !reducedMotion"
+                :start-val="fact.from"
+                :end-val="fact.value"
+                :duration="2"
+                :options="{ useGrouping: false }"
+              />
+              <template v-else>{{ fact.value }}</template>
+            </dd>
           </div>
         </dl>
       </section>
 
-      <!-- Story timeline -->
-      <section class="flex flex-col gap-10">
+      <!-- Story timeline, on a lighter full-width band for rhythm. -->
+      <section
+        class="relative isolate flex flex-col gap-10 py-20 before:absolute before:inset-y-0 before:left-1/2 before:-z-10 before:w-screen before:-translate-x-1/2 before:bg-(--background-secondary)"
+      >
         <div class="flex flex-col gap-2">
           <span class="text-sm font-semibold tracking-widest text-(--ui-primary) uppercase">Notre histoire</span>
           <h3 class="max-lg:text-2xl!">De l'idée au site en ligne</h3>
@@ -268,11 +309,15 @@ onBeforeUnmount(() => {
       <!-- Mission and pillars -->
       <section class="flex flex-col gap-10">
         <div class="flex items-center gap-12 max-lg:flex-col-reverse!">
-          <img
-            src="../assets/images/knowUs/Gsxr.png"
-            alt="La GSX-R de Sloan, la moto à l'origine du projet"
-            class="h-auto w-[420px] max-lg:w-full! max-lg:max-w-[420px]"
-          />
+          <div
+            class="relative w-[420px] shrink-0 overflow-hidden rounded-3xl shadow-(--ui-primary)/20 shadow-2xl ring-1 ring-(--border-gray) after:absolute after:inset-0 after:bg-linear-to-t after:from-black/40 after:to-transparent after:to-50% max-lg:w-full! max-lg:max-w-[420px]"
+          >
+            <img
+              src="../assets/images/knowUs/Gsxr.png"
+              alt="La GSX-R de Sloan, la moto à l'origine du projet"
+              class="block h-auto w-full"
+            />
+          </div>
           <div class="flex flex-1 flex-col gap-2">
             <span class="text-sm font-semibold tracking-widest text-(--ui-primary) uppercase">Notre mission</span>
             <h3 class="max-lg:text-2xl!">Une plateforme centrale pour les motards</h3>
@@ -288,9 +333,11 @@ onBeforeUnmount(() => {
           <li v-for="pillar in pillars" :key="pillar.title">
             <NuxtLink
               :to="pillar.to"
-              class="group flex h-full flex-col gap-3 rounded-2xl border border-(--border-gray) bg-(--background) p-6 transition hover:-translate-y-1 hover:border-(--ui-primary) hover:shadow-lg"
+              class="group flex h-full flex-col gap-3 rounded-2xl border border-(--border-gray) bg-(--background) bg-radial-[circle_at_top_right] from-(--ui-primary)/10 to-transparent to-60% p-6 transition hover:-translate-y-1 hover:border-(--ui-primary) hover:shadow-xl"
             >
-              <UIcon :name="pillar.icon" class="size-7 text-(--ui-primary)" aria-hidden="true" />
+              <span class="grid size-12 place-items-center rounded-full bg-(--ui-primary)/10" aria-hidden="true">
+                <UIcon :name="pillar.icon" class="size-6 text-(--ui-primary)" />
+              </span>
               <span class="text-lg font-semibold">{{ pillar.title }}</span>
               <span class="text-sm text-(--label-text)">{{ pillar.text }}</span>
               <span class="mt-auto flex items-center gap-1 text-sm font-semibold text-(--ui-primary)">
