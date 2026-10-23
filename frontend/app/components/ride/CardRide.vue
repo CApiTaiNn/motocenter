@@ -168,7 +168,7 @@ onMounted(async () => {
 
 <template>
   <div
-    class="relative flex h-auto min-h-[124px] w-full cursor-pointer flex-col overflow-visible rounded-xl bg-cover bg-center shadow-[0_4px_12px_rgba(0,0,0,0.15)] transition-shadow hover:shadow-[0_6px_18px_rgba(0,0,0,0.28)]"
+    class="relative flex h-auto min-h-[124px] w-full cursor-pointer flex-col overflow-visible rounded-xl bg-cover bg-center shadow-[0_4px_12px_rgba(0,0,0,0.15)] transition-shadow hover:shadow-[0_6px_18px_rgba(0,0,0,0.28)] max-md:min-h-0"
     :style="{ backgroundImage: `url(${imageUrl})` }"
     role="button"
     tabindex="0"
@@ -177,8 +177,8 @@ onMounted(async () => {
   >
     <div class="absolute inset-0 z-1 rounded-xl bg-linear-to-t from-black/95 via-black/70 to-black/40"></div>
 
-    <div class="relative z-2 flex flex-col gap-1 p-2 text-white md:p-3!">
-      <header class="flex w-full flex-wrap items-center justify-between gap-3">
+    <div class="relative z-2 flex flex-col gap-1 p-2 text-white max-md:gap-0.5 md:p-3">
+      <header class="flex w-full flex-wrap items-center justify-between gap-3 max-md:gap-1">
         <div class="flex min-w-0 flex-1 flex-row flex-wrap items-center gap-2">
           <span
             class="size-[10px] rounded-full shadow-[0_0_10px_rgba(255,255,255,0.3)]"
@@ -186,7 +186,7 @@ onMounted(async () => {
             aria-hidden="true"
           ></span>
 
-          <h2 class="m-0 shrink overflow-hidden text-base font-bold text-ellipsis whitespace-normal [text-shadow:0_2px_4px_rgba(0,0,0,0.5)] md:text-lg!">{{ props.ride.title }}</h2>
+          <h2 class="m-0 shrink overflow-hidden text-base font-bold text-ellipsis whitespace-normal [text-shadow:0_2px_4px_rgba(0,0,0,0.5)] max-md:text-sm md:text-lg!">{{ props.ride.title }}</h2>
 
           <UBadge
             v-if="props.ride.is_event"
@@ -218,10 +218,10 @@ onMounted(async () => {
         />
       </header>
 
-      <p class="mt-0.5 mb-1.5 line-clamp-2 text-xs opacity-85">{{ props.ride.description }}</p>
+      <p class="mt-0.5 mb-1.5 line-clamp-2 text-xs opacity-85 max-md:mb-1 max-md:line-clamp-1 max-md:text-[11px]">{{ props.ride.description }}</p>
 
       <footer>
-        <div class="mb-1.5 flex flex-wrap gap-x-3 gap-y-1">
+        <div class="mb-1.5 flex flex-wrap gap-x-3 gap-y-1 max-md:mb-1 max-md:gap-x-2 max-md:gap-y-0 max-md:text-[11px]">
           <UBadge
             variant="subtle"
             size="sm"
@@ -256,7 +256,7 @@ onMounted(async () => {
           </UBadge>
         </div>
 
-        <div class="flex flex-wrap items-center justify-between gap-3 pt-1.5 text-xs max-[480px]:flex-col! max-[480px]:items-stretch! max-[480px]:gap-3!">
+        <div class="flex flex-wrap items-center justify-between gap-3 pt-1.5 text-xs max-[480px]:flex-col max-[480px]:items-stretch max-[480px]:gap-1.5 max-md:pt-0.5 max-md:text-[11px]">
           <div class="flex items-center gap-3 max-[480px]:w-full max-[480px]:flex-wrap max-[480px]:justify-start">
             <template v-if="creator">
               <UAvatar
@@ -264,7 +264,7 @@ onMounted(async () => {
                 :alt="`Avatar de ${creator.pseudo || appName}`"
                 :src="srcAvatarCreator"
               />
-              <p>
+              <p class="text-xs max-md:text-[11px]">
                 Créée par <strong>{{ creator.pseudo }}</strong>
               </p>
             </template>

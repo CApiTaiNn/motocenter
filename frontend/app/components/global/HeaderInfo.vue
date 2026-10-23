@@ -5,7 +5,7 @@ interface IProps {
   scrollToElementId: string
   // Compact drops the full-screen height and the scroll cue, so a page whose
   // real content should sit near the top (e.g. the comparo tool) does not open
-  // on a whole viewport of hero.
+  // on a whole viewport of hero. On mobile the hero is always compact.
   compact?: boolean
 }
 const props = defineProps<IProps>()
@@ -17,19 +17,20 @@ const props = defineProps<IProps>()
     :class="
       props.compact
         ? 'py-14 max-lg:py-10!'
-        : 'min-h-screen max-lg:min-h-[50vh]!'
+        : 'min-h-screen max-lg:min-h-0 max-lg:py-8'
     "
   >
     <div class="flex flex-col items-center justify-center">
       <slot name="title"> </slot>
     </div>
     <div
-      class="mx-auto flex w-1/2 flex-col items-center justify-center p-8 max-lg:w-[95%]! md:max-lg:w-[70%]!"
+      class="mx-auto flex w-1/2 flex-col items-center justify-center p-8 max-lg:w-[95%]! max-lg:gap-4 max-lg:p-4 md:max-lg:w-[70%]!"
       :class="props.compact ? 'gap-6' : 'gap-12'"
     >
       <slot name="subtitle"> </slot>
       <ButtonArrow
         v-if="!props.compact"
+        class="max-lg:hidden"
         :scroll-to-element-id="props.scrollToElementId"
       />
     </div>

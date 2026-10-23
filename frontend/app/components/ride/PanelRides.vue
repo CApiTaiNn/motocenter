@@ -23,7 +23,7 @@ const selectRide = (rideId: string) => {
 
 <template>
   <div
-    class="sidebar absolute top-[80px] right-0 bottom-[20px] z-1020 flex w-[34dvw] rounded-l-xl rounded-r-none border-l border-solid border-gray-300 bg-(--background) backdrop-blur-sm transition-transform duration-300 ease-in-out max-lg:w-[51dvw]! max-md:w-[90dvw]!"
+    class="sidebar absolute top-[80px] right-0 bottom-[20px] z-1020 flex w-[34dvw] rounded-l-xl rounded-r-none border-l border-solid border-gray-300 bg-(--background) backdrop-blur-sm transition-transform duration-300 ease-in-out max-lg:w-[51dvw]! max-md:inset-y-2 max-md:w-[85dvw]!"
     :class="isSidebarOpen ? 'translate-x-0' : 'translate-x-full'"
   >
     <div class="absolute top-1/2 -left-9 z-1002 -translate-y-1/2">
@@ -44,20 +44,20 @@ const selectRide = (rideId: string) => {
       />
     </div>
 
-    <div class="flex-1 overflow-y-auto p-6 font-sans">
-      <div class="mb-5 flex items-center gap-2 border-b border-(--border-gray) pb-3">
+    <div class="flex-1 overflow-y-auto p-6 font-sans max-md:p-3">
+      <div class="mb-5 flex items-center gap-2 border-b border-(--border-gray) pb-3 max-md:mb-3 max-md:pb-2">
         <UIcon name="i-lucide-route" class="size-5 shrink-0 text-(--ui-primary)" aria-hidden="true" />
-        <h3 class="text-lg font-bold text-(--text-color)">Balades</h3>
+        <h3 class="text-lg font-bold text-(--text-color) max-md:text-base">Balades</h3>
         <UBadge color="neutral" variant="subtle" size="sm" class="ml-auto rounded-full font-semibold">
           {{ props.filteredRides.length }}
         </UBadge>
       </div>
-      <div class="flex flex-col gap-6 pb-6">
+      <div class="flex flex-col gap-6 pb-6 max-md:gap-2.5 max-md:pb-3">
         <template v-if="props.loading">
           <USkeleton
             v-for="n in 4"
             :key="n"
-            class="h-[124px] w-full rounded-xl"
+            class="h-[124px] w-full rounded-xl max-md:h-[92px]"
           />
         </template>
 
@@ -73,7 +73,7 @@ const selectRide = (rideId: string) => {
           <div
             v-for="ride in props.filteredRides"
             :key="ride._id"
-            class="h-auto w-full zoom-[0.92] rounded-xl"
+            class="h-auto w-full zoom-[0.92] rounded-xl max-md:zoom-100"
           >
             <CardRide
               :ride="ride"

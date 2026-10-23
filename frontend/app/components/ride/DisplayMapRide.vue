@@ -897,15 +897,15 @@ watch(
     </div>
     <div
       v-if="props.displayFilters"
-      class="filters pointer-events-auto absolute top-[15px] left-[15px] z-1001 flex max-w-[calc(100%-30px)] flex-col gap-2 rounded-xl border border-(--border-gray) bg-(--background)/90 p-2 shadow-(--shadow-lg) backdrop-blur-md"
+      class="filters pointer-events-auto absolute top-[15px] left-[15px] z-1001 flex max-w-[calc(100%-30px)] flex-col gap-2 rounded-xl border border-(--border-gray) bg-(--background)/90 p-2 shadow-(--shadow-lg) backdrop-blur-md max-md:top-2 max-md:left-2 max-md:max-w-[calc(100%-16px)] max-md:gap-1.5 max-md:p-1.5"
     >
       <!-- Ligne principale : fond de carte, recherche, ouverture des filtres -->
-      <div class="flex flex-wrap items-center gap-2">
+      <div class="flex flex-wrap items-center gap-2 max-md:flex-nowrap max-md:gap-1.5">
         <USelect
           v-model="selectedId"
           :items="mapItems"
           value-key="id"
-          class="w-40"
+          class="w-40 max-md:w-28 max-md:text-xs"
           icon="i-lucide-layers"
           color="neutral"
           variant="subtle"
@@ -916,27 +916,28 @@ watch(
           color="neutral"
           placeholder="Rechercher une balade..."
           icon="i-lucide-search"
+          class="max-md:min-w-0 max-md:flex-1 max-md:text-xs"
         />
 
         <UButton
           icon="i-lucide-sliders-horizontal"
           color="primary"
           variant="solid"
-          class="cursor-pointer text-white!"
+          class="cursor-pointer text-white! max-md:px-2 max-md:text-xs"
           @click="handleFilters"
         >
-          Filtres
+          <span class="max-md:sr-only">Filtres</span>
         </UButton>
       </div>
 
-      <!-- Filtres rapides -->
-      <div class="flex flex-wrap items-center gap-2">
+      <!-- Filtres rapides : une seule ligne qui défile sur mobile, pour garder la carte visible -->
+      <div class="flex flex-wrap items-center gap-2 max-md:scrollbar-none max-md:flex-nowrap max-md:gap-1.5 max-md:overflow-x-auto">
         <UButton
           icon="i-lucide-clock"
           size="sm"
           :color="filterTime ? 'primary' : 'neutral'"
           :variant="filterTime ? 'solid' : 'subtle'"
-          class="cursor-pointer"
+          class="shrink-0 cursor-pointer max-md:px-2 max-md:py-1 max-md:text-xs"
           :class="filterTime ? 'text-white!' : ''"
           @click="filterTime = !filterTime"
         >
@@ -948,7 +949,7 @@ watch(
           size="sm"
           :color="filterDistance ? 'primary' : 'neutral'"
           :variant="filterDistance ? 'solid' : 'subtle'"
-          class="cursor-pointer"
+          class="shrink-0 cursor-pointer max-md:px-2 max-md:py-1 max-md:text-xs"
           :class="filterDistance ? 'text-white!' : ''"
           @click="filterDistance = !filterDistance"
         >
@@ -960,7 +961,7 @@ watch(
           size="sm"
           :color="filterLike ? 'primary' : 'neutral'"
           :variant="filterLike ? 'solid' : 'subtle'"
-          class="cursor-pointer"
+          class="shrink-0 cursor-pointer max-md:px-2 max-md:py-1 max-md:text-xs"
           :class="filterLike ? 'text-white!' : ''"
           @click="filterLike = !filterLike"
         >
@@ -972,7 +973,7 @@ watch(
           size="sm"
           :color="filterRecent ? 'primary' : 'neutral'"
           :variant="filterRecent ? 'solid' : 'subtle'"
-          class="cursor-pointer"
+          class="shrink-0 cursor-pointer max-md:px-2 max-md:py-1 max-md:text-xs"
           :class="filterRecent ? 'text-white!' : ''"
           @click="filterRecent = !filterRecent"
         >
@@ -984,7 +985,7 @@ watch(
           size="sm"
           :color="filterEvent ? 'primary' : 'neutral'"
           :variant="filterEvent ? 'solid' : 'subtle'"
-          class="cursor-pointer"
+          class="shrink-0 cursor-pointer max-md:px-2 max-md:py-1 max-md:text-xs"
           :class="filterEvent ? 'text-white!' : ''"
           @click="filterEvent = !filterEvent"
         >

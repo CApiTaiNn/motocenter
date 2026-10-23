@@ -229,14 +229,14 @@ const displayedPosts = computed(() => {
         </div>
 
         <!-- Sort tabs + result count -->
-        <div class="flex items-center justify-between gap-3 border-b border-solid border-(--border-gray)">
-          <div class="flex gap-1">
+        <div class="flex flex-wrap items-center justify-between gap-x-3 border-b border-solid border-(--border-gray)">
+          <div class="flex gap-1 max-md:gap-0">
             <button
               v-for="tab in SORT_TABS"
               :key="tab.key"
               type="button"
               :aria-pressed="sortBy === tab.key"
-              class="-mb-px cursor-pointer border-b-2 border-transparent px-3 py-2 text-sm font-semibold transition-colors"
+              class="-mb-px cursor-pointer border-b-2 border-transparent px-3 py-2 text-sm font-semibold whitespace-nowrap transition-colors max-md:px-2 max-md:text-xs"
               :class="
                 sortBy === tab.key
                   ? 'border-(--ui-primary) text-(--text-color)'
@@ -247,7 +247,7 @@ const displayedPosts = computed(() => {
               {{ tab.label }}
             </button>
           </div>
-          <span v-if="!loading" class="text-sm text-(--label-text)">
+          <span v-if="!loading" class="shrink-0 text-sm text-(--label-text) max-md:text-xs">
             {{ displayedPosts.length }}
             discussion{{ displayedPosts.length > 1 ? 's' : '' }}
           </span>

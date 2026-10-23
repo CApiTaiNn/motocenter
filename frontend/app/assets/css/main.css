@@ -85,37 +85,78 @@ body {
   background-color: var(--background);
 }
 
-h1 {
-  font-family: 'Poppins', sans-serif;
-  font-size: 64px;
-  font-weight: 600;
-}
-h2 {
-  font-family: 'Poppins', sans-serif;
-  font-size: 49px;
-  font-weight: 600;
-}
-h3 {
-  font-family: 'Poppins', sans-serif;
-  font-size: 30px;
-  font-weight: 600;
-}
-h4 {
-  font-family: 'Poppins', sans-serif;
-  font-size: 24px;
-  font-weight: 600;
-}
-h5 {
-  font-family: 'Krona One', sans-serif;
-  font-size: 20px;
-  font-weight: 400;
+/* Desktop element defaults stay outside any layer, so they still win over
+   Tailwind utilities there (the desktop design relies on it). */
+@media (min-width: 1025px) {
+  h1 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 64px;
+    font-weight: 600;
+  }
+  h2 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 49px;
+    font-weight: 600;
+  }
+  h3 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 30px;
+    font-weight: 600;
+  }
+  h4 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 24px;
+    font-weight: 600;
+  }
+  h5 {
+    font-family: 'Krona One', sans-serif;
+    font-size: 20px;
+    font-weight: 400;
+  }
+  p {
+    font-family: 'Poppins', sans-serif;
+    font-size: 20px;
+    font-weight: 300;
+  }
 }
 
-p {
-  font-family: 'Poppins', sans-serif;
-  font-size: 20px;
-  font-weight: 300;
+/* Mobile element defaults sit in the base layer, so a utility on the element
+   (text-xs, max-md:text-sm, ...) wins without "!" and screens can be dense. */
+@layer base {
+  @media (max-width: 1024px) {
+    h1 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 32px;
+      font-weight: 600;
+    }
+    h2 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 24px;
+      font-weight: 600;
+    }
+    h3 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 18px;
+      font-weight: 600;
+    }
+    h4 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    h5 {
+      font-family: 'Krona One', sans-serif;
+      font-size: 14px;
+      font-weight: 400;
+    }
+    p {
+      font-family: 'Poppins', sans-serif;
+      font-size: 16px;
+      font-weight: 300;
+    }
+  }
 }
+
 .under-title-poppins {
   font-family: 'Poppins', sans-serif;
   font-size: 14px;
@@ -135,36 +176,4 @@ p {
 }
 .border {
   border: 0.5px solid var(--border-gray);
-}
-@media (max-width: 1024px) {
-  /* mobile */
-  h1 {
-    font-family: 'Poppins', sans-serif;
-    font-size: 32px;
-    font-weight: 600;
-  }
-  h2 {
-    font-family: 'Poppins', sans-serif;
-    font-size: 24px;
-    font-weight: 600;
-  }
-  h3 {
-    font-family: 'Poppins', sans-serif;
-    font-size: 18px;
-    font-weight: 600;
-  }
-  h4 {
-    font-family: 'Poppins', sans-serif;
-    font-size: 16px;
-    font-weight: 600;
-  }
-  h5 {
-    font-family: 'Krona One', sans-serif;
-    font-size: 14px;
-    font-weight: 400;
-  }
-  p {
-    font-family: 'Poppins', sans-serif;
-    font-size: 16px;
-  }
 }
