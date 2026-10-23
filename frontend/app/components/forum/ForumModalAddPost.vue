@@ -63,19 +63,7 @@ const state = reactive({
 
 const currentImageUrl = ref(props.post?.image || '')
 
-const uploadImage = async (file: File, name: string): Promise<string> => {
-  const formData = new FormData()
-  formData.append('file', file)
-  formData.append('type', 'image')
-  formData.append('directory', 'posts')
-  formData.append('name', name)
-
-  const res = await $fetch<{ url: string }>('/api/uploadFile', {
-    method: 'POST',
-    body: formData
-  })
-  return res.url
-}
+const { uploadImage } = useUpload()
 
 const onSubmit = async () => {
   isLoading.value = true
@@ -90,10 +78,7 @@ const onSubmit = async () => {
 
   try {
     if (state.file instanceof File) {
-      const regex = /([^/]+)(?=\.\w+$)/
-      const match = props.post?.image?.match(regex)
-      const fileName = match ? match[0] : Date.now().toString()
-      payload.url = await uploadImage(state.file, fileName)
+      payload.url = await uploadImage(state.file)
     }
 
     try {

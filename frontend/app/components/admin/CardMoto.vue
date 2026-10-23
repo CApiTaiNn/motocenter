@@ -6,37 +6,16 @@ import { MotorcycleCategory, type IMotorcycle } from '~/types/motorcycles'
 
 const apiBase = useRuntimeConfig().public.apiBase
 
-async function uploadFile(
-  file: File,
-  type: 'image' | 'sound',
-  directory: string
-): Promise<string> {
-  const formData = new FormData()
-  formData.append('file', file)
-  formData.append('type', type)
-  formData.append('directory', directory)
-  formData.append('name', `${state.name}_${String(state.year)}`)
-
-  const res = await $fetch<{ url: string }>('/api/uploadFile', {
-    method: 'POST',
-    body: formData
-  })
-  return res.url
-}
+const { uploadImage, uploadSound } = useUpload()
 
 async function onImageChange(file: File | null | undefined) {
   if (!file) return
-  const directory = 'motorcycles'
-  const url = await uploadFile(file, 'image', directory)
-  state.imageUrl = `${url}?t=${Date.now()}` // timestamp pour refresh l'image -_-
+  state.imageUrl = await uploadImage(file)
 }
 
 async function onSoundChange(file: File | null | undefined) {
   if (!file) return
-  const directory = 'motorcycles'
-  const url = await uploadFile(file, 'sound', directory)
-
-  state.soundLink = `${url}?t=${Date.now()}` // meme que l'image
+  state.soundLink = await uploadSound(file)
 }
 const props = defineProps({
   mode: { type: String, default: 'create' },
@@ -217,12 +196,14 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
       // Put edit
       await $fetch(`${apiBase}motorcycles/${props.moto._id}`, {
         method: 'PUT',
+        credentials: 'include',
         body: motorcycleData
       })
     } else {
       // Post creation
       await $fetch(`${apiBase}motorcycles`, {
         method: 'POST',
+        credentials: 'include',
         body: { ...motorcycleData }
       })
     }
@@ -248,7 +229,8 @@ async function removeMotorcycle() {
 
   try {
     await $fetch(`${apiBase}motorcycles/${props.moto._id}`, {
-      method: 'DELETE'
+      method: 'DELETE',
+      credentials: 'include'
     })
     toast.add({
       title: 'Supprimée',

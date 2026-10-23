@@ -32,8 +32,8 @@ const initPreviewMap = async () => {
     touchZoom: false
   }).setView([48.26, -3], 8)
 
-  L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&hl=fr', {
-    maxZoom: 20
+  L.tileLayer(baseTiles(runtimeConfig.public.maptilerKey).streets.url, {
+    maxZoom: 19
   }).addTo(previewMap)
 
   const bounds = L.latLngBounds([])

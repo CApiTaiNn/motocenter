@@ -47,7 +47,7 @@ const props = withDefaults(defineProps<IProps>(), {
 
 // INSTANCES LEAFLET
 const map = ref<any>(null) // Instance principale de la carte Leaflet
-const currentTileLayer = ref<any>(null) // Couche de tuiles active (fond de plan OSM, google, etc.)
+const currentTileLayer = ref<any>(null) // Couche de tuiles active (fond de plan OSM, satellite, etc.)
 const ridesLayerGroup = ref<any>(null) // Groupe de couches contenant les tracés et marqueurs des balades
 const L_instance = ref<any>(null) // Bibliothèque Leaflet importée dynamiquement côté client uniquement
 const LDraw_instance = ref<any>(null) // Leaflet avec les outils de dessin (Leaflet-Draw)
@@ -97,14 +97,15 @@ let activeTraceLayer: any = null
 let markersById: Record<string, any> = {}
 let markersClusterRef: any = null
 
+const tiles = baseTiles(useRuntimeConfig().public.maptilerKey)
+
 // Liste des fonds de carte disponibles avec leur URL
 const mapItems = ref<MapItem[]>([
   {
     label: 'Par défaut',
     id: 'default',
     icon: 'i-lucide-map',
-    url: 'https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&hl=fr',
-    attribution: '&copy; Google'
+    ...tiles.streets
   },
   {
     label: 'OSM',
@@ -113,13 +114,16 @@ const mapItems = ref<MapItem[]>([
     url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
     attribution: '&copy; OSM'
   },
-  {
-    label: 'Satellite',
-    id: 'satellite',
-    icon: 'i-lucide-satellite',
-    url: 'https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}&hl=fr',
-    attribution: '&copy; Google'
-  },
+  ...(tiles.satellite
+    ? [
+        {
+          label: 'Satellite',
+          id: 'satellite',
+          icon: 'i-lucide-satellite',
+          ...tiles.satellite
+        }
+      ]
+    : []),
   {
     label: 'Sombre',
     id: 'dark',

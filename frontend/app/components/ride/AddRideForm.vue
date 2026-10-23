@@ -19,6 +19,7 @@ const isSelectLoading = ref<boolean>(false) // État de chargement des listes d�
 const isMapLoading = ref<boolean>(false) // État de chargement de la carte
 const isAutoUpdating = ref(false) // Verrou pour éviter les boucles lors des mises à jour automatiques
 const { user } = useAuth() // User actuel
+const orsKey = useRuntimeConfig().public.orsKey
 
 const route = useRoute() // Récupérer les paramètres get passé (notamment pour le scroll automatique)
 const router = useRouter() // Changer l'URL pour enlever le paramètre GET quand le scroll est fini
@@ -203,26 +204,17 @@ const calculateRouteFromCities = async () => {
     }
 
     isAutoUpdating.value = true
-    const res = await fetch(
-      `https://router.project-osrm.org/route/v1/driving/${startCoords.join(',')};${endCoords.join(',')}?overview=full&geometries=geojson`
-    )
-    const data = await res.json()
+    const drivingRoute = await fetchDrivingRoute([startCoords, endCoords], orsKey)
 
-    if (data.routes && data.routes.length > 0) {
+    if (drivingRoute) {
       const rawGeom = {
         type: 'FeatureCollection',
-        features: [
-          { type: 'Feature', properties: {}, geometry: data.routes[0].geometry }
-        ]
+        features: [{ type: 'Feature', properties: {}, geometry: drivingRoute.geometry }]
       }
       stateForm.geom = simplifyGeometry(rawGeom, 0.00005)
       isGpsRoute.value = true
-      stateForm.duration = parseFloat(
-        (data.routes[0].duration / 3600).toFixed(2)
-      )
-      stateForm.distance = parseFloat(
-        (data.routes[0].distance / 1000).toFixed(2)
-      )
+      stateForm.duration = parseFloat((drivingRoute.duration / 3600).toFixed(2))
+      stateForm.distance = parseFloat((drivingRoute.distance / 1000).toFixed(2))
     }
   } finally {
     isMapLoading.value = false
@@ -232,30 +224,7 @@ const calculateRouteFromCities = async () => {
   }
 }
 
-async function uploadFile(
-  file: File,
-  type: 'image' | 'sound',
-  directory: string
-): Promise<string> {
-  const clearString = (s: string | undefined) => {
-    return s ? s.replace(' ', '_').toLowerCase() : ''
-  }
-
-  const formData = new FormData()
-  formData.append('file', file)
-  formData.append('type', type)
-  formData.append('directory', directory)
-  formData.append(
-    'name',
-    `${clearString(stateForm.startTown?.value)}_${clearString(stateForm.endTown?.value)}-${new Date().getTime()}`
-  )
-
-  const res = await $fetch<{ url: string }>('/api/uploadFile', {
-    method: 'POST',
-    body: formData
-  })
-  return res.url
-}
+const { uploadImage } = useUpload()
 
 // Fonction pour trouver une commune à partir de coordonnées [long, lat]
 const getCommuneFromCoords = async (
@@ -327,7 +296,7 @@ async function onSubmit() {
   try {
     let directoryImageRide
     if (stateForm.picture) {
-      directoryImageRide = await uploadFile(stateForm.picture, 'image', 'rides')
+      directoryImageRide = await uploadImage(stateForm.picture)
     }
 
     const payload = {
@@ -486,7 +455,7 @@ watch(
     const [startCity, endCity, estimatedTime] = await Promise.all([
       getCommuneFromCoords(coords[0]), // Point de départ de la geom
       getCommuneFromCoords(coords[coords.length - 1]), // Point d'arrivé de la geom
-      getEstimatedDuration(newGeom)
+      getEstimatedDuration(newGeom, orsKey)
     ])
 
     stateForm.startTown = startCity

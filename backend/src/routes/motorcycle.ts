@@ -312,19 +312,21 @@ router.delete('/:id', authenticateToken, requireAdmin, async (req: Request, res:
   if (!isValidObjectId(req.params.id)) {
     return res.status(404).json({ error: 'Motorcycle not found' })
   }
-  const deletedMotorcycle = await Motorcycle.findByIdAndDelete(req.params.id)
-  if (!deletedMotorcycle) {
+  const motorcycle = await Motorcycle.findById(req.params.id)
+  if (!motorcycle) {
     return res.status(404).json({ error: 'Motorcycle not found' })
   }
   // Cascade: the linked discussion thread is owned by this motorcycle, so
-  // drop it and its messages instead of leaving an orphaned post.
-  if (deletedMotorcycle.post) {
+  // drop it and its messages instead of leaving an orphaned post. Children go
+  // first: if a step fails, the motorcycle is still there and a retry finishes.
+  if (motorcycle.post) {
     await Message.deleteMany({
-      reference: deletedMotorcycle.post,
+      reference: motorcycle.post,
       referenceModel: 'Post'
     })
-    await Post.findByIdAndDelete(deletedMotorcycle.post)
+    await Post.findByIdAndDelete(motorcycle.post)
   }
+  await motorcycle.deleteOne()
   res.status(200).json({ message: 'Motorcycle deleted successfully' })
 })
 

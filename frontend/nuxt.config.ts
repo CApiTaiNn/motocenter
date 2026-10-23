@@ -26,10 +26,16 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       appName: process.env.NUXT_PUBLIC_APP_NAME || 'Perforum',
+      // Public site URL used in the sitemap. Empty uses the request's domain.
+      siteUrl: process.env.NUXT_PUBLIC_SITE_URL || '',
       apiBase:
         process.env.NUXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1/',
       // Google OAuth client id. Empty when unset, which hides the Google button.
-      googleClientId: process.env.NUXT_PUBLIC_GOOGLE_CLIENT_ID || ''
+      googleClientId: process.env.NUXT_PUBLIC_GOOGLE_CLIENT_ID || '',
+      // Map tiles and driving routes. Empty falls back to free public
+      // servers with no service guarantee (fine for local work only).
+      maptilerKey: process.env.NUXT_PUBLIC_MAPTILER_KEY || '',
+      orsKey: process.env.NUXT_PUBLIC_ORS_KEY || ''
     }
   },
 

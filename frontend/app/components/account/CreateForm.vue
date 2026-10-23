@@ -21,7 +21,6 @@ const clearSubmitError = () => {
 }
 const show = ref(false)
 const isLoading = ref(false)
-const apiBase = useRuntimeConfig().public.apiBase
 const state = reactive({
   firstname: '',
   lastname: '',
@@ -140,17 +139,7 @@ const validateStep = (step: number): FormError[] => {
   return errors
 }
 
-const uploadImage = async (file: File, name: string): Promise<string> => {
-  const formData = new FormData()
-  formData.append('file', file)
-  formData.append('name', name)
-
-  const { url } = await $fetch<{ url: string }>(`${apiBase}images`, {
-    method: 'POST',
-    body: formData
-  })
-  return url
-}
+const { uploadImage } = useUpload()
 
 const getError = (path: string) => {
   return formErrors.value.find((e) => e.name === path)?.message
@@ -238,7 +227,7 @@ const handleSubmit = async () => {
     let imageUrl = ''
     if (state.file) {
       // On attend l'URL de l'image avant d'appeler register
-      imageUrl = await uploadImage(state.file, Date.now().toString())
+      imageUrl = await uploadImage(state.file)
     }
 
     await register(

@@ -101,10 +101,10 @@ export async function setupAddRideMocks(
         : route.fallback()
   )
 
-  // Nuxt server route hit by uploadFile() when a picture is attached.
+  // Backend upload route hit by uploadImage() when a picture is attached.
   await page.route(
-    (u) => u.pathname.endsWith('/api/uploadFile'),
-    (route) => json(route, { url: '/rides/test.jpg' })
+    (u) => u.pathname.endsWith('/api/v1/images'),
+    (route) => json(route, { url: 'https://storage.test/rides/test.jpg' })
   )
 
   // geo.api.gouv.fr/communes — initial list + name search for both town selects.

@@ -1,5 +1,6 @@
 import type { IRide } from '~/types/ride.js'
 import { scrollToMap } from '~/utils/global'
+import { fetchDrivingRoute } from '~/utils/routing'
 import { simplify } from '@turf/simplify'
 
 export const getUniqueValues = (rides: IRide[], key: keyof IRide): string[] => {
@@ -228,28 +229,19 @@ export const getCoordsFromCity = async (
 }
 
 export const getEstimatedDuration = async (
-  geom: any
+  geom: any,
+  orsKey: string
 ): Promise<number | undefined> => {
   try {
-    const feature = geom.features[0]
-    const coords = feature.geometry.coordinates
+    const coords = geom.features[0].geometry.coordinates
+    const route = await fetchDrivingRoute(coords, orsKey)
 
-    // OSRM demande les coordonnées sous forme long,lat;long,lat...
-    const polyline = coords.map((c: any) => `${c[0]},${c[1]}`).join(';')
-
-    const res = await fetch(
-      `https://router.project-osrm.org/route/v1/driving/${polyline}?overview=false`
-    )
-    const data = await res.json()
-
-    if (data.routes && data.routes.length > 0) {
+    if (route) {
       // La durée est en secondes, on la convertit en heures
-      const durationSeconds = data.routes[0].duration
-      const durationHours = durationSeconds / 3600
-      return parseFloat(durationHours.toFixed(2))
+      return parseFloat((route.duration / 3600).toFixed(2))
     }
   } catch (e) {
-    console.error('Erreur calcul durée OSRM:', e)
+    console.error('Erreur calcul durée itinéraire:', e)
   }
   return undefined
 }

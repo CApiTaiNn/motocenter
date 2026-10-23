@@ -104,19 +104,7 @@ const fillProfil = () => {
   imagePreview.value = user.value?.image || ''
 }
 
-const uploadImage = async (file: File, name: string): Promise<string> => {
-  const formData = new FormData()
-  formData.append('file', file)
-  formData.append('type', 'image')
-  formData.append('directory', 'users')
-  formData.append('name', name)
-
-  await $fetch<{ url: string }>('/api/uploadFile', {
-    method: 'POST',
-    body: formData
-  })
-  return name + '.' + file.name.split('.').pop()
-}
+const { uploadImage } = useUpload()
 
 const applyApiError = (err: any) => {
   switch (err?.data?.code) {
@@ -164,7 +152,7 @@ const handleSave = async () => {
     }
 
     if (state.file) {
-      const imageUrl = await uploadImage(state.file, Date.now().toString())
+      const imageUrl = await uploadImage(state.file)
       formData.append('image', imageUrl)
     }
 
