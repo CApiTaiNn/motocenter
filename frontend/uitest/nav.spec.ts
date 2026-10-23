@@ -1,12 +1,12 @@
 import { test, expect } from './support/test'
-import { blockUnmockedApi, json } from './support/mock'
+import { blockUnmockedApi, json, visitViaSpa } from './support/mock'
 import { mockHomeApi } from './fixtures/home'
 import type { IUser } from '../app/types/users'
 
 // UI tests for the shared header (app/components/NavApp.vue), exercised on the
 // home page. The nav fetches nothing itself; it only needs the app-wide
-// users/account probe mocked so the LoadingOverlay clears. A normal
-// page.goto('/') is fine here — the home route does not fetch during SSR.
+// users/account probe mocked so the LoadingOverlay clears. The home carousel
+// loads during SSR, out of reach of the mocks, so we open it with visitViaSpa().
 
 const authUser: IUser = {
   _id: 'user-1',
@@ -29,7 +29,7 @@ test.describe('navigation header', () => {
   test('dark-mode toggle is visible and switches the theme', async ({
     page
   }) => {
-    await page.goto('/')
+    await visitViaSpa(page, '/')
 
     const html = page.locator('html')
     // Headless Chromium reports a light colour scheme, so preference "system"
@@ -49,7 +49,7 @@ test.describe('navigation header', () => {
     )
     await page.route(/\/api\/v1\/auth\/logout/, (route) => json(route, {}))
 
-    await page.goto('/')
+    await visitViaSpa(page, '/')
 
     // The avatar replaces the "Connexion" button once authenticated.
     await page.getByRole('button', { name: 'Menu du compte' }).click()

@@ -22,7 +22,6 @@ interface IStatCount {
 const connexionModal = useConnexionModal()
 const toast = useToast()
 
-const itemsCaroussel = ref<IMotorcycle[]>([])
 const { apiBase, appName } = useRuntimeConfig().public
 const dynamicStats = ref<IStatCount[]>([])
 const totalUsers = ref(0)
@@ -81,20 +80,25 @@ async function fetchStats() {
 async function fetchUserCount() {
   totalUsers.value = await $fetch<number>(`${apiBase}users/count`)
 }
-async function fetchMotocycles() {
-  const data = await $fetch<{ motorcycles: IMotorcycle[] }>(
-    `${apiBase}motorcycles`,
-    {
-      params: {
-        // The card shows brand, category/A2, year, weight and comparison count —
-        // all must be projected or they render blank.
-        project:
-          'name,year,horsePower,torque,weight,price,imageUrl,brand,category,isAvailableA2,numberOfComparison'
+// Loaded during SSR so search engines see the motorcycle cards and their links.
+const { data: itemsCaroussel, error: motorcyclesError } = await useAsyncData(
+  'home-motorcycles',
+  async () => {
+    const data = await $fetch<{ motorcycles: IMotorcycle[] }>(
+      `${apiBase}motorcycles`,
+      {
+        params: {
+          // The card shows brand, category/A2, year, weight and comparison count —
+          // all must be projected or they render blank.
+          project:
+            'name,year,horsePower,torque,weight,price,imageUrl,brand,category,isAvailableA2,numberOfComparison'
+        }
       }
-    }
-  )
-  itemsCaroussel.value = data.motorcycles
-}
+    )
+    return data.motorcycles
+  },
+  { default: () => [] }
+)
 
 onMounted(async () => {
   if (statsRow.value) {
@@ -111,7 +115,8 @@ onMounted(async () => {
   }
 
   try {
-    await Promise.all([fetchMotocycles(), fetchStats(), fetchUserCount()])
+    if (motorcyclesError.value) throw motorcyclesError.value
+    await Promise.all([fetchStats(), fetchUserCount()])
   } catch {
     toast.add({
       title: 'Chargement impossible',
@@ -226,14 +231,12 @@ onMounted(async () => {
     </section>
     <section class="band flex flex-col gap-8 lg:min-h-screen lg:justify-center">
       <h2 class="text-center">Les best-sellers</h2>
-      <ClientOnly>
-        <!-- Full-bleed: break out of the section's horizontal padding so the
-             rail spans the viewport, matching the comparo carousels. -->
-        <CarrouselMotorcycles
-          :items="itemsCaroussel"
-          class="mx-[calc(50%-50vw)] w-screen max-w-[100vw]"
-        />
-      </ClientOnly>
+      <!-- Full-bleed: break out of the section's horizontal padding so the
+           rail spans the viewport, matching the comparo carousels. -->
+      <CarrouselMotorcycles
+        :items="itemsCaroussel"
+        class="mx-[calc(50%-50vw)] w-screen max-w-[100vw]"
+      />
     </section>
     <section class="band flex flex-col gap-8 lg:min-h-screen lg:justify-center">
       <h2 class="text-center">

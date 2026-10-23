@@ -1,15 +1,14 @@
 import { test, expect } from './support/test'
-import { blockUnmockedApi } from './support/mock'
+import { blockUnmockedApi, visitViaSpa } from './support/mock'
 import { mockHomeApi, motorcycles, rides } from './fixtures/home'
 
-// UI tests for app/pages/index.vue (route '/'). Every backend call the page
-// fires on mount is client-side (app.vue + section onMounted), so page.route
-// intercepts them all. blockUnmockedApi is registered first as a safety net;
-// mockHomeApi's specific regexes are registered after it and therefore win.
+// UI tests for app/pages/index.vue (route '/'). blockUnmockedApi is registered
+// first as a safety net; mockHomeApi's specific regexes are registered after it
+// and therefore win.
 //
-// SSR note: nothing on this page fetches during SSR — app.vue resolves auth in
-// onMounted (client), and each section fetches in onMounted too — so there is
-// no un-interceptable initial-load traffic to work around here.
+// SSR note: the motorcycle carousel loads during SSR (useAsyncData), which
+// page.route cannot intercept on a direct goto. We reach the page through
+// visitViaSpa(), a client-side navigation where the mocks apply.
 
 test.describe('home page (/)', () => {
   test.beforeEach(async ({ page }) => {
@@ -20,7 +19,7 @@ test.describe('home page (/)', () => {
   // --- Hero section -------------------------------------------------------
 
   test('hero "Essayer" button links to /comparo', async ({ page }) => {
-    await page.goto('/')
+    await visitViaSpa(page, '/')
     await page.getByRole('link', { name: 'Essayer' }).click()
     await expect(page).toHaveURL('/comparo')
   })
@@ -28,7 +27,7 @@ test.describe('home page (/)', () => {
   test('hero "Se connecter" button opens the connexion modal', async ({
     page
   }) => {
-    await page.goto('/')
+    await visitViaSpa(page, '/')
     // The modal is closed initially: its "Se connecter" submit button is hidden.
     await page.getByRole('button', { name: 'Se connecter' }).click()
     // ConnexionForm renders an <h3>Se connecter</h3> inside the opened UModal.
@@ -44,7 +43,7 @@ test.describe('home page (/)', () => {
   test('ComparoSection "Lancer une comparaison" links to /comparo', async ({
     page
   }) => {
-    await page.goto('/')
+    await visitViaSpa(page, '/')
     await page
       .getByRole('link', { name: 'Lancer une comparaison' })
       .click()
@@ -56,7 +55,7 @@ test.describe('home page (/)', () => {
   test('RideSection ride teaser card navigates to /ride focused on that ride', async ({
     page
   }) => {
-    await page.goto('/')
+    await visitViaSpa(page, '/')
     // The first teaser button shows the ride title; clicking it calls
     // navigateTo({ path: '/ride', query: { ride: <id>, scroll: 'true' } }).
     await page
@@ -70,13 +69,13 @@ test.describe('home page (/)', () => {
   test('RideSection "Explorer la carte" button links to /ride', async ({
     page
   }) => {
-    await page.goto('/')
+    await visitViaSpa(page, '/')
     await page.getByRole('link', { name: 'Explorer la carte' }).click()
     await expect(page).toHaveURL('/ride')
   })
 
   test('RideSection map preview card links to /ride', async ({ page }) => {
-    await page.goto('/')
+    await visitViaSpa(page, '/')
     // The whole square map preview is a NuxtLink to="/ride" (no query params).
     // The shared nav/footer also link to /ride ("Balades"), so scope to <main>;
     // inside it two links point at /ride — the map card (no text) and the
@@ -94,7 +93,7 @@ test.describe('home page (/)', () => {
   test('ForumSection "Rejoindre le forum" button links to /forum', async ({
     page
   }) => {
-    await page.goto('/')
+    await visitViaSpa(page, '/')
     await page.getByRole('link', { name: 'Rejoindre le forum' }).click()
     await expect(page).toHaveURL('/forum')
   })
@@ -104,7 +103,7 @@ test.describe('home page (/)', () => {
   test('best-seller card navigates to its motorcycle detail page', async ({
     page
   }) => {
-    await page.goto('/')
+    await visitViaSpa(page, '/')
     // Article @click -> navigateTo(`/motorcycle/${item._id}`). Click the card's
     // name heading; the click bubbles to the article handler.
     await page
@@ -117,7 +116,7 @@ test.describe('home page (/)', () => {
   test('best-seller "Comparer" button navigates to /comparo', async ({
     page
   }) => {
-    await page.goto('/')
+    await visitViaSpa(page, '/')
     // handleCompareClick: off the /comparo page it navigates to /comparo.
     // @click.stop keeps this separate from the card's detail-page navigation.
     await page.getByRole('button', { name: 'Comparer' }).first().click()
@@ -144,7 +143,7 @@ test.describe('home page (/)', () => {
       })
     )
 
-    await page.goto('/')
+    await visitViaSpa(page, '/')
     // UCarousel renders prev/next arrow buttons (aria-labels "Prev"/"Next")
     // once the rail overflows; match the "next" arrow by its accessible name.
     const next = page.getByRole('button', { name: /next|suivant/i }).first()

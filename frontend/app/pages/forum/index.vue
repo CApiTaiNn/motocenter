@@ -22,11 +22,6 @@ const asArray = (value: unknown): string[] => {
   return []
 }
 
-const posts = ref<IPost[]>([])
-const loading = ref(true)
-// A toast raised during the initial load (onMounted) is not shown, so a failed
-// first fetch also sets this flag to render a persistent inline error.
-const loadError = ref(false)
 // Seed the filters from the URL so a reload or a shared link restores them.
 const filters = ref({
   brandIds: asArray(route.query.brand),
@@ -94,48 +89,54 @@ const filter = computed(() => {
 const apiBase = useRuntimeConfig().public.apiBase
 const toast = useToast()
 
-const getPosts = async () => {
-  loadError.value = false
-  try {
-    const res = await $fetch<{ posts: IPost[] }>(`${apiBase}posts`, {
-      params: {
-        deep: true,
-        // The post card renders author, brand and category, so they must be
-        // projected: without user/brand/category the card's post.user.image
-        // throws during render and the whole list fails to show.
-        project: 'content,title,category,user,brand,id,createdAt,views,image',
-        filter: filter.value
-      }
-    })
-    posts.value = await Promise.all(
-      res.posts.map(async (post: IPost) => {
-        post.responses = await getResponseOfPost(post._id)
-        return post
-      })
-    )
-  } catch (error) {
-    // Tell the user the fetch failed, so the empty state is not mistaken for a
-    // genuinely empty forum. The list resets and the page leaves its loading
-    // state in the finally block below.
-    console.error('Failed to load posts', error)
-    posts.value = []
-    loadError.value = true
-    toast.add({
-      title: 'Chargement impossible',
-      description: 'Les discussions n’ont pas pu être chargées. Réessayez plus tard.',
-      color: 'error'
-    })
-  } finally {
-    loading.value = false
-  }
-}
-
 const getResponseOfPost = async (postId: string) => {
   const data = await $fetch<{ messages: IMessage[] }>(
     `${apiBase}posts/${postId}/responses`
   )
   return data.messages
 }
+
+const fetchPosts = async (): Promise<IPost[]> => {
+  const res = await $fetch<{ posts: IPost[] }>(`${apiBase}posts`, {
+    params: {
+      deep: true,
+      // The post card renders author, brand and category, so they must be
+      // projected: without user/brand/category the card's post.user.image
+      // throws during render and the whole list fails to show.
+      project: 'content,title,category,user,brand,id,createdAt,views,image',
+      filter: filter.value
+    }
+  })
+  return Promise.all(
+    res.posts.map(async (post: IPost) => {
+      post.responses = await getResponseOfPost(post._id)
+      return post
+    })
+  )
+}
+
+// Loaded during SSR so search engines see the posts and their links.
+const {
+  data: posts,
+  status,
+  error,
+  refresh: getPosts
+} = await useAsyncData('forum-posts', fetchPosts, { default: () => [] })
+
+const loading = computed(() => status.value === 'pending')
+// The inline error makes sure a failed load is not mistaken for an empty
+// forum, even on the server render where no toast can show.
+const loadError = computed(() => !!error.value)
+
+watch(error, (err) => {
+  if (!err) return
+  console.error('Failed to load posts', err)
+  toast.add({
+    title: 'Chargement impossible',
+    description: 'Les discussions n’ont pas pu être chargées. Réessayez plus tard.',
+    color: 'error'
+  })
+})
 
 const handleFilter = async (updateFilter: any) => {
   filters.value = {
@@ -177,10 +178,6 @@ const displayedPosts = computed(() => {
   return list
 })
 
-onMounted(async () => {
-  await Promise.all([getPosts()])
-  loading.value = false
-})
 </script>
 
 <template>

@@ -98,9 +98,9 @@ interface MockOptions {
  * fully-loaded, interactive state (the app-wide auth fetch also flips the
  * blocking LoadingOverlay off — without it every click is intercepted).
  *
- * All of these run client-side (app.vue's onMounted -> fetchUser, and the
- * page/section onMounted fetches), so page.route intercepts them. Call AFTER
- * blockUnmockedApi and BEFORE page.goto('/'); the specific regexes below win
+ * page.route only intercepts browser requests, so open the page with
+ * visitViaSpa(): the carousel loads during SSR on a direct goto. Call AFTER
+ * blockUnmockedApi and BEFORE navigating; the specific regexes below win
  * over the broad safety-net handler because they are registered later.
  */
 export async function mockHomeApi(page: Page, opts: MockOptions = {}) {

@@ -1,15 +1,16 @@
 import { test, expect } from './support/test'
-import { API, json } from './support/mock'
+import { API, json, visitViaSpa } from './support/mock'
 import { installForumMocks, posts, brands } from './fixtures/forum-index'
 
 // UI tests for app/pages/forum/index.vue (route /forum). Every backend call is
-// mocked via installForumMocks; no backend/DB required. All fetches on this page
-// are client-side (onMounted), so page.route intercepts them.
+// mocked via installForumMocks; no backend/DB required. The post list loads
+// during SSR (useAsyncData), out of reach of page.route on a direct goto, so
+// we reach the page through visitViaSpa(), a client-side navigation.
 
 test.describe('/forum index', () => {
   test('renders the discussion list from the posts endpoint', async ({ page }) => {
     await installForumMocks(page)
-    await page.goto('/forum')
+    await visitViaSpa(page, '/forum')
 
     for (const post of posts) {
       await expect(page.getByText(post.title)).toBeVisible()
@@ -29,7 +30,7 @@ test.describe('/forum index', () => {
       }
       return route.fallback()
     })
-    await page.goto('/forum')
+    await visitViaSpa(page, '/forum')
 
     await expect(
       page.getByText('Les discussions n’ont pas pu être chargées. Réessayez plus tard.')
@@ -40,7 +41,7 @@ test.describe('/forum index', () => {
     page
   }) => {
     await installForumMocks(page)
-    await page.goto('/forum')
+    await visitViaSpa(page, '/forum')
     await expect(page.getByText('Problème de démarrage à froid')).toBeVisible()
 
     // Typing debounces (300ms) then refetches GET posts with the search term
@@ -65,7 +66,7 @@ test.describe('/forum index', () => {
     page
   }) => {
     await installForumMocks(page)
-    await page.goto('/forum')
+    await visitViaSpa(page, '/forum')
     await expect(page.getByText('Problème de démarrage à froid')).toBeVisible()
 
     await page.getByRole('button', { name: 'Sans réponse' }).click()
@@ -80,7 +81,7 @@ test.describe('/forum index', () => {
     page
   }) => {
     await installForumMocks(page)
-    await page.goto('/forum')
+    await visitViaSpa(page, '/forum')
     await expect(page.getByText('Problème de démarrage à froid')).toBeVisible()
 
     await page
@@ -93,13 +94,10 @@ test.describe('/forum index', () => {
     await expect(page.getByText('Entretien de la chaîne')).toBeVisible()
     await expect(page.getByText('Problème de démarrage à froid')).toBeHidden()
 
-    // A reload keeps the URL, and the page must rebuild the filter from it.
-    await page.reload()
-    await page.waitForLoadState('networkidle').catch(() => {})
-    await page
-      .locator('.z-9999')
-      .waitFor({ state: 'detached', timeout: 5000 })
-      .catch(() => {})
+    // Opening the same URL again must rebuild the filter from it. A real
+    // reload would load the posts during SSR, out of reach of the mocks.
+    const { pathname, search } = new URL(page.url())
+    await visitViaSpa(page, pathname + search)
 
     await expect(page).toHaveURL(/[?&]search=cha/)
     await expect(
@@ -112,7 +110,7 @@ test.describe('/forum index', () => {
 
   test('clicking a discussion navigates to /forum/:id', async ({ page }) => {
     await installForumMocks(page)
-    await page.goto('/forum')
+    await visitViaSpa(page, '/forum')
 
     // Card click first records a view (POST posts/add-view) then navigates.
     const addView = page.waitForRequest(
@@ -130,7 +128,7 @@ test.describe('/forum index', () => {
     page
   }) => {
     await installForumMocks(page, { authenticated: true })
-    await page.goto('/forum')
+    await visitViaSpa(page, '/forum')
 
     await expect(page.getByRole('heading', { name: 'Ajouter post' })).toBeHidden()
     await page.getByRole('button', { name: 'Nouvelle discussion' }).click()
@@ -143,7 +141,7 @@ test.describe('/forum index', () => {
     page
   }) => {
     await installForumMocks(page, { authenticated: false })
-    await page.goto('/forum')
+    await visitViaSpa(page, '/forum')
 
     await page.getByRole('button', { name: 'Nouvelle discussion' }).click()
 
@@ -156,7 +154,7 @@ test.describe('/forum index', () => {
     page
   }) => {
     await installForumMocks(page, { authenticated: true })
-    await page.goto('/forum')
+    await visitViaSpa(page, '/forum')
 
     await page.getByRole('button', { name: 'Nouvelle discussion' }).click()
     await expect(page.getByRole('heading', { name: 'Ajouter post' })).toBeVisible()
