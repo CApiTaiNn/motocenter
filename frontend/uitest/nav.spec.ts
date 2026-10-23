@@ -64,4 +64,43 @@ test.describe('navigation header', () => {
     ).toBeVisible()
     await expect(page).toHaveURL('/')
   })
+
+  // Start on /knowUs: it is static, so the click is the only thing under test.
+  // Scoped to the banner landmark because the footer repeats the same labels.
+  const navLinks = [
+    { label: 'Accueil', url: '/' },
+    { label: 'Comparateur', url: '/comparo' },
+    { label: 'Forum', url: '/forum' },
+    { label: 'Balades', url: '/ride' },
+    { label: 'Nous connaitre', url: '/knowUs' }
+  ] as const
+
+  for (const { label, url } of navLinks) {
+    test(`"${label}" link navigates to ${url}`, async ({ page }) => {
+      await page.goto('/knowUs')
+      await page
+        .getByRole('banner')
+        .getByRole('link', { name: label, exact: true })
+        .filter({ visible: true })
+        .first()
+        .click()
+      await expect(page).toHaveURL(url)
+    })
+  }
+
+  test('"Connexion" button opens the login modal', async ({ page }) => {
+    await page.goto('/knowUs')
+    // The button needs JS, so wait for hydration before clicking.
+    await page.waitForLoadState('networkidle')
+    const connexion = page
+      .getByRole('banner')
+      .getByRole('button', { name: 'Connexion' })
+      .filter({ visible: true })
+      .first()
+    await expect(connexion).toBeEnabled()
+    await connexion.click()
+    await expect(
+      page.getByRole('heading', { name: 'Se connecter' })
+    ).toBeVisible()
+  })
 })
